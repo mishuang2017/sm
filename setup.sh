@@ -18,7 +18,7 @@ set -x
 	for i in nis sudo yp-tools ypbind ypserv autofs; do
 		yum -y install $i
 	done
-	for i in virsh-manager virsh-install; do
+	for i in virt-manager virt-install; do
 		yum -y install $i
 	done
 	sleep 1
