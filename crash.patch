@@ -1,0 +1,803 @@
+diff --git a/Makefile b/Makefile
+index bdc8321..cd90400 100644
+--- a/Makefile
++++ b/Makefile
+@@ -23,7 +23,7 @@ PROGRAM=crash
+ # Supported targets: X86 ALPHA PPC IA64 PPC64 SPARC64
+ # TARGET and GDB_CONF_FLAGS will be configured automatically by configure
+ #
+-TARGET=
++TARGET=X86_64
+ GDB_CONF_FLAGS=
+ 
+ ARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ -e s/arm.*/arm/ -e s/sa110/arm/)
+@@ -34,10 +34,10 @@ endif
+ #
+ # GDB, GDB_FILES, GDB_OFILES and GDB_PATCH_FILES will be configured automatically by configure 
+ #
+-GDB=
+-GDB_FILES=
+-GDB_OFILES=
+-GDB_PATCH_FILES=
++GDB=gdb-7.6
++GDB_FILES=${GDB_7.6_FILES}
++GDB_OFILES=${GDB_7.6_OFILES}
++GDB_PATCH_FILES=gdb-7.6.patch gdb-7.6-ppc64le-support.patch gdb-7.6-proc_service.h.patch
+ 
+ #
+ # Default installation directory
+@@ -45,7 +45,7 @@ GDB_PATCH_FILES=
+ INSTALLDIR=${DESTDIR}/usr/bin
+ 
+ # LDFLAGS will be configured automatically by configure
+-LDFLAGS=
++LDFLAGS=-llzo2
+ 
+ GENERIC_HFILES=defs.h xen_hyper_defs.h xen_dom0.h
+ MCORE_HFILES=va_server.h vas_crash.h
+@@ -183,7 +183,7 @@ GDB_7.6_OFILES=${GDB}/gdb/symtab.o
+ # 
+ # GDB_FLAGS is passed up from the gdb Makefile.
+ #
+-GDB_FLAGS=
++GDB_FLAGS=-DGDB_7_6
+ 
+ #
+ # WARNING_OPTIONS and WARNING_ERROR are both applied on a per-file basis. 
+@@ -192,15 +192,15 @@ GDB_FLAGS=
+ # usefulness is also dependent upon the processor's compiler -- your mileage
+ # may vary.
+ #
+-#WARNING_OPTIONS=-Wall -O2 -Wstrict-prototypes -Wmissing-prototypes -fstack-protector -Wformat-security
++WARNING_OPTIONS=-Wall -O2 -Wstrict-prototypes -Wmissing-prototypes -fstack-protector -Wformat-security
+ #WARNING_ERROR=-Werror
+ 
+ # TARGET_CFLAGS will be configured automatically by configure
+-TARGET_CFLAGS=
++TARGET_CFLAGS= -DLZO
+ 
+ CRASH_CFLAGS=-g -D${TARGET} ${TARGET_CFLAGS} ${GDB_FLAGS} ${CFLAGS}
+ 
+-GPL_FILES=
++GPL_FILES=COPYING3
+ TAR_FILES=${SOURCE_FILES} Makefile ${GPL_FILES} README .rh_rpm_package crash.8 \
+ 	${EXTENSION_SOURCE_FILES} ${MEMORY_DRIVER_FILES}
+ CSCOPE_FILES=${SOURCE_FILES}
+diff --git a/defs.h b/defs.h
+index c779839..d9f4089 100644
+--- a/defs.h
++++ b/defs.h
+@@ -2040,6 +2040,7 @@ struct size_table {         /* stash of commonly-used sizes */
+ 	long __wait_queue;
+ 	long device;
+ 	long net_device;
++	long netdev_queue;
+ 	long sock;
+ 	long signal_struct;
+ 	long sigpending_signal;
+@@ -4701,6 +4702,11 @@ void cmd_fuser(void);        /* filesys.c */
+ void cmd_dev(void);          /* dev.c */
+ void cmd_gdb(void);          /* gdb_interface.c */
+ void cmd_net(void);          /* net.c */
++void cmd_vp(void);           /* net.c */
++void cmd_flow(void);         /* net.c */
++void cmd_tc(void);           /* net.c */
++void cmd_array(void);        /* net.c */
++void cmd_hash(void);         /* net.c */
+ void cmd_extend(void);       /* extensions.c */
+ #if defined(S390) || defined(S390X)
+ void cmd_s390dbf(void);
+diff --git a/global_data.c b/global_data.c
+index 998aaae..ced16ec 100644
+--- a/global_data.c
++++ b/global_data.c
+@@ -94,6 +94,11 @@ struct command_table_entry linux_command_table[] = {
+ 	{"mod",     cmd_mod,     help_mod,     0},
+ 	{"mount",   cmd_mount,   help_mount,   0},
+ 	{"net",	    cmd_net,	help_net,      REFRESH_TASK_TABLE},
++	{"vp",      cmd_vp,	help_net,      REFRESH_TASK_TABLE},
++	{"flow",    cmd_flow,	help_net,      REFRESH_TASK_TABLE},
++	{"tc",	    cmd_tc,	help_net,      REFRESH_TASK_TABLE},
++	{"array",   cmd_array,	help_net,      REFRESH_TASK_TABLE},
++	{"hash",    cmd_hash,	help_net,      REFRESH_TASK_TABLE},
+ 	{"p",       cmd_p,       help_p,       0},
+ 	{"ps",      cmd_ps,      help_ps,      REFRESH_TASK_TABLE},
+ 	{"pte",     cmd_pte,     help_pte,     0},
+diff --git a/net.c b/net.c
+index bb86963..49767b9 100644
+--- a/net.c
++++ b/net.c
+@@ -20,6 +20,9 @@
+ #include <netdb.h>
+ #include <net/if_arp.h>
+ #include <arpa/inet.h>
++#include <stdlib.h>
++
++extern void print_struct(char *, ulong);
+ 
+ /*
+  *  Cache values we need that can change based on OS version, or any other
+@@ -313,7 +316,9 @@ net_init(void)
+  * The net command...
+  */
+ 
+-#define NETOPTS	  "N:asSR:xdn"
++#define NETOPTS	  "N:asSR:xdnl:"
++#define FLOWOPTS  "a:b:c"
++#define TCOPTS  "i:xh"
+ #define s_FLAG FOREACH_s_FLAG
+ #define S_FLAG FOREACH_S_FLAG
+ #define x_FLAG FOREACH_x_FLAG
+@@ -329,6 +334,8 @@ net_init(void)
+ #define NET_REFERENCE_CHECK(X)   (X)
+ #define NET_REFERENCE_FOUND(X)   ((X) && ((X)->cmdflags & NET_REF_FOUND))
+ 
++char *link_name = NULL;
++
+ void
+ cmd_net(void)
+ {
+@@ -346,6 +353,7 @@ cmd_net(void)
+ 	ref = NULL;
+ 	sflag = nflag = aflag = 0;
+ 	task = pid_to_task(0);
++	link_name = NULL;
+ 
+ 	while ((c = getopt(argcnt, args, NETOPTS)) != EOF) {
+ 		switch (c) {
+@@ -359,6 +367,10 @@ cmd_net(void)
+ 			}
+ 			break;
+ 
++		case 'l':
++			link_name = optarg;
++			break;
++
+ 		case 'a':
+ 			dump_arp();
+ 			aflag++;
+@@ -425,7 +437,7 @@ cmd_net(void)
+ 	if (sflag & (s_FLAG|S_FLAG))
+ 		dump_sockets(sflag, ref);
+ 	else {
+-		if ((argcnt == 1) || nflag)
++		if ((argcnt == 1) || nflag || link_name)
+ 			show_net_devices(task);
+ 		else if (!aflag)
+ 			cmd_usage(pc->curcmd, SYNOPSIS);
+@@ -529,6 +541,41 @@ show_net_devices_v2(ulong task)
+ 	FREEBUF(net_device_buf);
+ }
+ 
++static ulong
++read_pointer1(ulong addr)
++{
++	ulong buf[1];
++
++	readmem(addr, KVADDR, buf, sizeof(ulong), "addr", FAULT_ON_ERROR);
++
++	return buf[0];
++}
++
++static ulong
++read_pointer2(ulong addr, char *type, char *member)
++{
++	int offset;
++	char *buf;
++	ulong val;
++
++	offset = MEMBER_OFFSET(type, member);
++	buf = malloc(offset+sizeof(ulong));
++
++	if (buf == NULL)
++		return 0;
++
++	readmem(addr, KVADDR, buf, offset + sizeof(ulong), "addr", FAULT_ON_ERROR);
++
++	val =  *((ulong *)&buf[offset]);
++	free(buf);
++
++	return val;
++}
++
++ulong mlx5e_priv;
++ulong mlx5e_priv_net;
++ulong table_test;
++
+ static void
+ show_net_devices_v3(ulong task)
+ {
+@@ -581,10 +628,129 @@ show_net_devices_v3(ulong task)
+ 		get_device_name(ld->list_ptr[i], buf);
+ 		fprintf(fp, "%-6s ", buf);
+ 
++		if (link_name)
++			if (strcmp(buf, link_name) == 0) {
++				mlx5e_priv = ld->list_ptr[i] + SIZE(net_device);
++				mlx5e_priv_net = ld->list_ptr[i];
++			}
++
+ 		get_device_address(ld->list_ptr[i], buf);
+ 		fprintf(fp, "%s\n", buf);
+ 	}
++
++	if (link_name) {
++		fprintf(fp, "\n%s:\n", link_name);
++		fprintf(fp, "mlx5e_priv  %lx\n", mlx5e_priv);
++
++		/*
++		 * struct mlx5e_vxlan {
++		 *   udp_port = 0x12b5
++	 	 * }
++		 */
++		ulong vxlan = mlx5e_priv +  MEMBER_OFFSET("mlx5e_priv", "vxlan") +  MEMBER_OFFSET("mlx5e_vxlan_db", "tree");
++		fprintf(fp, "tree -t ra %lx -s mlx5e_vxlan\n", vxlan);
++
++		ulong fs = mlx5e_priv + MEMBER_OFFSET("mlx5e_priv", "fs");
++		fprintf(fp, "mlx5e_flow_steering  %lx\n", fs);
++
++		// for old code
++		ulong  ppriv = read_pointer2(mlx5e_priv, "mlx5e_priv", "ppriv");
++/* 		fprintf(fp, "mlx5_eswitch_rep  %lx\n", ppriv); */
++
++		/* in VM/VF, ppriv is NULL */
++		if (ppriv != 0) {
++			fprintf(fp, "mlx5e_rep_priv  %lx\n", ppriv);
++
++			ulong  rep = read_pointer2(ppriv, "mlx5e_rep_priv", "rep");
++			fprintf(fp, "mlx5_eswitch_rep  %lx\n", rep);
++		}
++
++		ulong  mdev = read_pointer2(mlx5e_priv, "mlx5e_priv", "mdev");
++		fprintf(fp, "mlx5_core_dev  %lx\n", mdev);
++
++		ulong mlx5_priv = mdev + MEMBER_OFFSET("mlx5_core_dev", "priv");
++		fprintf(fp, "mlx5_priv  %lx\n", mlx5_priv);
++
++		ulong eq_table = mlx5_priv + MEMBER_OFFSET("mlx5_priv", "eq_table");
++		fprintf(fp, "mlx5_eq_table  %lx\n", eq_table);
++
++		ulong eqs_list = eq_table + MEMBER_OFFSET("mlx5_eq_table", "comp_eqs_list");
++		fprintf(fp, "list -H %lx -o mlx5_eq.list -s mlx5_eq\n", eqs_list);
++
++		ulong esw = read_pointer2(mlx5_priv, "mlx5_priv", "eswitch");
++		fprintf(fp, "mlx5_eswitch  %lx\n", esw);
++
++		ulong offloads = esw + MEMBER_OFFSET("mlx5_eswitch", "offloads");
++		fprintf(fp, "mlx5_esw_offload  %lx\n", offloads);
++
++		ulong encap_tbl = offloads + MEMBER_OFFSET("mlx5_esw_offload", "encap_tbl");
++		fprintf(fp, "encap_tbl  %lx\n", encap_tbl);
++		fprintf(fp, "list 0xffff8810325d8200 -o 0x30 -s mlx5e_encap_entry\n");
++
++		ulong fdb_table = esw + MEMBER_OFFSET("mlx5_eswitch", "fdb_table");
++		fprintf(fp, "mlx5_eswitch_fdb  %lx\n", fdb_table);
++
++		table_test = read_pointer2(fdb_table, "mlx5_eswitch_fdb", "fdb");
++		fprintf(fp, "flow -c -a  %lx\n", table_test);
++		fprintf(fp, "repeat -1 flow -c -a  %lx\n", table_test);
++		fprintf(fp, "flow -a  %lx\n", table_test);
++
++		ulong  qdisc = read_pointer2(mlx5e_priv_net, "net_device", "qdisc");
++		fprintf(fp, "Qdisc  %lx\n", qdisc);
++
++		ulong  txq = read_pointer2(qdisc, "Qdisc", "dev_queue");
++		fprintf(fp, "tx-0, net_device._tx\n");
++		fprintf(fp, "netdev_queue  %lx\n", txq);
++
++		ulong channels = mlx5e_priv + MEMBER_OFFSET("mlx5e_priv", "channels");
++		fprintf(fp, "mlx5e_channels  %lx\n", channels);
+ 	
++		ulong channel1 = read_pointer1(channels);
++		channel1 = read_pointer1(channel1);
++		fprintf(fp, "mlx5e_channel.sq  %lx\n", channel1);
++
++		ulong sq = channel1 + MEMBER_OFFSET("mlx5e_channel", "sq");
++		fprintf(fp, "mlx5e_txqsq  %lx\n", sq);
++
++		ulong  ingress_queue = read_pointer2(mlx5e_priv_net, "net_device", "ingress_queue");
++		fprintf(fp, "net_device.ingress_queue\n");
++		fprintf(fp, "netdev_queue  %lx\n", ingress_queue);
++
++		if (ingress_queue) {
++			qdisc = read_pointer2(ingress_queue, "netdev_queue", "qdisc");
++			fprintf(fp, "Qdisc  %lx\n", qdisc);
++
++			// qdisc_priv()
++			ulong ingress_sched_data = qdisc + 0x140; // SIZE(Qdisc);
++			fprintf(fp, "ingress_sched_data  %lx\n", ingress_sched_data);
++			ulong tcf_block = read_pointer1(ingress_sched_data);
++			fprintf(fp, "tcf_block  %lx\n", tcf_block);
++
++			fprintf(fp, "list -H %lx  -l tcf_chain.list -s tcf_chain\n", tcf_block);
++		}
++
++		ulong ingress_cl_list = read_pointer2(mlx5e_priv_net, "net_device", "ingress_cl_list");
++
++		if (ingress_cl_list) {
++			fprintf(fp, "list %lx -s tcf_proto\n", ingress_cl_list);
++			ulong cls_fl_head= read_pointer2(ingress_cl_list, "tcf_proto", "root");
++			fprintf(fp, "cls_fl_head  %lx\n", cls_fl_head);
++
++			ulong idr = cls_fl_head + MEMBER_OFFSET("cls_fl_head", "handle_idr");
++			fprintf(fp, "idr  %lx\n", idr);
++			fprintf(fp, "tree -t ra %lx -s cls_fl_filter\n", idr);
++			ulong radix = read_pointer2(idr, "radix_tree_root", "rnode");
++			fprintf(fp, "radix_tree_node  %lx\n", radix & ~1UL);
++
++			ulong cls_fl_filter = cls_fl_head + MEMBER_OFFSET("cls_fl_head", "filters");
++			fprintf(fp, "list -H %lx\n", cls_fl_filter);
++			fprintf(fp, "list -H %lx | wc -l\n", cls_fl_filter);
++			fprintf(fp, "list -H %lx -l cls_fl_filter.list -s cls_fl_filter\n", cls_fl_filter);
++		}
++	}
++
++	link_name = NULL;
++
+ 	FREEBUF(ld->list_ptr);
+ 	FREEBUF(net_device_buf);
+ }
+@@ -1663,3 +1829,441 @@ sym_socket_dump(ulong file,
+ 
+     	return TRUE;
+ }
++
++void
++cmd_hash(void)
++{
++	int c;
++	char *addr = NULL;
++	char *ptr;
++	ulong a;
++	int show = 0;
++	int i = 0;
++	ulong rhash_head;
++	int offset = 0;
++	char *opt_s = NULL;	/* struct */
++	char *opt_m = NULL;	/* member */
++	int print = 0;
++
++	while ((c = getopt(argcnt, args, "a:s:m:tp")) != EOF) {
++		switch (c) {
++		case 'a':
++			addr = optarg;	/* address of tbl */
++			break;
++		case 't':	/* for testing */
++			show = 1;
++			a = 0xffff8809b254c0c0;
++			break;
++		case 's':
++			opt_s = optarg;
++			break;
++		case 'm':
++			opt_m = optarg;
++			break;
++		case 'p':
++			print = 1;
++			break;
++		default:
++			return;
++		}
++	}
++
++	if (!addr || !opt_s || !opt_m) {
++		fprintf(fp, "hash -a <address of tbl> -s struct -m member\n");
++		return;
++	}
++
++	if (show != 1)
++		a = strtoul(addr, &ptr, 16);
++
++	fprintf(fp, "bucket_table %lx -x\n", a);
++
++	unsigned int size = read_pointer2(a, "bucket_table", "size");
++	ulong buckets = a + MEMBER_OFFSET("bucket_table", "buckets");
++
++	offset = MEMBER_OFFSET(opt_s, opt_m);
++
++	fprintf(fp, "size %x, offset %x\n", size, offset);
++	fprintf(fp, "buckets %lx\n", buckets);
++
++	for (i = 0; i < size; i++) {
++		rhash_head = read_pointer1(buckets + i * 8);
++		if (rhash_head == i * 2 + 1)
++			continue;
++		if (print)
++				print_struct(opt_s, rhash_head - offset);
++		else
++			fprintf(fp, "%s %lx\n", opt_s, rhash_head - offset);
++	}
++}
++
++/*
++struct sw_flow {
++    [0x0] struct callback_head rcu;
++          struct {
++              struct hlist_node node[2];
++              u32 hash;
++   [0x10] } flow_table;
++          struct {
++              struct hlist_node node[2];
++              u32 hash;
++   [0x38] } ufid_table;
++   [0x60] int stats_last_writer;
++   [0x68] struct sw_flow_key key;
++  [0x238] struct sw_flow_id id;
++  [0x250] struct sw_flow_mask *mask;
++  [0x258] struct sw_flow_actions *sf_acts;
++  [0x260] struct flow_stats *stats[];
++}
++SIZE: 0x260
++*/
++
++void print_dp(ulong dp);
++void print_dp(ulong dp)
++{
++	int n = 0;
++	int j, k;
++	char *ufid_str;
++	int offset;
++	int ufid_count;
++
++	fprintf(fp, "datapath %lx\n", dp);
++	ulong table = dp + MEMBER_OFFSET("datapath", "table");
++	fprintf(fp, "flow_table %lx\n", table);
++	ulong mask_list = table + MEMBER_OFFSET("flow_table", "mask_list");
++	ufid_count = (int)read_pointer2(table, "flow_table", "ufid_count");
++	fprintf(fp, "ufid_count %x\n", ufid_count);
++
++	if (ufid_count) {
++		ufid_str = "ufid_ti";
++		offset = MEMBER_OFFSET("sw_flow", "ufid_table");
++	} else {
++		ufid_str = "ti";
++		offset = MEMBER_OFFSET("sw_flow", "flow_table");
++	}
++
++	fprintf(fp, "list -H %lx -l sw_flow_mask.list -s sw_flow_mask\n", mask_list);
++
++	ulong ufid_ti = read_pointer2(table, "flow_table", ufid_str);
++	fprintf(fp, "table_instance %lx\n", ufid_ti);
++
++	ulong flex_array = read_pointer1(ufid_ti);
++	fprintf(fp, "flex_array %lx\n", flex_array);
++	ulong parts = flex_array + MEMBER_OFFSET("flex_array", "parts");
++	fprintf(fp, "rd %lx 2\n", parts);
++
++	ulong part;
++	for(j = 0; j < 2; j ++) {
++		part = read_pointer1(parts + j * 8);
++		fprintf(fp, "rd %lx 512\n", part);
++		ulong flow;
++		ulong key;
++		ulong eth;
++		for (k = 0; k < 512; k ++) {
++			flow = read_pointer1(part + k * 8);
++			if (flow) {
++				n++;
++				fprintf(fp, "\tsw_flow -l 0x%x %lx\n", offset, flow);
++				key = flow + MEMBER_OFFSET("sw_flow", "key") - offset;
++				fprintf(fp, "\t\tsw_flow_key %lx\n", key);
++				eth = key + MEMBER_OFFSET("sw_flow_key", "eth");
++				fprintf(fp, "\t\trd -8 %lx 22\n", eth);
++			}
++		}
++	}
++
++	fprintf(fp, "flows number: %d\n", n);
++}
++
++void
++cmd_vp(void)
++{
++	int i;
++	char buf[BUFSIZE];
++	ulong dp = 0, old_dp = 0;
++	int c;
++	int n = 0;
++	int offset;
++	int verbose = 1;
++
++	while ((c = getopt(argcnt, args, "v")) != EOF) {
++		switch (c) {
++		case 'v':
++			verbose = 0;
++			break;
++		default:
++			return;
++		}
++	}
++
++	offset = MEMBER_OFFSET("vport", "hash_node");
++
++	ulong dev_table_ovs = symbol_value("dev_table_ovs");
++	dev_table_ovs = read_pointer1(dev_table_ovs);
++	fprintf(fp, "dev_table_ovs: %lx\n", dev_table_ovs);
++	for (i = 0; i < 1024; i++) {
++		ulong vport = read_pointer1(dev_table_ovs + i * 8);
++
++		if (vport) {
++			ulong dev = read_pointer2(vport - offset, "vport", "dev");
++			get_device_name(dev, buf);
++			fprintf(fp, "\n%-6s\n", buf);
++
++			fprintf(fp, "list %lx -l vport.hash_node -s vport\n", vport);
++			dp = read_pointer2(vport - 0x20, "vport", "dp");
++			if (dp && dp != old_dp && n != 2 && verbose) {
++				print_dp(dp);
++				old_dp = dp;
++				n++;
++			}
++		}
++	}	
++}
++
++void
++cmd_array(void)
++{
++	int c;
++	char *addr = NULL;
++	char *s;
++	char *number;
++	int n;
++	ulong a;
++	int i;
++	char *member = NULL;
++	int print = 0;
++
++/* 	STRUCT_SIZE_INIT(netdev_queue, "netdev_queue"); */
++
++	while ((c = getopt(argcnt, args, "a:s:n:m:p")) != EOF) {
++		switch (c) {
++		case 'a':
++			addr = optarg;
++			break;
++		case 'n':
++			number = optarg;
++			break;
++		case 's':
++			s = optarg;
++			break;
++		case 'm':
++			member = optarg;
++			break;
++		case 'p':
++			print = 1;
++			break;
++		default:
++			return;
++		}
++	}
++
++	if (!addr || !number || !s)
++		return;
++
++	a = strtoul(addr, NULL, 16);
++	n = atoi(number);
++
++	fprintf(fp, "%lx\n", STRUCT_SIZE("mlx5e_priv"));
++	for (i = 0; i < n; i ++) {
++		ulong new = a + i * STRUCT_SIZE(s);
++		if (member)
++			fprintf(fp, "%s.%s %lx\n", s, member, new);
++		else {
++			if (print)
++				print_struct(s, new);
++			else
++				fprintf(fp, "%s %lx\n", s, new);
++		}
++	}
++
++}
++
++void
++cmd_tc(void)
++{
++	int c;
++	char *index = NULL;
++	int i;
++	int vxlan = 0;
++	int help = 0;
++	ulong net_ns_p = symbol_value("init_net");
++/* 	ulong gact = symbol_value("gact_net_id"); */
++
++	while ((c = getopt(argcnt, args, TCOPTS)) != EOF) {
++		switch (c) {
++		case 'i':
++			index = optarg;
++			break;
++		case 'x':
++			vxlan = 1;
++			break;
++		case 'h':
++			help = 1;
++			break;
++		default:
++			return;
++		}
++	}
++
++	if (help || !index) {
++/* 		fprintf(fp, "gact_net_id: %d\n", gact); */
++		fprintf(fp, "mirred_net_id 12\n");
++		fprintf(fp, "vxlan_net_id 13\n");
++		fprintf(fp, "vlan_net_id 14\n");
++		fprintf(fp, "tunnel_key_net_id 14\n");
++
++		fprintf(fp, "-l tc_action.tcfa_head -s tc_action\n");
++		fprintf(fp, "-l tc_action.tcfa_head -s tcf_mirred\n");
++		fprintf(fp, "-l tc_action.tcfa_head -s tcf_vlan\n");
++		fprintf(fp, "-l tc_action.tcfa_head -s tcf_tunnel_key\n");
++		return;
++	}
++
++	i = atoi(index);
++
++	ulong gen = read_pointer2(net_ns_p, "net", "gen");
++	fprintf(fp, "net_generic %lx\n", gen);
++	ulong tc_action_net = read_pointer1(gen + i * 8);
++
++	if (vxlan == 13) {
++		fprintf(fp, "vxlan_net %lx\n", tc_action_net);
++	} else {
++		fprintf(fp, "tc_action_net %lx\n", tc_action_net);
++
++/* 		ulong tcf_hashinfo = read_pointer1(tc_action_net); */
++/* 		fprintf(fp, "tcf_hashinfo %lx\n", tcf_hashinfo); */
++/* 		ulong htab = read_pointer1(tcf_hashinfo); */
++/* 		ulong hmask = read_pointer1(tcf_hashinfo + 8); */
++/* 		fprintf(fp, "rd %lx %d\n", htab, hmask); */
++
++		ulong tcf_idrinfo = read_pointer1(tc_action_net);
++		fprintf(fp, "tcf_idrinfo %lx\n", tcf_idrinfo);
++		ulong idr = tcf_idrinfo + MEMBER_OFFSET("tcf_idrinfo", "action_idr");
++
++		fprintf(fp, "idr  %lx\n", idr);
++		ulong radix = read_pointer2(idr, "radix_tree_root", "rnode");
++		fprintf(fp, "radix_tree_node  %lx\n", radix & ~1UL);
++		fprintf(fp, "\ntree -t ra %lx -s tc_action\n", idr);
++		fprintf(fp, "tree -t ra %lx -s tc_action.tcfa_refcnt\n", idr);
++		fprintf(fp, "repeat tree -t ra %lx -s tc_action.tcfa_refcnt\n", idr);
++	}
++}
++
++void
++cmd_flow(void)
++{
++	int c;
++	char *addr = NULL;
++	char *ptr;
++	ulong a = 0;
++	struct list_data group, *ld_group;
++	struct list_data fte, *ld_fte;
++	struct list_data rule, *ld_rule;
++	int n1, n2, n3, i1, i2, i3;
++	int show = 0;
++	int no_fte = 0;
++
++	while ((c = getopt(argcnt, args, FLOWOPTS)) != EOF) {
++		switch (c) {
++		case 'a':
++			show = 1;
++			addr = optarg;
++			break;
++		case 'b':
++			show = 2;
++			addr = optarg;
++		case 'c':
++			no_fte = 1;
++			addr = optarg;
++			break;
++		default:
++			return;
++		}
++	}
++
++	a = strtoul(addr, &ptr, 16);
++/* 	a = table_test; */
++
++	fprintf(fp, "mlx5_flow_table  %lx -x\n", a);
++
++	ld_group =  &group;
++	BZERO(ld_group, sizeof(struct list_data));
++	ld_group->flags |= LIST_ALLOCATE;
++
++	ld_group->start = ld_group->end = a + MEMBER_OFFSET("fs_node", "children");
++	ld_group->list_head_offset = 0;
++
++	n1 = do_list(ld_group);
++
++	if (show == 1) {
++		for (i1 = 1; i1 < n1; ++i1) {
++			ulong t1 = ld_group->list_ptr[i1];
++			fprintf(fp, "\tmlx5_flow_group %lx -x\n", t1);
++
++			ld_fte =  &fte;
++			BZERO(ld_fte, sizeof(struct list_data));
++			ld_fte->flags |= LIST_ALLOCATE;
++
++			ld_fte->start = ld_fte->end = t1 + MEMBER_OFFSET("fs_node", "children");
++			ld_fte->list_head_offset = 0;
++
++			n2 = do_list(ld_fte);
++			fprintf(fp, "\t\tfte number: %d\n", n2 - 1);
++			if (no_fte == 0) {
++				for (i2 = 1; i2 < n2; ++i2) {
++					ulong t2 = ld_fte->list_ptr[i2];
++					fprintf(fp, "\t\tfs_fte.val,index  %lx -x\n", t2);
++
++					ld_rule =  &rule;
++					BZERO(ld_rule, sizeof(struct list_data));
++					ld_rule->flags |= LIST_ALLOCATE;
++
++					ld_rule->start = ld_rule->end = t2 + MEMBER_OFFSET("fs_node", "children");
++					ld_rule->list_head_offset = 0;
++
++					n3 = do_list(ld_rule);
++
++					for (i3 = 1; i3 < n3; ++i3) {
++						ulong t3 = ld_rule->list_ptr[i3];
++						fprintf(fp, "\t\t\tmlx5_flow_rule.dest_attr %lx -x\n", t3);
++					}
++				}
++			}
++		}
++	} else if (show == 2) {
++		for (i1 = 1; i1 < n1; ++i1) {
++			ulong t1 = ld_group->list_ptr[i1];
++			fprintf(fp, "\tlist -H %lx -s mlx5_flow_group.mask -x\n", ld_group->list_ptr[0]);
++
++			ld_fte =  &fte;
++			BZERO(ld_fte, sizeof(struct list_data));
++			ld_fte->flags |= LIST_ALLOCATE;
++
++			ld_fte->start = ld_fte->end = t1 + MEMBER_OFFSET("fs_node", "children");
++			ld_fte->list_head_offset = 0;
++
++			n2 = do_list(ld_fte);
++			fprintf(fp, "\t\tfte number: %d\n", n2 - 1);
++			for (i2 = 1; i2 < n2; ++i2) {
++				ulong t2 = ld_fte->list_ptr[i2];
++				fprintf(fp, "\t\tlist -H %lx -s fs_fte.val,index -x\n", ld_fte->list_ptr[0]);
++
++				ld_rule =  &rule;
++				BZERO(ld_rule, sizeof(struct list_data));
++				ld_rule->flags |= LIST_ALLOCATE;
++
++				ld_rule->start = ld_rule->end = t2 + MEMBER_OFFSET("fs_node", "children");
++				ld_rule->list_head_offset = 0;
++
++				n3 = do_list(ld_rule);
++
++/* 				ulong t3 = ld_rule->list_ptr[i3]; */
++				fprintf(fp, "\t\t\tlist -H %lx -s mlx5_flow_rule.dest_attr -x\n", ld_rule->list_ptr[0]);
++			}
++		}
++	}
++
++/* 	FREEBUF(ld_group->list_ptr); */
++/* 	FREEBUF(ld_fte->list_ptr); */
++/* 	FREEBUF(ld_rule->list_ptr); */
++}
+diff --git a/symbols.c b/symbols.c
+index c793760..e8809ad 100644
+--- a/symbols.c
++++ b/symbols.c
+@@ -141,7 +141,7 @@ static void dump_node(struct struct_elem *, char *, unsigned char, unsigned char
+ 
+ static void whatis_datatype(char *, ulong, FILE *);
+ static void whatis_variable(struct syment *);
+-static void print_struct(char *, ulong);
++void print_struct(char *, ulong);
+ static void print_union(char *, ulong);
+ static void dump_datatype_member(FILE *, struct datatype_member *);
+ static void dump_datatype_flags(ulong, FILE *);
+@@ -7423,7 +7423,7 @@ is_datatype_command(void)
+ /*
+  *  Given a structure name and an address, have gdb do most of the work.
+  */
+-static void
++void
+ print_struct(char *s, ulong addr)
+ {
+ 	char buf[BUFSIZE];
