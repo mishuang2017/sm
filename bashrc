@@ -3,10 +3,12 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=2
+numvfs=3
 port=1
 vni=200
 vni=100
+vid=50
+vxlan_port=4789
 
 # Append to history
 shopt -s histappend
@@ -48,6 +50,7 @@ if (( host_num == 13 )); then
 	if (( port == 1 )); then
 		link=enp4s0f0
 		link_ip=192.168.1.13
+		vxlan_ip=1.1.1.13
 		link_remote_ip=192.168.1.14
 
 		br=br1
@@ -71,11 +74,17 @@ if (( host_num == 13 )); then
 	vf1=enp4s0f2
 	vf2=enp4s0f3
 
+	if (( oldkernel == 0 )); then
+		rep1=${link}_0
+		rep2=${link}_1
+	else
+		rep1=eth0
+		rep2=eth1
+	fi
+
 	link_mac=24:8a:07:88:27:ca
 	link_mac2=24:8a:07:88:27:cb
 
-	rep1=${link}_0
-	rep2=${link}_1
 
 	linux_dir=/home1/chrism/linux
 fi
@@ -83,6 +92,7 @@ if (( host_num == 14 )); then
 	if (( port == 1 )); then
 		link=enp4s0f0
 		link_ip=192.168.1.14
+		vxlan_ip=1.1.1.14
 		link_remote_ip=192.168.1.13
 
 		br=br1
@@ -103,12 +113,14 @@ if (( host_num == 14 )); then
 	ns_ip1=1.1.1.5
 	ns_ip2=1.1.1.6
 	ns_ip=1.1.$host_num
+	link_ip_vlan=1.1.1.13
 
 	vf1=enp4s0f2
 	vf2=enp4s0f3
 
 	rep1=${link}_0
 	rep2=${link}_1
+	rep3=${link}_2
 
 	linux_dir=/home1/chrism/linux
 fi
@@ -182,7 +194,11 @@ vm2_ip=192.168.122.12
 
 linkp=$(echo $link | cut -d '0' -f 1)
 
-vx_rep=vxlan_sys_4789
+if (( oldkernel == 1 )); then
+	vx_rep=dummy_vxlan0
+else
+	vx_rep=vxlan_sys_4789
+fi
 
 alias ssh='ssh -o "StrictHostKeyChecking no"'
 
@@ -212,7 +228,7 @@ alias crash1="$nfs_dir/crash/crash -i /root/.crash $linux_dir/vmlinux"
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 alias c=crash1
 
-alias crash='/auto/mtbcswgwork/chrism/crash/crash'
+alias crash='/auto/mtbcswgwork/chrism/crash/crash -i ~/.crash'
 
 crash_dir=/var/crash
 alias c0="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.0 $linux_dir/vmlinux"
@@ -222,6 +238,9 @@ alias c3="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.3 $linux_dir/vm
 alias c4="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.4 $linux_dir/vmlinux"
 alias c5="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.5 $linux_dir/vmlinux"
 alias c6="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.6 $linux_dir/vmlinux"
+
+alias cc0="/bin/crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
+alias cc0="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 
 alias sw='vsconfig-sw; restart-ovs'
 alias hw='vsconfig-hw; restart-ovs'
@@ -346,6 +365,7 @@ alias ovs2="cd $nfs_dir/ovs/test/ovs-tests"
 alias ipa='ip a'
 alias ipl='ip l'
 alias ipal='ip a l'
+alias smd='cd /usr/src/debug/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64'
 
 alias sm="cd $nfs_dir"
 alias smc="cd $nfs_dir/crash; vi net.c"
@@ -358,6 +378,9 @@ alias smn='cd /etc/sysconfig/network-scripts/'
 alias vs='ovs-vsctl'
 alias of='ovs-ofctl'
 alias dp='ovs-dpctl'
+alias app='ovs-appctl'
+alias app1='ovs-appctl dpctl/dump-flows'
+alias appn='ovs-appctl dpctl/dump-flows --names'
 # systemctl start openvswitch.service
 
 alias p2='n0 ping 1.1.1.2'
@@ -376,12 +399,25 @@ alias tcss="tc -stats filter show dev $link ingress"
 alias tcs2="tc filter show dev $link protocol arp parent ffff:"
 alias tcs3="tc filter show dev $link protocol 802.1Q parent ffff:"
 
-alias tcss-rep="tc -stats filter show dev $rep1  protocol ip parent ffff:"
-alias tcss-rep2="tc -stats filter show dev $rep2  protocol ip parent ffff:"
+alias tcss-rep2="tc -stats filter show dev $rep2 parent ffff:"
+alias tcss-rep2-ip="tc -stats filter show dev $rep2  protocol ip parent ffff:"
+alias tcss-rep2-arp="tc -stats filter show dev $rep2  protocol arp parent ffff:"
+
 alias tcss-rep="tc -stats filter show dev $rep1 ingress"
-alias tcss-rep-arp="tc -stats filter show dev $rep1  protocol arp parent ffff:"
-alias tcss-vxlan="tc -stats filter show dev $vx_rep  protocol ip parent ffff:"
+alias tcss-rep-ip="tc -stats filter show dev $rep1 protocol ip parent ffff:"
+alias tcss-rep-arp="tc -stats filter show dev $rep1 protocol arp parent ffff:"
+
+alias tcss-link="tc -stats filter show dev $link parent ffff:"
+alias tcss-link-ip="tc -stats filter show dev $link  protocol ip parent ffff:"
+alias tcss-link-arp="tc -stats filter show dev $link  protocol arp parent ffff:"
+
+alias tcss-vxlan-ip="tc -stats filter show dev $vx_rep  protocol ip parent ffff:"
+alias tcss-vxlan-arp="tc -stats filter show dev $vx_rep  protocol arp parent ffff:"
 alias tcss-vxlan="tc -stats filter show dev $vx_rep ingress"
+
+alias tcss-vx-ip="tc -stats filter show dev $vx  protocol ip parent ffff:"
+alias tcss-vx-arp="tc -stats filter show dev $vx  protocol arp parent ffff:"
+alias tcss-vx="tc -stats filter show dev $vx ingress"
 
 # "tc -s filter show dev enp4s0f0_0 ingress"
 
@@ -482,7 +518,6 @@ alias np3="ip netns exec n1 netperf -H 1.1.1.3 -t TCP_STREAM -l $n_time -- m $m_
 alias np4="ip netns exec n1 netperf -H 1.1.1.3 -t TCP_STREAM -l $n_time -- m $m_msg -p 12866 &"
 alias np5="ip netns exec n1 netperf -H 1.1.1.3 -t TCP_STREAM -l $n_time -- m $m_msg -p 12867 &"
 
-
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
 function vlan
@@ -491,13 +526,13 @@ function vlan
         typeset link=$1 vid=$2 ip=$3 vlan=vlan$vid
 
         modprobe 8021q
+	ifconfig $link 0
         ip link add link $link name $vlan type vlan id $vid
         ip link set dev $vlan up
-        ip addr add $ip/24 brd + dev $vlan
+        ip addr add $ip/16 brd + dev $vlan
 }
-alias v1="vlan $link 52 $link_ip_vlan"
+alias v1="vlan $link $vid $link_ip_vlan"
 alias v2='ip link del vlan'
-
 
 function call
 {
@@ -519,7 +554,7 @@ function profile
 	[[ $# != 1 ]] && return
 	scp ~/.bashrc $who@$host:~
 	scp ~/.virc $who@$host:~
-	scp -r ~/.vi $who@$host:~
+	scp ~/.vim $who@$host:~
 	scp ~/.screenrc $who@$host:~
 	scp ~/.tmux.conf $who@$host:~
 }
@@ -657,13 +692,13 @@ alias normalm="ovs-ofctl add-flow ovsbr 'dl_dst=52:54:00:60:78:03 action=normal'
 
 alias make_core='make M=drivers/net/ethernet/mellanox/mlx5/core'
 
-stap_str="-d act_gact -d cls_flower -d act_mirred -d /usr/sbin/ethtool -d udp_tunnel -d sch_ingress -d 8021q -d /usr/sbin/ip -d /usr/sbin/ifconfig -d /usr/sbin/tc -d devlink -d mlx5_core -d tun -d kernel -d openvswitch -d vport_vxlan -d vxlan -d /usr/sbin/ovs-vswitchd -d /usr/bin/bash -d /usr/lib64/libc-2.26.so"
+stap_str="-d act_gact -d cls_flower -d act_mirred -d /usr/sbin/ethtool -d udp_tunnel -d sch_ingress -d 8021q -d /usr/sbin/ip -d /usr/sbin/ifconfig -d /usr/sbin/tc -d devlink -d mlx5_core -d tun -d kernel -d openvswitch -d vport_vxlan -d vxlan -d /usr/sbin/ovs-vswitchd -d /usr/bin/bash"
 
 # make oldconfig
 # make prepare
 
-STAP="/usr/local/bin/stap -v"
 STAP="/usr/bin/stap -v"
+STAP="/usr/local/bin/stap -v"
 function stm
 {
         if [[ $# == 1 ]]; then
@@ -989,12 +1024,13 @@ set -x;
 set +x
 }
 
-function build-ovs
+# need to install /auto/mtbcswgwork/chrism/libcap-ng-0.7.8 first
+function install-ovs
 {
 set -x
 	./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
-	make
-	sudo make install
+	make -j 32
+	sudo make install -j 32
 set +x
 }
 
@@ -1471,7 +1507,7 @@ function tc2
 {
 	typeset l
 # 	for link in p2p1 $rep1 $rep2 $vx_rep; do
-	for l in $link $rep1 $rep2 $vx_rep; do
+	for l in $link $rep1 $rep2 $vx_rep, $vx; do
 		ip link show $l > /dev/null 2>&1 || continue
 		tc qdisc show dev $l ingress | grep ffff > /dev/null 2>&1
 		if (( $? == 0 )); then
@@ -1481,8 +1517,7 @@ function tc2
 	done
 }
 
-
-function tc3
+function tc-vxlan
 {
 set -x
 	offload=skip_sw
@@ -1490,12 +1525,9 @@ set -x
         [[ "$offload" == "sw" ]] && offload="skip_hw"
 
 	TC=tc
-	TC=/home1/chrism/tc-scripts/tc
-	TC=/home1/chrism/iproute2/tc/tc
-	typeset link=p4p1
-	typeset rep=eth0
+	typeset link=$link
+	typeset rep=$rep1
 	typeset vx=$vx_rep
-	vid=52
 	typeset vni=$vni
 	port=4789
 
@@ -1588,6 +1620,210 @@ set -x
 set +x
 }
 
+function tc-mirror
+{
+set -x
+	offload="skip_hw"
+
+	TC=tc
+	local link=$link
+	local rep=$rep1
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $rep ingress > /dev/null 2>&1
+
+	if [[ "$offload" == "skip_sw" ]]; then
+		ethtool -K $link hw-tc-offload on 
+		ethtool -K $rep  hw-tc-offload on 
+	fi
+	if [[ "$offload" == "skip_hw" ]]; then
+		ethtool -K $link hw-tc-offload off
+		ethtool -K $rep  hw-tc-offload off
+	fi
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $rep ingress 
+	ip link set $link promisc on
+
+	brd_mac=ff:ff:ff:ff:ff:ff
+
+	src_mac=02:25:d0:e2:14:01
+	dst_mac=24:8a:07:88:27:ca
+
+# 	ip neigh del dev enp4s0f2 1.1.1.1
+# 	arp -d 1.1.1.1
+# 	ip neigh add    1.1.1.1 lladdr $dst_mac dev $vf1
+# 	ip neigh change 1.1.1.1 lladdr $dst_mac $vf1
+
+	$TC filter add dev $rep protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac	\
+		action mirred egress mirror dev $rep2 \
+		action mirred egress redirect dev $link
+# 	$TC filter add dev $rep protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $rep2	# mirror to VF2
+	$TC filter add dev $rep protocol arp parent ffff: flower $offload dst_mac $brd_mac src_mac $src_mac action mirred egress redirect dev $link
+	$TC filter add dev $rep protocol arp parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $link
+
+	src_mac=24:8a:07:88:27:ca
+	dst_mac=02:25:d0:e2:14:01
+	$TC filter add dev $link protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac	\
+		action mirred egress mirror dev $rep2 \
+		action mirred egress redirect dev $rep
+# 	$TC filter add dev $link protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $rep2	# mirror to VF2
+	$TC filter add dev $link protocol arp parent ffff: flower $offload dst_mac $brd_mac src_mac $src_mac action mirred egress redirect dev $rep
+	$TC filter add dev $link protocol arp parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $rep
+
+set +x
+}
+
+function tc-mirror-vlan
+{
+set -x
+	offload="skip_hw"
+
+	TC=tc
+	local link=$link
+	local rep=$rep1
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $rep ingress > /dev/null 2>&1
+
+	if [[ "$offload" == "skip_sw" ]]; then
+		ethtool -K $link hw-tc-offload on 
+		ethtool -K $rep  hw-tc-offload on 
+	fi
+	if [[ "$offload" == "skip_hw" ]]; then
+		ethtool -K $link hw-tc-offload off
+		ethtool -K $rep  hw-tc-offload off
+	fi
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $rep ingress 
+	ip link set $link promisc on
+
+	brd_mac=ff:ff:ff:ff:ff:ff
+
+	src_mac=02:25:d0:e2:14:01
+	dst_mac=24:8a:07:88:27:ca
+
+	$TC filter add dev $rep protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac	\
+		action mirred egress mirror dev $rep2	\
+		action vlan push id $vid		\
+		action mirred egress redirect dev $link
+# 	$TC filter add dev $rep protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $rep2	# mirror to VF2
+	$TC filter add dev $rep protocol arp parent ffff: flower $offload dst_mac $brd_mac src_mac $src_mac	\
+		action mirred egress mirror dev $rep2	\
+		action vlan push id $vid action mirred egress redirect dev $link
+	$TC filter add dev $rep protocol arp parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac	\
+		action mirred egress mirror dev $rep2	\
+		action vlan push id $vid action mirred egress redirect dev $link
+
+	src_mac=24:8a:07:88:27:ca
+	dst_mac=02:25:d0:e2:14:01
+	$TC filter add dev $link protocol 802.1Q parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac	\
+		vlan_ethtype 0x800 vlan_id $vid vlan_prio 0 action vlan pop \
+		action mirred egress mirror dev $rep2 \
+		action mirred egress redirect dev $rep
+# 	$TC filter add dev $link protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $rep2	# mirror to VF2
+	$TC filter add dev $link protocol 802.1Q parent ffff: flower $offload dst_mac $brd_mac src_mac $src_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action mirred egress mirror dev $rep2	\
+		action vlan pop action mirred egress redirect dev $rep
+	$TC filter add dev $link protocol 802.1Q parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action mirred egress mirror dev $rep2	\
+		action vlan pop action mirred egress redirect dev $rep
+
+set +x
+}
+
+function local-vxlan
+{
+set -x
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $VXLAN type vxlan dstport 4789 external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+set +x
+}
+function tc-mirror-vxlan
+{
+set -x
+	offload="skip_hw"
+
+	TC=tc
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $rep1 ingress > /dev/null 2>&1
+	$TC qdisc del dev $rep2 ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	if [[ "$offload" == "skip_sw" ]]; then
+		ethtool -K $link hw-tc-offload on 
+		ethtool -K $rep1  hw-tc-offload on 
+	fi
+	if [[ "$offload" == "skip_hw" ]]; then
+		ethtool -K $link hw-tc-offload off
+		ethtool -K $rep1  hw-tc-offload off
+	fi
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $rep1 ingress 
+	$TC qdisc add dev $vx ingress 
+
+	local_vm_mac=02:25:d0:e2:14:01
+	remote_vm_mac=fe:71:5a:75:38:67
+
+	$TC filter add dev $rep1 protocol ip  parent ffff: prio 1 flower $offload	\
+		src_mac $local_vm_mac	\
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress mirror dev $rep2 \
+		action mirred egress redirect dev $vx
+	$TC filter add dev $rep1 protocol arp parent ffff: prio 2 flower $offload	\
+		src_mac $local_vm_mac	\
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress mirror dev $rep2 \
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ip  parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac \
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress mirror dev $rep2 \
+		action mirred egress redirect dev $rep1	\
+
+	$TC filter add dev $vx protocol arp parent ffff: prio 2 flower $offload	\
+		src_mac $remote_vm_mac \
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress mirror dev $rep2 \
+		action mirred egress redirect dev $rep1
+set +x
+}
+
+alias tcx='tc-mirror-vxlan'
+
+function tc-mirror2
+{ local link=$link
+	local rep=$rep1
+	offload="skip_sw"
+	src_mac=02:25:d0:e2:14:01
+	dst_mac=24:8a:07:88:27:ca
+	$TC filter add dev $rep protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $rep2	# mirror to VF2
+	src_mac=24:8a:07:88:27:ca
+	dst_mac=02:25:d0:e2:14:01
+	$TC filter add dev $link protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $rep2	# mirror to VF2
+}
+
 function tc5
 {
 set -x
@@ -1653,65 +1889,85 @@ set -x
                     action mirred egress redirect dev $rep
 }
 
-# export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-
-
 alias vf00="ip link set dev  $link vf 0 vlan 0 qos 0"
 alias vf052="ip link set dev $link vf 0 vlan 52 qos 0"
 
 alias vf10="ip link set dev  $link vf 1 vlan 0 qos 0"
 alias vf152="ip link set dev $link vf 1 vlan 52 qos 0"
 
-function make_mlx
+function get_rep
 {
-	make M=drivers/net/ethernet/mellanox/mlx5/core -j 32
-	make modules_install -j 32
-
-	modprobe -r mlx5_ib
-	modprobe -r mlx5_core
-	modprobe -v mlx5_core
+	[[ $# != 1 ]] && return
+	if (( oldkernel == 1 )); then
+		echo "eth$1"
+	else
+		echo "${link}_$1"
+	fi
 }
 
-function ke
+function ovs-vlan-set
 {
-# 	kexec -l /boot/vmlinuz-4.12.0-rc6+ --append="BOOT_IMAGE=/vmlinuz-4.12.0-rc6+ intel_iommu=on root=/dev/mapper/cl-root ro crashkernel=512M rd.lvm.lv=cl/root rd.lvm.lv=cl/swap"
-	kexec -e
+	ovs-vsctl set port $rep1 tag=$vid
 }
 
-function restart_ovs
+function ovs-vlan-remove
+{
+	ovs-vsctl remove port $rep1 tag $vid
+	ovs-vsctl remove port $rep2 tag $vid
+	ovs-vsctl remove port $rep3 tag $vid
+}
+
+function mirror-br
 {
 set -x
-	sudo ovs-vsctl del-br $br
-	typeset rep
-# 	vs del-port $link
-	for (( i = 0; i < numvfs; i++)); do
-		rep=${link}_$i
-		vs del-port $rep
-	done
-	vs del-port $br $link
-	vs del-br $br
+	local rep
 	vs add-br $br
+	vxlan1
 # 	vs add-port $br $link
+	for (( i = 1; i < numvfs; i++)); do
+		rep=$(get_rep $i)
+		vs add-port $br $rep tag=$vid
+		ip link set $rep up
+	done
+
+	ip link set $rep1 up
+	ovs-vsctl add-port $br $rep1 tag=$vid\
+	    -- --id=@p get port $rep1 \
+	    -- --id=@m create mirror name=m0 select-all=true output-port=@p \
+	    -- set bridge $br mirrors=@m
+set +x
+}
+
+function create-br
+{
+set -x
+	typeset rep
+
+	vs add-br $br
 	vxlan1
 # 	vs add-port $br $link
 	for (( i = 0; i < numvfs; i++)); do
-		rep=${link}_$i
+		rep=$(get_rep $i)
 		vs add-port $br $rep
 		ip link set $rep up
 	done
 set +x
 }
 
-function del_ovs
+# rep=$(eval echo '$'rep"$i")
+function del-br
 {
 set -x
-# 	vs del-port $link
-	for (( i = 1; i <= numvfs; i++)); do
-		rep=$(eval echo '$'rep"$i")
+	for (( i = 0; i < numvfs; i++)); do
+		rep=$(get_rep $i)
+		rep=${link}_$i
 		vs del-port $rep
 	done
 
 	vs del-br $br
+# 	vs del-port $link
+	ip l d $vx_rep
+	ip l d dummy0 > /dev/null 2>&1
 set +x
 }
 
@@ -1735,23 +1991,6 @@ set -x
 	vs add-port $br vnet1
 	vs add-port $br vnet3
 set +x
-}
-
-function stop-switchdev
-{
-set -x
-	virsh shutdown vm1
-	virsh shutdown vm2
-	echo 0 > /sys/class/net/$link/device/sriov_numvfs
-	virsh list
-set +x
-}
-
-
-function stop_ovs
-{
-	killall ovsdb-server
-	killall ovs-vswitchd
 }
 
 function vlan-ns
@@ -1957,6 +2196,8 @@ set -x
 
 	if [[ "$1" == "bind" ]]; then
 		bind_all
+		ifconfig $vf1 1.1.1.2/16 up
+		ifconfig $vf2 up
 		set +x
 		return
 	fi
@@ -2212,7 +2453,7 @@ function tm
 
 function lns
 {
-	ln -s ~chrism/.vi
+	ln -s ~chrism/.vim
 	ln -s ~chrism/.virc
 	ln -s ~chrism/.screenrc
 	ln -s ~chrism/.tmux.conf
@@ -2466,10 +2707,6 @@ function tcb1
 	$TC -b $1
 }
 
-
-alias tcb2='cd /root/tc; tcb1 hw_1m-index-1/batch.0; tc2'
-alias tcb3='cd /root/tc; tcb hw_1m-index-1; tc2'
-
 # [root@bjglab-18 ~]# dp dump-flows system@ovs-system
 # in_port(1),eth(src=02:25:d0:e2:18:50,dst=0a:5e:73:d8:72:45),eth_type(0x0800), packets:26, bytes:3848, used:0.180s, actions:set(tunnel(tun_id=0x1,dst=192.168.1.19,tp_dst=4789,flags(key))),2
 # in_port(1),eth(src=02:25:d0:e2:18:50,dst=0a:5e:73:d8:72:45),eth_type(0x0806), packets:0, bytes:0, used:5.300s, actions:set(tunnel(tun_id=0x1,dst=192.168.1.19,tp_dst=4789,flags(key))),2
@@ -2517,7 +2754,14 @@ function vsconfig1
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_hw
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
+# 	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
+}
+
+function vsconfig2
+{
+	ovs-vsctl remove Open_vSwitch . other_config hw-offload
+	ovs-vsctl remove Open_vSwitch . other_config tc-policy
+# 	ovs-vsctl remove Open_vSwitch . other_config max-idle
 }
 
 function burn5
@@ -2584,10 +2828,6 @@ set -x
 set +x
 }
 
-patch_dir=~/idr/review3
-patch_dir=~/patch/ingress/review2
-patch_dir=~/net/review1
-patch_dir=~/net-next/review3
 patch_dir=~/net/r1
 alias smp="cd $patch_dir"
 
@@ -2662,7 +2902,7 @@ function ovs-add-flow
 	sudo ovs-appctl dpctl/add-flow "ufid:ffffffff-ffff-ffff-ffff-ffffffff${j} $1" drop
 }
 
-function app
+function app-test
 {
 # 	ovs-add-flow "in_port(2),eth_type(0x800),eth(src=11:22:33:44:55:66)"
 	time ovs-appctl offloads/test 1 50 100 1
@@ -2757,12 +2997,24 @@ set -x
 	ip1
 	ip link del $vx > /dev/null 2>&1
 	ip link add name $vx type vxlan id $vni dev $link  remote $link_remote_ip dstport 4789
-# 	ifconfig $vx 1.1.1.2/16 up
-	ip link set vxlan0 up
-	ip addr add 1.1.1.2/24 dev vxlan0
+	ifconfig $vx $vxlan_ip/16 up
+# 	ip link set vxlan0 up
+# 	ip addr add 1.1.1.2/16 dev vxlan0
 # 	ip addr add fc00:0:0:0::2/64 dev vxlan0
 set +x
 }
+
+
+
+function peer2
+{
+set -x
+	ifconfig $link 0
+	ip link del $vx > /dev/null 2>&1
+set +x
+}
+
+
 
 alias e1="enable-tcp-offload $link"
 alias d1="disable-tcp-offload $link"
@@ -2860,6 +3112,16 @@ set -x
 set +x
 }
 
+function create-vm
+{
+	dir=/var/lib/libvirt/images/
+	disk_name=myvm.qcow2
+	vm_name=myvm
+	cd $dir
+	qemu-img create -f qcow2 $disk_name 1G
+	virt-install --name $vm_name --memory 1024 --disk=$dir/$disk_name --pxe --check path_in_use=off
+}
+
 function netperf1
 {
 	killall -9 netperf
@@ -2941,7 +3203,7 @@ function restore
 	/bin/cp -f $dir1/act_api.c net/sched/act_api.c
 }
 
-function build-libevent
+function install-libevent
 {
 	version=2.1.8-stable
 	libevent=libevent-$version
@@ -2957,7 +3219,7 @@ function build-libevent
 	sudo ldconfig
 }
 
-function build-tmux
+function install-tmux
 {
 	sm
 	cd tmux
@@ -3101,11 +3363,11 @@ function ping-all
 
 function brctl-virbr
 {
-	for (( i = 0; i < 8; i++)); do
-		brctl delif br0 vnet$i
+	for (( i = 0; i < 2; i++)); do
+		brctl delif br2 vnet$i
 	done
-	for (( i = 0; i < 8; i++)); do
-		brctl addif virbr0 vnet$i
+	for (( i = 0; i < 2; i++)); do
+		brctl addif br0 vnet$i
 	done
 }
 
@@ -3134,6 +3396,13 @@ function watcht
 	watch -d -n 1 "ethtool -S $link | grep \"tx[0-9]*_packets:\""
 }
 
+# yum --enablerepo=extras install epel-release
+# yum install python-devel
+# yum -y install pip
+# pip install rpyc
+# pip install netifaces
+# yum install libvirt
+ 
 function update
 {
 	lnst-slave &

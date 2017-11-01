@@ -18,11 +18,12 @@ set -x
 	for i in nis sudo yp-tools ypbind ypserv autofs; do
 		yum -y install $i
 	done
-	for i in virt-manager virt-install; do
-		yum -y install $i
-	done
+	dnf -y install @virtualization
+	yum -y groupinstall "Virtualization Host"
+	dnf -y groupinstall "C Development Tools and Libraries"
+	dnf -y groupinstall "Development Tools"
 	sleep 1
-	for i in tmux cscope ctags screen ncurses-devel openssl-devel gcc gcc-c++ patch *lzo* *elf* git bison readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc; do
+	for i in tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc; do
 		yum -y install $i
 	done
 	sleep 1
