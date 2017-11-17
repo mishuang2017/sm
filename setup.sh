@@ -18,14 +18,27 @@ set -x
 	for i in nis sudo yp-tools ypbind ypserv autofs; do
 		yum -y install $i
 	done
+
+	for i in nfs-utils nfs-utils-lib; do
+		yum -y install $i
+	done
+
 	dnf -y install @virtualization
 	yum -y groupinstall "Virtualization Host"
 	dnf -y groupinstall "C Development Tools and Libraries"
 	dnf -y groupinstall "Development Tools"
 	sleep 1
-	for i in tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc; do
+	for i in tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx; do
 		yum -y install $i
 	done
+
+	# ofed
+	yum -y install gtk2 atk cairo
+
+	# ovs
+	yum -y install libatomic
+	yum -y install dh-autoreconf
+
 	sleep 1
 	systemctl disable gdm
 	systemctl stop gdm
@@ -41,6 +54,7 @@ set -x
 	sleep 1
 	systemctl disable firewalld
 	systemctl stop firewalld
+	dnf -y remove firewalld
 	sleep 1
 	systemctl enable network
 	sleep 1
@@ -157,15 +171,12 @@ EOF
 
 	echo lab.mtl.com > /etc/defaultdomain
 
-	systemctl enable ypbind.service
-	sleep 1
-	systemctl enable autofs.service
-	sleep 1
-
-	systemctl start ypbind.service
-	sleep 1
-	systemctl start autofs.service
-	sleep 1
+	for i in nfs-client.target ypbind.service autofs.service; do
+		systemctl enable $i
+		sleep 1
+		systemctl start $i
+		sleep 1
+	done
 
 	yptest | head -n 20
 

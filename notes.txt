@@ -547,6 +547,11 @@ hairpin
 
 ===asap===
 
+FTP details:
+U: MLNX_ASAP2_Direct_Beta
+P: GoMlnxDirect!
+Host: ftpsupport.mellanox.com
+
 \\labfs02\linux_release\ovs_release\ASAP2_DIRECT-3.3-build4
 
 19: enp4s0f0
@@ -585,7 +590,6 @@ tc qdisc add dev eth0 ingress
 
 sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 sudo yum -y install python36u
-
 
 ===fw===
 
@@ -1553,7 +1557,37 @@ This command means “attach a root qdisc identified by id 1 to the device eth0,
 [root@bjglab-18 workloads]# cat  /sys/class/net/p2p1/tx_queue_len
 1000
 
+===mirror===
+
+mlx5e_handle_csum
+
 ===tcpdump===
+
+# incoming only
+tcpdump src host 1.1.1.14 -e -xxx -i $vf2
+
+# excluding arp
+tcpdump ip src host 1.1.1.14 -e -xxx -i $vf2
+
+[root@dev-r630-03 ~]#  tcpdump -nnvXSs 0 -c1 icmp -i $vf1
+tcpdump: listening on enp4s0f2, link-type EN10MB (Ethernet), capture size 262144 bytes
+11:09:34.861715 IP (tos 0x0, ttl 64, id 35562, offset 0, flags [none], proto ICMP (1), length 84)
+    1.1.1.14 > 1.1.13.2: ICMP echo reply, id 19444, seq 653, length 64
+        0x0000:  4500 0054 8aea 0000 4001 dfad 0101 010e  E..T....@.......
+        0x0010:  0101 0d02 0000 3b8b 4bf4 028d dea1 0b5a  ......;.K......Z
+        0x0020:  0000 0000 c024 0d00 0000 0000 1011 1213  .....$..........
+        0x0030:  1415 1617 1819 1a1b 1c1d 1e1f 2021 2223  .............!"#
+        0x0040:  2425 2627 2829 2a2b 2c2d 2e2f 3031 3233  $%&'()*+,-./0123
+        0x0050:  3435 3637                                4567
+1 packet captured
+1 packet received by filter
+0 packets dropped by kernel
+
+# tcpdump -ttttnnvvS
+2017-11-15 10:57:38.957580 IP (tos 0x0, ttl 64, id 34874, offset 0, flags [none], proto ICMP (1), length 84)
+    1.1.1.14 > 1.1.13.2: ICMP echo reply, id 19356, seq 196, length 64
+2017-11-15 10:57:39.981562 IP (tos 0x0, ttl 64, id 34875, offset 0, flags [none], proto ICMP (1), length 84)
+    1.1.1.14 > 1.1.13.2: ICMP echo reply, id 19356, seq 197, length 64
 
 [root@bjglab-18 ~]# tcpdump -nnepi p2p1
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
@@ -6546,5 +6580,21 @@ cscope -i /my/db/cscope.files
 
 3 . Export to environment variable
 CSCOPE_DB=/my/db/cscope.out; export CSCOPE_DB 
+
+===snmp===
+
+include/uapi/linux/snmp.h
+
+struct net{
+	struct netns_mib        mib;
+
+ipstats_mib
+
+ip_rcv
+        __IP_INC_STATS(net, IPSTATS_MIB_INHDRERRORS);
+
+static const struct snmp_mib snmp4_ipstats_list[] = {
+        SNMP_MIB_ITEM("InReceives", IPSTATS_MIB_INPKTS),
+        SNMP_MIB_ITEM("InHdrErrors", IPSTATS_MIB_INHDRERRORS),
 
 ===status===
