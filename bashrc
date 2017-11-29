@@ -119,9 +119,13 @@ if (( host_num == 14 )); then
 	vf1=enp4s0f2
 	vf2=enp4s0f3
 
-	rep1=${link}_0
-	rep2=${link}_1
-	rep3=${link}_2
+	if (( oldkernel == 0 )); then
+		rep1=${link}_0
+		rep2=${link}_1
+	else
+		rep1=eth0
+		rep2=eth1
+	fi
 
 	linux_dir=/home1/chrism/linux
 fi
@@ -206,6 +210,7 @@ alias ssh='ssh -o "StrictHostKeyChecking no"'
 
 if [[ -e /sys/class/net/$link/device ]]; then
 	link_bdf=$(basename $(readlink /sys/class/net/$link/device))
+	pci=$link_bdf
 fi
 
 alias a1="ip l show $link | grep ether; ip link set dev $link address $link_mac;  ip l show $link | grep ether"
@@ -232,18 +237,24 @@ alias crash1="$nfs_dir/crash/crash -i /root/.crash $linux_dir/vmlinux"
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 alias c=crash1
 
-alias crash='/auto/mtbcswgwork/chrism/crash/crash -i ~/.crash'
 
+if (( oldkernel == 1 )); then
+	CRASH=/root/bin/crash
+else
+	CRASH=$nfs_dir/crash/crash
+fi
+alias crash="$CRASH -i ~/.crash"
 crash_dir=/var/crash
 alias c0="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.0 $linux_dir/vmlinux"
-alias c1="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.1 $linux_dir/vmlinux"
+alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $linux_dir/vmlinux"
 alias c2="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.2 $linux_dir/vmlinux"
 alias c3="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.3 $linux_dir/vmlinux"
 alias c4="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.4 $linux_dir/vmlinux"
 alias c5="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.5 $linux_dir/vmlinux"
 alias c6="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.6 $linux_dir/vmlinux"
 
-alias cc0="/bin/crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
+alias cc0="$CRASH $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
+alias cc1="$CRASH $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 alias cc0="$nfs_dir/crash/crash -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 
 alias sw='vsconfig-sw; restart-ovs'
@@ -338,6 +349,10 @@ alias mount-mswg='sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/'
 alias tvf1="tcpdump ip src host 1.1.1.14 -e -xxx -i $vf1"
 alias tvf2="tcpdump ip src host 1.1.1.14 -e -xxx -i $vf2"
 alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
+
+alias up="mlxlink -d $link_bdf -p 1 -a UP"
+alias down="mlxlink -d $link_bdf -p 1 -a DN"
+alias m1="mlxlink -d $link_bdf"
 
 alias modv='modprobe --dump-modversions'
 alias 154='ssh mishuang@10.12.66.154'
@@ -555,6 +570,17 @@ set -x
 set +x
 }
 
+function cone
+{
+set -x
+# 	/bin/rm -f cscope.out > /dev/null;
+# 	/bin/rm -f tags > /dev/null;
+# 	cscope -R -b -k -q &
+	cscope -R -b &
+	ctags -R
+set +x
+}
+
 alias cu='time cscope -R -b -k'
 
 function profile
@@ -702,7 +728,7 @@ alias normalm="ovs-ofctl add-flow ovsbr 'dl_dst=52:54:00:60:78:03 action=normal'
 
 alias make_core='make M=drivers/net/ethernet/mellanox/mlx5/core'
 
-stap_str="-d act_gact -d cls_flower -d act_mirred -d /usr/sbin/ethtool -d udp_tunnel -d sch_ingress -d 8021q -d /usr/sbin/ip -d /usr/sbin/ifconfig -d /usr/sbin/tc -d devlink -d mlx5_core -d tun -d kernel -d openvswitch -d vport_vxlan -d vxlan -d /usr/sbin/ovs-vswitchd -d /usr/bin/bash -d /usr/lib64/libc-2.26.so"
+stap_str="-d act_gact -d cls_flower -d act_mirred -d /usr/sbin/ethtool -d udp_tunnel -d sch_ingress -d 8021q -d /usr/sbin/ip -d /usr/sbin/ifconfig -d /usr/sbin/tc -d devlink -d mlx5_core -d tun -d kernel -d openvswitch -d vport_vxlan -d vxlan -d /usr/sbin/ovs-vswitchd -d /usr/bin/bash -d /usr/lib64/libc-2.26.so -d /usr/lib64/libpthread-2.26.so"
 
 # make oldconfig
 # make prepare
@@ -1059,6 +1085,16 @@ set -x
 	./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
 	make -j 32
 	sudo make install -j 32
+set +x
+}
+
+function io
+{
+set -x
+	ovs
+	make -j 32
+	sudo make install
+	sudo systemctl restart openvswitch.service
 set +x
 }
 
@@ -1642,8 +1678,7 @@ set -x
 	$TC qdisc add dev $link ingress 
 	$TC qdisc add dev $rep ingress 
 
-        brd_mac=ff:ff:ff:ff:ff:ff
-
+        brd_mac=ff:ff:ff:ff:ff:f
 	dst_mac=02:25:d0:e2:18:50
 	src_mac=02:25:d0:e2:18:51
 	$TC filter add dev $rep prio 3 protocol ip  parent ffff: flower $offload dst_mac $dst_mac src_mac $src_mac action mirred egress redirect dev $link
@@ -1732,16 +1767,14 @@ set -x
 	$TC filter add dev $redirect protocol ip  parent ffff: flower $offload src_mac $src_mac	\
 		action mirred egress mirror dev $mirror \
 		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp parent ffff: flower $offload src_mac $src_mac	\
-		action mirred egress mirror dev $mirror \
+	$TC filter add dev $redirect protocol arp parent ffff: flower skip_hw src_mac $src_mac	\
 		action mirred egress redirect dev $link
 
 	src_mac=24:8a:07:88:27:9a
 	$TC filter add dev $link protocol ip  parent ffff: flower $offload src_mac $src_mac	\
 		action mirred egress mirror dev $mirror \
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol arp parent ffff: flower $offload src_mac $src_mac	\
-		action mirred egress mirror dev $mirror \
+	$TC filter add dev $link protocol arp parent ffff: flower skip_hw src_mac $src_mac	\
 		action mirred egress redirect dev $redirect
 
 set +x
@@ -2263,8 +2296,8 @@ function mirror-br
 set -x
 	local rep
 	ovs-vsctl add-br $br
-	ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip options:key=$vni
-# 	vs add-port $br $link
+# 	ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip options:key=$vni
+	vs add-port $br $link
 	for (( i = 1; i < numvfs; i++)); do
 		rep=$(get_rep $i)
 # 		vs add-port $br $rep tag=$vid
@@ -2323,14 +2356,16 @@ set -x
 set +x
 }
 
+alias br='create-br nomal'
+alias brx='create-br vxlan'
+
 function create-br
 {
 set -x
+	[[ $# != 1 ]] && return
 	typeset rep
-
 	vs add-br $br
-	vxlan1
-# 	vs add-port $br $link
+	[[ "$1" == "vxlan" ]] && vxlan1 || vs add-port $br $link
 	for (( i = 0; i < numvfs; i++)); do
 		rep=$(get_rep $i)
 		vs add-port $br $rep
@@ -2350,7 +2385,7 @@ set -x
 	done
 
 	vs del-br $br
-# 	vs del-port $link
+	vs del-port $link
 	ip l d $vx_rep
 	ip l d dummy0 > /dev/null 2>&1
 set +x
@@ -2577,8 +2612,8 @@ set -x
 		fi
 
 		ip1
-
-# 		restart_ovs
+# 	else
+# 		return
 	fi
 
 	start-ovs
@@ -3147,11 +3182,20 @@ function gdb1
 
 alias g1='gdb1 ovs-vswitchd'
 
-function vsconfig1
+function vsconfig0
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_hw
 # 	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
+	sudo systemctl restart openvswitch.service
+}
+
+function vsconfig1
+{
+	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
+	ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_sw
+# 	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
+	sudo systemctl restart openvswitch.service
 }
 
 function vsconfig2
@@ -3159,6 +3203,7 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config hw-offload
 	ovs-vsctl remove Open_vSwitch . other_config tc-policy
 # 	ovs-vsctl remove Open_vSwitch . other_config max-idle
+	sudo systemctl restart openvswitch.service
 }
 
 function burn5
@@ -3691,6 +3736,7 @@ function kexec1
 
 function fast-reboot
 {
+	pgrep vim && return
 	ver=$(uname -r)
 	if [[ $# == 1 ]]; then
 		ver=$1
@@ -3812,301 +3858,101 @@ function watchr
 	watch -d -n 1 "ethtool -S $link | grep \"rx[0-9]*_packets:\""
 }
 
-function watcht
+function natan
 {
-	watch -d -n 1 "ethtool -S $link | grep \"tx[0-9]*_packets:\""
+	fw_path=/.autodirect/fwgwork/natano/fw2/mirror_and_decap_wa
+	fw_path=/root/mirror_and_decap_wa
+	galil_fw_path=${fw_path}_galil/
+	mstdev=$pci
+	mlxburn -d $mstdev -fw ${galil_fw_path}fw-ConnectX5.mlx -conf_dir ${galil_fw_path} -force
 }
 
-# yum --enablerepo=extras install epel-release
-# yum install python-devel
-# yum -y install pip
-# pip install rpyc
-# pip install netifaces
-# yum install libvirt
- 
-function update
-{
-	lnst-slave &
-	rpyc_classic.py &
-	sleep 1
-	cd /root/lnst-hw-offload-config
-	./update-dev13_14.py
-}
-
-function run-lnst
-{
-	del_ovs
-	vs del-br $br
-	vs del-br t_br1
-	vs del-br t_br2
-	cd /root/lnst-hw-offload-config
-	lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/1_virt_ovs_vxlan_flow_key.xml
-}
-alias f=key-flow
-function key-flow
+function q1
 {
 set -x
-	ovs-vsctl del-br $br
-	ovs-vsctl add-br $br
-	ovs-vsctl add-port $br vxlan0 -- set Interface vxlan0 type=vxlan  option:remote_ip=$link_remote_ip option:key=flow option:dst_port=4789 ofport_request=10
-	ovs-vsctl add-port $br enp4s0f0_0
-	ovs-vsctl add-port $br enp4s0f0_1
-	ovs-vsctl set Interface enp4s0f0_0 ofport_request=5
-	ovs-vsctl set Interface enp4s0f0_1 ofport_request=6
+	modprobe vfio
+	modprobe vfio-pci
+	echo 15b3 101a >/sys/bus/pci/drivers/vfio-pci/new_id
+	ls /dev/vfio
 
-	ovs-ofctl add-flow $br "table=2,dl_dst=e4:11:22:33:44:55,actions=drop"
-	ovs-ofctl add-flow $br "table=2,priority=100,actions=drop"
+	qemu-system-x86_64 --enable-kvm \
+		-cpu qemu64		\
+		-name vm1		\
+		-m 1024			\
+		-hda /var/lib/libvirt/images/vm1.qcow2	\
+		-smp 4,sockets=4,cores=1,threads=1	\
+		-netdev user,id=nat1,hostfwd=tcp:127.0.0.1:8000-10.0.2.15:22	\
+		-device e1000,netdev=nat1,mac=52:54:00:13:01:01			\
+		-device vfio-pci,host=04:00.2,id=hostdev0,bus=pci.0,addr=0x9	\
+		-vga std	\
+		-vnc :1		\
+		-daemonize
 
-	typeset vni=100
-	typeset ofport=5
-	ovs-ofctl add-flow $br "table=0, priority=1 actions=goto_table:1"
-	ovs-ofctl add-flow $br "table=1, priority=1 actions=goto_table:2"
-	ovs-ofctl add-flow $br "table=2,in_port=$ofport,actions=set_field:$vni->tun_id,output:10"
-	ovs-ofctl add-flow $br "table=2,in_port=10,tun_id=$vni,actions=output:$ofport"
-
-	typeset vni=200
-	typeset ofport=6
-	ovs-ofctl add-flow $br "table=0,in_port=$ofport,actions=set_field:$vni->tun_id,output:10"
-	ovs-ofctl add-flow $br "table=0,in_port=10,tun_id=$vni,actions=output:$ofport"
-
-	ip link set enp4s0f0_0 up
-	ip link set enp4s0f0_1 up
-	ip link set enp4s0f0 up
-	ip link set $br up
-	ifconfig $link 0
-	ip addr add $link_ip/24 dev $link
-	ip link set $br up
-
-	ovs-ofctl dump-flows $br
 set +x
 }
+alias sq1="ssh -p 8000 127.0.0.1"
 
-function key-flow1
-{
-	ovs-ofctl add-flow $br 'table=0,in_port=5,actions=set_field:100->tun_id,output:10';
-	ovs-ofctl add-flow $br 'table=0,in_port=10,tun_id=100,actions=output:5';
-	ovs-ofctl add-flow $br 'table=0,priority=100,actions=drop';
-}
-
-function key-flow2
-{
-	ovs-ofctl add-flow $br 'table=0,in_port=5,actions=set_field:200->tun_id,output:10';
-	ovs-ofctl add-flow $br 'table=0,in_port=10,tun_id=200,actions=output:5';
-	ovs-ofctl add-flow $br 'table=0,priority=100,actions=drop';
-}
-
-function disable-ipv6
-{
-	sysctl -w net.ipv6.conf.all.disable_ipv6=1
-	sysctl -w net.ipv6.conf.default.disable_ipv6=1
-}
-
-function enable-ipv6
-{
-	sysctl -w net.ipv6.conf.all.disable_ipv6=0
-	sysctl -w net.ipv6.conf.default.disable_ipv6=0
-}
-
-# ovs-appctl vlog/list
-alias ovs-vlog-list="ovs-appctl vlog/list"
-
-function ovs-vlog-set
-{
-	[[ $# != 1 ]] && return
-
-	m=$1
-	ovs-appctl vlog/set $m:console:dbg
-	ovs-appctl vlog/set $m:syslog:dbg
-	ovs-appctl vlog/set $m:file:dbg
-}
-
-function install-python3
-{
-	sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-	sudo yum -y install python36u
-	sudo ln -s /usr/bin/python3.6 /usr/bin/python3
-}
-
-function tc-batch
-{
-	n=1000000
-	[[ $# != 0 ]] && n=$1
-	file=b.txt
-	TC=tc
-	set -x
-	$TC qdisc add dev $link ingress
-	ethtool -K $link hw-tc-offload on
-	time ~chrism/bin/tdc_batch.py $link $file -n $n -o --share_action
-# 	time ~chrism/bin/tdc_batch.py $link $file -n $n -o
-	time $TC -b $file
-	time $TC qdisc del dev $link ingress
-	/bin/rm $file
-	set +x
-}
-
-function copy-kdump
+function q2
 {
 set -x
-	[[ $# != 1 ]] && return
-	typeset host=$1
-	
-	typeset file=./file.txt
-	rpm -ql kexec-tools > $file
-        while read line; do
-		scp $line root@$host:$line
-        done < $file
+	modprobe vfio
+	modprobe vfio-pci
+	echo 15b3 101a >/sys/bus/pci/drivers/vfio-pci/new_id
+	ls /dev/vfio
+
+	qemu-system-x86_64 --enable-kvm \
+		-cpu qemu64 -smp 4 -name vm2 -m 1024 -hda /var/lib/libvirt/images/vm2.qcow2 \
+		-netdev user,id=nat1,hostfwd=tcp:127.0.0.1:8001-10.0.2.16:22 \
+		-device e1000,netdev=nat1,mac=52:54:00:13:01:02 \
+		-device vfio-pci,host=04:00.3 \
+		-vga std \
+		-vnc :3 -daemonize
 set +x
 }
+alias sq2="ssh -p 8001 127.0.0.1"
 
-function copy-kdump-local
+function qq1
 {
-set -x
-	typeset dir=kdump
-	mkdir -p $dir
-
-	typeset file=./file.txt
-	rpm -ql kexec-tools > $file
-        while read line; do
-		d=$(dirname $line)
-		mkdir -p $dir/$d
-		cp $line $dir/$line
-        done < $file
-set +x
-}
-
-function selinux
-{
-	typeset file=/etc/selinux/config
-	sed -i 's/SELINUX=enforcing/SELINUX=disable/' $file;
-	setenforce 0
-}
-
-function rm-gdm
-{
-set -x
-	rmdir Videos/
-	rmdir Templates/
-	rmdir Pictures/
-	rmdir Music/
-	rmdir Documents/
-	rmdir Downloads/
-	rmdir Desktop/
-	rmdir Public/
-set +x
-}
-
-# commit 40b360a38a043b8e7ef6c8e273d2521929b37c54 (HEAD, origin/mlnx_ofed_4_2, origin/HEAD, mlnx_ofed_4_2)
-# Author: Inbar Karmy <inbark@mellanox.com>
-# Date:   Wed Sep 6 11:37:22 2017 +0300
-# 
-#     BACKPORTS: Fix the number of tx queues that are allocated
-# 
-#     Fix the number of tx queues that are allocated to depend on
-#     TC number.
-# 
-#     Issue: 1121966
-# 
-#     Change-Id: I55f83a25768a9fe649e5e9df65d6330eded976dd
-#     Signed-off-by: Inbar Karmy <inbark@mellanox.com>
-
-# http://l-gerrit.mtl.labs.mlnx:8080/mlnx_ofed/mlnx-ofa_kernel-4.0
-function install-ofed
-{
-	smm
-	ln -s ofed_scripts/configure
-	ln -s ofed_scripts/makefile
-	ln -s ofed_scripts/Makefile
-	./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-ipoib-mod --with-mlx5-mod -j 32
-#	./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlx4-mod --with-mlx4_en-mod --with-ipoib-mod --with-srp-mod --with-rds-mod --with-iser-mod
-	make -j 32
-	sudo make install
-}
-
-function get_sw_id
-{
-    cat /sys/class/net/$1/phys_switch_id 2>/dev/null
-    # also appear in: ip -d link show dev $1
-}
-
-function get_port_name
-{
-    cat /sys/class/net/$1/phys_port_name 2>/dev/null
-    # also appear in: ip -d link show dev $1
-}
-
-function show_reps
-{
-	# get uplink switch id
-
-	nic_id=`get_sw_id $link`
-
-	[[ "$#" == 1 ]] && nic_id=`get_sw_id $1`
-
-	if [ -z "$nic_id" ]; then
-		echo "Cannot get switch id for $link"
-		return
-	fi
-
-	# go over virtual net devices and find same switch id
-	VIRTUAL="/sys/devices/virtual/net"
-
-	for net in `ls -1 $VIRTUAL`; do
-	    virt_id=`get_sw_id $net`
-	    if [ "$nic_id" = "$virt_id" ]; then
-		port_name=`get_port_name $net`
-		echo "$NIC : $net -> VF$port_name"
-	    fi
-	done
-}
-
-function tcp1
-{
-	offload="skip_hw"
-	TC=tc
-	redirect=$rep2
-	mirror=$rep1
-
-	[[ "$1" == "hw" ]] && offload="skip_sw"
-
-set -x
-# 	$TC filter add dev $redirect protocol ip parent ffff: prio 30 flower $offload ip_proto icmp \
-
-	$TC qdisc del dev $link ingress > /dev/null 2>&1
-	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
-
-	if [[ "$offload" == "skip_sw" ]]; then
-		ethtool -K $link hw-tc-offload on 
-		ethtool -K $redirect  hw-tc-offload on 
-	fi
-	if [[ "$offload" == "skip_hw" ]]; then
-		ethtool -K $link hw-tc-offload off
-		ethtool -K $redirect  hw-tc-offload off
-	fi
-
-	$TC qdisc add dev $link ingress 
-	$TC qdisc add dev $redirect ingress 
-	ip link set $link promisc on
-	ip link set $rep1 promisc on
-	ip link set $rep2 promisc on
-
-# 		action pedit ex munge ip dst set 1.1.1.14 pipe \
-# 		action pedit ex munge eth dst set 11:22:33:44:55:66 \
-# 		action pedit ex munge ip src set 1.1.1.1 pipe\
-	src_mac=02:25:d0:13:01:02
-	$TC filter add dev $redirect protocol ip  parent ffff: flower $offload src_mac $src_mac	\
-		action mirred egress mirror dev $mirror \
-		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp parent ffff: flower $offload src_mac $src_mac	\
-		action mirred egress mirror dev $mirror \
-		action mirred egress redirect dev $link
-
-	src_mac=24:8a:07:88:27:9a
-	$TC filter add dev $link protocol ip  parent ffff: flower $offload src_mac $src_mac	\
-		action pedit ex munge eth dst set 11:22:33:44:55:66 pipe\
-		action mirred egress mirror dev $mirror \
-		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol arp parent ffff: flower $offload src_mac $src_mac	\
-		action mirred egress mirror dev $mirror \
-		action mirred egress redirect dev $redirect
-set +x
+	/usr/bin/qemu-system-x86_64 \
+		-machine accel=kvm	\
+		-name guest=vm1,debug-threads=on	\
+		-S -object secret,id=masterKey0,format=raw,file=/var/lib/libvirt/qemu/domain-10-vm1/master-key.aes	\
+		-machine pc-i440fx-2.10,accel=kvm,usb=off,dump-guest-core=off	\	
+		-cpu Broadwell -m 3815 -realtime mlock=off -smp 1,sockets=1,cores=1,threads=1	\
+		-uuid edc5bad7-f54b-43ec-957b-821d197d1a01 -no-user-config -nodefaults		\
+		-chardev socket,id=charmonitor,path=/var/lib/libvirt/qemu/domain-10-vm1/monitor.sock,server,nowait	\
+		-mon chardev=charmonitor,id=monitor,mode=control -rtc base=utc,driftfix=slew	\
+		-global kvm-pit.lost_tick_policy=delay -no-hpet -no-shutdown	\
+		-global PIIX4_PM.disable_s3=1 -global PIIX4_PM.disable_s4=1 -boot strict=on	\	
+		-device ich9-usb-ehci1,id=usb,bus=pci.0,addr=0x6.0x7	\
+		-device ich9-usb-uhci1,masterbus=usb.0,firstport=0,bus=pci.0,multifunction=on,addr=0x6	\
+		-device ich9-usb-uhci2,masterbus=usb.0,firstport=2,bus=pci.0,addr=0x6.0x1	\
+		-device ich9-usb-uhci3,masterbus=usb.0,firstport=4,bus=pci.0,addr=0x6.0x2	\
+		-device virtio-serial-pci,id=virtio-serial0,bus=pci.0,addr=0x5	\
+		-drive file=/var/lib/libvirt/images/vm1.qcow2,format=qcow2,if=none,id=drive-virtio-disk0	\
+		-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x7,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1	\
+		-drive if=none,id=drive-ide0-0-0,readonly=on	\
+		-device ide-cd,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0	\
+		-netdev tap,fd=25,id=hostnet0,vhost=on,vhostfd=27	\
+		-device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:13:02:01,bus=pci.0,addr=0xa	\
+		-netdev tap,fd=28,id=hostnet1,vhost=on,vhostfd=29	\
+		-device virtio-net-pci,netdev=hostnet1,id=net1,mac=52:54:00:13:01:01,bus=pci.0,addr=0x3	\
+		-chardev pty,id=charserial0	\
+		-device isa-serial,chardev=charserial0,id=serial0	\
+		-chardev socket,id=charchannel0,path=/var/lib/libvirt/qemu/channel/target/domain-10-vm1/org.qemu.guest_agent.0,server,nowait	\
+		-device virtserialport,bus=virtio-serial0.0,nr=1,chardev=charchannel0,id=channel0,name=org.qemu.guest_agent.0	\
+		-chardev spicevmc,id=charchannel1,name=vdagent	\
+		-device virtserialport,bus=virtio-serial0.0,nr=2,chardev=charchannel1,id=channel1,name=com.redhat.spice.0	\
+		-device usb-tablet,id=input0,bus=usb.0,port=1	\
+		-spice port=5900,addr=127.0.0.1,disable-ticketing,image-compression=off,seamless-migration=on	\
+		-device qxl-vga,id=video0,ram_size=67108864,vram_size=67108864,vram64_size_mb=0,vgamem_mb=16,max_outputs=1,bus=pci.0,addr=0x2	\
+		-device intel-hda,id=sound0,bus=pci.0,addr=0x4	\
+		-device hda-duplex,id=sound0-codec0,bus=sound0.0,cad=0	\
+		-chardev spicevmc,id=charredir0,name=usbredir	\
+		-device usb-redir,chardev=charredir0,id=redir0,bus=usb.0,port=2	\
+		-chardev spicevmc,id=charredir1,name=usbredir	\
+		-device usb-redir,chardev=charredir1,id=redir1,bus=usb.0,port=3	\
+		-device vfio-pci,host=04:00.2,id=hostdev0,bus=pci.0,addr=0x9	\
+		-device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x8	\
+		-msg timestamp=on
 }

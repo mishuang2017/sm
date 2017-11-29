@@ -104,7 +104,7 @@ index 998aaae..ced16ec 100644
  	{"ps",      cmd_ps,      help_ps,      REFRESH_TASK_TABLE},
  	{"pte",     cmd_pte,     help_pte,     0},
 diff --git a/net.c b/net.c
-index bb86963..49767b9 100644
+index bb86963..6080f84 100644
 --- a/net.c
 +++ b/net.c
 @@ -20,6 +20,9 @@
@@ -207,7 +207,7 @@ index bb86963..49767b9 100644
  static void
  show_net_devices_v3(ulong task)
  {
-@@ -581,10 +628,129 @@ show_net_devices_v3(ulong task)
+@@ -581,10 +628,133 @@ show_net_devices_v3(ulong task)
  		get_device_name(ld->list_ptr[i], buf);
  		fprintf(fp, "%-6s ", buf);
  
@@ -253,6 +253,10 @@ index bb86963..49767b9 100644
 +
 +		ulong mlx5_priv = mdev + MEMBER_OFFSET("mlx5_core_dev", "priv");
 +		fprintf(fp, "mlx5_priv  %lx\n", mlx5_priv);
++
++		ulong fc_stats = mlx5_priv + MEMBER_OFFSET("mlx5_priv", "fc_stats");
++		fprintf(fp, "mlx5_fc_stats  %lx\n", fc_stats);
++		fprintf(fp, "tree -t rbtree -r mlx5_fc.node %lx -o 0 -s mlx5_fc.lastpackets,lastbytes\n", fc_stats);
 +
 +		ulong eq_table = mlx5_priv + MEMBER_OFFSET("mlx5_priv", "eq_table");
 +		fprintf(fp, "mlx5_eq_table  %lx\n", eq_table);
@@ -337,7 +341,7 @@ index bb86963..49767b9 100644
  	FREEBUF(ld->list_ptr);
  	FREEBUF(net_device_buf);
  }
-@@ -1663,3 +1829,441 @@ sym_socket_dump(ulong file,
+@@ -1663,3 +1833,441 @@ sym_socket_dump(ulong file,
  
      	return TRUE;
  }
@@ -537,8 +541,8 @@ index bb86963..49767b9 100644
 +{
 +	int c;
 +	char *addr = NULL;
-+	char *s;
-+	char *number;
++	char *s = NULL;
++	char *number = NULL;
 +	int n;
 +	ulong a;
 +	int i;
