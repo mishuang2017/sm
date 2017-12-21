@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=2
+numvfs=3
 port=1
 vni=200
 vni=100
@@ -52,6 +52,7 @@ if (( host_num == 13 )); then
 		link=enp4s0f0
 		link2=enp4s0f1
 		link_ip=192.168.1.13
+		link_ipv6=2017::13
 		link_ip_vlan=1.1.1.13
 		link_ip_vxlan=1.1.1.13
 		link_remote_ip=192.168.1.14
@@ -93,6 +94,7 @@ if (( host_num == 14 )); then
 	if (( port == 1 )); then
 		link=enp4s0f0
 		link_ip=192.168.1.14
+		link_ipv6=2017::14
 		link_ip_vlan=1.1.1.14
 		link_ip_vxlan=1.1.1.14
 		link_remote_ip=192.168.1.13
@@ -233,6 +235,9 @@ alias vsconfig-none='ovs-vsctl set Open_vSwitch . other_config:tc-policy=none'
 alias ovs-log=' tail -f  /var/log/openvswitch/ovs-vswitchd.log'
 alias ovs2-log=' tail -f /var/log/openvswitch/ovsdb-server.log'
 
+alias p4="ping 1.1.1.14"
+alias p6="ping6 2017::14"
+
 alias crash1="$nfs_dir/crash/crash -i /root/.crash $linux_dir/vmlinux"
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 alias c=crash1
@@ -363,7 +368,8 @@ alias 13c='ssh root@10.12.206.25'
 alias 14c='ssh root@10.12.206.26'
 
 alias slave='lnst-slave'
-alias classic='rpyc_classic.py'
+alias classic='rpyc_classic.py'	# used to update mac address
+alias lv='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/03-vlan_in_host.xml'
 alias iso='cd /mnt/d/software/iso'
 
 # alias uperf="$nfs_dir/uperf-1.0.5/src/uperf"
@@ -378,6 +384,7 @@ alias chown1="sudo chown -R chrism.mtl $linux_dir"
 alias sb='tmux save-buffer'
 
 alias sm2='cd /home1/chrism'
+alias sm3='cd /home1/chrism/iproute2'
 alias sm1="cd $linux_dir"
 alias smm='cd /home1/chrism/mlnx-ofa_kernel-4.0'
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
@@ -385,16 +392,18 @@ alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actio
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
 alias ovs="cd $nfs_dir/ovs/openvswitch"
 alias ovs="cd /home1/chrism/openvswitch"
+alias smo="cd /home1/chrism/openvswitch"
+alias cfo="cd /home1/chrism/openvswitch; cscope -d"
 alias ovs2="cd $nfs_dir/ovs/test/ovs-tests"
 alias ipa='ip a'
 alias ipl='ip l'
 alias ipal='ip a l'
 alias smd='cd /usr/src/debug/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64'
 alias rmswp='sm1; find . -name *.swp -exec rm {} \;'
+alias rmswp1='find . -name *.swp -exec rm {} \;'
 
 alias sm="cd $nfs_dir"
 alias smc="cd $nfs_dir/crash; vi net.c"
-alias sm3="cd $nfs_dir/ovs/openvswitch"
 alias smi='cd /var/lib/libvirt/images'
 alias smi2='cd /etc/libvirt/qemu'
 
@@ -413,8 +422,6 @@ alias p9='n0 ping 1.1.1.19'
 alias p="ping $link_remote_ip"
 alias px="ping $link_remote_ip"
 alias p11='n0 ping 1.1.1.11'
-alias p4='n0 ping 1.1.1.4'
-alias p6='n0 ping 1.1.1.6'
 alias p5='n0 ping 1.1.1.5'
 alias p3='n0 ping 1.1.1.3'
 
@@ -433,6 +440,7 @@ alias tcss-rep-ip="tc -stats filter show dev $rep1 protocol ip parent ffff:"
 alias tcss-rep-arp="tc -stats filter show dev $rep1 protocol arp parent ffff:"
 
 alias tcss-link="tc -stats filter show dev $link parent ffff:"
+alias tl=tcss-link
 alias tcss-link-ip="tc -stats filter show dev $link  protocol ip parent ffff:"
 alias tcss-link-arp="tc -stats filter show dev $link  protocol arp parent ffff:"
 
@@ -505,7 +513,8 @@ alias screen='screen -h 1000'
 alias path='echo -e ${PATH//:/\\n}'
 alias x=x.py
 alias cf="cd $linux_dir; cscope -d"
-alias cf2='cd /home1/chrism/linux; cscope -d'
+alias cf2='cd /auto/mtbcswgwork/chrism/iproute2; cscope -d'
+alias cf3='sm3; cscope -d'
 
 alias cd-download='cd /cygdrive/c/Users/chrism/Downloads'
 alias cd-doc='cd /cygdrive/c/Users/chrism/Documents'
@@ -521,8 +530,8 @@ alias qlog='less /var/log/libvirt/qemu/vm1.log'
 alias vd='virsh dumpxml vm1'
 alias simx='/opt/simx/bin/manage_vm_simx_support.py -n vm2'
 
-alias vfs="mlxconfig -d $linik_bdf set SRIOV_EN=1 NUM_OF_VFS=127"
-alias vfq="mlxconfig -d $link_bdf q"
+alias vfs="mlxconfig -d $link_bdf set SRIOV_EN=1 NUM_OF_VFS=127"
+alias vfq="mlxconfig -d $pci q"
 alias vfsm="mlxconfig -d $linik_bdf set NUM_VF_MSIX=6"
 
 alias tune1="ethtool -C $link adaptive-rx off rx-usecs 64 rx-frames 128 tx-usecs 64 tx-frames 32"
@@ -555,9 +564,10 @@ function vlan
         ip link add link $link name $vlan type vlan id $vid
         ip link set dev $vlan up
         ip addr add $ip/16 brd + dev $vlan
+        ip addr add $link_ipv6/64 dev $vlan
 }
 alias v1="vlan $link $vid $link_ip_vlan"
-alias v2='ip link del vlan'
+alias v2="ip link del vlan$vid"
 
 function call
 {
@@ -728,7 +738,7 @@ alias normalm="ovs-ofctl add-flow ovsbr 'dl_dst=52:54:00:60:78:03 action=normal'
 
 alias make_core='make M=drivers/net/ethernet/mellanox/mlx5/core'
 
-stap_str="-d act_gact -d cls_flower -d act_mirred -d /usr/sbin/ethtool -d udp_tunnel -d sch_ingress -d 8021q -d /usr/sbin/ip -d /usr/sbin/ifconfig -d /usr/sbin/tc -d devlink -d mlx5_core -d tun -d kernel -d openvswitch -d vport_vxlan -d vxlan -d /usr/sbin/ovs-vswitchd -d /usr/bin/bash -d /usr/lib64/libc-2.26.so -d /usr/lib64/libpthread-2.26.so"
+stap_str="-d act_gact -d cls_flower -d act_mirred -d /usr/sbin/ethtool -d udp_tunnel -d sch_ingress -d 8021q -d /usr/sbin/ip -d /usr/sbin/ifconfig -d /usr/sbin/tc -d devlink -d mlx5_core -d tun -d kernel -d openvswitch -d vport_vxlan -d vxlan -d /usr/sbin/ovs-vswitchd -d /usr/bin/bash -d /usr/lib64/libc-2.26.so -d /usr/lib64/libpthread-2.26.so -d /home1/chrism/iproute2/tc/tc"
 
 # make oldconfig
 # make prepare
@@ -1745,6 +1755,7 @@ set -x
 	redirect=$rep2
 	mirror=$rep1
 
+	TC=/home1/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $link ingress > /dev/null 2>&1
@@ -2297,22 +2308,24 @@ set -x
 	local rep
 	ovs-vsctl add-br $br
 # 	ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip options:key=$vni
-	vs add-port $br $link
+
+	ip link set $rep1 up
+	ovs-vsctl add-port $br $rep1	\
+	    -- --id=@p get port $rep1	\
+	    -- --id=@m create mirror name=m0 select-all=true output-port=@p \
+	    -- set bridge $br mirrors=@m
+
 	for (( i = 1; i < numvfs; i++)); do
 		rep=$(get_rep $i)
 # 		vs add-port $br $rep tag=$vid
 		vs add-port $br $rep
 		ip link set $rep up
 	done
+	vs add-port $br $link
 
-	ip link set $rep1 up
 # 	ovs-vsctl add-port $br $rep1 tag=$vid\
 # set +x
 # 	return
-	ovs-vsctl add-port $br $rep1	\
-	    -- --id=@p get port $rep1	\
-	    -- --id=@m create mirror name=m0 select-all=true output-port=@p \
-	    -- set bridge $br mirrors=@m
 
 # 	ovs-ofctl add-flow $br 'nw_dst=1.1.1.14 action=drop'
 set +x
@@ -2331,8 +2344,7 @@ set -x
 	done
 
 	ip link set $rep1 up
-# 	ovs-vsctl add-port $br $rep1 tag=$vid\
-	ovs-vsctl add-port $br $rep1 \
+	ovs-vsctl add-port $br $rep1 tag=$vid\
 	    -- --id=@p get port $rep1	\
 	    -- --id=@m create mirror name=m0 select-all=true output-port=@p \
 	    -- set bridge $br mirrors=@m
@@ -2356,6 +2368,7 @@ set -x
 set +x
 }
 
+alias brv='create-br vlan'
 alias br='create-br nomal'
 alias brx='create-br vxlan'
 
@@ -2366,9 +2379,10 @@ set -x
 	typeset rep
 	vs add-br $br
 	[[ "$1" == "vxlan" ]] && vxlan1 || vs add-port $br $link
+	[[ "$1" == "vlan" ]] && tag="tag=$vid" || tag=""
 	for (( i = 0; i < numvfs; i++)); do
 		rep=$(get_rep $i)
-		vs add-port $br $rep
+		vs add-port $br $rep $tag
 		ip link set $rep up
 	done
 set +x
@@ -2552,6 +2566,7 @@ alias n4='exec n4'
 
 alias n0='exec n10'
 alias n1='exec n11'
+alias n2='exec n12'
 
 alias n20='exec n20'
 alias n21='exec n21'
@@ -2977,7 +2992,7 @@ set -x
 set +x
 }
 
-function tcbnoodle
+function tcnoodle2
 {
 	dir=nb
 	/bin/rm -rf $dir
@@ -3064,12 +3079,30 @@ set -x
 set +x
 }
 
-function tca
+function tca1
 {
 set -x
-	sudo time tc action add action ok index 1 action ok index 2 action ok index 3
-	sudo tc action ls action gact
-	sudo tc action delete action ok index 1 action ok index 2 action ok index 3
+	TC=tc
+	TC=/home1/chrism/iproute2/tc/tc
+	time $TC action add action ok index 1 action ok index 2 action ok index 3
+	$TC action ls action gact
+	$TC actions flush action gact
+set +x
+}
+
+function tca3
+{
+set -x
+	TC=tc
+	TC=/home1/chrism/iproute2/tc/tc
+	time tc action add action ok index 1
+	time tc action add action ok index 2
+	time tc action add action ok index 3
+	tc action ls action gact
+	time tc action delete action ok index 1
+	tc action ls action gact
+	time tc action delete action ok index 2
+	time tc action delete action ok index 3
 set +x
 }
 
@@ -3108,35 +3141,84 @@ function tcca
 	tc filter change  dev $link prio 1 protocol ip handle 1 parent ffff: flower skip_hw src_mac e4:11:0:0:0:0 dst_mac e4:12:0:0:0:0 action pass
 }
 
+function tca
+{
+set -x
+	[[ $# == 0 ]] && n=1 || n=$1
+
+	file=/tmp/a.txt
+
+	TC=tc.orig
+	tc=tc
+	TC=/home1/chrism/iproute2/tc/tc
+
+# 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
+
+	sudo ~chrism/bin/tdc_batch_act.py -n $n $file
+	time $TC -b $file -bs 10
+	$TC action ls action gact
+	$TC actions flush action gact
+set +x
+}
+
+function tca2
+{
+set -x
+	TC=tc.orig
+	TC=/auto/mtbcswgwork/chrism/iproute2/tc/tc
+	TC=/home1/chrism/iproute2/tc/tc
+
+	$TC actions flush action gact
+	$TC actions add action pass index 1
+	$TC actions list action gact
+	$TC actions get action gact index 1
+# 	$TC actions del action gact index 1
+	$TC actions flush action gact
+set +x
+}
+
+alias td='tc action delete action ok index'
+alias td1='tc action delete action ok index 1'
+
+function tcd
+{
+set -x
+	[[ $# == 0 ]] && n=1 || n=$1
+
+	file=/tmp/a.txt
+
+	TC=/home1/chrism/iproute2/tc/tc
+	TC=tc
+
+# 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
+
+	tc action ls action gact
+	sudo ~chrism/bin/tdc_batch_act.py -d -n $n $file
+	time $TC -b $file
+	tc action ls action gact
+set +x
+}
+
+alias tls='tc action ls action gact'
 
 function tcb
 {
-	[[ $# == 0 ]] && return
+	[[ $# == 0 ]] && n=1 || n=$1
 
+	file=/tmp/b.txt
+
+	TC=/auto/mtbcswgwork/chrism/iproute2/tc/tc
 	TC=tc
+	TC=/home1/chrism/iproute2/tc/tc
 
-	$TC qdisc del dev $link ingress
-	$TC qdisc add dev $link ingress
-	ethtool -K $link hw-tc-offload on
-
-	time for file in $1/*.*; do
-set -x
-		$TC -b $file
-set +x
-	done
-}
-
-function tcb1
-{
-	[[ $# == 0 ]] && return
-
-	TC=tc
-
-	$TC qdisc del dev $link ingress
-	$TC qdisc add dev $link ingress
-	ethtool -K $link hw-tc-offload on
-
-	$TC -b $1
+	sudo $TC qdisc del dev $link ingress > /dev/null 2>&1
+	sudo $TC qdisc add dev $link ingress
+	sudo ethtool -K $link hw-tc-offload on
+# 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
+	sudo ~chrism/bin/tdc_batch.py -s -n $n $link $file
+	time $TC -b $file -batchsize 10
+# 	time $TC -b $file
+# 	sudo $TC filter show dev $link parent ffff:
 }
 
 # [root@bjglab-18 ~]# dp dump-flows system@ovs-system
@@ -3178,6 +3260,7 @@ function gdb1
 	typeset bin=$1
 # 	gdb -batch $(which $bin) $(pgrep $bin) -x ~chrism/g.txt
 	gdb $(which $bin) $(pgrep $bin) -x ~chrism/g.txt
+# 	gdb $(which $bin) $(pgrep $bin)
 }
 
 alias g1='gdb1 ovs-vswitchd'
@@ -3188,6 +3271,7 @@ function vsconfig0
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_hw
 # 	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
 	sudo systemctl restart openvswitch.service
+	vsconfig
 }
 
 function vsconfig1
@@ -3196,6 +3280,7 @@ function vsconfig1
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_sw
 # 	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
 	sudo systemctl restart openvswitch.service
+	vsconfig
 }
 
 function vsconfig2
@@ -3204,6 +3289,7 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config tc-policy
 # 	ovs-vsctl remove Open_vSwitch . other_config max-idle
 	sudo systemctl restart openvswitch.service
+	vsconfig
 }
 
 function burn5
@@ -3225,7 +3311,7 @@ function git-patch
 	typeset dir=$1
 	typeset n=$2
 	mkdir -p $dir
-	git format-patch -o $dir -$n HEAD
+	git format-patch --subject-prefix="patch net-next internal" -o $dir -$n HEAD
 }
 
 linux_file=~/idr/
@@ -3270,7 +3356,8 @@ set -x
 set +x
 }
 
-patch_dir=~/net/r1
+patch_dir=~/batch/bugfix
+patch_dir=~/batch/review4
 alias smp="cd $patch_dir"
 
 # Jamal Hadi Salim <jhs@mojatatu.com>
@@ -3282,7 +3369,8 @@ function git-format-patch
 # 	git format-patch --cover-letter --subject-prefix="INTERNAL RFC net-next v9" -o $patch_dir -$1
 # 	git format-patch --cover-letter --subject-prefix="patch net-next" -o $patch_dir -$1
 # 	git format-patch --cover-letter --subject-prefix="patch net-next internal v11" -o $patch_dir -$1
-	git format-patch --cover-letter --subject-prefix="patch net internal" -o $patch_dir -$1
+# 	git format-patch --cover-letter --subject-prefix="patch net internal" -o $patch_dir -$1
+	git format-patch --subject-prefix="patch iproute2 v2" -o $patch_dir -$1
 }
 
 #
@@ -3956,3 +4044,17 @@ function qq1
 		-device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x8	\
 		-msg timestamp=on
 }
+
+function tc_simple
+{
+	tc2
+set -x
+	tc qdisc add dev $link ingress
+	tc filter add dev $link parent ffff: protocol ip prio 5 U32 match ip protocol 1 0xff flowid 1:1 action simple "Incoming ICMP" index 1 ok
+	tc -s filter ls dev $link parent ffff:
+set +x
+}
+
+
+
+
