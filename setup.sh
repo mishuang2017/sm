@@ -39,6 +39,14 @@ set -x
 	yum -y install libatomic
 	yum -y install dh-autoreconf
 
+	# tc
+	yum -y install libmnl libmnl-devel
+
+        # gdb debug
+        dnf -y debuginfo-install glibc-2.26-15.fc27.x86_64
+	# gdb needs makeinfo
+	yum -y instal texinfo
+
 	sleep 1
 	systemctl disable gdm
 	systemctl stop gdm

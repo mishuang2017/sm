@@ -1,5 +1,43 @@
 
+\\labfs02\linux_release\ovs_release
+/mswg/release/linux/ovs_release
+
 1085542891826
+
+===udev===
+
+mlx5e_rep_get_phys_port_name
+phys_switch_id_show
+
+# udevadm info --query=property --name /dev/sda
+DEVLINKS=/dev/disk/by-id/scsi-36847beb0f962180020e608c514fe9c96 /dev/disk/by-id/wwn-0x6847beb0f962180020e608c514fe9c96 /dev/disk/by-path/pci-0000:03:00.0-scsi-0:2:0:0
+DEVNAME=/dev/sda
+DEVPATH=/devices/pci0000:00/0000:00:01.0/0000:03:00.0/host0/target0:2:0/0:2:0:0/block/sda
+DEVTYPE=disk
+ID_BUS=scsi
+ID_MODEL=PERC_H330_Mini
+ID_MODEL_ENC=PERC\x20H330\x20Mini\x20\x20
+ID_PART_TABLE_TYPE=dos
+ID_PATH=pci-0000:03:00.0-scsi-0:2:0:0
+ID_PATH_TAG=pci-0000_03_00_0-scsi-0_2_0_0
+ID_REVISION=4.27
+ID_SCSI=1
+ID_SCSI_SERIAL=00969cfe14c508e620001862f9b0be47
+ID_SERIAL=36847beb0f962180020e608c514fe9c96
+ID_SERIAL_SHORT=6847beb0f962180020e608c514fe9c96
+ID_TYPE=disk
+ID_VENDOR=DELL
+ID_VENDOR_ENC=DELL\x20\x20\x20\x20
+ID_WWN=0x6847beb0f9621800
+ID_WWN_VENDOR_EXTENSION=0x20e608c514fe9c96
+ID_WWN_WITH_EXTENSION=0x6847beb0f962180020e608c514fe9c96
+MAJOR=8
+MINOR=0
+SUBSYSTEM=block
+TAGS=:systemd:
+USEC_INITIALIZED=77440
+
+udevadm info -a --path=/sys/class/net/enp4s0f0
 
 ===simx===
 
@@ -265,7 +303,7 @@ chrome://settings/content
 ===core===
 
 ulimit -c unlimited
-echo ".core" > /proc/sys/kernel/core_pattern
+echo "core" > /proc/sys/kernel/core_pattern
 
 gcc -o main -g a.c
 gdb main /tmp/core-main-10815 
@@ -636,6 +674,8 @@ sudo yum -y install python36u
 
 ===fw===
 
+mlxfwup -d 04:00.0 -f 14.21.2030
+
 [root@dev-r630-04 network-scripts]# grep -i 0x29cdba /mswg/release/BUILDS/fw-4117/fw-4117-rel-14_21_0412-build-001/etc/syndrome_list.log
 BAD_PARAM           | 0x29CDBA |  set_flow_table_entry: an FTE with flow counter in FDB must has fully match on dmac
 
@@ -688,9 +728,9 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git checkout -- .
 
 git remote add roid https://github.com/roidayan/linux.git
-git fetch roid asap2-direct-3.3-next
+git fetch roid asap2-direct-3.4-next 
 git checkout FETCH_HEAD
-git checkout -b asap2-direct-3.3-next
+git checkout -b asap2-direct-3.4-next
 
 git remote add origin ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux
 git fetch origin net
@@ -741,6 +781,8 @@ git send-email --dry-run --to internal --cc jiri --cc or $patch_dir/*.patch --su
 
 git send-email --dry-run --to=netdev@vger.kernel.org --cc jiri@resnulli.us $patch_dir/*.patch --suppress-cc=all
 git send-email --dry-run --to=netdev@vger.kernel.org --cc gerlitz.or@gmail.com $patch_dir/*.patch --suppress-cc=all
+git send-email --dry-run --to=netdev@vger.kernel.org --cc gerlitz.or@gmail.com --cc stephen@networkplumber.org --cc dsahern@gmail.com \
+	--cc marcelo.leitner@gmail.com --cc phil@nwl.cc $patch_dir/*.patch --suppress-cc=all
 
 git send-email --to internal --cc mark -cc paul --cc roid --cc matan --cc jiri --cc guy --cc or --cc jhs@mojatatu.com --cc alex.aring@gmail.com --cc mrv@mojatatu.com $patch_dir/*.patch --suppress-cc=all
 
@@ -1661,6 +1703,42 @@ This command means “attach a root qdisc identified by id 1 to the device eth0,
 1000
 
 ===mirror===
+
+[root@dev-r630-03 ~]# dmesg
+[ 8810.091295] device enp4s0f2 left promiscuous mode
+[ 8810.092263] del_rule: type: 1
+[ 8810.095299] del_rule: type: 1
+[ 8810.096406] del_rule: type: 1
+[ 8811.243538] device enp4s0f3 left promiscuous mode
+[ 8811.244519] del_rule: type: 1
+[ 8811.247525] del_rule: type: 1
+[ 8811.248724] del_rule: type: 1
+[ 8823.338725] del_rule: type: 256
+[ 8823.339581] mlx5_cmd_set_fte: id: 1, list_size: 0, action: 4
+[ 8823.340352] mlx5_cmd_set_fte: id: 2, list_size: 1, action: 4
+[ 8823.343783] del_rule: type: 0
+[ 8823.344539] del_rule: type: 0
+[ 8823.443766] del_rule: type: 256
+[ 8823.444577] mlx5_cmd_set_fte: id: 1, list_size: 0, action: 4
+[ 8823.445357] mlx5_cmd_set_fte: id: 65535, list_size: 1, action: 4
+[ 8823.446739] del_rule: type: 0
+[ 8823.447526] del_rule: type: 0
+[ 8869.715394] fl_hw_replace_filter: is called
+[ 8869.716272] mirror: 19
+[ 8869.716963] mirror vport: 1
+[ 8869.717644] redirect: 6
+[ 8869.779828] mlx5_eswitch_add_offloaded_rule: dest[i].vport_num: 65535
+[ 8869.783184] mlx5_cmd_set_fte: id: 1, list_size: 0, action: c
+[ 8869.784006] mlx5_cmd_set_fte: id: 65535, list_size: 1, action: c
+[ 8869.784803] mlx5_cmd_set_fte: flow_counter_id: 48
+[ 8869.848272] fl_hw_replace_filter: is called
+[ 8869.849232] mirror: 19
+[ 8869.850068] mirror vport: 1
+[ 8869.850837] redirect: 20
+[ 8869.851582] mlx5_eswitch_add_offloaded_rule: dest[i].vport_num: 2
+[ 8869.854352] mlx5_cmd_set_fte: id: 1, list_size: 0, action: c
+[ 8869.855179] mlx5_cmd_set_fte: id: 2, list_size: 1, action: c
+[ 8869.855937] mlx5_cmd_set_fte: flow_counter_id: 49 
 
 https://redmine.mellanox.com/issues/1077699
 Bug CD #1077699: Decapsulation in iterator entry will cause wrong IPv4/L4 Checksums on some iterations
@@ -7262,6 +7340,113 @@ cscope -i /my/db/cscope.files
 3 . Export to environment variable
 CSCOPE_DB=/my/db/cscope.out; export CSCOPE_DB 
 
+===ecmp===
+
+pci_sriov_get_totalvfs
+
+init_one
+	load_one
+		mlx5_init_once
+			mlx5_eswitch_init
+				mlx5_eswitch_compat_debugfs_init
+
+ 0xffffffffa07a1380 : mlx5_devlink_eswitch_mode_set+0x0/0x230 [mlx5_core]
+ 0xffffffffa07a6bff : esw_compat_write+0x15f/0x1b0 [mlx5_core]
+ 0xffffffff811de5cd : vfs_write+0xbd/0x1e0 [kernel]
+ 0xffffffff811df06f : sys_write+0x7f/0xe0 [kernel]
+ 0xffffffff81645b12 : tracesys+0xdd/0xe2 [kernel]
+parms: devlink=0xffff880849e80000 mode=0x1
+execname: bash
+
+esw_mode_to_devlink
+mlx5_devlink_eswitch_mode_set
+	esw_offloads_start
+	esw_offloads_stop
+
+IPv4: Hash-based multipath routing. When the routing cache was removed in 3.6, the IPv4 multipath algorithm changed from more or less being destination-based into being quasi-random per-packet scheduling. This increased the risk of out-of-order packets and made it impossible to use multipath together with anycast services. In this release, the multipath routing implementation is replaced with a flow-based load balancing based on a hash over the source and destination addresses merge commit
+
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=07355737a8badd951e6b72aa8609a2d6eed0a7e7
+
+fib_select_path
+	fib_multipath_hash
+	fib_select_multipath
+
+ 0xffffffff815aa390 : fib_select_multipath+0x0/0x110 [kernel]
+ 0xffffffff81562f58 : __ip_route_output_key+0x8f8/0x930 [kernel]
+ 0xffffffff8156324c : ip_route_output_flow+0x1c/0x60 [kernel]
+ 0xffffffffa07674b8 : vxlan_tnl_send+0xb8/0x270 [vport_vxlan]
+ 0xffffffffa0bedf84 : ovs_vport_send+0x14/0x50 [openvswitch]
+ 0xffffffffa0be11c5 : do_output+0x25/0x40 [openvswitch]
+ 0xffffffffa0be21aa : do_execute_actions+0x58a/0x730 [openvswitch]
+ 0xffffffffa0be238c : ovs_execute_actions+0x3c/0xf0 [openvswitch]
+ 0xffffffffa0be4b3a : ovs_packet_cmd_execute+0x2aa/0x2e0 [openvswitch]
+ 0xffffffff8155bfdd : genl_family_rcv_msg+0x1cd/0x400 [kernel]
+ 0xffffffff8155c2a1 : genl_rcv_msg+0x91/0xd0 [kernel]
+ 0xffffffff8155a209 : netlink_rcv_skb+0xa9/0xc0 [kernel]
+ 0xffffffff8155a738 : genl_rcv+0x28/0x40 [kernel]
+ 0xffffffff8155981d : netlink_unicast+0xed/0x1b0 [kernel]
+ 0xffffffff81559c10 : netlink_sendmsg+0x330/0x770 [kernel]
+ 0xffffffff81510d10 : sock_sendmsg+0xb0/0xf0 [kernel]
+ 0xffffffff81511149 : ___sys_sendmsg+0x3a9/0x3c0 [kernel]
+ 0xffffffff81512031 : __sys_sendmsg+0x51/0x90 [kernel]
+ 0xffffffff81512082 : sys_sendmsg+0x12/0x20 [kernel]
+ 0xffffffff81645b12 : tracesys+0xdd/0xe2 [kernel]
+parms: res=0xffff88080e4337b8
+
+Returning from:  0xffffffff81563230 : ip_route_output_flow+0x0/0x60 [kernel]
+Returning to  :  0xffffffffa07674b8 : vxlan_tnl_send+0xb8/0x270 [vport_vxlan]
+ 0xffffffffa0bedf84 : ovs_vport_send+0x14/0x50 [openvswitch]
+ 0xffffffffa0be11c5 : do_output+0x25/0x40 [openvswitch]
+ 0xffffffffa0be21aa : do_execute_actions+0x58a/0x730 [openvswitch]
+ 0xffffffffa0be238c : ovs_execute_actions+0x3c/0xf0 [openvswitch]
+ 0xffffffffa0be4b3a : ovs_packet_cmd_execute+0x2aa/0x2e0 [openvswitch]
+ 0xffffffff8155bfdd : genl_family_rcv_msg+0x1cd/0x400 [kernel]
+ 0xffffffff8155c2a1 : genl_rcv_msg+0x91/0xd0 [kernel]
+ 0xffffffff8155a209 : netlink_rcv_skb+0xa9/0xc0 [kernel]
+ 0xffffffff8155a738 : genl_rcv+0x28/0x40 [kernel]
+ 0xffffffff8155981d : netlink_unicast+0xed/0x1b0 [kernel]
+ 0xffffffff81559c10 : netlink_sendmsg+0x330/0x770 [kernel]
+ 0xffffffff81510d10 : sock_sendmsg+0xb0/0xf0 [kernel]
+ 0xffffffff81511149 : ___sys_sendmsg+0x3a9/0x3c0 [kernel]
+ 0xffffffff81512031 : __sys_sendmsg+0x51/0x90 [kernel]
+ 0xffffffff81512082 : sys_sendmsg+0x12/0x20 [kernel]
+ 0xffffffff81645b12 : tracesys+0xdd/0xe2 [kernel]
+ffff8808072fc700        -131906915023104
+
+crash> rtable  ffff8808072fc700
+  rt_uses_gateway = 0x1,
+  rt_iif = 0x0,
+  rt_gateway = 0x10a0107,	7.1.10.1
+
+mlx5e_rep_neigh_update
+	mlx5e_rep_update_flows
+		mlx5e_tc_encap_flows_del
+			mlx5_eswitch_del_offloaded_rule
+
+/mswg/release/BUILDS/fw-4119/fw-4119-rel-16_21_2030-build-001/etc/syndrome_list.log
+BAD_PARAM           | 0x0D5EF2 |  set_flow_table_entry: currently only one flow counter is supported per flow
+
+rateswatch.sh 
+ethtool_phy_pps_BW.sh 
+ 
+esw_offloads_init
+	mlx5_lag_set_multipath_ready
+
+mlx5_lag_deactivate_multipath
+mlx5_lag_activate_multipath
+
+mlx5_lag_netdev_event
+
+mlx5_handle_changeupper_event
+mlx5_lag_set_affinity
+create_lag_debugfs_files
+
+[74309.482135] mlx5_core 0000:04:00.0: mlx5_lag_activate_multipath:867:(pid 27933): Cannot find lag device
+
+[ 1428.921673] mlx5_lag_add 1
+[ 1428.921693] mlx5_lag_add 1
+[ 1428.921709] mlx5_lag_add 2
+
 ===baidu===
 
 list intf_list
@@ -7284,6 +7469,38 @@ execname: modprobe
 ts: 355
  0x7fb2617fb0d9 : syscall    +0x19/0x40 [/usr/lib64/libc-2.26.so]
  0xdca05af4db [/usr/bin/kmod    +0x134db/0x23000]
+
+===switch===
+
+https://docs.google.com/document/d/17tc3eqHhP5iske11G0vPikOaYKXfeeaUu5UWVStBR9U/edit#heading=h.ll18b5d3okav
+
+enable
+configure terminal
+ip l3
+ip routing
+protocol ospf
+
+interface ethernet 1/3 no switchport force
+interface ethernet 1/3 ip address 8.2.10.1/24
+
+interface ethernet 1/1 no switchport force
+interface ethernet 1/1 ip address 7.1.10.1/24
+
+interface ethernet 1/2 no switchport force
+interface ethernet 1/2 ip address 7.2.10.1/24
+
+ip route vrf default 9.0.10.0 255.255.255.0 8.2.10.13
+ip route vrf default 6.0.10.0 255.255.255.0 7.1.10.14
+ip route vrf default 6.0.10.0 255.255.255.0 7.2.10.14
+
+show ip route
+
+ip route vrf default 9.0.10.0 255.255.255.0 8.2.10.74
+
+interface ethernet 1/2 shutdown
+interface ethernet 1/2 no shutdown
+
+show interfaces ethernet status
 
 ===snmp===
 
@@ -7321,11 +7538,19 @@ VLOG_ERR("%s is called", __func__);
 
 OVS_ACTION_ATTR_OUTPUT
 
+xlate_actions
+	mirror_ingress_packet
+		mirror_packet
+			output_normal
+				compose_output_action
+	do_xlate_actions
+
 Thread 13 "handler92" hit Breakpoint 1, compose_output_action__ (ctx=ctx@entry=0x7f4833fbd010, ofp_port=4, xr=xr@entry=0x0, check_stp=check_stp@entry=true) at ofproto/ofproto-dpif-xlate.c:3720
 3720    {
 (gdb) bt
 #0  compose_output_action__ (ctx=ctx@entry=0x7f4833fbd010, ofp_port=4, xr=xr@entry=0x0, check_stp=check_stp@entry=true) at ofproto/ofproto-dpif-xlate.c:3720
 #1  0x00000000004425f0 in compose_output_action (xr=0x0, ofp_port=<optimized out>, ctx=0x7f4833fbd010) at ofproto/ofproto-dpif-xlate.c:3890
+
 #2  output_normal (ctx=ctx@entry=0x7f4833fbd010, out_xbundle=out_xbundle@entry=0x1c42250, xvlan=xvlan@entry=0x7f4833fbba84) at ofproto/ofproto-dpif-xlate.c:2221
 #3  0x0000000000445e47 in xlate_normal (ctx=0x7f4833fbd010) at ofproto/ofproto-dpif-xlate.c:2826
 #4  xlate_output_action (ctx=ctx@entry=0x7f4833fbd010, port=<optimized out>, max_len=<optimized out>, may_packet_in=may_packet_in@entry=true) at ofproto/ofproto-dpif-xlate.c:4858
@@ -7346,6 +7571,7 @@ Thread 13 "handler220" hit Breakpoint 1, compose_output_action__ (ctx=ctx@entry=
 (gdb) bt
 #0  compose_output_action__ (ctx=ctx@entry=0x7f4833fbd010, ofp_port=1, xr=xr@entry=0x0, check_stp=check_stp@entry=true) at ofproto/ofproto-dpif-xlate.c:3720
 #1  0x00000000004425f0 in compose_output_action (xr=0x0, ofp_port=<optimized out>, ctx=0x7f4833fbd010) at ofproto/ofproto-dpif-xlate.c:3890
+
 #2  output_normal (ctx=ctx@entry=0x7f4833fbd010, out_xbundle=<optimized out>, xvlan=xvlan@entry=0x7f4833fbbc14) at ofproto/ofproto-dpif-xlate.c:2221
 #3  0x0000000000442826 in mirror_packet (ctx=ctx@entry=0x7f4833fbd010, xbundle=<optimized out>, mirrors=1) at ofproto/ofproto-dpif-xlate.c:1903
 #4  0x00000000004491bb in mirror_ingress_packet (ctx=0x7f4833fbd010) at ofproto/ofproto-dpif-xlate.c:1934
@@ -7359,4 +7585,15 @@ Thread 13 "handler220" hit Breakpoint 1, compose_output_action__ (ctx=ctx@entry=
 #11 0x00007f4850bff609 in start_thread () from /lib64/libpthread.so.0
 #12 0x00007f48503cfe6f in clone () from /lib64/libc.so.6
 
+===fix===
 
+[root@dev-r630-03 ~]#  ~chrism/bin/syndrome.sh 0x98afbb
+SYNDROME 98afbb
+HCA mlx5_0
+TYPE MT4117
+FW 14.21.2030
+type 4117
+fw 14_21_2030
+/mswg/release/BUILDS/fw-4117/fw-4117-rel-14_21_2030-build-001/etc/syndrome_list.log
+/mswg/release/BUILDS/fw-4117/fw-4117-rel-14_21_2030-build-001/etc/syndrome_list.log
+baD_RES_STATE       | 0x98AFBB |  create_flow_table: encap FT creation is allowed only if all VFs aren't initialized
