@@ -1,0 +1,4 @@
+set confirm off
+set print pretty on
+source ~chrism/gdb/1.sh
+alias 1 = source
