@@ -1,5 +1,5 @@
 set $print = 1
-set $debug = 0
+set $debug = 1
 
 define print-hmap
 	set $name = $arg0
@@ -44,13 +44,14 @@ define print-hmap
 				set $i = $i + 1
 			end
 		end
-		set $p = $p + 0x1
+		set $p = $p + $delta
 	end
 end
 
 ################################################################################
 
 define print-xports
+	set $delta = 1
         set $p = (*(struct xlate_cfg*) xcfgp)->xports.buckets
         set $num = (*(struct xlate_cfg*) xcfgp)->xports.n
 	if $arg0 == 0
@@ -79,6 +80,7 @@ end
 ################################################################################
 
 define print-xbundles
+	set $delta = 1
         set $p = (*(struct xlate_cfg*) xcfgp)->xbundles.buckets
         set $num = (*(struct xlate_cfg*) xcfgp)->xbundles.n
 	if $arg0 == 0
@@ -107,6 +109,7 @@ end
 ################################################################################
 
 define print-xbridges
+	set $delta = 1
         set $p = (*(struct xlate_cfg*) xcfgp)->xbridges.buckets
         set $num = (*(struct xlate_cfg*) xcfgp)->xbridges.n
 	if $arg0 == 0
@@ -134,7 +137,78 @@ end
 
 ################################################################################
 
+define print-all-ofproto-dpifs
+	set $delta = 1
+        set $p = all_ofproto_dpifs.buckets
+        set $num = all_ofproto_dpifs.n
+	if $arg0 == 0
+		set $print = 0
+		p/x $num
+	else
+		set $print = 1
+	end
+	if $argc == 2
+		print-hmap "ofproto_dpif" ofproto_dpif $p $num all_ofproto_dpifs_node $arg1
+	else
+		print-hmap "ofproto_dpif" ofproto_dpif $p $num all_ofproto_dpifs_node
+	end
+end
+define ofproto-dpif
+	print-all-ofproto-dpifs 0
+end
+define ofproto-dpif2
+	if $argc == 0
+		print-all-ofproto-dpifs 1
+	else
+		print-all-ofproto-dpifs 1 $arg0
+	end
+end
+
+################################################################################
+#
+# ofproto_dpif->bundles
+#
+# (gdb) ofproto-dpif2 bundles
+# ======= 1 =======
+# $4 = {
+#   buckets = 0x1245980,
+#   one = 0x0,
+#   mask = 3,
+#   n = 4
+# }
+# (gdb) ofbundle 0x1245980 4
+
+define print-ofbundles
+	set $delta = 8
+        set $p = $arg0
+        set $num = $arg1
+	if $arg2 == 0
+		set $print = 0
+		p/x $num
+	else
+		set $print = 1
+	end
+	if $argc == 4
+		print-hmap "ofbundle" ofbundle $p $num hmap_node $arg3
+	else
+		print-hmap "ofbundle" ofbundle $p $num hmap_node 
+	end
+end
+define ofbundle
+	print-ofbundles $arg0 $arg1 0
+end
+define ofbundle2
+	if $argc == 2
+		print-ofbundles $arg0 $arg1 1
+	else
+		print-ofbundles $arg0 $arg1 1 $arg2
+	end
+end
+
+################################################################################
+
 define print-all-ofprotos
+	set $delta = 1
         set $p = all_ofprotos.buckets
         set $num = all_ofprotos.n
 	if $arg0 == 0
@@ -161,8 +235,48 @@ define ofproto2
 end
 
 ################################################################################
+#
+# (gdb) ofproto2 ports
+# ======= 1 =======
+# $7 = {
+#   buckets = 0x122af80,
+#   one = 0x0,
+#   mask = 3,
+#   n = 4
+# }
+# (gdb) ofport 0x122af80 4
+
+define print-ofports
+	set $delta = 8
+        set $p = $arg0
+        set $num = $arg1
+	if $arg2 == 0
+		set $print = 0
+		p/x $num
+	else
+		set $print = 1
+	end
+	if $argc == 4
+		print-hmap "ofport" ofport $p $num hmap_node $arg3
+	else
+		print-hmap "ofport" ofport $p $num hmap_node 
+	end
+end
+define ofport
+	print-ofports $arg0 $arg1 0
+end
+define ofport2
+	if $argc == 2
+		print-ofports $arg0 $arg1 1
+	else
+		print-ofports $arg0 $arg1 1 $arg2
+	end
+end
+
+################################################################################
 
 define print-port-to-netdevs
+	set $delta = 1
 	set $p = port_to_netdev.buckets
 	set $num = port_to_netdev.n
 	if $arg0 == 0
@@ -191,6 +305,7 @@ end
 ################################################################################
 
 define print-ifindex-to-ports
+	set $delta = 1
 	set $p = ifindex_to_port.buckets
 	set $num = ifindex_to_port.n
 	if $arg0 == 0
@@ -219,6 +334,7 @@ end
 ################################################################################
 
 define print-backer
+	set $delta = 1
         set $shash_node = all_dpif_backers.map.one
         p/x $shash_node
 	set $backer = (*(struct shash_node *) $shash_node)->data
