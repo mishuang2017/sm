@@ -1,5 +1,15 @@
+set max-value-size unlimited
+set confirm off
+set print pretty on
+
+# source ~chrism/gdb/1.sh
+# source ~chrism/gdb/2.sh
+# alias 1 = source
+
 set $print = 1
-set $debug = 1
+set $debug = 0
+
+source ~chrism/gdb/1.py
 
 define print-hmap
 	set $name = $arg0
@@ -19,9 +29,9 @@ define print-hmap
 				printf "p *(struct %s *) 0x%x\n", $name, $a
 			else
 				if $argc == 6
-					p (*(struct $arg1 *) $a).$arg5
+					p/x (*(struct $arg1 *) $a).$arg5
 				else
-					p *(struct $arg1 *) $a
+					p/x *(struct $arg1 *) $a
 				end
 			end
 			set $i = $i + 1
@@ -35,9 +45,9 @@ define print-hmap
 					printf "p *(struct %s *) 0x%x\n", $name, $node
 				else
 					if $argc == 6
-						p (*(struct $arg1 *) $node).$arg5
+						p/x (*(struct $arg1 *) $node).$arg5
 					else
-						p *(struct $arg1 *) $node
+						p/x *(struct $arg1 *) $node
 					end
 				end
 				set $node = (*(struct $arg1 *) $node)->$arg4.next
@@ -342,6 +352,28 @@ define print-backer
         p *(struct dpif_backer *)$backer
 end
 
+define print-udpif
+	set $delta = 1
+        set $shash_node = all_dpif_backers.map.one
+        p/x $shash_node
+	set $backer = (*(struct shash_node *) $shash_node)->data
+        p/x $backer
+        p *((struct dpif_backer *)$backer).udpif
+end
+
+# (gdb) p *((struct handler *) 0x2097740)@11
+
+define print-handlers
+	set $delta = 1
+	set $shash_node = all_dpif_backers.map.one
+	p/x $shash_node
+	set $backer = (*(struct shash_node *) $shash_node)->data
+	p/x $backer
+	set $n = (*((struct dpif_backer *)$backer).udpif).n_handlers
+	p/x *(*((struct dpif_backer *)$backer).udpif).handlers@$n
+end
+
+
 define print-ofport-dpifs
 	if $arg0 == 0
 		set $print = 0
@@ -397,3 +429,130 @@ end
 
 ################################################################################
 
+define print-xbundle
+	if $argc == 1
+		ls xbundle 0x18 $arg0
+	end
+	if $argc == 2
+		ls xbundle 0x18 $arg0 $arg1
+	end
+end
+
+define ls
+	if $argc < 3
+		echo ls "struct name" "offset" "list head address"\n
+	else
+		set $offset = $arg1
+		set $head = $arg2
+		set $node = $arg2
+		set $i = 1
+		while $i != 0
+			if $node == $head
+				set $node = *$node
+			end
+			if $argc == 3
+				p (*(struct $arg0 *) (($node = *$node) - $offset))
+			else
+				p (*(struct $arg0 *) (($node = *$node) - $offset)).$arg3
+			end
+			p/x $node - $offset
+			if $node == $head
+				set $i = 0
+			end
+		end
+	end
+end
+
+# print-xbundle $g_xbundles_head name
+
+set $dpif = all_ofproto_dpifs.one
+
+define print-dpif
+	p/x $dpif
+	p/x *(struct ofproto_dpif *)$dpif
+# 	p/x (*(struct ofproto_dpif *)$dpif)->netflow
+end
+
+set $ofproto = all_ofprotos.one
+
+define print-ofproto
+	echo struct ofproto\t
+# 	p $ofproto
+# 	p *(struct ofproto*)$ofproto
+
+	set $tables = (*(struct ofproto*)$ofproto).tables
+# 	echo struct oftable\t
+# 	p $tables
+# 	p/x *(struct oftable*) $tables
+
+	set $cls = (*(struct ofproto*)$ofproto).tables->cls
+# 	echo struct classifier\t
+# 	p/s $cls
+# 	p/x *(struct classifier*) $cls
+
+	set $subtables = (*(struct ofproto*)$ofproto).tables->cls.subtables.impl.p
+# 	echo struct subtable\t
+# 	p $subtables
+# 	p/x *(struct pvector_impl*) $subtables
+
+	set $size = (*(struct pvector_impl*) $subtables).size
+	p/x $size
+	set $vector = (*(struct pvector_impl*) $subtables).vector
+	p/x $vector
+
+	set $i = 0
+	while $i != $size
+		set $i = $i + 1
+		p/x *(struct pvector_entry*) $vector
+		set $cls_subtable = (*(struct pvector_entry*) $vector).ptr
+# 		echo struct cls_subtable\t
+# 		p/x $cls_subtable
+# 		p/x *(struct cls_subtable*) $cls_subtable
+
+		set $rules = (*(struct cls_subtable*)$cls_subtable).rules.impl.p
+		p/x $rules
+
+		x (*(struct cls_subtable*)$cls_subtable).rules_list.prev
+		set $rules_list = $_
+		echo cls_rule\t
+		p/x $rules_list
+		p/x *(struct cls_rule*) $rules_list
+		set $o = &((struct rule*)0)->cr
+		# 8 bytes
+		set $rule_dpif = $rules_list - 2
+		echo rule_dpif\t
+		p/x $rule_dpif
+		p/x *(struct rule_dpif*) $rule_dpif
+
+		set $rule_actions = (*(struct rule_dpif*) $rule_dpif)->up.actions
+		echo rule_actions\t
+		p/x $rule_actions
+		p/x *(struct rule_actions*)$rule_actions
+
+		set $ofpacts = (*(struct rule_actions*)$rule_actions)->ofpacts
+		echo ofpacts\t
+		p/x $ofpacts
+		p/x *(struct ofpact_output*)$ofpacts
+
+		set $miniflow = (*(struct cls_rule*)$rules_list)->match.flow
+		x/50 $miniflow
+
+		set $cls_match = (*(struct cls_rule*)$rules_list)->cls_match.p
+		echo cls_match\t
+		p/x $i
+		p/x $cls_match
+		p/x *(struct cls_match*) $cls_match
+
+# 		echo cmap_impl\n
+# 		p/x *(struct cmap_impl*) $rules
+
+		set $vector = $vector + 1
+# 		p/x $vector
+	end
+
+# 	p/x (*(struct ofproto_dpif *)$dpif)->netflow
+end
+
+################################################################################
+
+source ~chrism/gdb/1.py
