@@ -1,0 +1,59 @@
+From c0202789ffdb9c4ca6c665147f1e45d3d3ecf8ab Mon Sep 17 00:00:00 2001
+From: Chris Mi <chrism@mellanox.com>
+Date: Mon, 11 Jun 2018 10:53:39 +0900
+Subject: [PATCH 5/5] fix fdb_table and add fwd_table
+
+---
+ net.c | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/net.c b/net.c
+index 133c782..131cf16 100644
+--- a/net.c
++++ b/net.c
+@@ -1757,7 +1757,6 @@ cmd_flow(void)
+ 	}
+ 
+ 	a = strtoul(addr, &ptr, 16);
+-/* 	a = table_test; */
+ 
+ 	if (!dest) {
+ 		fprintf(fp, "mlx5_flow_table  %lx -x\n", a);
+@@ -1932,8 +1931,6 @@ cmd_hash(void)
+         }
+ }
+ 
+-ulong table_test;
+-
+ void show_mlx(ulong net_addr)
+ {
+         int ofed = 0;
+@@ -2034,14 +2031,17 @@ void show_mlx(ulong net_addr)
+ 		fprintf(fp, "encap_tbl  %lx\n", encap_tbl);
+ 		fprintf(fp, "list 0xffff8810325d8200 -o 0x30 -s mlx5e_encap_entry\n");
+ 
+-		ulong fdb_table = esw + MEMBER_OFFSET("mlx5_eswitch", "fdb_table");
+-		fprintf(fp, "mlx5_eswitch_fdb  %lx\n", fdb_table);
+-
+-		table_test = read_pointer2(fdb_table, "mlx5_eswitch_fdb", "fdb");
+-		fprintf(fp, "flow -c %lx\n", table_test);
+-		fprintf(fp, "repeat -1 flow -c %lx\n", table_test);
+-		fprintf(fp, "flow %lx\n", table_test);
+-		fprintf(fp, "flow %lx -d\n", table_test);
++		ulong mlx5_eswitch_fdb = esw + MEMBER_OFFSET("mlx5_eswitch", "fdb_table");
++		fprintf(fp, "mlx5_eswitch_fdb  %lx\n\n", mlx5_eswitch_fdb);
++
++		ulong fdb_table = read_pointer1(mlx5_eswitch_fdb);
++		ulong fwd_table = read_pointer1(mlx5_eswitch_fdb + 8);
++		fprintf(fp, "flow %lx\n", fdb_table);
++		fprintf(fp, "fwd_table\n");
++		fprintf(fp, "flow %lx\n\n", fwd_table);
++		fprintf(fp, "flow -c %lx\n", fdb_table);
++		fprintf(fp, "repeat -1 flow -c %lx\n", fdb_table);
++		fprintf(fp, "flow %lx -d\n", fdb_table);
+ 	}
+ 
+ 	ulong  qdisc = read_pointer2(net_addr, "net_device", "qdisc");
+-- 
+2.14.2
+

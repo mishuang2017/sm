@@ -1,0 +1,32 @@
+From 3cdba266e2d9a6c5981deba12bdc695ba3a1b9db Mon Sep 17 00:00:00 2001
+From: Chris Mi <chrism@mellanox.com>
+Date: Fri, 4 May 2018 10:37:57 +0900
+Subject: [PATCH 2/5] comment
+
+---
+ net.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/net.c b/net.c
+index b5ce629..cbe652c 100644
+--- a/net.c
++++ b/net.c
+@@ -2085,6 +2085,15 @@ void show_mlx(ulong net_addr)
+ 		return;
+ 	fprintf(fp, "tcf_block  %lx\n", tcf_block);
+ 
++	// net_device		->	ingress_queue
++	// netdev_queue		->	qdisc
++	// Qdisc			ingress_sched_data
++	// ingress_sched_data	->	block
++	// tcf_block		->	chain_list
++	// tcf_chain		->	tcf_proto
++	// tcf_proto		->	root
++	// cls_fl_head		->	handle_idr
++
+ 	ulong chain_list = tcf_block + MEMBER_OFFSET("tcf_block", "chain_list");
+ 	fprintf(fp, "list -H %lx -o tcf_chain.list -s tcf_chain\n", chain_list);
+ 	fprintf(fp, "list tcf_proto.next filter_chain_addr -s tcf_proto\n\n");
+-- 
+2.14.2
+
