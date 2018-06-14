@@ -33,7 +33,9 @@ set -x
 	done
 
 	# ofed
-	yum -y install gtk2 atk cairo
+	yum -y install gtk2 atk cairo python2-libxml2 createrepo
+	# dpdk
+	yum -y install numactl-devel 
 
 	# ovs
 	yum -y install libatomic
