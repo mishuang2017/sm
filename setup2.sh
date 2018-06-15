@@ -9,51 +9,30 @@ set -x
 	systemctl disable packagekitd
 	systemctl stop packagekitd
 	sleep 1
-
-	yum -y update vim-minimal
-	sleep 1
-	yum -y install vim-enhanced
-	sleep 1
-
-	for i in nis sudo yp-tools ypbind ypserv autofs; do
-		yum -y install $i
-	done
-
-	for i in nfs-utils nfs-utils-lib; do
-		yum -y install $i
-	done
-
-	dnf -y install @virtualization
-	yum -y groupinstall "Virtualization Host"
-	dnf -y groupinstall "C Development Tools and Libraries"
-	dnf -y groupinstall "Development Tools"
-	sleep 1
-	for i in tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx; do
-		yum -y install $i
-	done
-
-	# ofed
-	yum -y install gtk2 atk cairo python2-libxml2 createrepo cmake libnl3-devel
-	yum -y install infiniband-diags.x86_64 ibutils.x86_64
-	# dpdk
-	yum -y install numactl-devel 
-
-	# ovs
-	yum -y install libatomic
-	yum -y install dh-autoreconf
-
-	# tc
-	yum -y install libmnl libmnl-devel
-
-        # gdb debug
-        dnf -y debuginfo-install glibc-2.26-15.fc27.x86_64
-	# gdb needs makeinfo
-	yum -y instal texinfo
-
-	sleep 1
 	systemctl disable gdm
 	systemctl stop gdm
 	sleep 1
+
+	yum -y update vim-minimal
+	sleep 1
+
+	yum -y install vim-enhanced	\
+		yp-tools ypbind ypserv autofs \
+		nfs-utils nfs-utils-lib	\
+		ctags tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx	\
+		gtk2 atk cairo python2-libxml2 createrepo cmake libnl3-devel	\
+		infiniband-diags.x86_64 ibutils.x86_64	\
+		numactl-devel	\
+		libatomic dh-autoreconf	\
+		libmnl libmnl-devel	\
+		texinfo dmidecode
+
+# 	dnf -y debuginfo-install glibc-2.26-15.fc27.x86_64
+
+# 	dnf -y install @virtualization
+# 	yum -y groupinstall "Virtualization Host"
+# 	dnf -y groupinstall "C Development Tools and Libraries"
+# 	dnf -y groupinstall "Development Tools"
 set +x
 }
 
