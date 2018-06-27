@@ -28,18 +28,19 @@ set -x
 	dnf -y groupinstall "C Development Tools and Libraries"
 	dnf -y groupinstall "Development Tools"
 	sleep 1
-	for i in tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx; do
+	for i in ctags tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx gcc-c++; do
 		yum -y install $i
 	done
 
 	# ofed
-	yum -y install gtk2 atk cairo python2-libxml2 createrepo cmake libnl3-devel
+	yum -y install gtk2 atk cairo python2-libxml2 createrepo cmake libnl3-devel automake
 	yum -y install infiniband-diags.x86_64 ibutils.x86_64
 	# dpdk
 	yum -y install numactl-devel 
 
 	# ovs
 	yum -y install libatomic
+	yum -y install libtool
 	yum -y install dh-autoreconf
 
 	# tc
