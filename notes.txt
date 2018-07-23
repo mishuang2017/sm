@@ -1,4 +1,3 @@
-
 \\labfs02\linux_release\ovs_release
 /mswg/release/linux/ovs_release
 
@@ -887,6 +886,80 @@ usbserinfo:1.0 driver:2.0
 [    1.368938] 00:02: ttyS1 at I/O 0x2f8 (irq = 3, base_baud = 115200) is a 16550A
 [    1.390401] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
 
+===dpdk===
+
+RHEL 7.5
+
+OFED 4.3 GA
+--upstream-libs --dpdk
+
+dpdk 7.11
+
+===mlx5_ib===
+
+mlx5_ib_create_rwq_ind_table
+mlx5_ib_create_flow
+mlx5_ib_create_qp
+
+mlx5_ib_arm_cq
+mlx5_ib_update_xlt
+mlx5_ib_post_send_wait
+mlx5_ib_post_send
+mlx5_ib_cq_comp
+mlx5_ib_poll_cq
+mlx5_ib_umr_done
+
+
+/usr/local/bin/stap -v -d /usr/lib64/libpthread-2.17.so -d mlx5_ib  -d /usr/lib64/libibverbs.so.1.1.16.0  -d /usr/lib64/libmlx5.so.1.3.16.0  -d /home1/chrism/dpdk-18.05/build/app/testpmd ./mlx5_ib_post_send.stp
+
+ 0xffffffffc0a6ccd0 : mlx5_ib_post_send+0x0/0x1420 [mlx5_ib]
+ 0x0 (inexact)
+parms:
+execname: testpmd
+ts: 4
+ 0x7fab7d77e79d : __write_nocancel+0x24/0x57 [/usr/lib64/libpthread-2.17.so]
+ 0x7fab7e70984c : ibv_cmd_reg_mr+0x8c/0x130 [/usr/lib64/libibverbs.so.1.1.16.0]
+ 0x7fab7e4f9bfb : mlx5_reg_mr+0x6b/0xb0 [/usr/lib64/libmlx5.so.1.3.16.0]
+ 0x7fab7e712008 : ibv_reg_mr@@IBVERBS_1.1+0x38/0x70 [/usr/lib64/libibverbs.so.1.1.16.0]
+ 0x477e3e : mlx5_mr_lookup_dev+0xb0a/0xd4c [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x740f67 : mlx5_mr_update_mp_cb+0xb7/0xd0 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x51f651 : rte_mempool_mem_iter+0x31/0x50 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x7415d0 : mlx5_mr_update_mp+0x30/0x40 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x73a8c5 : mlx5_dev_start+0x2d5/0x610 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x4fdfbd : rte_eth_dev_start+0x8d/0x330 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x481eac : start_port+0x1bc/0x600 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x47a24f : main+0x52f/0xa90 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x7fab7d3c5445 [/usr/lib64/libc-2.17.so+0x22445/0x3cd000]
+
+ 0xffffffffc0a6c3f0 : mlx5_ib_create_qp+0x0/0x20 [mlx5_ib]
+ 0x0 (inexact)
+parms:
+execname: testpmd
+ts: 4
+ 0x7f371a3f179d : __write_nocancel+0x24/0x57 [/usr/lib64/libpthread-2.17.so]
+ 0x7f371b37dbad : ibv_cmd_create_qp_ex2+0x18d/0x310 [/usr/lib64/libibverbs.so.1.1.16.0]
+ 0x7f371b16ddfd : create_qp+0xc1d/0xd40 [/usr/lib64/libmlx5.so.1.3.16.0]
+ 0x747aaf : mlx5_flow_create_drop_queue+0x19f/0x4a0 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x721709 : mlx5_pci_probe+0x2009/0x25f0 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x55350f : pci_probe_all_drivers.part.1+0x13f/0x1d0 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x55364e : rte_pci_probe+0xae/0x160 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x53505c : rte_bus_probe+0x4c/0xb0 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x524465 : rte_eal_init+0x1205/0x13d0 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x479d64 : main+0x44/0xa90 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x7f371a038445 [/usr/lib64/libc-2.17.so+0x22445/0x3cd000]
+
+ 0xffffffffc0a6c3f0 : mlx5_ib_create_qp+0x0/0x20 [mlx5_ib]
+ 0x0 (inexact)
+parms:
+execname: testpmd
+ts: 5
+ 0x7f371a3f179d : __write_nocancel+0x24/0x57 [/usr/lib64/libpthread-2.17.so]
+ 0x7f371b37dbad : ibv_cmd_create_qp_ex2+0x18d/0x310 [/usr/lib64/libibverbs.so.1.1.16.0]
+ 0x7f371b16ddfd : create_qp+0xc1d/0xd40 [/usr/lib64/libmlx5.so.1.3.16.0]
+ 0x7275e4 : mlx5_hrxq_new+0x144/0x3f0 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x746202 : mlx5_flow_list_create.isra.12+0x342/0xa90 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+ 0x748ff2 : mlx5_ctrl_flow+0x2f2/0x370 [/home1/chrism/dpdk-18.05/build/app/testpmd]
+
 ===sig===
 
  0xffffffff812ae300 : do_coredump  +0x0/0xeb0 [kernel]
@@ -955,8 +1028,13 @@ git push origin HEAD:refs/for/master/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 
 git push origin HEAD:refs/for/net-next-mlx5/port-mirroring
+git push origin HEAD:refs/for/net-mlx5/fix-port-mirroring-panic
+git push origin HEAD:refs/for/net-mlx5/fix-port-mirroring-panic2
 
 git push origin HEAD:refs/for/net-mlx5/flow-counter-fw-warning
+
+git push origin HEAD:refs/for/mlnx_ofed_4_4/port_mirroring_panic_bp
+git push origin HEAD:refs/for/mlnx_ofed_4_4/cls_flower-and-act_tunnel_key-for-4_9
 
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
@@ -967,6 +1045,7 @@ git@github.com:openvswitch/ovs.git
 ofed:
 http://l-gerrit.mtl.labs.mlnx:8080/mlnx_ofed/mlnx-ofa_kernel-4.0
 ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git
+
 git push ssh2 HEAD:refs/for/mlnx_ofed_4_4/port-mirroring
 
 a. Declare to which commit/backport should this changed be fixup to:
@@ -2648,6 +2727,50 @@ static const struct dpctl_command all_commands[] = {
 
 ===ovs===
 
+/.autodirect/mswg/release/linux/ovs_release/latest-asap-mlnx-ofed/openvswitch/openvswitch 
+
+
+ovs-dpctl dump-flows  type=offloaded
+ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=5
+
+ofproto_max_idle
+
+
+
+ 0xffffffffa0dec8b0 : ovs_vport_get_stats+0x0/0x90 [openvswitch]
+ 0xffffffffa0ddef0c : ovs_vport_cmd_fill_info+0x18c/0x200 [openvswitch]
+ 0xffffffffa0ddf28b : ovs_vport_cmd_get+0x7b/0xe0 [openvswitch]
+ 0xffffffff816801a4 : genl_family_rcv_msg+0x1e4/0x390 [kernel]
+ 0xffffffff81680397 : genl_rcv_msg+0x47/0x90 [kernel]
+ 0xffffffff8167e3fd : netlink_rcv_skb+0x4d/0x130 [kernel]
+ 0xffffffff8167eba4 : genl_rcv+0x24/0x40 [kernel]
+ 0xffffffff8167dc96 : netlink_unicast+0x196/0x230 [kernel]
+ 0xffffffff8167dfde : netlink_sendmsg+0x2ae/0x3a0 [kernel]
+ 0xffffffff81616b06 : sock_sendmsg+0x36/0x40 [kernel]
+ 0xffffffff8161727f : ___sys_sendmsg+0x26f/0x2d0 [kernel]
+ 0xffffffff816185ce : __sys_sendmsg+0x5e/0xa0 [kernel] (inexact)
+ 0xffffffff8100421b : do_syscall_64+0x5b/0x180 [kernel] (inexact)
+ 0xffffffff81800088 : entry_SYSCALL_64_after_hwframe+0x44/0xa9 [kernel] (inexact)
+ 0x0 (inexact)
+parms: vport=0xffff881031afb980 stats=0xffffc90001637a40
+execname: ovs-vswitchd
+ts: 63
+ 0x7f3fdf5c5ee4 : sendmsg+0x54/0xb0 [/usr/lib64/libpthread-2.26.so]
+ 0x532eb1 : nl_sock_transact_multiple__+0x121/0x490 [/usr/sbin/ovs-vswitchd]
+ 0x5332dc : nl_sock_transact_multiple.part.8+0xbc/0x1a0 [/usr/sbin/ovs-vswitchd]
+ 0x533401 : nl_sock_transact+0x41/0xc0 [/usr/sbin/ovs-vswitchd]
+ 0x5342c0 : nl_transact+0x40/0x60 [/usr/sbin/ovs-vswitchd]
+ 0x5248f8 : dpif_netlink_vport_transact+0x98/0x150 [/usr/sbin/ovs-vswitchd]
+ 0x52589d : dpif_netlink_vport_get+0x3d/0x50 [/usr/sbin/ovs-vswitchd]
+ 0x52a014 : get_stats_via_vport+0x54/0x1f0 [/usr/sbin/ovs-vswitchd]
+ 0x52a5a7 : netdev_linux_get_stats+0x47/0x1a0 [/usr/sbin/ovs-vswitchd]
+ 0x4945bb : netdev_get_stats+0x5b/0xa0 [/usr/sbin/ovs-vswitchd]
+ 0x408c30 : iface_refresh_stats.part.27+0x50/0x520 [/usr/sbin/ovs-vswitchd]
+ 0x410e58 : bridge_run+0x1508/0x1930 [/usr/sbin/ovs-vswitchd]
+ 0x4069b5 : main+0x2c5/0x480 [/usr/sbin/ovs-vswitchd]
+ 0x7f3fdeccbf2a : __libc_start_main+0xea/0x1c0 [/usr/lib64/libc-2.26.so]
+ 0x4078da : _start+0x2a/0x30 [/usr/sbin/ovs-vswitchd]
+
 Linux kernel in $KBUILD is version $kversion, but version newer than 4.15.x is not supported
 acinclude.m4
 patchlevel
@@ -3946,6 +4069,77 @@ crash> rd -8 ffff880b961d8978 6
 ffff880b961d8978:  24 8a 07 88 27 ca                                 $...'.
 
 ===neigh update==
+
+53f800e3baf98 (Ido Schimmel                 2016-12-23 09:32:48 +0100  105)     call_netevent_notifiers(NETEVENT_NEIGH_UPDATE, neigh);
+
+mlx5e_rep_netevent_event
+mlx5e_rep_neigh_update
+
+mlx5e_rep_neigh_entry_insert
+mlx5e_rep_neigh_stats_work
+
+
+upstream
+
+1. down
+
+ 0xffffffffa0e3d6a0 : mlx5e_rep_netevent_event+0x0/0x300 [mlx5_core]
+ 0xffffffff810aab85 : notifier_call_chain+0x45/0x70 [kernel]
+ 0xffffffff810aadce : atomic_notifier_call_chain+0x2e/0x40 [kernel]
+ 0xffffffff8163ec66 : neigh_cleanup_and_release+0x36/0x50 [kernel]
+ 0xffffffff8163f044 : neigh_flush_dev.isra.39+0x134/0x150 [kernel]
+ 0xffffffff8163f0d2 : neigh_ifdown+0x32/0x100 [kernel]
+ 0xffffffff817165d5 : rt6_disable_ip+0x185/0x1b0 [kernel]
+ 0xffffffff817087b3 : addrconf_ifdown+0x53/0x560 [kernel]
+ 0xffffffff8170c65e : addrconf_notify+0x19e/0xb10 [kernel]
+ 0x0 (inexact)
+parms: nb=0xffff881017f8f2a8 event=0x1 ptr=0xffff881028df3e00
+execname: NetworkManager
+
+2. up
+
+<no user backtrace at module("mlx5_core").function("mlx5e_rep_netevent_event@drivers/net/ethernet/mellanox/mlx5/core/en_rep.c:432")>
+182
+ 0xffffffffa0e3d6a0 : mlx5e_rep_netevent_event+0x0/0x300 [mlx5_core]
+ 0xffffffff810aab85 : notifier_call_chain+0x45/0x70 [kernel]
+ 0xffffffff810aadce : atomic_notifier_call_chain+0x2e/0x40 [kernel]
+ 0xffffffff8163f8af : neigh_update+0x3ef/0x750 [kernel]
+ 0xffffffff816ba438 : arp_process+0x358/0x840 [kernel]
+ 0xffffffff816baa61 : arp_rcv+0x121/0x1d0 [kernel]
+ 0xffffffff8162e59c : __netif_receive_skb_core+0x44c/0xbb0 [kernel]
+ 0x0 (inexact)
+parms: nb=0xffff881017f8c4a8 event=0x1 ptr=0xffff881017f89a00
+execname: swapper/4
+
+
+centos 7.2
+
+1. no down
+2. up
+
+ 0xffffffff81533550 : call_netevent_notifiers+0x0/0x20 [kernel]
+ 0xffffffff8153794a : neigh_update+0x2ca/0x5e0 [kernel]
+ 0xffffffff8159976c : arp_process+0x2fc/0x660 [kernel]
+ 0xffffffff81599c0d : arp_rcv+0x11d/0x1a0 [kernel]
+ 0xffffffff8152a882 : __netif_receive_skb_core+0x582/0x7d0 [kernel]
+ 0xffffffff8152aae8 : __netif_receive_skb+0x18/0x60 [kernel]
+ 0xffffffff8152ab70 : netif_receive_skb+0x40/0xc0 [kernel]
+ 0xffffffff8152b6e0 : napi_gro_receive+0x80/0xb0 [kernel]
+ 0xffffffffa07e3436 : mlx5e_handle_rx_cqe_mpwrq+0x586/0xa00 [mlx5_core]
+ 0xffffffffa07e39a3 : mlx5e_poll_rx_cq+0xf3/0x920 [mlx5_core]
+ 0xffffffffa07e49ed : mlx5e_napi_poll+0xdd/0xb20 [mlx5_core]
+ 0xffffffff8152afa2 : net_rx_action+0x152/0x240 [kernel]
+ 0xffffffff81084b0f : __do_softirq+0xef/0x280 [kernel]
+ 0xffffffff8164721c : call_softirq+0x1c/0x30 [kernel]
+ 0xffffffff81016fc5 : do_softirq+0x65/0xa0 [kernel]
+ 0xffffffff81084ea5 : irq_exit+0x115/0x120 [kernel]
+ 0xffffffff81647db8 : do_IRQ+0x58/0xf0 [kernel]
+ 0xffffffff8163d0ed : ret_from_intr+0x0/0x15 [kernel]
+parms: val=0x1 v=0xffff88104b2a5400
+execname: swapper/10
+ts: 15
+<no user backtrace at kernel.function("call_netevent_notifiers@net/core/netevent.c:66")>
+
 
                     ip_route_output_key
 0xffffffff81687852 : icmp_reply.constprop.26        +0x1f2/0x270 [kernel]
@@ -5637,6 +5831,14 @@ ts: 665
 
 ===devlink===
 
+address of mlx5_core_dev
+
+crash> list -H devlink_list -s devlink.priv
+ffff88102f300000
+  priv = 0xffff88102f3000a0 ""
+ffff881029c40000
+  priv = 0xffff881029c400a0 ""
+
 devlink_register
 devlink_ops
 
@@ -5887,6 +6089,8 @@ mlx5_fc_stats_work() delete aging fc counter and add new created ones
 parms: dev=0xffff88077c9c0060 b=0xffff8807797cbc60
 
 ===mlx===
+
+ modprobe.blacklist=mlx5_core
 
 [64108.243439]  tree_put_node   +0x56/0x90 [mlx5_core]
 [64108.244875]  tree_remove_node   +0x12/0x30 [mlx5_core]
@@ -6494,6 +6698,36 @@ register_netdev
 
 ===ofed===
 
+include/net/tc_act/tc_vlan.h
+net/sched/act_vlan.c
+
+ofed_scripts/gen-compat-config.sh
+
+KERNEL4_9=$(echo ${KVERSION} | grep ^4\.9)
+if [[ ! -z ${KERNEL4_9} ]]; then
+	set_config CONFIG_COMPAT_KERNEL_4_9 y
+fi
+
+if [[ ! -z ${KERNEL4_9} ]]; then
+        set_config CONFIG_COMPAT_FLOW_DISSECTOR y
+        set_config CONFIG_COMPAT_CLS_FLOWER_MOD m
+        set_config CONFIG_COMPAT_TCF_TUNNEL_KEY_MOD m
+fi
+
+2190d1d09 (Jiri Pirko             2017-05-17 11:07:59 +0200 274) struct tcf_block {
+2190d1d09 (Jiri Pirko             2017-05-17 11:07:59 +0200 265) struct tcf_chain {
+5bc170188 (Jiri Pirko             2017-05-17 11:08:01 +0200 253)        struct tcf_chain        *chain;
+
+
+tc_cls_flower_offload
+
+CONFIG_COMPAT_KERNEL_4_9
+include/linux/compat_autoconf.h
+compat.config
+compat/config/rdma.m4
+
+
+
 https://wikinox.mellanox.com/display/SW/How+to+add+Backport+Patches
 https://wikinox.mellanox.com/display/SW/OFED+Kernel+commits+Metadata
 
@@ -6573,6 +6807,22 @@ ib_send_lat/ib_read_lat/ib_write_lat
 
 ib_write_bw -a # to start server
 ib_write_bw -a <hostname> # to start client
+
+===qemu===
+
+fc28 start vm
+
+[root@dev-r630-03 ~]# start1
+
+error: Failed to start domain vm1
+error: unsupported configuration: CPU mode 'custom' for x86_64 kvm domain on x86_64 host is not supported by hypervisor
+
+vi /etc/libvirt/qemu.conf
+# Add the following two lines
+user = "root"
+group = "root"
+
+https://bbs.archlinuxcn.org/viewtopic.php?id=4998
 
 ===lnst===
 
@@ -7300,9 +7550,6 @@ rpm -ql systemtap
 lrwxrwxrwx. 1 root root 0 Mar 15 02:39 /sys/class/net/em1/device/driver/module -> ../../../../module/igb
 
 ===hosts===
-
-jianbo
-10.213.24.60
 
 TYPE=Ethernet
 BOOTPROTO=static
@@ -8219,6 +8466,21 @@ user    0m22.333s
 sys     56m27.614s
 + set +x
 
+===centos===
+
+yum --enablerepo=base-debuginfo install -y kernel-debuginfo-$(uname -r)
+
+https://ask.fedoraproject.org/en/question/51444/how-to-install-specific-kernel-version/
+
+===lwn===
+
+https://lwn.net/Articles/743391/
+net: sched: allow qdiscs to share filter block instances
+
+===ubuntu===
+
+systemctl add-wants multi-user.target rpcbind.service
+
 ===link===
 
 https://mirrors.tuna.tsinghua.edu.cn
@@ -8233,3 +8495,68 @@ https://redmine.mellanox.com/issues/1413779
 Bug SW #1413779: multiple ufids mapped to the same rule in OVS
 
 Bug SW #1416097: [Upstream][ConnectX5 EX] kernel panic during VF mirroring configuration.
+
+----
+review test plan
+
+
+
+https://redmine.mellanox.com/issues/1432736
+Bug SW #1432736: switchdev configuration got reset when resetting VFs number
+
+
+https://redmine.mellanox.com/issues/1434021#change-12738628
+Bug SW #1434021: [OFED 4.4] packets counter not progressing for mirrored representors
+
+
+Bug SW #1432736: switchdev configuration got reset when resetting VFs number
+
+https://redmine.mellanox.com/issues/1435456
+Bug SW #1435456: [ MOFED 4.4 VF LAG ] no offload to sent packets
+
+
+Bug SW #1436235: VF Mirroring - Feature not supported
+https://redmine.mellanox.com/issues/1436235
+
+https://redmine.mellanox.com/issues/1435317
+Bug SW #1435317: [OFED 4.4] syndrome (0xd29096) followed by kernel panic during VST
+
+
+In file included from drivers/net/ethernet/mellanox/mlx5/core/diag/fw_tracer.h:37:0,
+                 from drivers/net/ethernet/mellanox/mlx5/core/diag/fw_tracer.c:33:
+drivers/net/ethernet/mellanox/mlx5/core/diag/fw_tracer.c: In function ‘mlx5_fw_tracer_handle_traces’:
+drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h:49:18: warning: ‘dev’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+  dev_dbg(&(__dev)->pdev->dev, "%s:%d:(pid %d): " format,  \
+                  ^~
+drivers/net/ethernet/mellanox/mlx5/core/diag/fw_tracer.c:633:24: note: ‘dev’ was declared here
+  struct mlx5_core_dev *dev;
+                        ^~~
+
+
+/tmp/tsscr/clusterTests/user/VLanTest/VLanTest.py --topo_file /.autodirect/sw_regression/linux/sw_ovs/conf/Topologies/GEN-021-022/topology.xml --entry_points gen-h-vrt-021 gen-h-vrt-022 --use_color --clientArgs '-c 100 -s 100 -i 0.05' --trafficType=Ping --successRate 0 --vlanModes VST --itr=5
+
+/auto/mthswgwork/antonm/GIT/vrtsdk/vrtsdk/vrtsdk/tools/OVSSetupConfiguration.py --topo_file /.autodirect/sw_regression/linux/sw_ovs/conf/Topologies/GEN-021-022/topology.xml --entry_points gen-h-vrt-021 gen-h-vrt-022 --use_color 
+./OVSSetupConfiguration.py --topo_file /.autodirect/sw_regression/linux/sw_ovs/conf/Topologies/GEN-021-022/topology.xml --entry_points gen-h-vrt-021 gen-h-vrt-022 --use_color 
+ 
+
+week 27
+
+https://redmine.mellanox.com/issues/1426097
+Bug SW #1426097: rule's parent is NULL if rule's refcount is 2
+discussed it with Mark
+
+
+https://redmine.mellanox.com/issues/1442281
+Bug SW #1442281: [OFED 4.4] syndrome (0xd29096) followed by kernel panic during VST
+
+BAD_PARAM           | 0xA9C090 |  set_flow_table_entry: push vlan action fte in fdb can ONLY be forward to internal
+
+Bug SW #1435023: [OFED 4.4] Call trace with up/down events on bridge device
+
+
+===========
+
+Scrum_Task #1446712: Support on CentOS 7.2 kernel 4.9
+
+
+

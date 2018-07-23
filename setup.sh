@@ -47,7 +47,7 @@ set -x
 	yum -y install libmnl libmnl-devel
 
         # gdb debug
-        dnf -y debuginfo-install glibc-2.26-15.fc27.x86_64
+        # dnf -y debuginfo-install glibc-2.26-15.fc27.x86_64
 	# gdb needs makeinfo
 	yum -y instal texinfo
 
