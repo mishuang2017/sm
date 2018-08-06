@@ -40,7 +40,7 @@ elif (( rh == 0 )); then
 	host_num=9
 fi
 
-export DISPLAY=:0.0
+# export DISPLAY=:0.0
 export DISPLAY=MTBC-CHRISM:0.0
 
 #        --add-kernel-support               --upstream-libs --dpdk
@@ -133,8 +133,9 @@ elif (( host_num == 14 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-	if (( ofed != 1 )); then
+	if (( ofed == 0 )); then
 		linux_dir=/home1/chrism/linux
+# 		[[ "$(uname -r)" == "4.9.27" ]] && linux_dir=/home1/chrism/linux-4.9.27
 	else
 		linux_dir=/home1/chrism/mlnx-ofa_kernel-4.0
 	fi
@@ -185,7 +186,7 @@ alias ssh='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias noga='/.autodirect/sw_tools/Internal/Noga/RELEASE/latest/cli/noga_manage.py'
 
 cx5=0
-modprobe mlx5_core > /dev/null 2>&1
+# modprobe mlx5_core > /dev/null 2>&1
 if [[ -e /sys/class/net/$link/device ]]; then
 	pci=$(basename $(readlink /sys/class/net/$link/device))
 	pci_id=$(echo $pci | cut -b 6-)
@@ -378,6 +379,7 @@ alias tvf2="tcpdump ip src host 1.1.1.14 -e -xxx -i $vf2"
 alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 
 alias watch-netstat='watch -d -n 1 netstat -s'
+alias ct=conntrack
 
 alias up="mlxlink -d $pci -p 1 -a UP"
 alias down="mlxlink -d $pci -p 1 -a DN"
@@ -578,6 +580,7 @@ fi
 alias cfm="smm; cscope -d"
 alias cf2='cd /auto/mtbcswgwork/chrism/iproute2; cscope -d'
 alias cf3='sm3; cscope -d'
+alias cfc='cd /usr/src/debug/*/*; cscope -d'
 
 alias cd-download='cd /cygdrive/c/Users/chrism/Downloads'
 alias cd-doc='cd /cygdrive/c/Users/chrism/Documents'
@@ -966,7 +969,7 @@ probe module("$module").function("$function")
         printf("parms: %s\n", \$\$parms);
         printf("execname: %s\n", execname());
         printf("ts: %d\n", timestamp() / 1000000);
-/*         print_ubacktrace() */
+        print_ubacktrace()
         printf("%d\n", i++);
 }
 EOF
@@ -1153,6 +1156,7 @@ alias mlx2="cd $linux_dir/include/linux/mlx5"
 mybuild () 
 {
 set -x; 
+	(( $UID == 0 )) && return
 	module=mlx5_core;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	cd $linux_dir;
@@ -1251,6 +1255,25 @@ set -x;
 set +x
 }
 
+mybuild3 ()
+{
+set -x;
+        [[ $# == 0 ]] && return
+        module=$1;
+	driver_dir=net/netfilter
+        cd $linux_dir;
+        make M=$driver_dir -j 32 || return
+        src_dir=$linux_dir/$driver_dir
+        sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
+
+        sudo modprobe -r $1
+        sudo modprobe -v $1
+
+set +x
+}
+alias b3=mybuild3
+
+# modprobe -v cls_flower tuple_offload=0
 function reprobe
 {
 	if (( centos72 == 1 )); then
@@ -3237,7 +3260,7 @@ set -x
 		local rep=$(get_rep $i)
 		vs add-port $br $rep $tag
 	done
-#         vs add-port $br $link
+        vs add-port $br $link
 #         vs add-port $br $bond
 set +x
 }
@@ -3601,6 +3624,7 @@ function start-switchdev
 
 # 	ifconfig enp4s1f2 up
 # 	ifconfig $rep1_2 up
+	ifconfig enp4s0f2 1.1.1.1/24 up
 
 # 	ifconfig $rep2 1.1.1.100/24 up
 # 	ip addr add 1::1/64 dev $rep2
@@ -3660,11 +3684,13 @@ function grub
 set -x
 	[[ $# == 0 ]] && kernel=0 || kernel=$1
 	file=/etc/default/grub
+	MKCONFIG=grub2-mkconfig
+# 	[[ -f /usr/local/sbin/grub-mkconfig ]] && MKCONFIG=/usr/local/sbin/grub-mkconfig
 	sudo sed -i '/GRUB_DEFAULT/d' $file
 # 	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
 	sudo echo "GRUB_DEFAULT=$kernel" >> $file
 
-	sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+	sudo $MKCONFIG -o /boot/grub2/grub.cfg
 
 set +x
 	sudo cat $file
@@ -3915,13 +3941,14 @@ function tcchange
 function tcm
 {
 # 	tc2
-	TC=tc
 	TC=/home1/chrism/iproute2/tc/tc
+	TC=tc
 	tc qdisc delete dev $link ingress > /dev/null 2>&1
 	sudo $TC qdisc add dev $link ingress
 # 	sudo $TC filter add  dev $link prio 1 protocol ip handle 0x80000001 parent ffff: flower skip_hw src_mac e4:11:0:0:0:2 dst_mac e4:12:0:0:0:2 action drop
 # 	sudo $TC filter add  dev $link prio 1 protocol ip handle 0x4 parent ffff: flower skip_hw src_mac e4:11:0:0:0:4 dst_mac e4:12:0:0:0:4 action drop
-	sudo tc filter add  dev $link prio 1 protocol ip handle 1 parent ffff: flower skip_hw src_mac e4:11:0:0:0:2 dst_mac e4:12:0:0:0:2 action drop
+	sudo tc filter add  dev $link prio 1 protocol ip handle 1 parent ffff: flower skip_hw src_mac e4:11:0:0:0:1 dst_mac e4:12:0:0:0:1 action drop
+ 	sudo tc filter add  dev $link prio 1 protocol ip handle 2 parent ffff: flower skip_hw src_mac e4:11:0:0:0:2 dst_mac e4:12:0:0:0:2 action drop
 	sudo $TC filter show dev $link parent ffff:
 }
 
@@ -5491,8 +5518,9 @@ function addbr1
 
 alias ofed-configure1='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j 32'
 alias ofed-configure='./configure --with-mlx5-core-and-en-mod -j 32'
+alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j 32'
 
-alias ofed-configure2="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
+# alias ofed-configure2="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
@@ -5685,3 +5713,42 @@ function book-noga
 }
 
 /bin/rm -rf .ccache
+
+alias fixup='./ofed_scripts/backports_fixup_changes.sh'
+alias get-patches='./ofed_scripts/ofed_get_patches.sh'
+
+function tc-ct
+{
+set -x
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	redirect=$rep2
+	mirror=$rep1
+	dest=$rep3
+
+	TC=/home1/chrism/iproute2/tc/tc
+	TC=tc
+
+	$TC qdisc del dev $dest ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $mirror ingress > /dev/null 2>&1
+
+	ethtool -K $dest hw-tc-offload on 
+	ethtool -K $redirect  hw-tc-offload on 
+	ethtool -K $mirror  hw-tc-offload on 
+
+	$TC qdisc add dev $redirect ingress 
+	$TC qdisc add dev $dest ingress 
+	$TC qdisc add dev $mirror ingress 
+
+	ip link set $redirect promisc on
+	ip link set $dest promisc on
+	ip link set $mirror promisc on
+
+	tc filter add dev $rep2 protocol ip parent ffff: chain 0 flower ct_state -trk action ct action goto chain 1
+	tc filter add dev $rep2 protocol ip parent ffff: chain 1 flower ct_state +trk+est action mirred egress redirect dev $rep3
+
+set +x
+}
