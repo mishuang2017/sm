@@ -1,0 +1,24 @@
+From 458b7b1232e1c751ce27a2e207508d09e7383a56 Mon Sep 17 00:00:00 2001
+From: Chris Mi <chrism@mellanox.com>
+Date: Thu, 13 Sep 2018 08:54:28 +0800
+Subject: [PATCH] repeat -1 num_flows
+
+---
+ net.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net.c b/net.c
+index ced5be2..dc564ad 100644
+--- a/net.c
++++ b/net.c
+@@ -2040,6 +2040,7 @@ void show_mlx(ulong net_addr)
+ 		ulong offloads = esw + MEMBER_OFFSET("mlx5_eswitch", "offloads");
+ 		fprintf(fp, "mlx5_esw_offload  %lx\n", offloads);
+ 		fprintf(fp, "mlx5_esw_offload.num_flows,encap  %lx\n", offloads);
++		fprintf(fp, "repeat -1 mlx5_esw_offload.num_flows -d %lx\n", offloads);
+ 
+ 		ulong vport_to_tir = read_pointer2(offloads, "mlx5_esw_offload", "ft_offloads");
+ 		fprintf(fp, "flow %lx\n", vport_to_tir);
+-- 
+2.14.4
+

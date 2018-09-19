@@ -1,3 +1,9 @@
+set bg=light
+set background=dark
+
+set nopaste
+set paste
+
 set ruler
 
 set hidden
@@ -5,17 +11,15 @@ set hidden
 set hlsearch
 set nohlsearch
 
-set background=dark
-" set background=dark
 
 set tabstop=8
 
-set softtabstop=4
-set shiftwidth=4
-set softtabstop=2
 set softtabstop=8
-set shiftwidth=2
 set shiftwidth=8
+
+" set softtabstop=4
+" set shiftwidth=4
+" set expandtab
 
 set encoding=utf-8
 " set cindent
@@ -25,11 +29,11 @@ set encoding=utf-8
 syntax off
 syntax on
 
-set winwidth=80
+" set winwidth=80
 " set ignorecase
 set nowrap
 set wrap
-set autowrite
+" set autowrite
 
 " imap { {<CR>}<ESC>O
 
@@ -39,16 +43,25 @@ map <C-K> :next<CR>
 map <F2> :set number!<CR>
 map <F3> :call CComment2()<CR>
 map <F4> :call SComment()<CR>
+map <F5> :call VComment()<CR>
 
 map <F7> :!make<CR>:!make run<CR>
 imap <F7> <ESC>:!make<CR>:!make run<CR>
-map <F8> :!make<CR>
-imap <F8> <ESC>:w<ESC>:!make<CR>
+map <F8> :!make -j 32<CR>
+imap <F8> <ESC>:w<ESC>:!make all<CR>
 map <F9> :w<CR>:!make run<CR>
 
 map <F10> :!make clean<CR>
-map <F11> :call Syn()<CR>
+map <F11> :!make clean<CR>:!make<CR>:!make run<CR>
 map <F12> :set hlsearch!<CR>
+
+
+imap <F12> <ESC>:s/^/issue: 1055634/<CR>
+imap <F11> <ESC>:s/change file/idr: Change/<CR>
+
+map <F12> :%s/Signed/issue: 1055634\rSigned/g<CR>
+map <F11> :%s/change file/idr: Change/<CR>
+map <F12> :s/\<0\>/INT_MAX/g<CR>
 
 map <c-w><c-o> <c-w><c-p>
 map <c-w>o <c-w><c-p>
@@ -87,8 +100,29 @@ function SComment()
 	endif
 endfunc
 
+function VComment()
+	let line = getline(".")
+	if line[0][0] == "\""
+		:s/^" //
+	else
+		:s/^/" /
+	endif
+endfunc
+
 " colorscheme darkZ
 " colorscheme dark-ruby
 " colorscheme c
 
 set vb t_vb=     " no visual bell & flas
+
+set laststatus=2
+
+if &diff
+	colorscheme evening
+endif
+
+highlight Normal term=none cterm=none ctermfg=White ctermbg=Black gui=none guifg=White guibg=Black
+highlight DiffAdd cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
+highlight DiffDelete cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
+highlight DiffChange cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
+highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=White
