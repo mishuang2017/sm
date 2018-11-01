@@ -43,7 +43,8 @@ map <C-K> :next<CR>
 map <F2> :set number!<CR>
 map <F3> :call CComment2()<CR>
 map <F4> :call SComment()<CR>
-map <F5> :call VComment()<CR>
+" map <F5> :call VComment()<CR>
+map <F5> :call RemovePlus()<CR>
 
 map <F7> :!make<CR>:!make run<CR>
 imap <F7> <ESC>:!make<CR>:!make run<CR>
@@ -54,14 +55,7 @@ map <F9> :w<CR>:!make run<CR>
 map <F10> :!make clean<CR>
 map <F11> :!make clean<CR>:!make<CR>:!make run<CR>
 map <F12> :set hlsearch!<CR>
-
-
-imap <F12> <ESC>:s/^/issue: 1055634/<CR>
-imap <F11> <ESC>:s/change file/idr: Change/<CR>
-
-map <F12> :%s/Signed/issue: 1055634\rSigned/g<CR>
-map <F11> :%s/change file/idr: Change/<CR>
-map <F12> :s/\<0\>/INT_MAX/g<CR>
+map <F12> :retab!<CR>
 
 map <c-w><c-o> <c-w><c-p>
 map <c-w>o <c-w><c-p>
@@ -109,6 +103,13 @@ function VComment()
 	endif
 endfunc
 
+function RemovePlus()
+	let line = getline(".")
+	if line[0][0] == "\+"
+		:s/^+//
+	endif
+endfunc
+
 " colorscheme darkZ
 " colorscheme dark-ruby
 " colorscheme c
@@ -126,3 +127,5 @@ highlight DiffAdd cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blu
 highlight DiffDelete cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
 highlight DiffChange cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
 highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=White
+
+" set noswapfile
