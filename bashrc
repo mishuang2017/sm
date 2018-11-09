@@ -3,7 +3,6 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=125
 numvfs=99
 numvfs=124
 numvfs=3
@@ -22,10 +21,13 @@ ofed=0
 uname -r | grep 3.10 > /dev/null 2>&1 && ofed=1
 
 centos72=0
-uname -r | grep 3.10.0-327.el7.x86_64 > /dev/null 2>&1 && centos72=1
+uname -r | grep 3.10.0-327 > /dev/null 2>&1 && centos72=1
 
 centos74=0
 uname -r | grep 3.10.0-693 > /dev/null 2>&1 && centos74=1
+
+centos75=0
+uname -r | grep 3.10.0-862 > /dev/null 2>&1 && centos75=1
 
 if [[ "$UID" == "0" ]]; then
 	dmidecode | grep "Red Hat" > /dev/null 2>&1
@@ -47,7 +49,6 @@ elif (( rh == 0 )); then
 fi
 
 # export DISPLAY=:0.0
-export DISPLAY=MTBC-CHRISM:0.0
 
 #        --add-kernel-support               --upstream-libs --dpdk
 export DPDK_DIR=/home1/chrism/dpdk-stable-17.11.2
@@ -96,6 +97,8 @@ elif (( host_num == 13 )); then
 	remote_mac=24:8a:07:88:27:ca
 
 	linux_dir=/home1/chrism/linux
+
+	export DISPLAY=MTBC-CHRISM:0.0
 elif (( host_num == 14 )); then
 	link=enp4s0
 	link=enp4s0f0
@@ -137,6 +140,8 @@ elif (( host_num == 14 )); then
 	vf3=enp4s0f4
 
 	linux_dir=/home1/chrism/linux
+
+	export DISPLAY=MTBC-CHRISM:0.0
 elif (( host_num == 15 )); then
 	link=ens9
 	link_ip=1.1.1.13
@@ -184,13 +189,16 @@ alias noga='/.autodirect/sw_tools/Internal/Noga/RELEASE/latest/cli/noga_manage.p
 
 cx5=0
 # modprobe mlx5_core > /dev/null 2>&1
-if [[ -e /sys/class/net/$link/device ]]; then
-	pci=$(basename $(readlink /sys/class/net/$link/device))
-	pci_id=$(echo $pci | cut -b 6-)
-	lspci -d 15b3: -nn | grep $pci_id | grep ConnectX-5 > /dev/null && cx5=1
-	pci2=$(basename $(readlink /sys/class/net/$link2/device) 2> /dev/null)
-fi
-
+function get_pci
+{
+	if [[ -e /sys/class/net/$link/device ]]; then
+		pci=$(basename $(readlink /sys/class/net/$link/device))
+		pci_id=$(echo $pci | cut -b 6-)
+		lspci -d 15b3: -nn | grep $pci_id | grep ConnectX-5 > /dev/null && cx5=1
+		pci2=$(basename $(readlink /sys/class/net/$link2/device) 2> /dev/null)
+	fi
+}
+get_pci
 
 alias dpdk-test="sudo build/app/testpmd -c7 -n3 --log-level 8 --vdev=net_pcap0,iface=$link --vdev=net_pcap1,iface=$link2 -- -i --nb-cores=2 --nb-ports=2 --total-num-mbufs=2048"
 
@@ -237,7 +245,7 @@ if (( ofed == 1 )); then
 else
 	CRASH=$nfs_dir/crash/crash-upstream
 	CRASH=$nfs_dir/crash/crash
-	CRASH=/home1/chrism/crash/crash
+	CRASH="/home1/chrism/crash/crash --active"
 fi
 
 if (( host_num == 15 )); then
@@ -263,10 +271,10 @@ alias cc0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules
 alias cc1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 
-# if (( ofed == 1 )); then
-# 	alias c=cc0
+if (( centos75 == 1 )); then
+	alias c=cc0
 # 	alias c="$CRASH -i /root/.crash /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/vmlinux"
-# fi
+fi
 
 [[ "$(uname -r)" == "3.10.0" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0/build/vmlinux"
 [[ "$(uname -r)" == "3.10.0+" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0+/build/vmlinux"
@@ -344,6 +352,7 @@ alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
 alias clone-crash='git clone git@github.com:crash-utility/crash.git'
+alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 
 alias ab='rej; git am --abort'
 alias gr='git add -u; git am --resolved'
@@ -448,6 +457,7 @@ alias cf5='sm5; cscope -d'
 
 alias sml='cd /home1/chrism/linux'
 alias sm9='cd /home1/chrism/linux-4.19'
+alias smy='cd /home1/chrism/yossi'
 alias sm14='cd /home1/chrism/linux-4.14.78'
 alias smm='cd /home1/chrism/mlnx-ofa_kernel-4.0'
 alias smm5='cd /home1/chrism/mlnx-ofa_kernel-4.5'
@@ -755,7 +765,7 @@ function profile
 	scp ~/.tmux.conf $who@$host:~
 }
 
-function lns
+function ln-profile
 {
 	ln -s ~chrism/.vim
 	ln -s ~chrism/.vimrc
@@ -1015,11 +1025,11 @@ global i=0;
 probe module("$module").function("$function")
 {
         if ((execname() == argv_1) || argv_1 == "") {
-		print_backtrace()
+/* 		print_backtrace() */
 		printf("parms: %s\n", \$\$parms);
 		printf("execname: %s\n", execname());
 		printf("ts: %d, %d\n", timestamp()/1000000, n++);
-		print_ubacktrace()
+/* 		print_ubacktrace() */
 		printf("%d\n", i++);
 	}
 }
@@ -1232,7 +1242,8 @@ set -x;
 		set +x
 		return
 	}
-# 	return
+set +x
+ 	return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 # 	make modules_install -j 32
@@ -2003,9 +2014,9 @@ set -x
 	src_mac=02:25:d0:$host_num:01:02
 	dst_mac=02:25:d0:$host_num:01:03
 	$TC filter add dev $rep2 handle 1 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
-	$TC filter add dev $rep2 handle 1 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
-set +x
-	return
+# 	$TC filter add dev $rep2 handle 1 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+# set +x
+# 	return
 	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
 	$TC filter add dev $rep2 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
 	src_mac=02:25:d0:$host_num:01:03
@@ -3877,6 +3888,7 @@ alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
 alias mystart=start-switchdev-all
 function start-switchdev
 {
+	get_pci
 	if [[ -z $pci ]]; then
 		echo "pci is null"
 		return
@@ -3913,12 +3925,12 @@ function start-switchdev
 	if [[ "$1" != "legacy" ]]; then
 		echo "enable switchdev mode for: $pci_addr"
 		if (( centos72 == 1 )); then
-# 			/sys/class/net/$link/compat/devlink
-			echo switchdev >  /sys/devices/pci0000:00/0000:00:02.0/$pci_addr/net/$l/compat/devlink/mode || echo "switchdev failed"
+			sysfs_dir=/sys/class/net/$link/compat/devlink
+			echo switchdev >  $sysfs_dir/mode || echo "switchdev failed"
 			if (( cx5 == 0 )); then
-				echo transport >  /sys/devices/pci0000:00/0000:00:02.0/$pci_addr/net/$l/compat/devlink/inline 2>/dev/null|| echo "transport failed"
+				echo transport > $sysfs_dir/inline 2>/dev/null|| echo "transport failed"
 			fi
-			echo basic > /sys/devices/pci0000:00/0000:00:02.0/$pci_addr/net/$l/compat/devlink/encap || echo "baisc failed"
+			echo basic > $sysfs_dir/encap || echo "baisc failed"
 		else
 			devlink dev eswitch set pci/$pci_addr mode switchdev
 			if (( cx5 == 0 )); then
@@ -4698,16 +4710,37 @@ function vsconfig2
 	vsconfig
 }
 
+# /mswg/release/BUILDS/fw-4119/fw-4119-rel-16_24_0220-build-001/etc
+
+function syndrome
+{
+	if [[ $# != 2 ]]; then
+		echo "eg: # syndrome 16.24.0166 0x6231F3"
+		return
+	fi
+
+	local ver=$(echo $1 | sed 's/\./_/g')
+	local type
+	if echo $ver | grep ^16; then
+		type=4119
+	elif echo $ver | grep ^14; then
+		type=4117
+	else
+		echo "wrong verions: $ver"
+		return
+	fi
+	local file=/mswg/release/BUILDS/fw-$type/fw-$type-rel-$ver-build-001/etc/syndrome_list.log
+	echo $file
+	grep -i $2 $file
+}
+
 function burn5
 {
 set -x
 	pci=0000:04:00.0
-	version=fw-4119-rel-16_23_8010
-	version=fw-4119-rel-16_23_1000
-	version=fw-4119-rel-16_23_4000
+	version=fw-4119-rel-16_24_0220
 	version=last_revision
 	version=fw-4119-rel-16_24_0166
-	version=fw-4119-rel-16_24_0220
 
 # 	mkdir -p /mswg/
 # 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -4724,11 +4757,8 @@ function burn5l
 {
 set -x
 	pci=0000:04:00.0
-	version=fw-4119-rel-16_23_8010
-	version=fw-4119-rel-16_23_1000
-	version=fw-4119-rel-16_23_4000
-	version=last_revision
 	version=fw-4119-rel-16_24_0220
+	version=last_revision
 	yes | sudo mlxburn -d $pci -fw /root/$version/fw-ConnectX5.mlx -conf_dir /root/$version
 	sudo mlxfwreset -d $pci reset
 set +x
@@ -4737,8 +4767,8 @@ set +x
 function burn4
 {
 set -x
-	version=last_revision
 	version=fw-4117-rel-14_23_8010
+	version=last_revision
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
 	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4117/$version/fw-ConnectX4Lx.mlx -conf_dir /mswg/release/fw-4117/$version
@@ -4746,11 +4776,12 @@ set -x
 set +x
 }
 
-jd_dir=/home1/chrism/backport-driver
+jd_dir=/labhome/chrism/ct2/driver-patch
 function gf
 {
 set -x
-	local file=~chrism/list.txt
+	smy
+	local file=~chrism/ct2/list2.txt
 	[[ $# > 2 ]] && return
 	local commit=$2
 	[[ "$USER" != "chrism" ]] && return
@@ -4836,7 +4867,7 @@ set +x
 }
 
 patch_dir2=~/batch/review11
-patch_dir=~/mirror/ovs2/1
+patch_dir=~/ovs/1
 alias smp="cd $patch_dir"
 alias smp2="cd $patch_dir2"
 
@@ -5954,22 +5985,31 @@ function addbr1
 alias force-stop='sudo /etc/init.d/openibd force-stop'
 alias force-start='sudo /etc/init.d/openibd force-start'
 alias force-restart='sudo /etc/init.d/openibd force-stop; sudo /etc/init.d/openibd force-start'
+alias fr=force-restart
 
 function im
 {
+set -x
+	tc2
+	sudo modprobe -r mlx5_ib
 	sudo modprobe -r mlx5_core
 	sudo modprobe -v devlink
 	sudo modprobe -v mlxfw
+	sudo modprobe -v mlx_compat
+	sudo modprobe -v vxlan
 	sudo insmod /lib/modules/$(uname -r)/extra/mlnx-ofa_kernel/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.ko
+set +x
 }
 
-alias ofed-configure1='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j 32'
-alias ofed-configure='./configure --with-mlx5-core-and-en-mod -j 32'
-alias ofed-configure2='./configure --with-mlx5-core-and-en-mod --with-core-mod --with-ipoib-mod --with-mlx5-mod -j 32'
+alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
+alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j 32'
+alias ofed-configure2='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j 32'
+alias ofed-configure3='./configure --with-mlx5-core-and-en-mod --with-core-mod --with-ipoib-mod --with-mlx5-mod -j 32'
 alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j 32'
+alias ofed-configure-all='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
 
 # Redhat 7.5
-alias ofed-configure2="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
+alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
@@ -6085,7 +6125,7 @@ function get_vf
 	local l=$link
 	local dir1=/sys/class/net/$l
 	local dir2=$(readlink $dir1)
-	[[ -d /sys/class/net/enp4s0f0 ]] || return
+	[[ -d /sys/class/net/$l ]] || return
 	cd $dir1
 	cd ../$dir2
 	cd ../../../
@@ -6428,6 +6468,7 @@ alias a25='addflow-ip 250000'
 alias a10='addflow-ip 1000000'
 alias a5='addflow-ip  500000'
 alias a1='addflow-ip 100000'
+alias a100='addflow-ip 100'
 
 alias send='/labhome/chrism/prg/python/scapy/send.py'
 alias visend='vi /labhome/chrism/prg/python/scapy/send.py'
@@ -6464,6 +6505,7 @@ set +x
 
 pg_linux=/home1/chrism/linux
 uname -r | grep 3.10.0 > /dev/null && pg_linux=/home1/chrism/linux-4.19
+uname -r | grep 3.10.0-862 > /dev/null && pg_linux=/home1/chrism/linux
 alias gen='$pg_linux/samples/pktgen/pktgen_sample01_simple.sh'
 alias genm='$pg_linux/samples/pktgen/pktgen_sample04_many_flows.sh'
 alias gen2='gen -i $vf2 -m 02:25:d0:13:01:03 -d 1.1.1.23'
@@ -6532,12 +6574,20 @@ function set10
 	pgset "src_max 10.15.66.64"	# 1,000,000
 }
 
+function set100
+{
+	pgset1
+	pgset "src_max 10.0.0.100"	# 100
+}
+
+
+
 function checkout1
 {
 	[[ $# != 1 ]] && return
-	sml
+	smy
 	git branch
-	git checkout net-next-mlx5
+	git checkout ct-one-table
 	git branch -D 1
 	git branch 1
 	git checkout 1
@@ -6637,7 +6687,7 @@ function get-diff
 {
 	local v="-v"
 	[[ "$1" == "config" ]] && v=""
-	local dir=/labhome/chrism/backport/mlx5_core/1030-2
+	local dir=/labhome/chrism/backport/mlx5_core/1105
 	for i in $dir/*; do
 		if diffstat -l $i | grep $v "\.config" > /dev/null 2>&1 &&
 		   diffstat -l $i | grep $v "\.gitignore" > /dev/null 2>&1; then
@@ -6725,7 +6775,7 @@ function git-user
 	git log --author="$1@mellanox.com"
 }
 
-function lnc
+function ln-crash
 {
 	cd /var/crash
 	local dir=$(ls -td */ | head -1)
@@ -6783,7 +6833,7 @@ function tc1
 	ethtool -K $l hw-tc-offload on 
 	tc filter add dev $link prio 1 protocol all parent ffff: flower skip_sw action mirred egress redirect dev $rep2
 }
-alias cp-rpm='scp mi@10.12.205.14:~/rpmbuild/RPMS/x86_64/* .'
+alias cp-rpm='scp mi@10.12.205.13:~/rpmbuild/RPMS/x86_64/* .'
 
 function tc-panic
 {
@@ -6797,3 +6847,12 @@ set -x
 		action mirred egress redirect dev vxlan_sys_4789
 set +x
 }
+
+# list  *(mlx5e_stats_flower+0x3f)
+function gdb-mlx5
+{
+	local mod=$(modinfo -n mlx5_core)
+	gdb $mod
+}
+
+alias vi-list='vi /labhome/chrism/ct2/list2.txt'
