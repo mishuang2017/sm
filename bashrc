@@ -4,7 +4,9 @@ if [ -f /etc/bashrc ]; then
 fi
 
 numvfs=99
+numvfs=100
 numvfs=124
+numvfs=8
 numvfs=3
 vni=200
 vni=100
@@ -72,13 +74,15 @@ elif (( host_num == 13 )); then
 	link_ip=192.168.1.13
 	link_ipv6=2::13
 	link2_ip=8.1.10.13
-	link2_ip=192.168.2.14
+	link2_ip=192.168.2.13
 	link_remote_ip=192.168.1.14
+	link_remote_ip2=192.168.2.14
 	link_ipv6=2017::13
 
 	br=br
 	br2=br2
 	vx=vxlan0
+	vx2=vxlan1
 	bond=bond0
 
 	ns_ip1=1.1.1.3
@@ -97,6 +101,7 @@ elif (( host_num == 13 )); then
 	remote_mac=24:8a:07:88:27:ca
 
 	linux_dir=/home1/chrism/linux
+	linux_dir=$(readlink /lib/modules/$(uname -r)/build)
 
 	export DISPLAY=MTBC-CHRISM:0.0
 elif (( host_num == 14 )); then
@@ -110,10 +115,12 @@ elif (( host_num == 14 )); then
 	link2_ip=192.168.2.14
 	link_ipv6=2017::14
 	link_remote_ip=192.168.1.13
+	link_remote_ip2=192.168.2.13
 
 	br=br
 	br2=br2
 	vx=vxlan0
+	vx2=vxlan1
 	bond=bond0
 
 	link_mac=24:8a:07:88:27:9a
@@ -139,7 +146,9 @@ elif (( host_num == 14 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
+	linux_dir=/home1/chrism/yossi
 	linux_dir=/home1/chrism/linux
+	linux_dir=$(readlink /lib/modules/$(uname -r)/build)
 
 	export DISPLAY=MTBC-CHRISM:0.0
 elif (( host_num == 15 )); then
@@ -172,8 +181,8 @@ rep5_2=${link2}_4
 vm1_ip=192.168.122.11
 vm2_ip=192.168.122.12
 
-link_ip_vlan=1.1.1.1
-link_ip_vxlan=1.1.1.2
+link_ip_vlan=1.1.1.100
+link_ip_vxlan=1.1.1.200
 
 brd_mac=ff:ff:ff:ff:ff:ff
 
@@ -212,6 +221,7 @@ alias mac1="ip l show $link | grep ether; ip link set dev $link address $link_ma
 alias mac2="ip l show $link | grep ether; ip link set dev $link address $link_mac2; ip l show $link | grep ether"
 
 alias vxlan1="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip  options:key=$vni"
+alias vxlan1-2="ovs-vsctl add-port $br2 $vx2 -- set interface $vx2 type=vxlan options:remote_ip=$link_remote_ip2  options:key=$vni"
 alias vxlan2="ovs-vsctl del-port $br $vx"
 alias vx='vxlan2; vxlan1'
 
@@ -228,7 +238,7 @@ alias vsconfig-skip_hw='ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip
 alias ovs-log=' tail -f  /var/log/openvswitch/ovs-vswitchd.log'
 alias ovs2-log=' tail -f /var/log/openvswitch/ovsdb-server.log'
 
-alias p4="ping 1.1.1.14"
+alias p23="ping 1.1.1.23"
 alias p6="ping6 2017::14"
 
 alias 3.10='cd /usr/src/debug/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64'
@@ -236,15 +246,9 @@ alias restart-network='/etc/init.d/network restart'
 
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 
-
 if (( ofed == 1 )); then
-	CRASH=$nfs_dir/crash/crash
-	CRASH=~chrism/bin/crash
-	CRASH=/root/bin/crash
 	CRASH=/home1/chrism/crash/crash
 else
-	CRASH=$nfs_dir/crash/crash-upstream
-	CRASH=$nfs_dir/crash/crash
 	CRASH="/home1/chrism/crash/crash --active"
 fi
 
@@ -255,8 +259,7 @@ fi
 alias crash1="$CRASH -i /root/.crash $linux_dir/vmlinux"
 alias c=crash1
 
-alias gdb-kcore="gdb $linux_dir/vmlinux /proc/kcore"
-
+# -d8 to add debug info
 alias crash="$CRASH -i ~/.crash"
 crash_dir=/var/crash
 alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $linux_dir/vmlinux"
@@ -266,18 +269,22 @@ alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 $linux_dir/vmlinux"
 alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 $linux_dir/vmlinux"
 alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 $linux_dir/vmlinux"
 alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $linux_dir/vmlinux"
+alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $linux_dir/vmlinux"
+alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $linux_dir/vmlinux"
+alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $linux_dir/vmlinux"
+alias c10="$CRASH -i /root/.crash $crash_dir/vmcore.10 $linux_dir/vmlinux"
 
 alias cc0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 alias cc1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 
-if (( centos75 == 1 )); then
+if (( centos75 == 1 || centos74 == 1 )); then
 	alias c=cc0
 # 	alias c="$CRASH -i /root/.crash /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/vmlinux"
 fi
 
-[[ "$(uname -r)" == "3.10.0" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0/build/vmlinux"
-[[ "$(uname -r)" == "3.10.0+" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0+/build/vmlinux"
+# [[ "$(uname -r)" == "3.10.0" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0/build/vmlinux"
+# [[ "$(uname -r)" == "3.10.0+" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0+/build/vmlinux"
 
 alias pc='picocom -b 115200 /dev/ttyS0'
 alias pc='picocom -b 38400 /dev/ttyS1'
@@ -287,19 +294,17 @@ alias rq='echo g > /proc/sysrq-trigger'
 alias sw='vsconfig-sw; restart-ovs'
 alias hw='vsconfig-hw; restart-ovs'
 
-alias fsdump5="mlxdump -d $pci fsdump --type FT --gvmi=0 --no_zero"
-alias fsdump52="mlxdump -d $pci2 fsdump --type FT --gvmi=1 --no_zero"
-
 alias fsdump5="mlxdump -d $pci fsdump --type FT --gvmi=0 --no_zero=1"
 alias fsdump52="mlxdump -d $pci2 fsdump --type FT --gvmi=1 --no_zero=1"
+
+alias fsdump5="mlxdump -d $pci fsdump --type FT --gvmi=0 --no_zero"
+alias fsdump52="mlxdump -d $pci2 fsdump --type FT --gvmi=1 --no_zero"
 
 function fsdump
 {
 	fsdump5 > /root/1.txt
 	fsdump52 > /root/2.txt
 }
-
-alias gc='grub-customizer'
 
 alias vm1="ssh root@$vm1_ip"
 alias vm2="ssh root@$vm2_ip"
@@ -347,13 +352,21 @@ alias reset2='virsh reset vm2'
 alias dud='du -h -d 1'
 
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
-alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg'
+alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
 alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
 alias clone-crash='git clone git@github.com:crash-utility/crash.git'
+alias clone-crash2='git clone git@github.com:mishuang2017/crash.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
+alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
+alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 
+alias git-log='git log --tags --source'
+alias v4.3='git checkout v4.3; git checkout -b v4.3'
+alias v4.4='git checkout v4.4; git checkout -b v4.4'
+alias v4.5='git checkout v4.5; git checkout -b v4.5'
+alias v4.20='git checkout v4.20; git checkout -b v4.20'
 alias ab='rej; git am --abort'
 alias gr='git add -u; git am --resolved'
 alias gar='git add -A; git am --resolved'
@@ -391,6 +404,7 @@ alias tvf="ip netns exec n0 tcpdump -enn -i $vf1"
 alias tvf2="ip netns exec n1 tcpdump -en -i $vf2"
 alias trep="tcpdump -en -i $rep1"
 alias mount-mswg='sudo mkdir -p /mswg; sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/'
+alias mount-swgwork='sudo mkdir -p /swgwork; sudo mount l1:/vol/swgwork /swgwork'
 
 alias tvf1="tcpdump ip src host 1.1.1.14 -e -xxx -i $vf1"
 alias tvf2="tcpdump ip src host 1.1.1.14 -e -xxx -i $vf2"
@@ -427,6 +441,8 @@ alias classic='rpyc_classic.py'	# used to update mac address
 alias lv='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/03-vlan_in_host.xml'
 alias lh='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/header_rewrite.xml'
 alias iso='cd /mnt/d/software/iso'
+
+alias win='vncviewer 10.12.201.153:0'
 
 # alias uperf="$nfs_dir/uperf-1.0.5/src/uperf"
 
@@ -474,7 +490,7 @@ alias ipa='ip a'
 alias ipl='ip l'
 alias ipal='ip a l'
 alias smd='cd /usr/src/debug/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64'
-alias rmswp='sm1; find . -name *.swp -exec rm {} \;'
+alias rmswp='find . -name *.swp -exec rm {} \;'
 alias rmswp1='find . -name *.swp -exec rm {} \;'
 
 alias mount-fedora="mount /dev/mapper/fedora-root /mnt"
@@ -496,13 +512,9 @@ alias app1='ovs-appctl dpctl/dump-flows'
 alias appn='ovs-appctl dpctl/dump-flows --names'
 # systemctl start openvswitch.service
 
-alias p2='n0 ping 1.1.1.2'
-alias p9='n0 ping 1.1.1.19'
-alias p="ping $link_remote_ip"
-alias px="ping $link_remote_ip"
-alias p11='n0 ping 1.1.1.11'
-alias p5='n0 ping 1.1.1.5'
-alias p3='n0 ping 1.1.1.3'
+alias p1="ping $link_remote_ip"
+alias p=p1
+alias p2="ping $link_remote_ip2"
 
 # tc -s filter show dev enp4s0f0_1 root
 alias tcss="tc -stats filter show dev $link protocol ip parent ffff:"
@@ -535,6 +547,7 @@ alias tcss-link-arp="tc -stats filter show dev $link  protocol arp parent ffff:"
 alias tcss-link="tc -stats filter show dev $link parent ffff:"
 
 alias tcss-vxlan="tc -stats filter show dev $vx_rep  protocol ip parent ffff:"
+alias vxlan=tcss-vxlan
 alias tcss-vxlan-arp="tc -stats filter show dev $vx_rep  protocol arp parent ffff:"
 alias tcss-vxlan-all="tc -stats filter show dev $vx_rep ingress"
 
@@ -554,8 +567,8 @@ alias s0='[[ $UID == 0 ]] && su chrism'
 alias e=exit
 alias 160='ssh root@10.200.0.160'
 alias ka=killall
-alias vnc2='ssh chrism@10.7.2.14'
-alias vnc='ssh chrism@10.12.68.111'
+alias vnc2='ssh -X chrism@10.7.2.14'
+alias vnc='ssh -X chrism@10.12.68.111'
 alias netstat1='netstat -ntlp'
 
 alias f7="ssh root@l-csi-0937h.mtl.labs.mlnx"
@@ -619,11 +632,7 @@ alias h='history'
 alias screen='screen -h 1000'
 alias path='echo -e ${PATH//:/\\n}'
 alias x=x.py
-if (( ofed == 1 )); then
-	alias cf="sm1; cscope -d"
-else
-	alias cf="cd $linux_dir; cscope -d"
-fi
+alias cf=" cscope -d"
 alias cfm="smm; cscope -d"
 alias cf2='cd /auto/mtbcswgwork/chrism/iproute2; cscope -d'
 alias cf3='sm3; cscope -d'
@@ -639,6 +648,7 @@ alias nc-client='nc 1.1.1.19 80 > /dev/null'
 
 # password is windows password
 alias mount-setup='mkdir -p /mnt/setup; mount  -o username=chrism //10.200.0.25/Setup /mnt/setup'
+
 
 alias qlog='less /var/log/libvirt/qemu/vm1.log'
 # alias vd='virsh dumpxml vm1'
@@ -683,6 +693,12 @@ alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
 [[ $UID == 0 ]] && echo 2 > /proc/sys/fs/suid_dumpable
 
 # ================================================================================
+
+trap cleanup EXIT
+function cleanup
+{
+set +x
+}
 
 function core
 {
@@ -748,7 +764,8 @@ function greps
 {
 	[[ $# != 1 ]] && return
 	sm1
-	grep include -Rn -e "struct $1 {" | sed 's/:/\t/'
+# 	grep include -Rn -e "struct $1 {" | sed 's/:/\t/'
+	grep include -Rn -e "struct $1 {"
 }
 
 function profile
@@ -981,7 +998,7 @@ set +x
 alias make_core='make M=drivers/net/ethernet/mellanox/mlx5/core'
 
 alias stap='/usr/local/bin/stap --all-modules -v'
-stap_str_common="--all-modules -d /usr/sbin/ovs-vswitchd -d /usr/sbin/tc -d /usr/sbin/ping"
+stap_str_common="--all-modules -d /usr/sbin/ovs-vswitchd -d /usr/sbin/tc -d /usr/bin/ping"
 if (( ofed == 1)); then
 	stap_str="$stap_str_common -d /usr/lib64/libc-2.17.so"
 	STAP="/usr/local/bin/stap -v"
@@ -1025,11 +1042,11 @@ global i=0;
 probe module("$module").function("$function")
 {
         if ((execname() == argv_1) || argv_1 == "") {
-/* 		print_backtrace() */
+		print_backtrace()
 		printf("parms: %s\n", \$\$parms);
 		printf("execname: %s\n", execname());
 		printf("ts: %d, %d\n", timestamp()/1000000, n++);
-/* 		print_ubacktrace() */
+		print_ubacktrace()
 		printf("%d\n", i++);
 	}
 }
@@ -1114,7 +1131,7 @@ probe kernel.function("$1")
 		printf("parms: %s\n", \$\$parms);
 		printf("execname: %s\n", execname());
 		printf("ts: %d, %d\n", timestamp()/1000000, n++);
-	/* 	print_ubacktrace() */
+		print_ubacktrace()
 		printf("\n");
 	}
 }
@@ -1135,7 +1152,7 @@ probe module("$mod").function("$1")
 		printf("parms: %s\n", \$\$parms);
 		printf("execname: %s\n", execname());
 		printf("ts: %d, %d\n", timestamp()/1000000, n++);
-	/* 	print_ubacktrace() */
+		print_ubacktrace()
 		printf("\n");
 	}
 }
@@ -1183,7 +1200,7 @@ global n = 1;
 
 probe kernel.function("$fun").return
 {
-/* 	print_backtrace() */
+	print_backtrace()
 	printf("%x\t%d\t", \$return, \$return);
 	printf("ts: %d, %d\n", timestamp()/1000000, n++);
 }
@@ -1199,7 +1216,7 @@ global n = 1;
 
 probe module("$mod").function("$fun").return
 {
-/* 	print_backtrace() */
+	print_backtrace()
 	printf("%x\t%d\n", \$return, \$return);
 	printf("ts: %d, %d\n", timestamp()/1000000, n++);
 }
@@ -1242,8 +1259,6 @@ set -x;
 		set +x
 		return
 	}
-set +x
- 	return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 # 	make modules_install -j 32
@@ -1301,6 +1316,7 @@ set +x
 
 
 alias b1="tc2; mybuild1 cls_flower"
+alias bct="tc2; mybuild1 act_ct"
 alias b_gact="tc2; mybuild1 act_gact"
 alias b_mirred="tc2; mybuild1 act_mirred"
 alias b_vlan="tc2; mybuild1 act_vlan"
@@ -1355,6 +1371,9 @@ set +x
 }
 alias b4=mybuild4
 
+# modprobe -rv cls_flower act_mirred
+# modprobe -av cls_flower act_mirred
+
 # modprobe -v cls_flower tuple_offload=0
 function reprobe
 {
@@ -1364,7 +1383,7 @@ function reprobe
 # 		sudo modprobe -r cls_flower
 # 		sudo /etc/init.d/openibd stop
 # 	fi
-	sudo /etc/init.d/openibd stop
+# 	sudo /etc/init.d/openibd stop
 	sudo modprobe -r cls_flower
 	sudo modprobe -r mlx5_ib
 	sudo modprobe -r mlx5_core
@@ -1762,7 +1781,23 @@ function debug-m
 	grep $1 /sys/kernel/debug/dynamic_debug/control
 }
 
-alias make-all='[[ $UID == 0 ]] && break; sm1; make olddefconfig; make -j 32; sudo make modules_install -j 32; sudo make install; /bin/rm -rf ~/.ccache'
+function printk8
+{
+	echo 8 > /proc/sys/kernel/printk
+	echo 'module nf_conntrack +p' > /sys/kernel/debug/dynamic_debug/control
+}
+
+function make-all
+{
+	[[ $UID == 0 ]] && break
+
+	make olddefconfig
+	make -j 32
+	sudo make modules_install -j 32
+	sudo make install
+
+	/bin/rm -rf ~/.ccache
+}
 alias m=make-all
 alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install -j 32'
@@ -2013,10 +2048,11 @@ set -x
 
 	src_mac=02:25:d0:$host_num:01:02
 	dst_mac=02:25:d0:$host_num:01:03
-	$TC filter add dev $rep2 handle 1 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
-# 	$TC filter add dev $rep2 handle 1 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+# 	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
 # set +x
 # 	return
+
 	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
 	$TC filter add dev $rep2 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
 	src_mac=02:25:d0:$host_num:01:03
@@ -2026,6 +2062,49 @@ set -x
 	$TC filter add dev $rep3 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
 set +x
 }
+
+function tc-vf-frag
+{
+set -x
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	TC=/home1/chrism/iproute2/tc/tc
+	TC=tc
+
+	$TC qdisc del dev $rep2 ingress
+	$TC qdisc del dev $rep3 ingress
+
+	ethtool -K $rep2 hw-tc-offload on 
+	ethtool -K $rep3 hw-tc-offload on 
+
+	$TC qdisc add dev $rep2 ingress 
+	$TC qdisc add dev $rep3 ingress 
+
+	src_mac=02:25:d0:$host_num:01:02
+	dst_mac=02:25:d0:$host_num:01:03
+	$TC filter add dev $rep2 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 protocol ip  parent ffff: flower $offload ip_flags frag/firstfrag src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 protocol ip  parent ffff: flower $offload ip_flags frag/nofirstfrag src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+# 	$TC filter add dev $rep2 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+# set +x
+# 	return
+
+	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
+	src_mac=02:25:d0:$host_num:01:03
+	dst_mac=02:25:d0:$host_num:01:02
+	$TC filter add dev $rep3 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 protocol ip  parent ffff: flower $offload ip_flags frag/firstfrag src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 protocol ip  parent ffff: flower $offload ip_flags frag/nofirstfrag src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+
+	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
+set +x
+}
+
+
 
 function tc-setup
 {
@@ -2974,8 +3053,26 @@ set -x
 		enc_key_id $vni			\
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
+
+
 set +x
 }
+
+function ipn1
+{
+set -x
+	ip n replace $link_remote_ip dev $link lladdr 11:22:33:44:55:66
+set +x
+}
+
+function ipn2
+{
+set -x
+	ip n replace $link_remote_ip dev $link lladdr 11:22:33:44:55:77
+set +x
+}
+
+
 
 function tc-vxlan-cx4
 {
@@ -3586,6 +3683,17 @@ alias brv='create-br vlan'
 alias br='create-br nomal'
 alias brx='create-br vxlan'
 
+function create-br-all
+{
+	del-br
+	brx
+	if (( ports == 2 )); then
+		ip2
+		create-br2 vxlan
+		restart-ovs
+	fi
+}
+
 function create-br
 {
 set -x
@@ -3627,14 +3735,14 @@ set -x
 	local rep
 	vs del-br $br2
 	vs add-br $br2
-	[[ "$1" == "vxlan" ]] && vxlan1
+	[[ "$1" == "vxlan" ]] && vxlan1-2
 	[[ "$1" == "vlan" ]] && vs add-port $br $link2
 	[[ "$1" == "vlan" ]] && tag="tag=$vid" || tag=""
 	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep2 $i)
 		vs add-port $br2 $rep $tag
 	done
-        vs add-port $br2 $link2
+#         vs add-port $br2 $link2
 set +x
 }
 
@@ -3747,7 +3855,7 @@ function netns
 	ip link set dev $link netns $n
 	ip netns exec $n ifconfig $link mtu 1450
 	ip netns exec $n ip link set dev $link up
-	ip netns exec $n ip addr add $ip/24 brd + dev $link
+	ip netns exec $n ip addr add $ip/16 brd + dev $link
 
 # 	ip netns exec $n ip addr add 1::$ipv6/64 dev $link
 
@@ -3762,28 +3870,18 @@ function set_netns_all
 	local i
 	local p=$1
 	local start
+	local ns_ip=1.1.$p
 
 	echo
 	echo "start set_netns_all"
-	ns_ip=1.1.1
-	if (( host_num == 14 )); then
-		if (( p == 1 )); then
-			start=121
-		fi
-		if (( p == 2 )); then
-			start=131
-		fi
-	elif (( host_num == 13 )); then
-		if (( p == 1 )); then
-			start=21
-		fi
-		if (( p == 2 )); then
-			start=31
-		fi
+	if (( host_num == 13 )); then
+		ns_ip=1.1.$p
+	elif (( host_num == 14 )); then
+		ns_ip=1.1.$((p+2))
 	fi
 
 	for (( i = 1; i < numvfs; i++)); do
-		ip=${ns_ip}.$((i+start))
+		ip=${ns_ip}.$((i))
 		vfn=$(get_vf $host_num $p $((i+1)))
 		echo "vf${i} name: $vfn, ip: $ip"
 		netns n${p}${i} $vfn $ip
@@ -3888,6 +3986,10 @@ alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
 alias mystart=start-switchdev-all
 function start-switchdev
 {
+	if (( numvfs > 99 )); then
+		echo "numvfs = $numvfs, return to confirm"
+		read
+	fi
 	get_pci
 	if [[ -z $pci ]]; then
 		echo "pci is null"
@@ -3911,7 +4013,7 @@ function start-switchdev
 	mode=switchdev
 	link_mode=transport
 
-	echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
+	time echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 
 	# echo "Set mac: "
 	for vf in `ip link show $l | grep "vf " | awk {'print $2'}`; do
@@ -3921,7 +4023,7 @@ function start-switchdev
 		((mac_vf=mac_vf+1))
 	done
 
- 	unbind_all $l
+ 	time unbind_all $l
 	if [[ "$1" != "legacy" ]]; then
 		echo "enable switchdev mode for: $pci_addr"
 		if (( centos72 == 1 )); then
@@ -3945,7 +4047,7 @@ function start-switchdev
 	fi
 
 	sleep 1
-	up_all_reps $p
+	time up_all_reps $p
 # 	hw_tc_all $p
 
 	if [[ "$1" == "vf" ]]; then
@@ -3970,27 +4072,16 @@ function start-switchdev
 		return
 	fi
 
-	bind_all $l
+	time bind_all $l
 
 # set +x
 # 	return
 
-	set_netns_all $p
-
-# 	ifconfig enp4s1f2 up
-# 	ifconfig $rep1_2 up
-# 	ifconfig enp4s0f2 1.1.1.1/24 up
-
-# 	ifconfig $rep2 1.1.1.100/24 up
-# 	ip addr add 1::1/64 dev $rep2
+	time set_netns_all $p
 
 # 	iptables -F
 # 	iptables -Z
 # 	iptables -X
-
-	start-ovs
-
-# 	ifconfig $rep1 1.1.1.5/24 up
 
 	return
 }
@@ -3998,18 +4089,21 @@ function start-switchdev
 function start-switchdev-all
 {
 # 	enable-multipath
-	ifconfig $link2 up
+# 	ifconfig $link2 up
+
+	start-ovs
 	for i in $(seq $ports); do
 		start-switchdev $i
 	done
+# 	create-br-all
 
-	ifconfig $(get_vf $host_num 1 1) up
-	ifconfig $rep1 up
+# 	ifconfig $(get_vf $host_num 1 1) up
+# 	ifconfig $rep1 up
 
-	if (( ports == 2 )); then
-		ifconfig $(get_vf $host_num 2 1) up
-		ifconfig $rep1_2 up
-	fi
+# 	if (( ports == 2 )); then
+# 		ifconfig $(get_vf $host_num 2 1) up
+# 		ifconfig $rep1_2 up
+# 	fi
 
 # 	brx
 # 	add-reps
@@ -4045,6 +4139,8 @@ set -x
 # 	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
 	sudo echo "GRUB_DEFAULT=$kernel" >> $file
 
+	sudo /bin/rm -rf /boot/*.old
+	sudo mv /boot/grub2/grub.cfg /boot/grub2/grub.cfg.orig
 	sudo $MKCONFIG -o /boot/grub2/grub.cfg
 
 set +x
@@ -4112,9 +4208,9 @@ if [ "$EUID" = 0 ]; then
 else
     __first_color=$GREEN
 fi
-# export PS1="$__first_color\u$GREEN@\h $RED_BOLD\W $BLUE\$(parse_git_branch)\$(parse_svn_branch)$BLUE\\$ \${?##0} $BLACK"
-# unset __first_color
-# export PS1="$GREEN\u@\h $RED_BOLD\W $BLUE\$(parse_git_branch)\$(parse_svn_branch)$BLACK\$ "
+export PS1="$__first_color\u$GREEN@\h $RED_BOLD\W $BLUE\$(parse_git_branch)\$(parse_svn_branch)$BLUE\\$ \${?##0} $BLACK"
+unset __first_color
+export PS1="$GREEN\u@\h $RED_BOLD\W $BLUE\$(parse_git_branch)\$(parse_svn_branch)$BLACK\$ "
 
 # export PROMPT_COMMAND=__prompt_command
 
@@ -4412,6 +4508,29 @@ set -x
 set +x
 }
 
+function tca
+{
+set -x
+	[[ $# == 0 ]] && n=1 || n=$1
+
+	file=/tmp/a.txt
+# 	local l=$rep2
+	local l=$link
+
+	TC=/home1/chrism/iproute2/tc/tc
+	TC=tc
+
+# 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
+
+	sudo ~chrism/bin/tdc_batch.py -o -n $n $l $file
+	$TC qdisc add dev $l ingress
+	ethtool -K $l hw-tc-offload on 
+	time $TC -b $file
+# 	$TC action ls action gact
+# 	$TC actions flush action gact
+set +x
+}
+
 function tca1
 {
 set -x
@@ -4473,29 +4592,6 @@ set +x
 function tcca
 {
 	tc filter change  dev $link prio 1 protocol ip handle 1 parent ffff: flower skip_hw src_mac e4:11:0:0:0:0 dst_mac e4:12:0:0:0:0 action pass
-}
-
-function tca
-{
-set -x
-	[[ $# == 0 ]] && n=1 || n=$1
-
-	file=/tmp/a.txt
-# 	local l=$rep2
-	local l=$link
-
-	TC=/home1/chrism/iproute2/tc/tc
-	TC=tc
-
-# 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
-
-	sudo ~chrism/bin/tdc_batch.py -o -n $n $l $file
-	$TC qdisc add dev $l ingress
-	ethtool -K $l hw-tc-offload on 
-	time $TC -b $file
-# 	$TC action ls action gact
-# 	$TC actions flush action gact
-set +x
 }
 
 function tca2
@@ -4734,32 +4830,50 @@ function syndrome
 	grep -i $2 $file
 }
 
+# mlxfwup
+
 function burn5
 {
 set -x
 	pci=0000:04:00.0
+	version=fw-4119-rel-16_24_0186
 	version=fw-4119-rel-16_24_0220
 	version=last_revision
 	version=fw-4119-rel-16_24_0166
+	version=fw-4119-rel-16_24_0310
+	version=fw-4119-rel-16_24_1000
+	version=fw-4119-rel-16_24_1012
 
 # 	mkdir -p /mswg/
 # 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
 # 	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/$version/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
 
-	scp -r chrism@10.7.2.14:/mswg/release/fw-4119/$version /root
-	yes | sudo mlxburn -d $pci -fw /root/$version/fw-ConnectX5.mlx -conf_dir /root/$version
+# 	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/last_revision/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
+
+	[[ "$version" == "last_revision" ]] && /bin/rm -rf last_revision
+	/bin/rm -rf /root/fw
+	mkdir /root/fw
+	scp -r chrism@10.7.2.14:/mswg/release/fw-4119/$version/*.tgz /root/fw
+	cd /root/fw
+	tar zxvf *.tgz
+	yes | sudo mlxburn -d $pci -fw ./fw-ConnectX5.mlx -conf_dir .
+# 	yes | sudo mlxburn -d $pci -fw /root/$version/fw-ConnectX5.mlx -conf_dir /root/$version
 
 	sudo mlxfwreset -d $pci reset
 set +x
 }
 
+alias fwreset="sudo mlxfwreset -d $pci reset"
+
 function burn5l
 {
 set -x
 	pci=0000:04:00.0
-	version=fw-4119-rel-16_24_0220
 	version=last_revision
-	yes | sudo mlxburn -d $pci -fw /root/$version/fw-ConnectX5.mlx -conf_dir /root/$version
+	version=fw-4119-rel-16_24_0300
+	version=fw-4119-rel-16_24_0166
+# 	yes | sudo mlxburn -d $pci -fw /root/$version/fw-ConnectX5.mlx -conf_dir /root/$version
+	yes | sudo mlxburn -d $pci -fw /root/fw-ConnectX5.mlx -conf_dir /root/$version
 	sudo mlxfwreset -d $pci reset
 set +x
 }
@@ -4776,12 +4890,18 @@ set -x
 set +x
 }
 
+list_file=/labhome/chrism/list/ct-flow-table.txt
+list_file=/labhome/chrism/backport/vlad/list2.txt
+alias vi-list="vi $list_file"
+
 jd_dir=/labhome/chrism/ct2/driver-patch
+jd_dir=/labhome/chrism/ct2/flow-table
+jd_dir=/labhome/chrism/ct2/vlad-mlx5
 function gf
 {
 set -x
-	smy
-	local file=~chrism/ct2/list2.txt
+	sm9
+	local file=$list_file
 	[[ $# > 2 ]] && return
 	local commit=$2
 	[[ "$USER" != "chrism" ]] && return
@@ -4867,7 +4987,7 @@ set +x
 }
 
 patch_dir2=~/batch/review11
-patch_dir=~/ovs/1
+patch_dir=~/ovs/2.9
 alias smp="cd $patch_dir"
 alias smp2="cd $patch_dir2"
 
@@ -4882,7 +5002,8 @@ function git-format-patch
 # 	git format-patch --cover-letter --subject-prefix="patch net-next internal v11" -o $patch_dir -$1
 # 	git format-patch --cover-letter --subject-prefix="patch net internal" -o $patch_dir -$1
 # 	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$1
-	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$1
+# 	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$1
+	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$1
 }
 
 #
@@ -5383,6 +5504,7 @@ function fast-reboot
 function reboot1
 {
 	local uname=$(uname -r)
+# 	pgrep vim && return
 
 	[[ $# == 1 ]] && uname=$1
 
@@ -6008,6 +6130,8 @@ alias ofed-configure3='./configure --with-mlx5-core-and-en-mod --with-core-mod -
 alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j 32'
 alias ofed-configure-all='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
 
+# centos 7.4
+alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 # Redhat 7.5
 alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
@@ -6072,39 +6196,41 @@ set +x
 }
 
 # ping -I ens6 11.196.22.1 -c 100 -s 100 -i 0.05
-function ping-all2
-{
-set -x
-	for n in $(seq 11 17); do
-		for i in $(seq 22 28); do
-			if (( n + 11 != i)); then
-				exe n$n ping 1.1.1.$i -c 1
-			fi
-		done
-	done
-
-	for n in $(seq 21 27); do
-		for i in $(seq 122 128); do
-			if (( n + 101 != i)); then
-				exe n$n ping 1.1.1.$i -c 1
-			fi
-		done
-	done
-set +x
-}
-
 function ping-all
 {
 set -x
-	for n in $(seq 11 17); do
-		for i in $(seq 122 128); do
-			exe n$n ping 1.1.1.$i -c 1
+	local s=32768
+	local s=1000
+	local c=100
+	local iv=0.1
+
+	local start1=10
+	local start2=$((start1+1))
+	local end=$((start1+numvfs-1))
+	local end2=$((numvfs-1))
+	for n in $(seq $start2 $end); do
+		for i in $(seq 1 $end2); do
+			if (( n - start1 != i)); then
+				exe n$n ping 1.1.1.$i -i $iv -c $c -s $s &
+			fi
+			exe n$n ping 1.1.3.$i -i $iv -c $c -s $s &
 		done
 	done
 
-	for n in $(seq 21 27); do
-		for i in $(seq 122 128); do
-			exe n$n ping 1.1.1.$i -c 1
+	if (( ports == 1 )); then
+set +x
+		return
+	fi
+
+	start1=20
+	start2=$((start1+1))
+	end=$((start1+numvfs-1))
+	for n in $(seq $start2 $end); do
+		for i in $(seq 1 $end2); do
+			if (( n - start1 != i)); then
+				exe n$n ping 1.1.2.$i -i $iv -c $c -s $s &
+			fi
+			exe n$n ping 1.1.4.$i -i $iv -c $c -s $s &
 		done
 	done
 set +x
@@ -6315,10 +6441,12 @@ function centos-uninstall
 	sudo rpm -e kernel-tools-libs-$kernel --nodeps
 }
 
+alias install-kernel="sudo rpm -ivh kernel-*.rpm --force"
+
 function centos-install
 {
 	cd /home1/mi/rpmbuild/RPMS/x86_64
-	sudo rpm -ivh kernel-*.rpm --force
+	install-kernel
 }
 
 function cp1
@@ -6445,8 +6573,8 @@ function addflow-ip
 	for(( i = 0; i <= 255; i++)); do
 		for(( j = 0; j <= 255; j++)); do
 			for(( k = 0; k <= 255; k++)); do
-#  				echo "table=0,priority=10,ip,nw_src=10.$i.$j.$k,in_port=enp4s0f0_1,action=output:enp4s0f0_2"
-				echo "table=0,priority=10,ip,nw_src=10.$i.$j.$k,dl_dst=02:25:d0:$host_num:01:03,in_port=enp4s0f0_1,action=output:enp4s0f0_2"
+ 				echo "table=0,priority=10,ip,nw_src=10.$i.$j.$k,in_port=enp4s0f0_1,action=output:enp4s0f0_2"
+# 				echo "table=0,priority=10,ip,nw_src=10.$i.$j.$k,dl_dst=02:25:d0:$host_num:01:03,in_port=enp4s0f0_1,action=output:enp4s0f0_2"
 #  				echo "table=0,priority=10,ip,nw_src=10.$i.$j.$k,dl_dst=24:8a:07:88:27:cb,in_port=enp4s0f0_1,action=output:enp4s0f0"
 				(( n++ ))
 				(( n >= num )) && break
@@ -6681,13 +6809,19 @@ set -x
 set +x
 }
 
-alias from-test=' ./test-all-dev.py --stop --from_test'
+alias from-test-stop=' ./test-all-dev.py --stop --from_test'
+alias test-all='./test-all.py -g "test-tc-*" -e "test-tc-par*" -e "test-tc-traff*"'
+alias test-all='./test-all.py -g "test-tc-*" -e "test-tc-par*" -e "test-tc-traff*" -e "test-tc-insert-rules-port2.sh" -e "test-tc-merged-esw-vf-pf.sh" -e "test-tc-merged-esw-vf-vf.sh" -e "test-tc-multi-prio-chains.sh" -e "test-tc-vf-remote-mirror.sh"'
+alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*" -e "test-tc-insert-rules-port2.sh" -e "test-tc-merged-esw-vf-pf.sh" -e "test-tc-merged-esw-vf-vf.sh" -e "test-tc-multi-prio-chains.sh" -e "test-tc-vf-remote-mirror.sh"'
+alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*"'
+alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*"'
+alias from-test='./test-all.py --from_test'
 
 function get-diff
 {
 	local v="-v"
 	[[ "$1" == "config" ]] && v=""
-	local dir=/labhome/chrism/backport/mlx5_core/1105
+	local dir=/labhome/chrism/backport/vlad/1
 	for i in $dir/*; do
 		if diffstat -l $i | grep $v "\.config" > /dev/null 2>&1 &&
 		   diffstat -l $i | grep $v "\.gitignore" > /dev/null 2>&1; then
@@ -6767,7 +6901,7 @@ function clear-trace
 	echo > trace
 }
 
-# alias test1='r; n1 ping 1.1.1.23 -c 5; off'
+alias test1='r; n1 ping 1.1.1.23 -c 5; off'
 
 function git-user
 {
@@ -6780,7 +6914,11 @@ function ln-crash
 	cd /var/crash
 	local dir=$(ls -td */ | head -1)
 	local n=$(ls vmcore* | wc -l)
-	ln -s ${dir}vmcore vmcore.$n
+	if [[ -f ${dir}vmcore ]]; then
+		ln -s ${dir}vmcore vmcore.$n
+	else
+		echo "no vmcore"
+	fi
 }
 
 function diff1
@@ -6813,6 +6951,73 @@ function replace1
 		tc filter replace dev $l protocol 0x806 parent ffff: prio 8 handle 0x1 flower dst_mac e4:11:22:11:4a:51 src_mac e4:11:22:11:4a:50 action drop
 		tcs $l
 	done
+}
+
+function tc-udp2
+{
+	local file=/tmp/udp.txt
+	/bin/rm -f $file
+	local num=1
+	local n=0
+	local l=$rep2
+	[[ $# == 1 ]] && num=$1
+	tc qdisc del dev $l ingress > /dev/null 2>&1;
+	tc qdisc add dev $l ingress;
+	ethtool -K $l hw-tc-offload on 
+
+	for(( i = 0; i <= 255; i++)); do
+		for(( j = 0; j <= 255; j++)); do
+			for(( k = 0; k <= 255; k++)); do
+				echo "filter add dev $l prio 1 protocol ip parent ffff: flower skip_sw ip_proto udp src_ip 10.$i.$j.$k dst_mac 02:25:d0:$host_num:01:03 action mirred egress redirect dev enp4s0f0_2"
+				(( n++ ))
+				(( n >= num )) && break
+			done
+			(( n >= num )) && break
+		done
+		(( n >= num )) && break
+	done >> $file
+
+	echo "begin"
+
+	TC=/home1/chrism/iproute2/tc/tc
+	time $TC -b $file
+}
+
+# split -l 100000 /tmp/udp.txt tc
+# for i in tc*; do
+# 	echo $i; time tc -b $i &
+# done
+
+function tc-udp
+{
+	local file=/tmp/udp.txt
+	/bin/rm -f $file
+	local num=1
+	local n=0
+	local l=$rep2
+	[[ $# == 1 ]] && num=$1
+	tc qdisc del dev $l ingress > /dev/null 2>&1;
+	tc qdisc add dev $l ingress;
+	ethtool -K $l hw-tc-offload on 
+
+	time for(( i = 0; i <= 255; i++)); do
+		for(( j = 0; j <= 255; j++)); do
+			for(( k = 0; k <= 255; k++)); do
+				echo "filter add dev $l prio 1 protocol ip parent ffff: flower skip_hw ip_proto udp src_ip 10.$i.$j.$k action mirred egress redirect dev enp4s0f0_2"
+				(( n++ ))
+				(( n >= num )) && break
+			done
+			(( n >= num )) && break
+		done
+		(( n >= num )) && break
+	done >> $file
+
+	return
+
+	echo "begin"
+
+	TC=/home1/chrism/iproute2/tc/tc
+	time $TC -b $file
 }
 
 function replace
@@ -6848,6 +7053,17 @@ set -x
 set +x
 }
 
+alias gdb-kcore="/usr/bin/gdb $linux_dir/vmlinux /proc/kcore"
+
+function add-symbol-file
+{
+	cd /sys/module/mlx5_core/sections
+	local text=$(cat .text)
+	local data=$(cat .data)
+	local bss=$(cat .bss)
+	echo "add-symbol-file /lib/modules/$(uname -r)/kernel/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.ko $text -s .data $data  -s .bss $bss"
+}
+
 # list  *(mlx5e_stats_flower+0x3f)
 function gdb-mlx5
 {
@@ -6855,4 +7071,183 @@ function gdb-mlx5
 	gdb $mod
 }
 
-alias vi-list='vi /labhome/chrism/ct2/list2.txt'
+function gdb-flower
+{
+	local mod=$(modinfo -n cls_flower)
+	gdb $mod
+}
+
+function gdb-nf
+{
+	local mod=$(modinfo -n nf_conntrack)
+	gdb $mod
+}
+
+function gdbm
+{
+	[[ $# != 1 ]] && return
+	local mod=$(modinfo -n $1)
+	gdb $mod
+}
+
+function dpkg_unlock
+{
+	sudo rm /var/lib/dpkg/lock
+	sudo rm /var/cache/apt/archives/lock
+	sudo dpkg --configure -a
+}
+
+function ct-tcp-dev
+{
+	cd /root/dev
+	./test-ct-tcp.sh
+}
+
+function ct-ext
+{
+	tc-setup $rep2
+	tc filter add dev $rep2 ingress protocol ip prio 2 flower dst_mac $mac1 e4:11:22:33:44:50  action ct action goto chain 1 
+}
+
+alias ct-udp=ct-tcp
+function ct-tcp
+{
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	tc-setup $rep2
+	tc-setup $rep3
+
+	mac1=02:25:d0:$host_num:01:02
+	mac2=02:25:d0:$host_num:01:03
+	echo "add arp rules"
+	tc filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep3
+
+	tc filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
+
+	echo "add ct rules"
+	tc filter add dev $rep2 ingress protocol ip prio 2 flower $offload \
+		dst_mac $mac2 ct_state -trk \
+		action ct action goto chain 1
+
+	tc filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+new \
+		action mirred egress redirect dev $rep3
+
+	tc filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+est \
+		action mirred egress redirect dev $rep3
+
+	# chain0,ct -> chain1,fwd
+	tc filter add dev $rep3 ingress protocol ip prio 2 flower $offload \
+		dst_mac $mac1 \
+		action ct action goto chain 1
+
+	tc filter add dev $rep3 ingress protocol ip prio 2 chain 1 flower $offload \
+		action mirred egress redirect dev $rep2
+}
+
+function br-ct
+{
+	local proto=udp
+	local proto=tcp
+
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $rep3
+
+	ovs-ofctl add-flow $br in_port=$rep2,dl_type=0x0806,actions=output:$rep3
+	ovs-ofctl add-flow $br in_port=$rep3,dl_type=0x0806,actions=output:$rep2
+
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	ovs-ofctl dump-flows $br
+}
+
+alias cd-scapy='cd /labhome/chrism/prg/python/scapy'
+
+alias udp13=/labhome/chrism/prg/python/scapy/udp13.py
+alias udp13-2=/labhome/chrism/prg/python/scapy/udp13-2.py
+alias udp14=/labhome/chrism/prg/python/scapy/udp14.py
+
+alias reboot='echo reboot; read; reboot'
+
+alias udp-server='/labhome/chrism/prg/c/udp-server/udp-server'
+alias udp-client='/labhome/chrism/prg/c/udp-client/udp-client'
+
+function udp1
+{
+	local n=1
+	[[ $# == 1 ]] && n=$1
+	pkill udp-client
+	for (( i = 0; i < n; i++ )); do
+		udp-client -c 1.1.1.123 -t 10000 -i 1 &
+	done
+}
+
+function dr
+{
+set -x
+	tc-setup $rep2
+	src_mac=02:25:d0:$host_num:01:02
+# 	tc filter add dev $rep2 ingress protocol arp flower  src_mac $src_mac action mirred egress redirect dev $rep3
+	tc filter add dev $rep2 ingress protocol arp flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+# 	tc filter add dev $rep2 ingress prio 2 protocol arp flower   src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+set +x
+}
+
+function ip-n8
+{
+set -x
+	ip n change 1.1.1.23 lladdr 02:25:d0:13:01:08 dev enp4s0f3
+set +x
+}
+
+function ip-n7
+{
+set -x
+	ip n change 1.1.1.23 lladdr 02:25:d0:13:01:07 dev enp4s0f3
+set +x
+}
+
+
+function tc-wrong
+{
+set -x
+	tc-setup $rep2
+	tc filter add dev $rep2 ingress protocol arp flower src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $vx_rep
+set +x
+}
+
+# tc_get_tfilter will be called
+function tc-filter-get
+{
+	tc -s filter get dev $rep2 handle 1 protocol ip prio 1 parent ffff: flower
+}
+
+# tc_del_tfilter will be called
+function tc-filter-del
+{
+	 tc filter del dev $rep2 handle 1 protocol ip prio 1 parent ffff: flower
+}
+
+# /proc/sys/net/ipv4/icmp_ratelimit
+
+# test-vf-vf-fwd-fl_classify.sh
+function fl_classify
+{
+set -x
+	tc-setup $rep1
+	tc-setup $rep2
+	tc filter add dev enp4s0f0_0 ingress protocol ip prio 1 flower skip_sw dst_mac 02:25:d0:13:01:01 action mirred egress redirect dev enp4s0f0_1
+	tc filter add dev enp4s0f0_1 ingress protocol ip prio 1 flower skip_sw dst_mac 02:25:d0:13:01:02 action mirred egress redirect dev enp4s0f0_0
+	tc filter add dev enp4s0f0_0 ingress protocol ip prio 1 flower skip_sw dst_mac 02:25:d0:13:01:01 action mirred egress redirect dev enp4s0f0_1
+set +x
+}
+
+alias test1='./test-vf-vf-fwd-fl_classify.sh'
