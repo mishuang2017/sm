@@ -61,7 +61,9 @@ export DPDK_TARGET=x86_64-native-linuxapp-gcc
 export DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
 # make install T=$DPDK_TARGET DESTDIR=install
 export LD_LIBRARY_PATH=$DPDK_DIR/x86_64-native-linuxapp-gcc/lib
-export CONFIG=config_chrism_cx5.sh
+export CONFIG=config_chrism_cx5.shexport
+export INSTALL_MOD_STRIP=1
+export CONFIG_LOCALVERSION_AUTO=y
 
 nfs_dir='/auto/mtbcswgwork/chrism'
 
@@ -200,7 +202,7 @@ cx5=0
 # modprobe mlx5_core > /dev/null 2>&1
 function get_pci
 {
-	if [[ -e /sys/class/net/$link/device ]]; then
+	if [[ -e /sys/class/net/$link/device && -f /usr/sbin/lspci ]]; then
 		pci=$(basename $(readlink /sys/class/net/$link/device))
 		pci_id=$(echo $pci | cut -b 6-)
 		lspci -d 15b3: -nn | grep $pci_id | grep ConnectX-5 > /dev/null && cx5=1
@@ -358,6 +360,7 @@ alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kern
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
 alias clone-crash='git clone git@github.com:crash-utility/crash.git'
 alias clone-crash2='git clone git@github.com:mishuang2017/crash.git'
+alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
@@ -381,7 +384,7 @@ alias slog3='git slog -3'
 alias slog4='git slog -4'
 alias slog10='git slog -10'
 alias git1='git slog v4.11.. drivers/net/ethernet/mellanox/mlx5/core/'
-alias gita='git log --author="chrism@mellanox.com"'
+alias gita='git log --tags --source --author="chrism@mellanox.com"'
 alias git-linux-origin='git remote set-url origin ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias git-linus='git remote add linus git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git; git fetch --tags linus'
 # git checkout v4.12
@@ -589,7 +592,7 @@ alias vm3=17
 alias 18='ssh -X root@10.12.205.18'
 alias vm4=18
 
-alias b3=' lspci -d 15b3: -nn'
+alias b3='lspci -d 15b3: -nn'
 
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -6174,19 +6177,6 @@ set -x
 set +x
 }
 
-function git-add1
-{
-set -x
-	git add drivers/net/ethernet/mellanox/mlx5/core/en_tc.c
-	git add drivers/net/ethernet/mellanox/mlx5/core/eswitch.c
-	git add drivers/net/ethernet/mellanox/mlx5/core/eswitch.h
-	git add drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c
-	git add drivers/net/ethernet/mellanox/mlx5/core/fs_core.c
-	git add include/linux/mlx5/mlx5_ifc.h
-	git add include/net/tc_act/tc_mirred.h
-set +x
-}
-
 function q
 {
 set -x
@@ -6391,6 +6381,36 @@ EOF
 # table=1,in_port=3,ip,ct_state=+trk+est,action=2
 
 	ovs-ofctl add-flow -O openflow13 $br $file
+set +x
+}
+
+pkgrelease_file=/tmp/pkgrelease
+function git-archive
+{
+	export CONFIG_LOCALVERSION_AUTO=y
+	local pkgrelease=$(make kernelrelease | cut -d- -f2)
+	git archive --format=tar --prefix=linux-3.10.0-$pkgrelease/ -o linux-3.10.0-${pkgrelease}.tar HEAD
+	echo $pkgrelease > $pkgrelease_file
+}
+
+function centos-cp
+{
+set -x
+	local src=/labhome/chrism/rpmbuild/1.5.3
+	local dst=/home1/mi/rpmbuild
+	local dst_sources=$dst/SOURCES
+	local dst_specs=$dst/SPECS
+	local ldir=/home1/chrism/linux
+	/bin/rm -rf $dst_sources/*.tar
+	/bin/rm -rf $dst_sources/*.tar.xz
+
+	local pkgrelease=$(cat $pkgrelease_file)
+	/bin/cp -f $ldir/linux-3.10.0-${pkgrelease}.tar $dst_sources
+	/bin/cp -f $src/kernel-3.10.0-x86_64.config $dst_sources
+	/bin/cp -f $src/kernel-3.10.0-x86_64-debug.config $dst_sources
+
+	/bin/cp -f $src/kernel.spec $dst_specs
+	sed -i "s/pkgrelease 693.21.1.el7/pkgrelease $pkgrelease/" $dst_specs/kernel.spec
 set +x
 }
 
@@ -6903,10 +6923,10 @@ function clear-trace
 
 alias test1='r; n1 ping 1.1.1.23 -c 5; off'
 
-function git-user
+function git-author
 {
 	[[ $# != 1 ]] && return
-	git log --author="$1@mellanox.com"
+	git log --tags --source --author="$1@mellanox.com"
 }
 
 function ln-crash
