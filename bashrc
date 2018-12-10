@@ -63,7 +63,7 @@ export DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
 export LD_LIBRARY_PATH=$DPDK_DIR/x86_64-native-linuxapp-gcc/lib
 export CONFIG=config_chrism_cx5.shexport
 export INSTALL_MOD_STRIP=1
-export CONFIG_LOCALVERSION_AUTO=y
+unset CONFIG_LOCALVERSION_AUTO
 
 nfs_dir='/auto/mtbcswgwork/chrism'
 
@@ -1796,13 +1796,13 @@ function make-all
 
 	make olddefconfig
 	make -j 32
-	sudo make modules_install -j 32
+	sudo make INSTALL_MOD_STRIP=1 modules_install -j 32
 	sudo make install
 
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
-alias mm='sudo make modules_install -j32; sudo make install'
+alias mm='sudo make INSTALL_MOD_STRIP=1 modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install -j 32'
 alias m32='make -j 32'
 alias make-kernel='make -j 32; sudo make install'
