@@ -5,8 +5,8 @@ fi
 
 numvfs=99
 numvfs=100
-numvfs=124
 numvfs=8
+numvfs=124
 numvfs=3
 vni=200
 vni=100
@@ -61,8 +61,8 @@ export DPDK_TARGET=x86_64-native-linuxapp-gcc
 export DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
 # make install T=$DPDK_TARGET DESTDIR=install
 export LD_LIBRARY_PATH=$DPDK_DIR/x86_64-native-linuxapp-gcc/lib
-export CONFIG=config_chrism_cx5.shexport
-export INSTALL_MOD_STRIP=1
+export CONFIG=config_chrism_cx5.sh
+# export INSTALL_MOD_STRIP=1
 unset CONFIG_LOCALVERSION_AUTO
 
 nfs_dir='/auto/mtbcswgwork/chrism'
@@ -1794,19 +1794,19 @@ function make-all
 {
 	[[ $UID == 0 ]] && break
 
+	unset CONFIG_LOCALVERSION_AUTO
 	make olddefconfig
 	make -j 32
-	sudo make INSTALL_MOD_STRIP=1 modules_install -j 32
+# 	sudo make headers_install
+	sudo make modules_install -j 32
 	sudo make install
 
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
-alias mm='sudo make INSTALL_MOD_STRIP=1 modules_install -j32; sudo make install'
+alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install -j 32'
 alias m32='make -j 32'
-alias make-kernel='make -j 32; sudo make install'
-alias mk=make-kernel
 
 alias make-local='./configure; make -j 32; sudo make install'
 alias ml=make-local
@@ -6144,10 +6144,19 @@ alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --wi
 
 function fetch
 {
-	[[ $# != 1 ]] && return
-	git fetch origin $1
+	if [[ $# == 1 ]]; then
+		repo=origin
+		local branch=$1
+	elif [[ $# == 2 ]]; then
+		local repo=$1
+		local branch=$2
+	else
+		return
+	fi
+
+	git fetch $repo $branch
 	git checkout FETCH_HEAD
-	git checkout -b $1
+	git checkout -b $branch
 }
 
 function tcs
@@ -6384,12 +6393,21 @@ EOF
 set +x
 }
 
+# https://fedoraproject.org/wiki/Building_a_custom_kernel
+# dnf download --source kernel
+
 pkgrelease_file=/tmp/pkgrelease
 function git-archive
 {
 	export CONFIG_LOCALVERSION_AUTO=y
-	local pkgrelease=$(make kernelrelease | cut -d- -f2)
-	git archive --format=tar --prefix=linux-3.10.0-$pkgrelease/ -o linux-3.10.0-${pkgrelease}.tar HEAD
+	if (( ofed == 1 )); then
+		local pkgrelease=$(make kernelrelease | cut -d- -f2)
+		git archive --format=tar --prefix=linux-3.10.0-$pkgrelease/ -o linux-3.10.0-${pkgrelease}.tar HEAD
+	fi
+	if (( ofed == 0 )); then
+		local pkgrelease=$(make kernelrelease)
+		git archive --format=tar --prefix=linux-$pkgrelease/ -o linux-${pkgrelease}.tar HEAD
+	fi
 	echo $pkgrelease > $pkgrelease_file
 }
 
@@ -6420,6 +6438,8 @@ function centos-yum
 	sudo yum install -y audit-libs-devel binutils-devel elfutils-devel elfutils-libelf-devel java-devel
 	sudo yum install -y ncurses-devel newt-devel numactl-devel pciutils-devel python-devel zlib-devel
 }
+
+#  rpmdev-setuptree
 function centos-dir
 {
 	[[ "$USER" != "mi" ]] && return
@@ -6453,6 +6473,7 @@ function centos-uninstall
 	kernel=3.10.0-862.3.3.el7.x86_64
 	kernel=3.10.0-693.el7.x86_64
 	kernel=3.10.0-693.21.3.el7.x86_64
+	kernel=3.10.0-gf60aafa.x86_64
 
 	cd /home1/mi/rpmbuild/RPMS/x86_64
 	sudo rpm -e kernel-headers-$kernel --nodeps
