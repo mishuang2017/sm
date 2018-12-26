@@ -23,6 +23,9 @@ set -x
 		yum -y install $i
 	done
 
+	# 'libvirt_driver_storage.so' fails to load due to "undefined symbol: rbd_diff_iterate2"
+	yum install librbd1-devel
+
 	dnf -y install @virtualization
 	yum -y groupinstall "Virtualization Host"
 	dnf -y groupinstall "C Development Tools and Libraries"
