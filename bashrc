@@ -46,6 +46,10 @@ elif [[ "$(hostname -s)" == "dev-chrism-vm1" ]]; then
 	host_num=15
 elif [[ "$(hostname -s)" == "dev-chrism-vm2" ]]; then
 	host_num=16
+elif [[ "$(hostname -s)" == "dev-chrism-vm3" ]]; then
+	host_num=17
+elif [[ "$(hostname -s)" == "dev-chrism-vm4" ]]; then
+	host_num=18
 elif (( rh == 0 )); then
 	host_num=9
 fi
@@ -53,12 +57,12 @@ fi
 # export DISPLAY=:0.0
 
 #        --add-kernel-support               --upstream-libs --dpdk
-export DPDK_DIR=/home1/chrism/dpdk-stable-17.11.2
-export DPDK_DIR=/root/dpdk-stable-17.11.3
-export RTE_SDK=$DPDK_DIR
-export MLX5_GLUE_PATH=/lib
-export DPDK_TARGET=x86_64-native-linuxapp-gcc
-export DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
+# export DPDK_DIR=/home1/chrism/dpdk-stable-17.11.2
+export DPDK_DIR=/root/dpdk-stable-17.11.4
+# export RTE_SDK=$DPDK_DIR
+# export MLX5_GLUE_PATH=/lib
+# export DPDK_TARGET=x86_64-native-linuxapp-gcc
+# export DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
 # make install T=$DPDK_TARGET DESTDIR=install
 export LD_LIBRARY_PATH=$DPDK_DIR/x86_64-native-linuxapp-gcc/lib
 export CONFIG=config_chrism_cx5.sh
@@ -153,17 +157,38 @@ elif (( host_num == 14 )); then
 	linux_dir=$(readlink /lib/modules/$(uname -r)/build)
 
 	export DISPLAY=MTBC-CHRISM:0.0
+
+	if [[ "$USER" == "root" ]]; then
+		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+	fi
+
 elif (( host_num == 15 )); then
 	link=ens9
 	link_ip=1.1.1.13
 	link_ip=192.168.1.14
 	link_remote_ip=192.168.1.13
 	linux_dir=/home1/chrism/linux
+	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4  -m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2  --nb-cores=2'
 elif (( host_num == 16 )); then
 	link=ens9
 	link_ip=1.1.1.3
 	link_remote_ip=1.1.1.13
 	linux_dir=/home1/chrism/linux
+	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap'
+elif (( host_num == 17 )); then
+	link=ens9
+	link_ip=1.1.1.13
+	link_ip=192.168.1.14
+	link_remote_ip=192.168.1.13
+	linux_dir=/home1/chrism/linux
+	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4  -m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2  --nb-cores=2'
+elif (( host_num == 18 )); then
+	link=ens9
+	link_ip=1.1.1.3
+	link_remote_ip=1.1.1.13
+	linux_dir=/home1/chrism/linux
+	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap'
 elif (( host_num == 20 )); then
 	linux_dir=/auto/mtbcswgwork/chrism/linux
 fi
@@ -474,7 +499,9 @@ alias cf4='sm4; cscope -d'
 alias sm5='cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64'
 alias cf5='sm5; cscope -d'
 
+alias spec='cd /home1/mi/rpmbuild/SPECS'
 alias sml='cd /home1/chrism/linux'
+alias smu='cd /home1/chrism/upstream'
 alias sm9='cd /home1/chrism/linux-4.19'
 alias smy='cd /home1/chrism/yossi'
 alias sm14='cd /home1/chrism/linux-4.14.78'
@@ -634,7 +661,7 @@ alias ta='type -all'
 alias h='history'
 alias screen='screen -h 1000'
 alias path='echo -e ${PATH//:/\\n}'
-alias x=x.py
+alias x=~chrism/bin/x.py
 alias cf=" cscope -d"
 alias cfm="smm; cscope -d"
 alias cf2='cd /auto/mtbcswgwork/chrism/iproute2; cscope -d'
@@ -743,10 +770,10 @@ set -x
 set +x
 }
 
-function cx86
+function xall
 {
-	make tags ARCH=x86
-	make cscope ARCH=x86
+	time make tags ARCH=x86 &
+	time make cscope ARCH=x86
 }
 
 function cone
@@ -755,12 +782,11 @@ set -x
 # 	/bin/rm -f cscope.out > /dev/null;
 # 	/bin/rm -f tags > /dev/null;
 # 	cscope -R -b -k -q &
-	cscope -R -b &
-	ctags -R
+	time cscope -R -b &
+	time ctags -R
 set +x
 }
 
-alias cu='time make cscope ARCH=x86'
 alias cu='time cscope -R -b -k'
 
 function greps
@@ -1340,9 +1366,11 @@ mybuild1 ()
 
 }
 
+alias bo=mybuild2
 mybuild2 ()
 {
 set -x;
+	sudo ovs-vsctl del-br $br
         module=openvswitch
         driver_dir=net/openvswitch
         cd $linux_dir;
@@ -3860,7 +3888,7 @@ function netns
 	ip netns exec $n ip link set dev $link up
 	ip netns exec $n ip addr add $ip/16 brd + dev $link
 
-# 	ip netns exec $n ip addr add 1::$ipv6/64 dev $link
+	ip netns exec $n ip addr add 1::$ipv6/64 dev $link
 
 # 	ip netns exec $n ip r a 2.2.2.0/24 nexthop via 1.1.1.1 dev $link
 }
@@ -4846,6 +4874,7 @@ set -x
 	version=fw-4119-rel-16_24_0310
 	version=fw-4119-rel-16_24_1000
 	version=fw-4119-rel-16_24_1012
+	version=fw-4119-rel-16_99_6104
 
 # 	mkdir -p /mswg/
 # 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -5525,6 +5554,8 @@ function reboot2
 	local cmdline=$(cat /proc/cmdline | cut -d " " -f 2-)
 	echo "sudo kexec -l /boot/vmlinuz-$uname --append=\"BOOT_IMAGE=/vmlinuz-$uname $cmdline\" --initrd=/boot/initramfs-$uname.img"
 }
+
+alias reboot3='reboot1 3.10.0+'
 
 function fast-reboot2
 {
@@ -6284,7 +6315,19 @@ set -x
 set +x
 }
 
-alias testpmd1='testpmd -l 0-3 -n 4 -- -i'
+# ssh chrism@ dev-chrism-vm4
+# echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+# /root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:0a.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap
+# testpmd> set fwd macswap
+# testpmd> start
+# testpmd> show port stats all
+
+# ssh chrism@ dev-chrism-vm3
+# echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+# /root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4  -m=1024  -w 0000:00:0a.0 -- -i --rxq=2 --txq=2  --nb-cores=2
+# testpmd> set fwd flowgen
+# testpmd> start
+# testpmd> show port stats all
 
 function o1
 {
@@ -6414,13 +6457,14 @@ function git-archive
 function centos-cp
 {
 set -x
-	local src=/labhome/chrism/rpmbuild/1.5.3
+	local src=/labhome/chrism/rpmbuild/1.5.4
 	local dst=/home1/mi/rpmbuild
 	local dst_sources=$dst/SOURCES
 	local dst_specs=$dst/SPECS
 	local ldir=/home1/chrism/linux
 	/bin/rm -rf $dst_sources/*.tar
 	/bin/rm -rf $dst_sources/*.tar.xz
+	/bin/rm -rf $dst/BUILD/*
 
 	local pkgrelease=$(cat $pkgrelease_file)
 	/bin/cp -f $ldir/linux-3.10.0-${pkgrelease}.tar $dst_sources
@@ -6430,6 +6474,13 @@ set -x
 	/bin/cp -f $src/kernel.spec $dst_specs
 	sed -i "s/pkgrelease 693.21.1.el7/pkgrelease $pkgrelease/" $dst_specs/kernel.spec
 set +x
+}
+
+function centos-yum-remove
+{
+	sudo yum remove -y rpm-build redhat-rpm-config asciidoc hmaccalc perl-ExtUtils-Embed pesign xmlto 
+	sudo yum remove -y audit-libs-devel binutils-devel elfutils-devel elfutils-libelf-devel java-devel
+	sudo yum remove -y ncurses-devel newt-devel numactl-devel pciutils-devel python-devel zlib-devel
 }
 
 function centos-yum
@@ -6473,7 +6524,7 @@ function centos-uninstall
 	kernel=3.10.0-862.3.3.el7.x86_64
 	kernel=3.10.0-693.el7.x86_64
 	kernel=3.10.0-693.21.3.el7.x86_64
-	kernel=3.10.0-gf60aafa.x86_64
+	kernel=3.10.0-gd01aeb8.x86_64
 
 	cd /home1/mi/rpmbuild/RPMS/x86_64
 	sudo rpm -e kernel-headers-$kernel --nodeps
@@ -6649,17 +6700,19 @@ alias sendm='/labhome/chrism/prg/python/scapy/m.py'
 function make-dpdk
 {
 	cd $DPDK_DIR
-	make config T=x86_64-native-linuxapp-gcc
-	make -j32 T=x86_64-native-linuxapp-gcc
+# 	make config T=x86_64-native-linuxapp-gcc
+# 	make -j32 T=x86_64-native-linuxapp-gcc
+
+	export RTE_SDK=`pwd`
+	export RTE_TARGET=x86_64-native-linuxapp-gcc
+	make install T=x86_64-native-linuxapp-gcc -j8
 }
 
-alias pmd1="$DPDK_DIR/build/app/testpmd -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
-alias pmd1k="$DPDK_DIR/build/app/testpmd1k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
-alias pmd10k="$DPDK_DIR/build/app/testpmd10k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
-alias pmd100k="$DPDK_DIR/build/app/testpmd100k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
-alias pmd200k="$DPDK_DIR/build/app/testpmd200k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
-
-alias viflowgen="cd $DPDK_DIR; vim app/test-pmd/flowgen.c"
+# alias pmd1="$DPDK_DIR/build/app/testpmd -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
+# alias pmd1k="$DPDK_DIR/build/app/testpmd1k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
+# alias pmd10k="$DPDK_DIR/build/app/testpmd10k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
+# alias pmd100k="$DPDK_DIR/build/app/testpmd100k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
+# alias pmd200k="$DPDK_DIR/build/app/testpmd200k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
 
 alias viflowgen="cd $DPDK_DIR; vim app/test-pmd/flowgen.c"
 
@@ -6754,14 +6807,12 @@ function set100
 function checkout1
 {
 	[[ $# != 1 ]] && return
-	smy
 	git branch
-	git checkout ct-one-table
+	git checkout net-nex5-mlx5
 	git branch -D 1
 	git branch 1
 	git checkout 1
 	git reset --hard $1
-	cu
 }
 
 function vr
@@ -7292,3 +7343,49 @@ set +x
 }
 
 alias test1='./test-vf-vf-fwd-fl_classify.sh'
+
+alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
+
+function jd-proc
+{
+	echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+	echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+}
+
+function jd-hugepage
+{
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+}
+
+/bin/cp ~/.bashrc ~/.bashrc.bak
+
+function net
+{
+	/etc/init.d/network restart
+}
+
+function change-mtu
+{
+	local mtu=$1
+	ifconfig $rep2 mtu $mtu
+	ifconfig $rep2
+	n1 ifconfig $vf2 mtu $mtu
+	n1 ifconfig $vf2
+}
+
+function test-mtu
+{
+	local i=0
+	while true; do
+		echo "============ $i ==========="
+		change-mtu 576
+		sleep 5
+		change-mtu 1450
+		sleep 5
+		((i++))
+	done
+}
+
+alias an0='ssh root@mtl-stm-az-125.mtl.labs.mlnx'
+alias an1='ssh root@10.196.23.1'
+alias an2='ssh root@10.196.24.1'
