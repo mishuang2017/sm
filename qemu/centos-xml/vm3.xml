@@ -1,21 +1,21 @@
 <!--
 WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE
 OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
-  virsh edit vm1
+  virsh edit vm3
 or other application using the libvirt API.
 -->
 
 <domain type='kvm'>
-  <name>vm1</name>
-  <uuid>edc5bad7-f54b-43ec-957b-821d197d1a01</uuid>
+  <name>vm3</name>
+  <uuid>edc5bad7-f54b-43ec-957b-821d197d1a03</uuid>
   <memory unit='KiB'>3906250</memory>
   <currentMemory unit='KiB'>3906250</currentMemory>
   <vcpu placement='static'>4</vcpu>
   <cputune>
-    <vcpupin vcpu='0' cpuset='0'/>
-    <vcpupin vcpu='1' cpuset='2'/>
-    <vcpupin vcpu='2' cpuset='4'/>
-    <vcpupin vcpu='3' cpuset='6'/>
+    <vcpupin vcpu='0' cpuset='8'/>
+    <vcpupin vcpu='1' cpuset='10'/>
+    <vcpupin vcpu='2' cpuset='12'/>
+    <vcpupin vcpu='3' cpuset='14'/>
   </cputune>
   <os>
     <type arch='x86_64' machine='pc-i440fx-rhel7.0.0'>hvm</type>
@@ -44,7 +44,7 @@ or other application using the libvirt API.
     <emulator>/usr/libexec/qemu-kvm</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='/var/lib/libvirt/images/vm1.qcow2'/>
+      <source file='/var/lib/libvirt/images/vm3.qcow2'/>
       <target dev='vda' bus='virtio'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
     </disk>
@@ -77,7 +77,7 @@ or other application using the libvirt API.
       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
     </controller>
     <interface type='bridge'>
-      <mac address='52:54:00:13:01:01'/>
+      <mac address='52:54:00:13:01:03'/>
       <source bridge='br0'/>
       <model type='virtio'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
@@ -116,7 +116,7 @@ or other application using the libvirt API.
     </video>
     <hostdev mode='subsystem' type='pci' managed='yes'>
       <source>
-        <address domain='0x0000' bus='0x04' slot='0x00' function='0x3'/>
+        <address domain='0x0000' bus='0x04' slot='0x00' function='0x5'/>
       </source>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x09' function='0x0'/>
     </hostdev>

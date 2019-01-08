@@ -8,11 +8,14 @@ or other application using the libvirt API.
 <domain type='kvm'>
   <name>vm2</name>
   <uuid>edc5bad7-f54b-43ec-957b-821d197d1a02</uuid>
-  <memory unit='GB'>4</memory>
-  <currentMemory unit='GB'>4</currentMemory>
-  <vcpu placement='static'>1</vcpu>
+  <memory unit='KiB'>3906250</memory>
+  <currentMemory unit='KiB'>3906250</currentMemory>
+  <vcpu placement='static'>4</vcpu>
   <cputune>
     <vcpupin vcpu='0' cpuset='1'/>
+    <vcpupin vcpu='1' cpuset='3'/>
+    <vcpupin vcpu='2' cpuset='5'/>
+    <vcpupin vcpu='3' cpuset='7'/>
   </cputune>
   <os>
     <type arch='x86_64' machine='pc-i440fx-rhel7.0.0'>hvm</type>
@@ -22,7 +25,7 @@ or other application using the libvirt API.
     <acpi/>
     <apic/>
   </features>
-  <cpu mode='custom' match='exact'>
+  <cpu mode='custom' match='exact' check='partial'>
     <model fallback='allow'>Broadwell</model>
   </cpu>
   <clock offset='utc'>
@@ -73,14 +76,16 @@ or other application using the libvirt API.
     <controller type='virtio-serial' index='0'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
     </controller>
-    <interface type='network'>
+    <interface type='bridge'>
       <mac address='52:54:00:13:01:02'/>
-      <source network='default'/>
+      <source bridge='br0'/>
       <model type='virtio'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
     </interface>
     <serial type='pty'>
-      <target port='0'/>
+      <target type='isa-serial' port='0'>
+        <model name='isa-serial'/>
+      </target>
     </serial>
     <console type='pty'>
       <target type='serial' port='0'/>
@@ -111,7 +116,7 @@ or other application using the libvirt API.
     </video>
     <hostdev mode='subsystem' type='pci' managed='yes'>
       <source>
-        <address domain='0x0000' bus='0x04' slot='0x00' function='0x3'/>
+        <address domain='0x0000' bus='0x04' slot='0x00' function='0x4'/>
       </source>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x09' function='0x0'/>
     </hostdev>
