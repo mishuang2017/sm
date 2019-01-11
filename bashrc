@@ -75,6 +75,7 @@ if (( host_num == 9 )); then
 	link=ens9
 elif (( host_num == 13 )); then
 	link=enp4s0f0
+	link_new=${link}_65534
 	link2=enp4s0f1
 	link_ip=8.2.10.13
 	link_ip=192.168.1.13
@@ -108,6 +109,11 @@ elif (( host_num == 13 )); then
 
 	linux_dir=/home1/chrism/linux
 	linux_dir=$(readlink /lib/modules/$(uname -r)/build)
+
+	if [[ "$USER" == "root" ]]; then
+		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+	fi
 
 	export DISPLAY=MTBC-CHRISM:0.0
 elif (( host_num == 14 )); then
@@ -165,30 +171,12 @@ elif (( host_num == 14 )); then
 
 elif (( host_num == 15 )); then
 	link=ens9
-	link_ip=1.1.1.13
-	link_ip=192.168.1.14
-	link_remote_ip=192.168.1.13
-	linux_dir=/home1/chrism/linux
-	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4  -m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2  --nb-cores=2'
 elif (( host_num == 16 )); then
 	link=ens9
-	link_ip=1.1.1.3
-	link_remote_ip=1.1.1.13
-	linux_dir=/home1/chrism/linux
-	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap'
 elif (( host_num == 17 )); then
 	link=ens9
-	link_ip=1.1.1.13
-	link_ip=192.168.1.14
-	link_remote_ip=192.168.1.13
-	linux_dir=/home1/chrism/linux
-	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4  -m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2  --nb-cores=2'
 elif (( host_num == 18 )); then
 	link=ens9
-	link_ip=1.1.1.3
-	link_remote_ip=1.1.1.13
-	linux_dir=/home1/chrism/linux
-	alias pmd1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap'
 elif (( host_num == 20 )); then
 	linux_dir=/auto/mtbcswgwork/chrism/linux
 fi
@@ -252,9 +240,7 @@ alias vxlan1-2="ovs-vsctl add-port $br2 $vx2 -- set interface $vx2 type=vxlan op
 alias vxlan2="ovs-vsctl del-port $br $vx"
 alias vx='vxlan2; vxlan1'
 
-alias ip1="ifconfig $link 0; ip addr add dev $link $link_ip/24; ip link set $link up"
 alias ipmirror="ifconfig $link 0; ip addr add dev $link $link_ip_vlan/16; ip link set $link up"
-alias ip2="ifconfig $link2 0; ip addr add dev $link2 $link2_ip/24; ip link set $link2 up"
 
 alias vsconfig='ovs-vsctl get Open_vSwitch . other_config'
 alias vsconfig-idle='ovs-vsctl set Open_vSwitch . other_config:max-idle=30000'
@@ -304,6 +290,11 @@ alias c10="$CRASH -i /root/.crash $crash_dir/vmcore.10 $linux_dir/vmlinux"
 alias cc0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 alias cc1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
+
+alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
+alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
+alias jd-ovs3="~chrism/bin/ct_lots_rule3.sh $rep2 $rep3"
+alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
 
 if (( centos75 == 1 || centos74 == 1 )); then
 	alias c=cc0
@@ -361,20 +352,24 @@ alias s17='ssh root@192.168.122.17'
 alias s18='ssh root@192.168.122.18'
 
 alias start1='virsh start vm1'
-alias start1c='virsh start vm1 --console'
-alias restart1='virsh reboot vm1'
 alias start2='virsh start vm2'
-alias restart2='virsh reboot vm2'
 alias start3='virsh start vm3'
-alias restart3='virsh reboot vm3'
-alias reboot='sudo reboot'
 
-alias stop1='virsh shutdown vm1'
-alias stop2='virsh shutdown vm2'
-alias stop3='virsh shutdown vm3'
+alias stop1='virsh destroy vm1'
+alias stop2='virsh destroy vm2'
+alias stop3='virsh destroy vm3'
 
-alias reset1='virsh reset vm1'
-alias reset2='virsh reset vm2'
+alias start1c='virsh start vm1 --console'
+
+alias restart1='stop1; sleep 5; start1'
+alias restart2='stop2; sleep 5; start2'
+alias restart2='stop3; sleep 5; start3'
+
+alias start-all='start1; start2'
+alias stop-all='stop1; stop2'
+alias start-all3='start1; start2; start3'
+alias stop-all3='stop1; stop2; stop3'
+alias restart-all='stop-all; start-all'
 
 alias dud='du -h -d 1'
 
@@ -389,6 +384,8 @@ alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
+
+alias git-net='git remote add david git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git'
 
 alias git-log='git log --tags --source'
 alias v4.3='git checkout v4.3; git checkout -b v4.3'
@@ -618,6 +615,10 @@ alias 17='ssh -X root@10.12.205.17'
 alias vm3=17
 alias 18='ssh -X root@10.12.205.18'
 alias vm4=18
+alias 9='ssh -X root@10.12.205.9'
+alias vm5=9
+alias 8='ssh -X root@10.12.205.8'
+alias vm6=8
 
 alias b3='lspci -d 15b3: -nn'
 
@@ -704,6 +705,7 @@ export PATH=$PATH:~/bin
 # export PATH=$PATH:/home1/chrism/dpdk-stable-17.11.2/install
 export EDITOR=vim
 export TERM=xterm
+[[ "$HOSTNAME" == "bc-vnc02" ]] && export TERM=screen
 unset PROMPT_COMMAND
 
 n_time=20
@@ -723,6 +725,32 @@ alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
 [[ $UID == 0 ]] && echo 2 > /proc/sys/fs/suid_dumpable
 
 # ================================================================================
+
+function ip1
+{
+	if ip link show dev $link > /dev/null 2>&1; then
+		ifconfig $link 0
+		ip addr add dev $link $link_ip/24
+		ip link set $link up
+	else
+		ifconfig $link_new 0
+		ip addr add dev $link_new $link_ip/24
+		ip link set $link_new up
+	fi
+}
+
+function ip2
+{
+	if ip link show dev $link2 > /dev/null 2>&1; then
+		ifconfig $link2 0
+		ip addr add dev $link2 $link2_ip/24
+		ip link set $link2 up
+	else
+		ifconfig $link2_new 0
+		ip addr add dev $link2_new $link2_ip/24
+		ip link set $link2_new up
+	fi
+}
 
 trap cleanup EXIT
 function cleanup
@@ -886,7 +914,8 @@ function off_all
 {
 	local l
 # 	for l in $link; do
-	for l in $link $link2; do
+	for l in $link $link2 $link_new; do
+		[[ ! -d /sys/class/net/$l ]] && continue
 		n=$(cat /sys/class/net/$l/device/sriov_numvfs)
 		echo "$l has $n vfs"
 		for (( i = 0; i < $n; i++)); do
@@ -1832,6 +1861,7 @@ function make-all
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
+alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install -j 32'
 alias m32='make -j 32'
@@ -4103,7 +4133,11 @@ function start-switchdev
 		return
 	fi
 
-	time bind_all $l
+	if ip link show dev $link > /dev/null 2>&1; then
+		time bind_all $l
+	else
+		time bind_all ${l}_65534
+	fi
 
 # set +x
 # 	return
@@ -4126,6 +4160,10 @@ function start-switchdev-all
 	for i in $(seq $ports); do
 		start-switchdev $i
 	done
+	ip1
+	ip2
+	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
+# 	jd-ovs3
 # 	create-br-all
 
 # 	ifconfig $(get_vf $host_num 1 1) up
@@ -4793,9 +4831,9 @@ function none1
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=65530
-	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=5000
-	ovs-vsctl set Open_vSwitch . other_config:min_revalidate_pps=1
+	ovs-vsctl set Open_vSwitch . other_config:max-idle=30000
+# 	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=5000
+# 	ovs-vsctl set Open_vSwitch . other_config:min_revalidate_pps=1
 	sudo systemctl restart openvswitch.service
 	vsconfig
 }
@@ -4867,14 +4905,8 @@ function burn5
 {
 set -x
 	pci=0000:04:00.0
-	version=fw-4119-rel-16_24_0186
-	version=fw-4119-rel-16_24_0220
 	version=last_revision
-	version=fw-4119-rel-16_24_0166
-	version=fw-4119-rel-16_24_0310
-	version=fw-4119-rel-16_24_1000
-	version=fw-4119-rel-16_24_1012
-	version=fw-4119-rel-16_99_6104
+	version=fw-4119-rel-16_99_6108
 
 # 	mkdir -p /mswg/
 # 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -4891,11 +4923,11 @@ set -x
 	yes | sudo mlxburn -d $pci -fw ./fw-ConnectX5.mlx -conf_dir .
 # 	yes | sudo mlxburn -d $pci -fw /root/$version/fw-ConnectX5.mlx -conf_dir /root/$version
 
-	sudo mlxfwreset -d $pci reset
+	sudo mlxfwreset -y -d $pci reset
 set +x
 }
 
-alias fwreset="sudo mlxfwreset -d $pci reset"
+alias fwreset="sudo mlxfwreset -d $pci reset -y"
 
 function burn5l
 {
@@ -6280,8 +6312,13 @@ function get_vf
 
 	local l=$link
 	local dir1=/sys/class/net/$l
+	if [[ ! -d $dir1 ]]; then
+		local l=$link_new
+		local dir1=/sys/class/net/$l
+	fi
+	[[ ! -d $dir1 ]] && return
+
 	local dir2=$(readlink $dir1)
-	[[ -d /sys/class/net/$l ]] || return
 	cd $dir1
 	cd ../$dir2
 	cd ../../../
@@ -6505,6 +6542,7 @@ function centos-src
 }
 function centos-build-nodebuginfo
 {
+	/bin/rm -rf /home1/mi/rpmbuild/RPMS/x86_64/*
 	cd ~/rpmbuild/SPECS
 # 	time rpmbuild -bb --target=`uname -m` kernel.spec 2> build-err.log | tee build-out.log
  	time rpmbuild -bb --target=`uname -m` --without kabichk --with baseonly --without debug --without debuginfo kernel.spec 2> build-err.log | tee build-out.log
@@ -6512,6 +6550,7 @@ function centos-build-nodebuginfo
 
 function centos-build
 {
+	/bin/rm -rf /home1/mi/rpmbuild/RPMS/x86_64/*
 	cd ~/rpmbuild/SPECS
 # 	time rpmbuild -bb --target=`uname -m` kernel.spec 2> build-err.log | tee build-out.log
  	time rpmbuild -bb --target=`uname -m` --without kabichk --with baseonly --without debug kernel.spec 2> build-err.log | tee build-out.log
@@ -6519,15 +6558,10 @@ function centos-build
 
 function centos-uninstall
 {
-	local kernel
-
-	kernel=3.10.0-862.3.3.el7.x86_64
-	kernel=3.10.0-693.el7.x86_64
-	kernel=3.10.0-693.21.3.el7.x86_64
-	kernel=3.10.0-gd01aeb8.x86_64
+	local kernel=3.10.0-g5c5c769.x86_64
 
 	cd /home1/mi/rpmbuild/RPMS/x86_64
-	sudo rpm -e kernel-headers-$kernel --nodeps
+# 	sudo rpm -e kernel-headers-$kernel --nodeps
 	sudo rpm -e kernel-debuginfo-common-x86_64-$kernel --nodeps
 	sudo rpm -e kernel-tools-$kernel --nodeps
 	sudo rpm -e kernel-tools-libs-$kernel --nodeps
@@ -6846,6 +6880,14 @@ function va
 	vi $file2
 }
 
+function vt
+{
+	[[ $# != 1 ]] && return
+	echo \"${1}\"
+	local name=$(echo "$1" | cut -d \( -f 1)
+	echo $name
+}
+
 alias err='make -j 32 > /tmp/err.txt 2>&1; vi /tmp/err.txt'
 
 function test_basic_L3
@@ -6907,6 +6949,7 @@ alias test-all='./test-all.py -g "test-tc-*" -e "test-tc-par*" -e "test-tc-traff
 alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*" -e "test-tc-insert-rules-port2.sh" -e "test-tc-merged-esw-vf-pf.sh" -e "test-tc-merged-esw-vf-vf.sh" -e "test-tc-multi-prio-chains.sh" -e "test-tc-vf-remote-mirror.sh"'
 alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*"'
 alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*"'
+alias test-all='./test-all.py -e "test-all-dev.py"'
 alias from-test='./test-all.py --from_test'
 
 function get-diff
@@ -6992,8 +7035,6 @@ function clear-trace
 	cd-trace
 	echo > trace
 }
-
-alias test1='r; n1 ping 1.1.1.23 -c 5; off'
 
 function git-author
 {
@@ -7278,8 +7319,19 @@ function udp1
 	[[ $# == 1 ]] && n=$1
 	pkill udp-client
 	for (( i = 0; i < n; i++ )); do
-		udp-client -c 1.1.1.123 -t 10000 -i 1 &
+		udp-client -c 1.1.1.23 -t 10000 -i 1
 	done
+}
+
+function udp2
+{
+    local n=1;
+    [[ $# == 1 ]] && n=$1;
+    pkill udp-client;
+    for ((i = 0; i < n; i++ ))
+    do
+        /labhome/chrism/prg/c/udp-client/udp-client -c 1.1.3.2 -t 10000 -i 1;
+    done
 }
 
 function dr
@@ -7342,9 +7394,7 @@ set -x
 set +x
 }
 
-alias test1='./test-vf-vf-fwd-fl_classify.sh'
-
-alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
+alias test1='./test-vf-rep-ping.sh'
 
 function jd-proc
 {
@@ -7389,3 +7439,20 @@ function test-mtu
 alias an0='ssh root@mtl-stm-az-125.mtl.labs.mlnx'
 alias an1='ssh root@10.196.23.1'
 alias an2='ssh root@10.196.24.1'
+
+if [[ $USER == "root" && "$(virt-what)" == "kvm" ]]; then
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	alias p0='/root/testpmd0 -l 0-2 -n 4  -m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2  --nb-cores=2'
+	alias p1='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4  -m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2  --nb-cores=2'
+	alias p2='/root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap'
+fi
+
+alias gitr='git format-patch -o ~/backport/r -1'
+alias log1=' git log lib/rhashtable.c'
+
+alias cs='corrupt -s'
+alias cc='corrupt -c 1.1.1.2 -t 100000'
+alias cc2='corrupt -c 1.1.3.2 -t 100000 -l 2'
+alias cc3='corrupt -c 1.1.1.23 -t 100000'
+
+alias msg='tail -f /var/log/messages'
