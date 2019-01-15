@@ -71,20 +71,22 @@ unset CONFIG_LOCALVERSION_AUTO
 
 nfs_dir='/auto/mtbcswgwork/chrism'
 
+
+link_ip=192.168.1.$host_num
+link2_ip=192.168.2.$host_num
+link_ipv6=1::$host_num
+
 if (( host_num == 9 )); then
 	link=ens9
 elif (( host_num == 13 )); then
 	link=enp4s0f0
 	link_new=${link}_65534
 	link2=enp4s0f1
-	link_ip=8.2.10.13
-	link_ip=192.168.1.13
-	link_ipv6=2::13
-	link2_ip=8.1.10.13
-	link2_ip=192.168.2.13
+# 	link_ip=8.2.10.13
+# 	link2_ip=8.1.10.13
 	link_remote_ip=192.168.1.14
+	link_remote_ipv6=1::14
 	link_remote_ip2=192.168.2.14
-	link_ipv6=2017::13
 
 	br=br
 	br2=br2
@@ -120,14 +122,11 @@ elif (( host_num == 14 )); then
 	link=enp4s0
 	link=enp4s0f0
 	link2=enp4s0f1
-	link_ip=7.1.10.14
-	link_ip=192.168.1.14
-	link_ipv6=2::14
-	link2_ip=7.2.10.14
-	link2_ip=192.168.2.14
-	link_ipv6=2017::14
+# 	link_ip=7.1.10.14
+# 	link2_ip=7.2.10.14
 	link_remote_ip=192.168.1.13
 	link_remote_ip2=192.168.2.13
+	link_remote_ipv6=1::13
 
 	br=br
 	br2=br2
@@ -181,6 +180,15 @@ elif (( host_num == 20 )); then
 	linux_dir=/auto/mtbcswgwork/chrism/linux
 fi
 
+function get_pf
+{
+	if ip link show dev $link > /dev/null 2>&1; then
+		echo $link
+	else
+		echo $link_new
+	fi
+}
+
 rep1=${link}_0
 rep2=${link}_1
 rep3=${link}_2
@@ -198,6 +206,7 @@ vm2_ip=192.168.122.12
 
 link_ip_vlan=1.1.1.100
 link_ip_vxlan=1.1.1.200
+link_ipv6_vxlan=1::200
 
 brd_mac=ff:ff:ff:ff:ff:ff
 
@@ -235,6 +244,7 @@ alias testpmd-ovs1='testpmd -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.3 -- -i'
 alias mac1="ip l show $link | grep ether; ip link set dev $link address $link_mac;  ip l show $link | grep ether"
 alias mac2="ip l show $link | grep ether; ip link set dev $link address $link_mac2; ip l show $link | grep ether"
 
+alias vxlan6="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ipv6  options:key=$vni"
 alias vxlan1="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip  options:key=$vni"
 alias vxlan1-2="ovs-vsctl add-port $br2 $vx2 -- set interface $vx2 type=vxlan options:remote_ip=$link_remote_ip2  options:key=$vni"
 alias vxlan2="ovs-vsctl del-port $br $vx"
@@ -293,7 +303,7 @@ alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux
 
 alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
 alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
-alias jd-ovs3="~chrism/bin/ct_lots_rule3.sh $rep2 $rep3"
+alias jd-ovs-ttl="~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
 alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
 
 if (( centos75 == 1 || centos74 == 1 )); then
@@ -420,7 +430,7 @@ alias rx2='rxdump -d 03:00.0 -s 0 -m'
 alias sx='sxdump -d 03:00.0 -s 0'
 
 alias or='ssh root@10.209.32.230'
-alias t="tcpdump -enn -i $link"
+alias t="tcpdump -enn -i $(get_pf)"
 alias t1="tcpdump -enn -v -i $link"
 alias t2="tcpdump -enn -vv -i $link"
 alias t4="tcpdump -enn -vvvv -i $link"
@@ -458,7 +468,6 @@ alias 14c='ssh root@10.12.206.26'
 
 alias switch='ssh admin@10.12.67.39'
 
-# alias t="ti $vf1"
 alias r=restart
 
 alias slave='lnst-slave'
@@ -573,7 +582,7 @@ alias tcss-link-ip="tc -stats filter show dev $link  protocol ip parent ffff:"
 alias tcss-link-arp="tc -stats filter show dev $link  protocol arp parent ffff:"
 alias tcss-link="tc -stats filter show dev $link parent ffff:"
 
-alias tcss-vxlan="tc -stats filter show dev $vx_rep  protocol ip parent ffff:"
+alias tcss-vxlan="tc -stats filter show dev $vx_rep parent ffff:"
 alias vxlan=tcss-vxlan
 alias tcss-vxlan-arp="tc -stats filter show dev $vx_rep  protocol arp parent ffff:"
 alias tcss-vxlan-all="tc -stats filter show dev $vx_rep ingress"
@@ -728,15 +737,11 @@ alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
 
 function ip1
 {
-	if ip link show dev $link > /dev/null 2>&1; then
-		ifconfig $link 0
-		ip addr add dev $link $link_ip/24
-		ip link set $link up
-	else
-		ifconfig $link_new 0
-		ip addr add dev $link_new $link_ip/24
-		ip link set $link_new up
-	fi
+	local l=$(get_pf)
+	ip addr flush $l
+	ip addr add dev $l $link_ip/24
+	ip addr add $link_ipv6/64 dev $l
+	ip link set $l up
 }
 
 function ip2
@@ -1965,7 +1970,7 @@ function tc2
 {
 	local l
 # 	for link in p2p1 $rep1 $rep2 $vx_rep; do
-	for l in $link $rep1 $rep2 $rep3; do
+	for l in $link_new $link $rep1 $rep2 $rep3; do
 		ip link show $l > /dev/null 2>&1 || continue
 		tc qdisc show dev $l ingress | grep ffff > /dev/null 2>&1
 		if (( $? == 0 )); then
@@ -3054,7 +3059,7 @@ set -x
 	ip1
 	ip link del $vx > /dev/null 2>&1
 	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
-	ifconfig $vx up
+	ip link set $vx up
 
 	$TC qdisc del dev $link ingress > /dev/null 2>&1
 	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
@@ -3097,7 +3102,7 @@ set -x
 		id $vni			\
 		action mirred egress redirect dev $vx
 
-	$TC filter add dev $vx protocol ip  parent ffff: prio 3 flower $offload	\
+	$TC filter add dev $vx protocol ip  parent ffff: prio 1 flower $offload	\
 		src_mac $remote_vm_mac	\
 		dst_mac $local_vm_mac	\
 		enc_src_ip $link_remote_ip	\
@@ -3106,7 +3111,7 @@ set -x
 		enc_key_id $vni			\
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $vx protocol arp parent ffff: prio 4 flower skip_hw	\
+	$TC filter add dev $vx protocol arp parent ffff: prio 2 flower skip_hw	\
 		src_mac $remote_vm_mac \
 		enc_src_ip $link_remote_ip	\
 		enc_dst_ip $link_ip		\
@@ -3115,6 +3120,144 @@ set -x
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
 
+
+set +x
+}
+
+# outer v6, inner v4
+function tc-vxlan64
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx udp6zerocsumtx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect  hw-tc-offload on 
+	ethtool -K $vx  hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	$TC qdisc add dev $vx ingress 
+# 	$TC qdisc add dev $link clsact
+# 	$TC qdisc add dev $redirect clsact
+# 	$TC qdisc add dev $vx clsact
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
+		src_mac $local_vm_mac		\
+		dst_mac $remote_vm_mac		\
+		action tunnel_key set		\
+		src_ip $link_ipv6		\
+		dst_ip $link_remote_ipv6	\
+		dst_port $vxlan_port		\
+		id $vni				\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $redirect protocol arp parent ffff: prio 2 flower skip_hw	\
+		src_mac $local_vm_mac		\
+		action tunnel_key set		\
+		src_ip $link_ipv6		\
+		dst_ip $link_remote_ipv6	\
+		dst_port $vxlan_port		\
+		id $vni				\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ip  parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac		\
+		dst_mac $local_vm_mac		\
+		enc_src_ip $link_remote_ipv6	\
+		enc_dst_ip $link_ipv6		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $vx protocol arp parent ffff: prio 2 flower skip_hw	\
+		src_mac $remote_vm_mac		\
+		enc_src_ip $link_remote_ipv6	\
+		enc_dst_ip $link_ipv6		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+set +x
+}
+
+# outer v4, inner v6
+function tc-vxlan46
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect  hw-tc-offload on 
+	ethtool -K $vx  hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	$TC qdisc add dev $vx ingress 
+# 	$TC qdisc add dev $link clsact
+# 	$TC qdisc add dev $redirect clsact
+# 	$TC qdisc add dev $vx clsact
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $redirect protocol ipv6 parent ffff: prio 1 flower $offload \
+		src_mac $local_vm_mac	\
+		dst_mac $remote_vm_mac	\
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ipv6 parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac	\
+		dst_mac $local_vm_mac	\
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
 
 set +x
 }
@@ -3743,6 +3886,7 @@ set +x
 alias brv='create-br vlan'
 alias br='create-br nomal'
 alias brx='create-br vxlan'
+alias brx6='create-br vxlan6'
 
 function create-br-all
 {
@@ -3763,6 +3907,7 @@ set -x
 	vs del-br $br
 	vs add-br $br
 	[[ "$1" == "vxlan" ]] && vxlan1
+	[[ "$1" == "vxlan6" ]] && vxlan6
 	[[ "$1" == "vlan" ]] && vs add-port $br $link
 	[[ "$1" == "vlan" ]] && tag="tag=$vid" || tag=""
 	for (( i = 0; i < numvfs; i++)); do
@@ -3918,6 +4063,7 @@ function netns
 	ip netns exec $n ip link set dev $link up
 	ip netns exec $n ip addr add $ip/16 brd + dev $link
 
+	(( $host_num == 14 )) && ipv6=$((ipv6+10))
 	ip netns exec $n ip addr add 1::$ipv6/64 dev $link
 
 # 	ip netns exec $n ip r a 2.2.2.0/24 nexthop via 1.1.1.1 dev $link
@@ -4163,7 +4309,7 @@ function start-switchdev-all
 	ip1
 	ip2
 	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
-# 	jd-ovs3
+# 	jd-ovs2
 # 	create-br-all
 
 # 	ifconfig $(get_vf $host_num 1 1) up
@@ -4584,7 +4730,7 @@ set -x
 
 	file=/tmp/a.txt
 # 	local l=$rep2
-	local l=$link
+	local l=$(get_pf)
 
 	TC=/home1/chrism/iproute2/tc/tc
 	TC=tc
@@ -5224,7 +5370,30 @@ set -x
 	ip1
 	ip link del $vx > /dev/null 2>&1
 	ip link add name $vx type vxlan id $vni dev $link  remote $link_remote_ip dstport 4789
-	ifconfig $vx $link_ip_vxlan/24 up
+# 	ifconfig $vx $link_ip_vxlan/24 up
+	ip addr add $link_ip_vxlan/24 brd + dev $vx
+	ip addr add $link_ipv6_vxlan/64 dev $vx
+	ip link set dev $vx up
+	ip link set $vx address $vxlan_mac
+
+# 	ip link set vxlan0 up
+# 	ip addr add 1.1.1.2/16 dev vxlan0
+# 	ip addr add fc00:0:0:0::2/64 dev vxlan0
+set +x
+}
+
+function peer6
+{
+set -x
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add name $vx type vxlan id $vni dev $(get_pf) remote $link_remote_ipv6 dstport 4789 \
+		udp6zerocsumtx udp6zerocsumrx
+# 	ifconfig $vx $link_ip_vxlan/24 up
+	ip addr add $link_ip_vxlan/24 brd + dev $vx
+	ip addr add $link_ipv6_vxlan/64 dev $vx
+	ip link set dev $vx up
+	ip link set dev $vx mtu 1000
 	ip link set $vx address $vxlan_mac
 
 # 	ip link set vxlan0 up
@@ -7395,6 +7564,7 @@ set +x
 }
 
 alias test1='./test-vf-rep-ping.sh'
+alias test1='./test-vf-vf-fwd-fl_classify.sh'
 
 function jd-proc
 {
