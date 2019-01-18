@@ -269,15 +269,7 @@ alias restart-network='/etc/init.d/network restart'
 
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 
-if (( ofed == 1 )); then
-	CRASH=/home1/chrism/crash/crash
-else
-	CRASH="/home1/chrism/crash/crash --active"
-fi
-
-if (( host_num == 15 )); then
-	CRASH=/root/bin/crash
-fi
+CRASH=/home1/chrism/crash/crash
 
 alias crash1="$CRASH -i /root/.crash $linux_dir/vmlinux"
 alias c=crash1
@@ -302,6 +294,7 @@ alias cc1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules
 alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 
 alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
+alias jd-vxlan="~chrism/bin/ct_lots_rule_vxlan.sh $rep2 $vx"
 alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
 alias jd-ovs-ttl="~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
 alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
@@ -546,7 +539,6 @@ alias dp='ovs-dpctl'
 alias app='ovs-appctl'
 alias app1='ovs-appctl dpctl/dump-flows'
 alias appn='ovs-appctl dpctl/dump-flows --names'
-# systemctl start openvswitch.service
 
 alias p1="ping $link_remote_ip"
 alias p=p1
@@ -969,31 +961,6 @@ function enable_tc
 	ethtool -K ${link}_0 hw-tc-offload on
 	ethtool -K ${link}_1 hw-tc-offload on
 }
-
-function ovs_setup
-{
-	systemctl start openvswitch.service
-	ovs-vsctl set Open_vSwitch . other_config:hw-offload=true
-	ovs-vsctl add-br $br
-
-	ovs-vsctl add-port $br $link
-	ovs-vsctl add-port $br ${link}_0 # tag=52
-	ovs-vsctl add-port $br ${link}_1 # tag=52
-
-	ip link set dev $link up
-	ip link set dev ${link}_0 up
-	ip link set dev ${link}_1 up
-
-	ovs-dpctl show 
-	ovs-dpctl dump-flows
-}
-
-# function tcq
-# {
-# 	tc qdisc add dev $link ingress
-# 	tc qdisc add dev ${link}_0 ingress
-# 	tc qdisc add dev ${link}_1 ingress
-# }
 
 alias tcq="tc -s qdisc show dev"
 alias tcq1="tc -s qdisc show dev $link"
@@ -3124,6 +3091,86 @@ set -x
 set +x
 }
 
+# outer v6, inner v6
+function tc-vxlan66
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx udp6zerocsumtx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect  hw-tc-offload on 
+	ethtool -K $vx  hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	$TC qdisc add dev $vx ingress 
+# 	$TC qdisc add dev $link clsact
+# 	$TC qdisc add dev $redirect clsact
+# 	$TC qdisc add dev $vx clsact
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $redirect protocol ipv6 parent ffff: prio 1 flower $offload \
+		src_mac $local_vm_mac		\
+		dst_mac $remote_vm_mac		\
+		action tunnel_key set		\
+		src_ip $link_ipv6		\
+		dst_ip $link_remote_ipv6	\
+		dst_port $vxlan_port		\
+		id $vni				\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ipv6 parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac		\
+		dst_mac $local_vm_mac		\
+		enc_src_ip $link_remote_ipv6	\
+		enc_dst_ip $link_ipv6		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+
+
+	$TC filter add dev $redirect protocol ipv6 parent ffff: prio 2 flower $offload \
+		src_mac $local_vm_mac		\
+		action tunnel_key set		\
+		src_ip $link_ipv6		\
+		dst_ip $link_remote_ipv6	\
+		dst_port $vxlan_port		\
+		id $vni				\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ipv6 parent ffff: prio 2 flower $offload	\
+		src_mac $remote_vm_mac		\
+		enc_src_ip $link_remote_ipv6	\
+		enc_dst_ip $link_ipv6		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+
+set +x
+}
+
 # outer v6, inner v4
 function tc-vxlan64
 {
@@ -3258,6 +3305,27 @@ set -x
 		enc_key_id $vni			\
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
+
+
+
+	$TC filter add dev $redirect protocol ipv6 parent ffff: prio 2 flower $offload \
+		src_mac $local_vm_mac	\
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ipv6 parent ffff: prio 2 flower $offload	\
+		src_mac $remote_vm_mac	\
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+
 
 set +x
 }
@@ -4059,7 +4127,8 @@ function netns
 	ip netns del $n 2>/dev/null
 	ip netns add $n
 	ip link set dev $link netns $n
-	ip netns exec $n ifconfig $link mtu 1450
+	ip netns exec $n ifconfig $link mtu 1400
+# 	ip netns exec $n ifconfig $link mtu 1450
 	ip netns exec $n ip link set dev $link up
 	ip netns exec $n ip addr add $ip/16 brd + dev $link
 
@@ -4309,7 +4378,7 @@ function start-switchdev-all
 	ip1
 	ip2
 	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
-# 	jd-ovs2
+	jd-vxlan
 # 	create-br-all
 
 # 	ifconfig $(get_vf $host_num 1 1) up
@@ -5391,10 +5460,10 @@ set -x
 		udp6zerocsumtx udp6zerocsumrx
 # 	ifconfig $vx $link_ip_vxlan/24 up
 	ip addr add $link_ip_vxlan/24 brd + dev $vx
-	ip addr add $link_ipv6_vxlan/64 dev $vx
 	ip link set dev $vx up
-	ip link set dev $vx mtu 1000
+# 	ip link set dev $vx mtu 1000
 	ip link set $vx address $vxlan_mac
+	ip addr add $link_ipv6_vxlan/64 dev $vx
 
 # 	ip link set vxlan0 up
 # 	ip addr add 1.1.1.2/16 dev vxlan0
@@ -6575,8 +6644,11 @@ function book-noga
 	noga -l -k 7a0d370e3a69f07c8741724a67ba6a6b -U chrism -n dev-r630-04 -t Server -L 168
 }
 
-# systemctl stop NetworkManager
-# systemctl disable NetworkManager
+# if systemctl status NetworkManager > /dev/null 2>&1; then
+# 	systemctl stop NetworkManager
+# 	systemctl disable NetworkManager
+# 	/etc/init.d/network restart
+# fi
 
 alias fixup='./ofed_scripts/backports_fixup_changes.sh'
 alias get-patches='./ofed_scripts/ofed_get_patches.sh'
@@ -6918,6 +6990,7 @@ function make-dpdk
 # alias pmd200k="$DPDK_DIR/build/app/testpmd200k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
 
 alias viflowgen="cd $DPDK_DIR; vim app/test-pmd/flowgen.c"
+alias vimacswap="cd $DPDK_DIR; vim app/test-pmd/macswap.c"
 
 function ln-ofed
 {
@@ -7119,6 +7192,7 @@ alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*" -e "test-tc-
 alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*"'
 alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*"'
 alias test-all='./test-all.py -e "test-all-dev.py"'
+alias test-all-stop='./test-all.py -e "test-all-dev.py" --stop'
 alias from-test='./test-all.py --from_test'
 
 function get-diff
@@ -7209,6 +7283,12 @@ function git-author
 {
 	[[ $# != 1 ]] && return
 	git log --tags --source --author="$1@mellanox.com"
+}
+
+function git-author2
+{
+	[[ $# != 1 ]] && return
+	git log --tags --source --author="$1"
 }
 
 function ln-crash
