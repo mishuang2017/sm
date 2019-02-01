@@ -25,6 +25,7 @@ set -x
 
 	# 'libvirt_driver_storage.so' fails to load due to "undefined symbol: rbd_diff_iterate2"
 	yum install librbd1-devel
+	# pip install requests urllib3 pyOpenSSL --upgrade
 
 	dnf -y install @virtualization
 	yum -y groupinstall "Virtualization Host"
