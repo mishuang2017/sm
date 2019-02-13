@@ -25,6 +25,9 @@ uname -r | grep 3.10 > /dev/null 2>&1 && ofed=1
 centos72=0
 uname -r | grep 3.10.0-327 > /dev/null 2>&1 && centos72=1
 
+kernel49=0
+uname -r | grep 4.9 > /dev/null 2>&1 && kernel49=1
+
 centos74=0
 uname -r | grep 3.10.0-693 > /dev/null 2>&1 && centos74=1
 
@@ -98,7 +101,6 @@ if (( host_num == 9 )); then
 	link=ens9
 elif (( host_num == 13 )); then
 	link=enp4s0f0
-	link_new=${link}_65534
 	link2=enp4s0f1
 	link2_new=${link2}_65534
 	link_remote_ip=192.168.1.14
@@ -156,30 +158,12 @@ elif (( host_num == 20 )); then
 	linux_dir=/auto/mtbcswgwork/chrism/linux
 fi
 
-if [[ "virt-what" == "" ]]; then
-	if [[ "$USER" == "root" ]]; then
-		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
-		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
-	fi
-fi
-
-function get_pf
-{
-	if ip link show dev $link > /dev/null 2>&1; then
-		echo $link
-	else
-		echo $link_new
-	fi
-}
-
-function get_pf2
-{
-	if ip link show dev $link2 > /dev/null 2>&1; then
-		echo $link2
-	else
-		echo $link2_new
-	fi
-}
+# if [[ "$USER" == "root" ]]; then
+# 	if [[ "$(virt-what)" == "" && $centos72 != 1 ]]; then
+# 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+# 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+# 	fi
+# fi
 
 rep1=${link}_0
 rep2=${link}_1
@@ -284,11 +268,12 @@ alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux
 
 alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
 alias jd-vxlan="~chrism/bin/ct_lots_rule_vxlan.sh $rep2 $vx"
+alias jd-vxlan2="~chrism/bin/ct_lots_rule_vxlan2.sh $rep2 $vx"
 alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
 alias jd-ovs-ttl="~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
 alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
 
-if (( centos75 == 1 || centos74 == 1 )); then
+if (( centos75 == 1 || centos74 == 1 || centos72 == 1 )); then
 	alias c=cc0
 # 	alias c="$CRASH -i /root/.crash /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/vmlinux"
 fi
@@ -353,14 +338,17 @@ alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp 
 alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
-alias clone-crash='git clone git@github.com:crash-utility/crash.git'
-alias clone-crash2='git clone git@github.com:mishuang2017/crash.git'
+alias clone-crash-upstream='git clone git@github.com:crash-utility/crash.git'
+alias clone-crash='git clone git@github.com:mishuang2017/crash.git'
 alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 
 alias git-net='git remote add david git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git'
+alias gg='git grep -n'
+
+alias dmesg='dmesg -T'
 
 alias git-log='git log --tags --source'
 alias v4.20='git checkout v4.20; git checkout -b v4.20'
@@ -391,7 +379,7 @@ alias rx2='rxdump -d 03:00.0 -s 0 -m'
 alias sx='sxdump -d 03:00.0 -s 0'
 
 alias or='ssh root@10.209.32.230'
-alias t="tcpdump -enn -i $(get_pf)"
+alias t="tcpdump -enn -i $link"
 alias t1="tcpdump -enn -v -i $link"
 alias t2="tcpdump -enn -vv -i $link"
 alias t4="tcpdump -enn -vvvv -i $link"
@@ -409,6 +397,7 @@ alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 alias watch-netstat='watch -d -n 1 netstat -s'
 alias w1='watch -d -n 1'
 alias w2='watch -d -n 1 cat /proc/buddyinfo'
+alias w2="watch -d -n 1 cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct"
 alias w3='watch -d -n 1 ovs-appctl upcall/show'
 alias w4='watch -d -n 1 sar -n DEV 1'
 alias ct=conntrack
@@ -453,6 +442,7 @@ if [[ "$USER" == "mi" ]]; then
 	arch=$(uname -m)
 fi
 
+alias sm7="cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.centos.x86_64"
 alias sm4='cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64'
 alias cf4='sm4; cscope -d'
 alias sm5='cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64'
@@ -607,6 +597,7 @@ alias vi2='vi ~/Documents/mirror.txt'
 alias vib='vi ~/Documents/bug.txt'
 alias vip='vi ~/Documents/private.txt'
 alias vig='sudo vim /boot/grub2/grub.cfg'
+alias vig1='sudo vim /boot/grub/grub.conf'
 alias vig2='sudo vim /etc/default/grub'
 alias viu="vi $nfs_dir/uperf-1.0.5/workloads/netperf.xml"
 alias vit='vi ~/.tmux.conf'
@@ -667,6 +658,7 @@ export PATH=$PATH:~/bin
 export EDITOR=vim
 export TERM=xterm
 [[ "$HOSTNAME" == "bc-vnc02" ]] && export TERM=screen
+[[ "$HOSTNAME" == "vnc14.mtl.labs.mlnx" ]] && export TERM=screen
 unset PROMPT_COMMAND
 
 n_time=20
@@ -689,7 +681,7 @@ alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
 
 function ip1
 {
-	local l=$(get_pf)
+	local l=$link
 	ip addr flush $l
 	ip addr add dev $l $link_ip/24
 	ip addr add $link_ipv6/64 dev $l
@@ -698,7 +690,7 @@ function ip1
 
 function ip2
 {
-	local l=$(get_pf2)
+	local l=$link2
 	ip addr flush $l
 	ip addr add dev $l $link2_ip/24
 	ip addr add $link2_ipv6/64 dev $l
@@ -940,6 +932,8 @@ function tc-drop
 		action drop
 }
 
+# ovs-ofctl add-flow br -O openflow13 "in_port=2,dl_type=0x86dd,nw_proto=58,icmp_type=128,action=set_field:0x64->tun_id,output:5"
+
 alias ofd="ovs-ofctl dump-flows $br"
 alias drop3="ovs-ofctl add-flow $br 'nw_dst=1.1.1.14 action=drop'"
 alias del3="ovs-ofctl del-flows $br 'nw_dst=1.1.1.14'"
@@ -977,9 +971,9 @@ set +x
 alias make_core='make M=drivers/net/ethernet/mellanox/mlx5/core'
 
 alias stap='/usr/local/bin/stap --all-modules -v'
-stap_str_common="--all-modules -d /usr/sbin/ovs-vswitchd -d /usr/sbin/tc -d /usr/bin/ping"
-if (( ofed == 1)); then
-	stap_str="$stap_str_common -d /usr/lib64/libc-2.17.so"
+stap_str_common="--all-modules -d /usr/sbin/ovs-vswitchd -d /usr/sbin/tc -d /usr/bin/ping -d /usr/sbin/ip"
+if (( ofed == 1 || kernel49 == 1 )); then
+	stap_str="$stap_str_common -d /usr/lib64/libc-2.17.so -d /usr/lib64/libpthread-2.17.so"
 	STAP="/usr/local/bin/stap -v"
 else
 	stap_str="$stap_str_common -d /usr/lib64/libc-2.26.so -d /usr/lib64/libpthread-2.26.so"
@@ -1352,18 +1346,20 @@ set +x
 }
 alias b4=mybuild4
 
+alias bnetfilter='b4 nft_gen_flow_offload'
+
 # modprobe -rv cls_flower act_mirred
 # modprobe -av cls_flower act_mirred
 
 # modprobe -v cls_flower tuple_offload=0
 function reprobe
 {
-# 	if (( centos72 == 1 )); then
-# 		tc2
-# 		del-br
-# 		sudo modprobe -r cls_flower
-# 		sudo /etc/init.d/openibd stop
-# 	fi
+	if (( centos72 == 1 )); then
+		tc2
+		del-br
+		sudo modprobe -r cls_flower
+		sudo /etc/init.d/openibd stop
+	fi
 # 	sudo /etc/init.d/openibd stop
 	sudo modprobe -r cls_flower
 	sudo modprobe -r mlx5_ib
@@ -3259,6 +3255,88 @@ set -x
 set +x
 }
 
+# ovs-ofctl add-flow br -O openflow13 "in_port=2,dl_type=0x86dd,nw_proto=58,icmp_type=128,action=set_field:0x64->tun_id,output:5"
+function tc-vxlan2
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect  hw-tc-offload on 
+	ethtool -K $vx  hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	$TC qdisc add dev $vx ingress 
+# 	$TC qdisc add dev $link clsact
+# 	$TC qdisc add dev $redirect clsact
+# 	$TC qdisc add dev $vx clsact
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $redirect protocol ipv6 parent ffff: prio 1 flower $offload \
+		src_mac $local_vm_mac	\
+		dst_mac $remote_vm_mac	\
+		ip_proto icmpv6		\
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ipv6 parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac	\
+		dst_mac $local_vm_mac	\
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+
+
+	$TC filter add dev $redirect protocol ipv6 parent ffff: prio 2 flower $offload \
+		src_mac $local_vm_mac	\
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress redirect dev $vx
+
+	$TC filter add dev $vx protocol ipv6 parent ffff: prio 2 flower $offload	\
+		src_mac $remote_vm_mac	\
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+
+
+set +x
+}
+
 function ipn1
 {
 set -x
@@ -4043,6 +4121,7 @@ function start-switchdev
 	done
 
  	time unbind_all $l
+# 	sleep 5
 	if [[ "$1" != "legacy" ]]; then
 		echo "enable switchdev mode for: $pci_addr"
 		if (( centos72 == 1 )); then
@@ -4120,8 +4199,13 @@ function start-switchdev-all
 	done
 	ip1
 	ip2
-	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
-	jd-vxlan
+# 	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
+	
+# 	(( host_num == 13 )) && jd-vxlan2
+# 	(( host_num == 14 )) && jd-vxlan
+# 	jd-vxlan
+# 	jd-ovs
+
 # 	create-br-all
 
 # 	ifconfig $(get_vf $host_num 1 1) up
@@ -4498,7 +4582,7 @@ set -x
 
 	file=/tmp/a.txt
 # 	local l=$rep2
-	local l=$(get_pf)
+	local l=$link
 
 	TC=/home1/chrism/iproute2/tc/tc
 	TC=tc
@@ -4753,7 +4837,7 @@ function none2
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=6000000
+	ovs-vsctl set Open_vSwitch . other_config:max-idle=60000000
 	sudo systemctl restart openvswitch.service
 	vsconfig
 }
@@ -4808,22 +4892,25 @@ function burn5
 {
 set -x
 	pci=0000:04:00.0
-	version=last_revision
 	version=fw-4119-rel-16_99_6108
+	version=fw-4119-rel-16_24_0310
+	version=fw-4119-rel-16_99_6408
+	version=last_revision
+	version=fw-4119-rel-16_22_1000
 
-# 	mkdir -p /mswg/
-# 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
-# 	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/$version/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
+	mkdir -p /mswg/
+	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
+	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/$version/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
 
 # 	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/last_revision/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
 
-	[[ "$version" == "last_revision" ]] && /bin/rm -rf last_revision
-	/bin/rm -rf /root/fw
-	mkdir /root/fw
-	scp -r chrism@10.7.2.14:/mswg/release/fw-4119/$version/*.tgz /root/fw
-	cd /root/fw
-	tar zxvf *.tgz
-	yes | sudo mlxburn -d $pci -fw ./fw-ConnectX5.mlx -conf_dir .
+# 	[[ "$version" == "last_revision" ]] && /bin/rm -rf last_revision
+# 	/bin/rm -rf /root/fw
+# 	mkdir /root/fw
+# 	scp -r chrism@10.7.2.14:/mswg/release/fw-4119/$version/*.tgz /root/fw
+# 	cd /root/fw
+# 	tar zxvf *.tgz
+# 	yes | sudo mlxburn -d $pci -fw ./fw-ConnectX5.mlx -conf_dir .
 
 	sudo mlxfwreset -y -d $pci reset
 set +x
@@ -5127,7 +5214,7 @@ set -x
 	ip link del $vx > /dev/null 2>&1
 	ip link add name $vx type vxlan id $vni dev $link  remote $link_remote_ip dstport 4789
 # 	ifconfig $vx $link_ip_vxlan/24 up
-	ip addr add $link_ip_vxlan/24 brd + dev $vx
+	ip addr add $link_ip_vxlan/16 brd + dev $vx
 	ip addr add $link_ipv6_vxlan/64 dev $vx
 	ip link set dev $vx up
 	ip link set $vx address $vxlan_mac
@@ -5138,12 +5225,13 @@ set -x
 set +x
 }
 
+# if outer header is ipv6
 function peer6
 {
 set -x
 	ip1
 	ip link del $vx > /dev/null 2>&1
-	ip link add name $vx type vxlan id $vni dev $(get_pf) remote $link_remote_ipv6 dstport 4789 \
+	ip link add name $vx type vxlan id $vni dev $link remote $link_remote_ipv6 dstport 4789 \
 		udp6zerocsumtx udp6zerocsumrx
 # 	ifconfig $vx $link_ip_vxlan/24 up
 	ip addr add $link_ip_vxlan/24 brd + dev $vx
@@ -5348,6 +5436,12 @@ function am
 	done
 }
 
+function install-pip
+{
+	curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+	python get-pip.py
+}
+
 function install-libevent
 {
 	version=2.1.8-stable
@@ -5447,6 +5541,12 @@ function disable-firewall
 # 14
 # SUBSYSTEM=="net", ACTION=="add", ATTR{phys_switch_id}=="248a0788279a", ATTR{phys_port_name}!="", NAME="enp4s0f0_$attr{phys_port_name}"
 # SUBSYSTEM=="net", ACTION=="add", ATTR{phys_switch_id}=="248a0788279b", ATTR{phys_port_name}!="", NAME="enp4s0f1_$attr{phys_port_name}"
+
+# /mswg/release/linux/ovs_release/scripts/udev
+# /mswg/release/linux/ovs_release/scripts/udev2
+
+alias udevadmin1="udevadm info -e | grep -A 10 ^P.*$link"
+alias udevadmin2="udevadm info -e | grep -A 10 ^P.*$link2"
 
 function udev
 {
@@ -5550,7 +5650,7 @@ set -x
 		-cpu qemu64		\
 		-name vm1		\
 		-m 4096			\
-		-hda /var/lib/libvirt/images/vm1-1.qcow2	\
+		-hda /var/lib/libvirt/images/vm1.qcow2	\
 		-smp 4,sockets=4,cores=1,threads=1	\
 		-netdev user,id=nat1,hostfwd=tcp:127.0.0.1:8000-10.0.2.15:22	\
 		-device e1000,netdev=nat1,mac=52:54:00:13:01:01			\
@@ -5852,6 +5952,9 @@ alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 # Redhat 7.5
 alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
+alias ofed-configure2='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
+
+
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
 # ./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlx5-mod --with-mlx4-mod --with-mlx4_en-mod --with-ipoib-mod --with-mlxfw-mod --with-srp-mod --with-iser-mod --with-isert-mod --with-innova-flex --kernel-sources=/images/kernel_headers/x86_64//linux-4.7-rc7 --kernel-version=4.7-rc7 -j 8
@@ -5904,7 +6007,7 @@ function q
 {
 set -x
 	tc qdisc show dev $rep2
-	tc qdisc show dev vxlan_sys_4789
+	tc qdisc show dev $vx_rep
 set +x
 }
 
@@ -6023,6 +6126,12 @@ function disable-ipv6
 	sysctl -w net.ipv6.conf.default.disable_ipv6=1
 }
 
+function enable-ipv6
+{
+	sysctl -w net.ipv6.conf.all.disable_ipv6=0
+	sysctl -w net.ipv6.conf.default.disable_ipv6=0
+}
+
 function book-noga
 {
 	noga -l -k 7a0d370e3a69f07c8741724a67ba6a6b -U chrism -n dev-r630-03 -t Server -L 168
@@ -6124,7 +6233,8 @@ set -x
 	local dst=/home1/mi/rpmbuild
 	local dst_sources=$dst/SOURCES
 	local dst_specs=$dst/SPECS
-	local ldir=/home1/chrism/linux
+# 	local ldir=/home1/chrism/linux
+	local ldir=/home1/vladbu/src/linux
 	/bin/rm -rf $dst_sources/*.tar
 	/bin/rm -rf $dst_sources/*.tar.xz
 	/bin/rm -rf $dst/BUILD/*
@@ -6430,8 +6540,6 @@ function set100
 	pgset "src_max 10.0.0.100"	# 100
 }
 
-
-
 function checkout1
 {
 	[[ $# != 1 ]] && return
@@ -6441,6 +6549,20 @@ function checkout1
 	git branch 1
 	git checkout 1
 	git reset --hard $1
+}
+
+alias pull1='git pull origin jd-kernel-unlocked-driver'
+function checkout2
+{
+	[[ $# != 1 ]] && return
+	git branch
+	git checkout jd-kernel-unlocked-driver
+	git branch -D 1
+	git branch 1
+	git checkout 1
+	git reset --hard $1
+	git am ~/backport/0001-disable-trace.patch
+	git am ~/backport/delay/0001-mlx5_flow_stats_work.patch
 }
 
 function vr
@@ -6995,8 +7117,7 @@ set -x
 set +x
 }
 
-alias test1='./test-vf-rep-ping.sh'
-alias test1='./test-vf-vf-fwd-fl_classify.sh'
+alias test1='/root/dev/test-tc-insert-rules.sh'
 
 function jd-proc
 {
@@ -7058,15 +7179,105 @@ alias cs='corrupt -s'
 alias cc='corrupt -c 1.1.1.2 -t 100000'
 alias cc2='corrupt -c 1.1.3.2 -t 100000 -l 2'
 alias cc3='corrupt -c 1.1.1.23 -t 100000'
+alias cc122='corrupt -c 1.1.1.122 -t 100000'
 
 alias msg='tail -f /var/log/messages'
 
-alias rc23='scp ~chrism/.bashrc root@10.196.23.1:/root/'
-alias rc24='scp ~chrism/.bashrc root@10.196.24.1:/root/'
-alias rc0='scp ~chrism/.bashrc root@10.7.2.14:/root/'
+alias rc23='scp ~chrism/.bashrc root@10.196.23.1:~/'
+alias rc24='scp ~chrism/.bashrc root@10.196.24.1:~'
+alias rc25='scp ~chrism/.bashrc root@10.196.23.5:~'
+alias rc26='scp ~chrism/.bashrc root@10.196.24.5:~'
+alias rc0='scp ~chrism/.bashrc chrism@10.7.2.14:~'
 
 function rca
 {
 	rc23
 	rc24
 }
+
+alias hping='hping3 -S -s 10001 -p 12345 1.1.1.122'
+
+function updown
+{
+set -x
+	while true; do
+		ifconfig $link down
+		sleep 20
+		ifconfig $link up
+		sleep 1
+# 		ip route add 10.254.0.0/15 via 10.255.8.193 dev p6p1
+		ip1
+		sleep 10
+	done
+set +x
+}
+
+alias f1="flint -d $pci q"
+alias cat1="cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct"
+
+alias dis="ethtool -S $link | grep dis"
+
+function autoprobe-show
+{
+	cat /sys/class/net/$link/device/sriov_drivers_autoprobe
+}
+
+function autoprobe
+{
+	cat /sys/class/net/$link/device/sriov_drivers_autoprobe
+	echo 1 > /sys/class/net/$link/device/sriov_drivers_autoprobe
+	cat /sys/class/net/$link/device/sriov_drivers_autoprobe
+}
+
+function autoprobe-disable
+{
+	cat /sys/class/net/$link/device/sriov_drivers_autoprobe
+	echo 0 > /sys/class/net/$link/device/sriov_drivers_autoprobe
+	cat /sys/class/net/$link/device/sriov_drivers_autoprobe
+}
+
+function eth0
+{
+	echo 0 > /sys/class/net/eth0_65534/device/sriov_numvfs
+}
+
+alias scapy-traffic-tester.py='~chrism/asap_dev_reg/scapy-traffic-tester.py'
+
+scapy_time=1000
+
+src_ip=1.1.1.22
+dst_ip=1.1.1.122
+scapy_device=ens9
+
+src_ip=192.168.1.13
+dst_ip=192.168.1.14
+scapy_device=$link
+
+alias scapyc="scapy-traffic-tester.py -i $scapy_device --src-ip $src_ip --dst-ip $dst_ip --inter 1 --time $scapy_time --pkt-count $scapy_time"
+alias scapyl="scapy-traffic-tester.py -i $scapy_device -l --src-ip $src_ip --inter 1 --time $scapy_time --pkt-count $scapy_time"
+
+alias test2="modprobe -r mlx5_core; modprobe -v mlx5_core; ip link set dev $link up"
+
+function test-ibd
+{
+	restart
+	br
+	restart-ovs
+	(( host_num == 13 )) && ip netns exec n11 ping 1.1.1.2 -c 5
+	(( host_num == 14 )) && ip netns exec n11 ping 1.1.3.2 -c 5
+# 	off
+}
+
+function test-ibd2
+{
+	restart
+	brx
+	restart-ovs
+# 	ip netns exec n11 ping 1.1.1.200 -c 5
+	(( host_num == 13 )) && ip netns exec n11 ping 1.1.3.1 -c 5
+	(( host_num == 14 )) && ip netns exec n11 ping 1.1.1.1 -c 5
+# 	off
+}
+
+alias ibd='/etc/init.d/openibd restart'
+alias ibd2='/etc/init.d/openibd force-restart'
