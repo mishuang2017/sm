@@ -1,4 +1,4 @@
-set max-value-size unlimited
+# set max-value-size unlimited
 set confirm off
 set print pretty on
 
@@ -9,6 +9,14 @@ set print pretty on
 set $print = 1
 set $debug = 0
 
+#
+# arg0: name of data struct, string
+# arg1: name of data struct, variable
+# arg2: pointer of the buckets of the hmap
+# arg3: how many elements
+# arg4: hmap_node name in data struct
+# arg5: member name to print in data struct, optional
+#
 define print-hmap
 	set $name = $arg0
 	set $p = $arg2
@@ -27,9 +35,9 @@ define print-hmap
 				printf "p *(struct %s *) 0x%x\n", $name, $a
 			else
 				if $argc == 6
-					p/x (*(struct $arg1 *) $a).$arg5
+					p/s (*(struct $arg1 *) $a).$arg5
 				else
-					p/x *(struct $arg1 *) $a
+					p/s *(struct $arg1 *) $a
 				end
 			end
 			set $i = $i + 1
@@ -43,9 +51,9 @@ define print-hmap
 					printf "p *(struct %s *) 0x%x\n", $name, $node
 				else
 					if $argc == 6
-						p/x (*(struct $arg1 *) $node).$arg5
+						p/s (*(struct $arg1 *) $node).$arg5
 					else
-						p/x *(struct $arg1 *) $node
+						p/s *(struct $arg1 *) $node
 					end
 				end
 				set $node = (*(struct $arg1 *) $node)->$arg4.next
@@ -54,6 +62,75 @@ define print-hmap
 		end
 		set $p = $p + $delta
 	end
+end
+
+#
+# arg0: name of data struct, string
+# arg1: name of data struct, variable
+# arg2: pointer of the buckets of the hmap
+# arg3: how many elements
+# arg4: member name to print in data struct, optional
+#
+define print-shash
+	set $name = $arg0
+	set $p = $arg2
+	set $num = $arg3
+	set $index = 1
+
+	set $i = 0
+	while $i != $num
+		set $a = *$p
+		if $a != 0
+			if $debug == 1
+				printf "======= %d =======\n", $index
+				set $index = $index + 1
+			end
+			if $print == 0
+				printf "p *(struct %s *) 0x%x\n", $name, $a
+			else
+				echo node-->
+				p/x $a
+				set $name = (*(struct shash_node *) $a).name
+				p/s $name
+				set $data = (*(struct shash_node *) $a).data
+				p/s *(struct $arg1 *) $data
+#                                 p/s *(struct netdev_vport *) $data
+# 				p/x *(struct $arg1 *) $a
+			end
+			set $i = $i + 1
+			set $a_next = (*(struct shash_node *) $a)->node.next
+			while $a_next != 0
+				if $debug == 1
+					printf "======= %d =======\n", $index
+					set $index = $index + 1
+				end
+				if $print == 0
+					printf "p *(struct %s *) 0x%x\n", $name, $a_next
+				else
+					echo node-->
+					p/x $a_next
+					set $name = (*(struct shash_node *) $a_next).name
+					p/s $name
+					set $data = (*(struct shash_node *) $a_next).data
+					p/s *(struct $arg1 *) $data
+# 					p/s *(struct netdev_vport *) $data
+# 					p/x *(struct shash_node *) $a_next
+				end
+				set $a_next = (*(struct shash_node *) $a_next)->node.next
+				set $i = $i + 1
+			end
+		end
+		set $p = $p + $delta
+	end
+end
+
+define shash
+	set $print = 1
+	set $delta = 1
+	set $p = (*(struct shash*)&netdev_shash)->map.buckets
+	set $num = (*(struct shash*)&netdev_shash)->map.n
+	p $p
+	print-shash "shash_node" netdev $p $num
 end
 
 ################################################################################
@@ -209,32 +286,32 @@ end
 
 ################################################################################
 
-define print-all-ofproto-dpifs
-	set $delta = 1
-        set $p = all_ofproto_dpifs.buckets
-        set $num = all_ofproto_dpifs.n
-	if $arg0 == 0
-		set $print = 0
-		p/x $num
-	else
-		set $print = 1
-	end
-	if $argc == 2
-		print-hmap "ofproto_dpif" ofproto_dpif $p $num all_ofproto_dpifs_node $arg1
-	else
-		print-hmap "ofproto_dpif" ofproto_dpif $p $num all_ofproto_dpifs_node
-	end
-end
-define ofproto-dpif
-	print-all-ofproto-dpifs 0
-end
-define ofproto-dpif2
-	if $argc == 0
-		print-all-ofproto-dpifs 1
-	else
-		print-all-ofproto-dpifs 1 $arg0
-	end
-end
+# define print-all-ofproto-dpifs
+# 	set $delta = 1
+#         set $p = all_ofproto_dpifs.buckets
+#         set $num = all_ofproto_dpifs.n
+# 	if $arg0 == 0
+# 		set $print = 0
+# 		p/x $num
+# 	else
+# 		set $print = 1
+# 	end
+# 	if $argc == 2
+# 		print-hmap "ofproto_dpif" ofproto_dpif $p $num all_ofproto_dpifs_node $arg1
+# 	else
+# 		print-hmap "ofproto_dpif" ofproto_dpif $p $num all_ofproto_dpifs_node
+# 	end
+# end
+# define ofproto-dpif
+# 	print-all-ofproto-dpifs 0
+# end
+# define ofproto-dpif2
+# 	if $argc == 0
+# 		print-all-ofproto-dpifs 1
+# 	else
+# 		print-all-ofproto-dpifs 1 $arg0
+# 	end
+# end
 
 ################################################################################
 #
@@ -278,6 +355,8 @@ define ofbundle2
 end
 
 ################################################################################
+# start point
+################################################################################
 
 define print-all-ofprotos
 	set $delta = 1
@@ -305,6 +384,11 @@ define ofproto2
 		print-all-ofprotos 1 $arg0
 	end
 end
+
+#
+# call ofproto_dpif_cast to get
+# struct ofproto_dpif
+#
 
 ################################################################################
 #
@@ -423,6 +507,9 @@ define print-udpif
         p *((struct dpif_backer *)$backer).udpif
 end
 
+# print all_udpifs
+# print *(struct udpif *) all_udpifs.next
+
 # (gdb) p *((struct handler *) 0x2097740)@11
 
 define print-handlers
@@ -491,12 +578,30 @@ end
 
 ################################################################################
 
-define print-xbundle
+# (gdb) xbridge2
+# $8 = {
+#   hmap_node = {
+#     hash = 10955958,
+#     next = 0x0
+#   },
+#   ofproto = 0x13af4e0,
+#   xbundles = {
+#     prev = 0x1405858,
+#     next = 0x13ae3a8
+#   },
+# (gdb) ls-xbundle 0x13ae3a8 name
+# $9 = 0x14064b0 "enp4s0f0_0"
+# $10 = 0x1405840
+# $11 = 0x13d7790 "br"
+# $12 = 0x13ae390
+#
+define ls-xbundle
+	set $offset = (int)&((struct xbundle*)0)->list_node
 	if $argc == 1
-		ls xbundle 0x18 $arg0
+		ls xbundle $offset $arg0
 	end
 	if $argc == 2
-		ls xbundle 0x18 $arg0 $arg1
+		ls xbundle $offset $arg0 $arg1
 	end
 end
 
@@ -560,7 +665,40 @@ define print-netdev
 	end
 end
 
-set $dpif = all_ofproto_dpifs.one
+define print-netdev-vport
+	set $p = port_to_netdev.buckets
+	p/x $p
+	set $num = port_to_netdev.n
+	p/x $num
+
+	set $i = 0
+	while $i != $num
+		set $a = *$p
+		p/x $a
+		if $a != 0
+			set $i = $i + 1
+			p/x $i
+			echo node-->
+			set $dev = (*(struct port_to_netdev_data *) $a).netdev
+			p/x $dev
+			p *(struct netdev_vport *) $dev
+			set $node = (*(struct port_to_netdev_data *) $a)->portno_node.next
+			while $node != 0
+				set $i = $i + 1
+				p/x $i
+				set $dev = (*(struct port_to_netdev_data *) $node).netdev
+				echo node-->
+				p/x $dev
+				p *(struct netdev_vport *) $dev
+				set $node = (*(struct port_to_netdev_data *) $node)->portno_node.next
+			end
+		end
+		set $p = $p + 0x1
+		p/x $p
+	end
+end
+
+# set $dpif = all_ofproto_dpifs.one
 
 define print-dpif
 	p/x $dpif
