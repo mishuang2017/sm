@@ -40,22 +40,22 @@ set wrap
 map <C-J> :previous<CR>
 map <C-K> :next<CR>
 
+map <F1> :call VComment()<CR>
 map <F2> :set number!<CR>
 map <F3> :call CComment2()<CR>
 map <F4> :call SComment()<CR>
-" map <F5> :call VComment()<CR>
 map <F5> :call RemovePlus()<CR>
 
-map <F7> :!make<CR>:!make run<CR>
-imap <F7> <ESC>:!make<CR>:!make run<CR>
+map <F7> :retab!<CR>
+" map <F7> :!make<CR>:!make run<CR>
+" imap <F7> <ESC>:!make<CR>:!make run<CR>
 map <F8> :!make -j 32<CR>
 imap <F8> <ESC>:w<ESC>:!make all<CR>
 map <F9> :w<CR>:!make run<CR>
 
 map <F10> :!make clean<CR>
-map <F11> :!make clean<CR>:!make<CR>:!make run<CR>
+" map <F11> :!make clean<CR>:!make<CR>:!make run<CR>
 map <F12> :set hlsearch!<CR>
-map <F12> :retab!<CR>
 
 map <c-w><c-o> <c-w><c-p>
 map <c-w>o <c-w><c-p>
@@ -129,3 +129,5 @@ highlight DiffChange cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=
 highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=White
 
 " set noswapfile
+
+" set term=screen

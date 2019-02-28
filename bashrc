@@ -3,14 +3,15 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=99
 numvfs=100
 numvfs=8
 numvfs=124
+numvfs=110
 numvfs=3
 vni=200
 vni=100
 vid=50
+vxlan_port=4000
 vxlan_port=4789
 vxlan_mac=24:25:d0:e2:00:00
 ecmp=0
@@ -61,6 +62,8 @@ elif [[ "$(hostname -s)" == "gen-h-vrt-023-005" ]]; then
 	host_num=25
 elif [[ "$(hostname -s)" == "gen-h-vrt-024-005" ]]; then
 	host_num=26
+elif [[ "$(hostname -s)" == "r-vrt-24-120" ]]; then
+	host_num=24
 elif (( rh == 0 )); then
 	host_num=9
 fi
@@ -186,7 +189,7 @@ brd_mac=ff:ff:ff:ff:ff:ff
 if (( centos72 == 1 )); then
 	vx_rep=dummy_4789
 else
-	vx_rep=vxlan_sys_4789
+	vx_rep=vxlan_sys_$vxlan_port
 fi
 
 alias scp='scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
@@ -200,7 +203,7 @@ function get_pci
 	if [[ -e /sys/class/net/$link/device && -f /usr/sbin/lspci ]]; then
 		pci=$(basename $(readlink /sys/class/net/$link/device))
 		pci_id=$(echo $pci | cut -b 6-)
-		lspci -d 15b3: -nn | grep $pci_id | grep ConnectX-5 > /dev/null && cx5=1
+		lspci -d 15b3: -nn | grep $pci_id | grep 1019 > /dev/null && cx5=1
 		pci2=$(basename $(readlink /sys/class/net/$link2/device) 2> /dev/null)
 	fi
 }
@@ -217,9 +220,11 @@ alias testpmd-ovs1='testpmd -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.3 -- -i'
 alias mac1="ip l show $link | grep ether; ip link set dev $link address $link_mac;  ip l show $link | grep ether"
 alias mac2="ip l show $link | grep ether; ip link set dev $link address $link_mac2; ip l show $link | grep ether"
 
-alias vxlan6="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ipv6  options:key=$vni"
-alias vxlan1="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip  options:key=$vni"
-alias vxlan1-2="ovs-vsctl add-port $br2 $vx2 -- set interface $vx2 type=vxlan options:remote_ip=$link_remote_ip2  options:key=$vni"
+alias vxlan6="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ipv6  options:key=$vni options:dst_port=$vxlan_port"
+alias vxlan1="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip  options:key=$vni options:dst_port=$vxlan_port"
+alias vxlan4000="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip  options:key=$vni options:dst_port=4000"
+alias vxlan4789="ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan options:remote_ip=$link_remote_ip  options:key=$vni options:dst_port=4789"
+alias vxlan1-2="ovs-vsctl add-port $br2 $vx2 -- set interface $vx2 type=vxlan options:remote_ip=$link_remote_ip2  options:key=$vni options:dst_port=$vxlan_port"
 alias vxlan2="ovs-vsctl del-port $br $vx"
 alias vx='vxlan2; vxlan1'
 
@@ -344,6 +349,7 @@ alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
+alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 
 alias git-net='git remote add david git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git'
 alias gg='git grep -n'
@@ -396,10 +402,12 @@ alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 
 alias watch-netstat='watch -d -n 1 netstat -s'
 alias w1='watch -d -n 1'
-alias w2='watch -d -n 1 cat /proc/buddyinfo'
 alias w2="watch -d -n 1 cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct"
+alias w2='watch -d -n 1 cat /proc/buddyinfo'
 alias w3='watch -d -n 1 ovs-appctl upcall/show'
 alias w4='watch -d -n 1 sar -n DEV 1'
+# sar -n TCP 1
+# pidstat -t -p 3794
 alias ct=conntrack
 alias rej='find . -name *rej -exec rm {} \;'
 
@@ -451,7 +459,7 @@ alias cf5='sm5; cscope -d'
 alias spec='cd /home1/mi/rpmbuild/SPECS'
 alias sml='cd /home1/chrism/linux'
 alias smu='cd /home1/chrism/upstream'
-alias sm9='cd /home1/chrism/linux-4.19'
+alias sm9='cd /home1/chrism/linux-4.9'
 alias smy='cd /home1/chrism/yossi'
 alias sm14='cd /home1/chrism/linux-4.14.78'
 alias smm='cd /home1/chrism/mlnx-ofa_kernel-4.0'
@@ -483,12 +491,13 @@ alias smi2='cd /etc/libvirt/qemu'
 alias smn='cd /etc/sysconfig/network-scripts/'
 alias mr='modprobe -r'
 
-alias vs='ovs-vsctl'
-alias of='ovs-ofctl'
-alias dp='ovs-dpctl'
-alias app='ovs-appctl'
-alias app1='ovs-appctl dpctl/dump-flows'
-alias appn='ovs-appctl dpctl/dump-flows --names'
+alias vs='sudo ovs-vsctl'
+alias of='sudo ovs-ofctl'
+alias dp='sudo ovs-dpctl'
+alias dpd='sudo ovs-dpctl dump-flows --name'
+alias app='sudo ovs-appctl'
+alias app1='sudo ovs-appctl dpctl/dump-flows'
+alias appn='sudo ovs-appctl dpctl/dump-flows --names'
 
 alias p1="ping $link_remote_ip"
 alias p=p1
@@ -828,6 +837,8 @@ function set_mac
 }
 
 alias on_sriov="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
+alias on_sriov="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
+alias off_sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
 
 function bind_all
 {
@@ -878,6 +889,12 @@ function off_all
 }
 
 alias off=off_all
+
+function off_pci
+{
+	cd /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0
+	echo 0 > sriov_numvfs
+}
 
 function switchdev
 {
@@ -1358,7 +1375,7 @@ function reprobe
 		tc2
 		del-br
 		sudo modprobe -r cls_flower
-		sudo /etc/init.d/openibd stop
+		sudo /etc/init.d/openibd force-stop
 	fi
 # 	sudo /etc/init.d/openibd stop
 	sudo modprobe -r cls_flower
@@ -4121,7 +4138,9 @@ function start-switchdev
 	done
 
  	time unbind_all $l
-# 	sleep 5
+	# 64 vfs, sleep 30
+# 	sleep 60
+        sleep 1
 	if [[ "$1" != "legacy" ]]; then
 		echo "enable switchdev mode for: $pci_addr"
 		if (( centos72 == 1 )); then
@@ -4136,7 +4155,7 @@ function start-switchdev
 			if (( cx5 == 0 )); then
 				devlink dev eswitch set pci/$pci_addr inline-mode transport
 			fi
-			devlink dev eswitch set pci/$pci_addr encap enable
+# 			devlink dev eswitch set pci/$pci_addr encap enable
 		fi
 
 		ip1
@@ -4242,13 +4261,20 @@ function stop-vm
 function grub
 {
 set -x
-	[[ $# == 0 ]] && kernel=0 || kernel=$1
+	local kernel
+	[[ $# == 1 ]] && kernel=$1
 	file=/etc/default/grub
 	MKCONFIG=grub2-mkconfig
 # 	[[ -f /usr/local/sbin/grub-mkconfig ]] && MKCONFIG=/usr/local/sbin/grub-mkconfig
 	sudo sed -i '/GRUB_DEFAULT/d' $file
+	sudo sed -i '/GRUB_SAVEDEFAULT/d' $file
 # 	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
-	sudo echo "GRUB_DEFAULT=$kernel" >> $file
+	if [[ $# == 0 ]]; then
+		sudo echo "GRUB_DEFAULT=saved" >> $file
+		sudo echo "GRUB_SAVEDEFAULT=true" >> $file
+	else
+		sudo echo "GRUB_DEFAULT=$kernel" >> $file
+	fi
 
 	sudo /bin/rm -rf /boot/*.old
 	sudo mv /boot/grub2/grub.cfg /boot/grub2/grub.cfg.orig
@@ -4895,8 +4921,8 @@ set -x
 	version=fw-4119-rel-16_99_6108
 	version=fw-4119-rel-16_24_0310
 	version=fw-4119-rel-16_99_6408
-	version=last_revision
 	version=fw-4119-rel-16_22_1000
+	version=last_revision
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -5212,7 +5238,7 @@ function peer
 set -x
 	ip1
 	ip link del $vx > /dev/null 2>&1
-	ip link add name $vx type vxlan id $vni dev $link  remote $link_remote_ip dstport 4789
+	ip link add name $vx type vxlan id $vni dev $link  remote $link_remote_ip dstport $vxlan_port
 # 	ifconfig $vx $link_ip_vxlan/24 up
 	ip addr add $link_ip_vxlan/16 brd + dev $vx
 	ip addr add $link_ipv6_vxlan/64 dev $vx
@@ -5500,11 +5526,15 @@ function mlxconfig-enable-sriov
 function mlxconfig-enable-ib
 {
 	mlxconfig -d $pci set LINK_TYPE_P1=1 LINK_TYPE_P2=1
+	mlxconfig -d $pci2 set LINK_TYPE_P1=1 LINK_TYPE_P2=1
+	sudo mlxfwreset -y -d $pci reset
 }
 
 function mlxconfig-enable-eth
 {
 	mlxconfig -d $pci set LINK_TYPE_P1=2 LINK_TYPE_P2=2
+	mlxconfig -d $pci2 set LINK_TYPE_P1=2 LINK_TYPE_P2=2
+	sudo mlxfwreset -y -d $pci reset
 }
 
 alias krestart='systemctl restart kdump'
@@ -5548,10 +5578,12 @@ function disable-firewall
 alias udevadmin1="udevadm info -e | grep -A 10 ^P.*$link"
 alias udevadmin2="udevadm info -e | grep -A 10 ^P.*$link2"
 
-function udev
+function udev-old
 {
+	local l=$link
+	[[ $# == 1 ]] && l=$1
 	local file=/etc/udev/rules.d/82-net-setup-link.rules
-	local id=$(ip -d link show $link | grep switchid | awk '{print $NF}')
+	local id=$(ip -d link show $l | grep switchid | awk '{print $NF}')
 	if [[ -z $id ]]; then
 		echo "Please enable switchdev mode"
 		return
@@ -5559,9 +5591,23 @@ function udev
 # 	echo $id
 	cat << EOF > $file
 SUBSYSTEM=="net", ACTION=="add", ATTR{phys_switch_id}=="$id", \
-ATTR{phys_port_name}!="", NAME="${link}_\$attr{phys_port_name}"
+ATTR{phys_port_name}!="", NAME="${l}_\$attr{phys_port_name}"
 EOF
 	cat $file
+}
+
+function udev
+{
+	cd /etc/udev/rules.d
+	cp ~chrism/udev2/82-net-setup-link.rules .
+	cd ..
+	cp ~chrism/udev2/vf-net-link-name.sh .
+}
+
+function udev2
+{
+	/bin/rm -rf /etc/udev/rules.d/82-net-setup-link.rules
+	/bin/rm -rf /etc/udev/vf-net-link-name.sh
 }
 
 mac_start=1
@@ -5945,7 +5991,7 @@ alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j 32'
 alias ofed-configure2='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j 32'
 alias ofed-configure3='./configure --with-mlx5-core-and-en-mod --with-core-mod --with-ipoib-mod --with-mlx5-mod -j 32'
 alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j 32'
-alias ofed-configure-all='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
+alias ofed-configure-all2='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
 
 # centos 7.4
 alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
@@ -5954,6 +6000,7 @@ alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --wi
 
 alias ofed-configure2='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
 
+alias ofed-configure-all='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
 
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
@@ -6122,8 +6169,10 @@ set +x
 
 function disable-ipv6
 {
+	sysctl -a | grep disable_ipv6
 	sysctl -w net.ipv6.conf.all.disable_ipv6=1
 	sysctl -w net.ipv6.conf.default.disable_ipv6=1
+	sysctl -a | grep disable_ipv6
 }
 
 function enable-ipv6
@@ -7117,7 +7166,10 @@ set -x
 set +x
 }
 
-alias test1='/root/dev/test-tc-insert-rules.sh'
+alias test1='/root/dev/test-ovs-vxlan-in-ns.sh'
+alias test2='/root/dev/test-ovs-vxlan-in-ns-dpctl.sh'
+alias test3='/root/dev/test-ovs-icmp-frag.sh'
+alias test4='/root/dev/test-ovs-vxlan-flow-key.sh'
 
 function jd-proc
 {
@@ -7256,7 +7308,7 @@ scapy_device=$link
 alias scapyc="scapy-traffic-tester.py -i $scapy_device --src-ip $src_ip --dst-ip $dst_ip --inter 1 --time $scapy_time --pkt-count $scapy_time"
 alias scapyl="scapy-traffic-tester.py -i $scapy_device -l --src-ip $src_ip --inter 1 --time $scapy_time --pkt-count $scapy_time"
 
-alias test2="modprobe -r mlx5_core; modprobe -v mlx5_core; ip link set dev $link up"
+# alias test2="modprobe -r mlx5_core; modprobe -v mlx5_core; ip link set dev $link up"
 
 function test-ibd
 {
@@ -7281,3 +7333,62 @@ function test-ibd2
 
 alias ibd='/etc/init.d/openibd restart'
 alias ibd2='/etc/init.d/openibd force-restart'
+
+
+function git-push
+{
+	[[ $# != 2 ]] && return
+	git push origin HEAD:refs/for/$1/$2
+}
+
+alias un="unbind_all $link"
+
+function load-ofed
+{
+set -x
+	modprobe devlink
+	cdr
+	local dir=/lib/modules/$(uname -r)
+	insmod $dir/extra/mlnx-ofa_kernel/compat/mlx_compat.ko
+	insmod $dir/extra/mlnx-ofa_kernel/drivers/infiniband/core/ib_core.ko
+	insmod $dir/extra/mlnx-ofa_kernel/drivers/infiniband/core/ib_uverbs.ko
+	insmod $dir/extra/mlnx-ofa_kernel/drivers/net/ethernet/mellanox/mlxfw/mlxfw.ko
+	insmod $dir/extra/mlnx-ofa_kernel/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.ko
+	insmod $dir/extra/mlnx-ofa_kernel/drivers/infiniband/hw/mlx5/mlx5_ib.ko
+set +x
+}
+
+alias dev=switchdev
+
+if (( centos72 == 1 )); then
+	alias c0='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.0 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c1='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.1 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c2='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.2 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c3='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.3 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c4='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.4 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c5='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.5 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c6='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.6 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c7='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.7 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c8='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.8 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+	alias c9='/home1/chrism/crash/crash -i /root/.crash /var/crash/vmcore.9 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
+fi
+
+function sun1
+{
+	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
+	WITH_VMS=1 ./load-r-vrt-24-120.sh cx5
+}
+
+alias sus='su sundost'
+
+function sun2
+{
+	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
+	./r-vrt-24-120_cx5/update-r-vrt-24-120_cx5.py
+}
+
+function sun3
+{
+	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
+	lnst-ctl -d -C lnst-ctl.conf --pools r-vrt-24-120_cx5/ run recipes/ovs_offload/1_virt_ovs_vxlan_flow_key.xml
+}
