@@ -40,6 +40,7 @@ if [[ "$UID" == "0" ]]; then
 	rh=$?
 fi
 
+crash_dir=/var/crash
 if [[ "$(hostname -s)" == "bc-vnc02" ]]; then
 	host_num=20
 elif [[ "$(hostname -s)" == "dev-r630-03" ]]; then
@@ -64,6 +65,12 @@ elif [[ "$(hostname -s)" == "gen-h-vrt-024-005" ]]; then
 	host_num=26
 elif [[ "$(hostname -s)" == "r-vrt-24-120" ]]; then
 	host_num=24
+elif [[ "$(hostname -s)" == "gen-h-vrt-005" ]]; then
+	host_num=5
+	crash_dir=/images/crash
+elif [[ "$(hostname -s)" == "gen-h-vrt-006" ]]; then
+	host_num=6
+	crash_dir=/images/crash
 elif (( rh == 0 )); then
 	host_num=9
 fi
@@ -99,10 +106,11 @@ vx2=vxlan1
 bond=bond0
 
 linux_dir=$(readlink /lib/modules/$(uname -r)/build)
+home1=images
 
 if (( host_num == 9 )); then
 	link=ens9
-elif (( host_num == 13 )); then
+elif (( host_num == 13 || host_num == 5)); then
 	link=enp4s0f0
 	link2=enp4s0f1
 	link2_new=${link2}_65534
@@ -115,7 +123,7 @@ elif (( host_num == 13 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-elif (( host_num == 14 )); then
+elif (( host_num == 14 || host_num == 6 )); then
 	link=enp4s0f0
 	link2=enp4s0f1
 	link_remote_ip=192.168.1.13
@@ -247,14 +255,13 @@ alias restart-network='/etc/init.d/network restart'
 
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 
-CRASH=/home1/chrism/crash/crash
+CRASH=/$home1/chrism/crash/crash
 
 alias crash1="$CRASH -i /root/.crash $linux_dir/vmlinux"
 alias c=crash1
 
 # -d8 to add debug info
 alias crash="$CRASH -i ~/.crash"
-crash_dir=/var/crash
 alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $linux_dir/vmlinux"
 alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $linux_dir/vmlinux"
 alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 $linux_dir/vmlinux"
@@ -350,6 +357,7 @@ alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
+alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
 
 alias git-net='git remote add david git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git'
 alias gg='git grep -n'
@@ -441,37 +449,38 @@ alias win='vncviewer 10.12.201.153:0'
 alias chown1="sudo chown -R chrism.mtl $linux_dir"
 alias sb='tmux save-buffer'
 
-alias sm='cd /home1/chrism'
-alias sm3='cd /home1/chrism/iproute2'
+alias sm="cd /$home1/chrism"
+alias sm3="cd /$home1/chrism/iproute2"
 alias sm1="cd $linux_dir"
+alias smb="cd /$home1/chrism/bcc/tools"
 
 if [[ "$USER" == "mi" ]]; then
 	kernel=$(uname -r | cut -d. -f 1-6)
 	arch=$(uname -m)
 fi
 
-alias sm7="cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.centos.x86_64"
-alias sm4='cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64'
+alias sm7="cd /$home1/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.centos.x86_64"
+alias sm4="cd /$home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64"
 alias cf4='sm4; cscope -d'
-alias sm5='cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64'
+alias sm5="cd /$home1/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64"
 alias cf5='sm5; cscope -d'
 
-alias spec='cd /home1/mi/rpmbuild/SPECS'
-alias sml='cd /home1/chrism/linux'
-alias smu='cd /home1/chrism/upstream'
-alias sm9='cd /home1/chrism/linux-4.9'
-alias smy='cd /home1/chrism/yossi'
-alias sm14='cd /home1/chrism/linux-4.14.78'
-alias smm='cd /home1/chrism/mlnx-ofa_kernel-4.0'
-alias smm5='cd /home1/chrism/mlnx-ofa_kernel-4.5'
+alias spec="cd /$home1/mi/rpmbuild/SPECS"
+alias sml="cd /$home1/chrism/linux"
+alias smu="cd /$home1/chrism/upstream"
+alias sm9="cd /$home1/chrism/linux-4.9"
+alias smy="cd /home1/chrism/yossi"
+alias sm14="cd /home1/chrism/linux-4.14.78"
+alias smm="cd /home1/chrism/mlnx-ofa_kernel-4.0"
+alias smm5="cd /home1/chrism/mlnx-ofa_kernel-4.5"
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
 alias ovs="cd $nfs_dir/ovs/openvswitch"
-alias ovs="cd /home1/chrism/openvswitch"
-alias smo="cd /home1/chrism/openvswitch"
-alias smt='cd /home1/chrism/ovs-tests'
-alias cfo="cd /home1/chrism/openvswitch; cscope -d"
+alias ovs="cd /$home1/chrism/openvswitch"
+alias smo="cd /$home1/chrism/openvswitch"
+alias smt="cd /$home1/chrism/ovs-tests"
+alias cfo="cd /$home1/chrism/openvswitch; cscope -d"
 alias ovs2="cd $nfs_dir/ovs/test/ovs-tests"
 alias ipa='ip a'
 alias ipl='ip l'
@@ -481,7 +490,7 @@ alias rmswp='find . -name *.swp -exec rm {} \;'
 alias rmswp1='find . -name *.swp -exec rm {} \;'
 
 alias mount-fedora="mount /dev/mapper/fedora-root /mnt"
-alias cfl='cd /home1/chrism/linux; cscope -d'
+alias cfl="cd /$home1/chrism/linux; cscope -d"
 
 alias sm2="cd $nfs_dir"
 alias smc="sm; cd crash; vi net.c"
@@ -719,6 +728,8 @@ function core
 	echo 2 > /proc/sys/fs/suid_dumpable
 }
 
+# coredumpctl gdb /usr/local/bin/bpftrace
+
 function core-enable
 {
 	mkdir -p /tmp/cores
@@ -739,6 +750,8 @@ function vlan
         ip addr add $ip/16 brd + dev $vlan
         ip addr add $link_ipv6/64 dev $vlan
 }
+
+alias vlan1="vlan $link $vid $link_ip"
 
 function call
 {
@@ -795,12 +808,17 @@ function profile
 
 function ln-profile
 {
+	mv ~/.bashrc bashrc.orig
+	ln -s ~chrism/.bashrc
 	ln -s ~chrism/.vim
 	ln -s ~chrism/.vimrc
-	ln -s ~chrism/.bashrc
 	ln -s ~chrism/.profile
 	ln -s ~chrism/.screenrc
 	ln -s ~chrism/.tmux.conf
+	ln -s ~chrism/.crash
+
+	mkdir -p /images/chrism
+	chown chrism.mtl /images/chrism
 }
 
 function bind5
@@ -935,7 +953,7 @@ function drop_tc
 
 function tc-drop
 {
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/$home1/chrism/iproute2/tc/tc
 
 	$TC qdisc del dev $link ingress
 	ethtool -K $link hw-tc-offload on 
@@ -1765,11 +1783,13 @@ function make-all
 {
 	[[ $UID == 0 ]] && break
 
+	local cpu_num=$(cat /proc/cpuinfo  | grep processor | wc -l)
+	cpu_num=$((cpu_num*2))
 	unset CONFIG_LOCALVERSION_AUTO
 	make olddefconfig
-	make -j 32
+	make -j $cpu_num
 # 	sudo make headers_install
-	sudo make modules_install -j 32
+	sudo make modules_install -j $cpu_num
 	sudo make install
 
 	/bin/rm -rf ~/.ccache
@@ -2695,7 +2715,7 @@ set +x
 }
 
 # test with tcv
-function vlan1
+function vlan2
 {
 set -x
 	redirect=$rep2
@@ -2713,7 +2733,7 @@ set +x
 }
 
 # test with tcv
-function vlan2
+function vlan3
 {
 set -x
 	redirect=$rep2
@@ -4268,7 +4288,11 @@ set -x
 # 	[[ -f /usr/local/sbin/grub-mkconfig ]] && MKCONFIG=/usr/local/sbin/grub-mkconfig
 	sudo sed -i '/GRUB_DEFAULT/d' $file
 	sudo sed -i '/GRUB_SAVEDEFAULT/d' $file
+	sudo sed -i '/GRUB_CMDLINE_LINUX/d' $file
 # 	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
+
+	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+
 	if [[ $# == 0 ]]; then
 		sudo echo "GRUB_DEFAULT=saved" >> $file
 		sudo echo "GRUB_SAVEDEFAULT=true" >> $file
@@ -4923,6 +4947,7 @@ set -x
 	version=fw-4119-rel-16_99_6408
 	version=fw-4119-rel-16_22_1000
 	version=last_revision
+	version=fw-4119-rel-16_25_0212
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -5011,6 +5036,13 @@ function gam
 {
 	[[ $# == 0 ]] && return
 	git am $jd_dir/$1/0001*
+}
+
+function git-checkout
+{
+	[[ $# == 0 ]] && return
+	git checkout $1
+	git checkout -b $1
 }
 
 function git-patch
@@ -5594,6 +5626,14 @@ SUBSYSTEM=="net", ACTION=="add", ATTR{phys_switch_id}=="$id", \
 ATTR{phys_port_name}!="", NAME="${l}_\$attr{phys_port_name}"
 EOF
 	cat $file
+}
+
+function udev3
+{
+	cd /etc/udev/rules.d
+	cp ~chrism/udev3/82-net-setup-link.rules .
+	cd ..
+	cp ~chrism/udev3/vf-net-link-name.sh .
 }
 
 function udev
@@ -6816,7 +6856,7 @@ function git-author2
 
 function ln-crash
 {
-	cd /var/crash
+	cd $crash_dir
 	local dir=$(ls -td */ | head -1)
 	local n=$(ls vmcore* | wc -l)
 	if [[ -f ${dir}vmcore ]]; then
@@ -7391,4 +7431,52 @@ function sun3
 {
 	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
 	lnst-ctl -d -C lnst-ctl.conf --pools r-vrt-24-120_cx5/ run recipes/ovs_offload/1_virt_ovs_vxlan_flow_key.xml
+}
+
+function yum-bcc
+{
+	local cmd=yum
+	sudo $cmd install -y bison cmake ethtool flex git iperf libstdc++-static \
+	  python-netaddr python-pip gcc gcc-c++ make zlib-devel \
+	  elfutils-libelf-devel
+	sudo $cmd install -y luajit luajit-devel  # for Lua support
+	sudo $cmd install -y \
+	  http://repo.iovisor.org/yum/extra/mageia/cauldron/x86_64/netperf-2.7.0-1.mga6.x86_64.rpm
+	sudo pip install pyroute2
+	sudo $cmd install -y clang clang-devel llvm llvm-devel llvm-static ncurses-devel
+}
+
+function install-bcc
+{
+	sm
+	mkdir -p bcc/build; cd bcc/build
+	cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+	time make -j 32
+	sudo make install
+}
+
+function install-bpftrace
+{
+	sm
+	cd bpftrace
+	unset CXXFLAGS
+	mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=DEBUG ..
+	unset CXXFLAGS
+	make -j 32
+	unset CXXFLAGS
+	make install
+}
+
+function bcc1
+{
+	[[ $# != 1 ]] && return
+	smb
+	./trace.py -K -U "$1 \"%s\", arg1"
+}
+
+alias trace='/home1/chrism/bcc/tools/trace.py'
+
+function bcc-mlx5e_xmit
+{
+	 trace -K -U 'mlx5e_xmit "%s", arg2'
 }
