@@ -23,17 +23,37 @@ shopt -s histappend
 ofed=0
 uname -r | grep 3.10 > /dev/null 2>&1 && ofed=1
 
+centos=0
 centos72=0
-uname -r | grep 3.10.0-327 > /dev/null 2>&1 && centos72=1
+if uname -r | grep 3.10.0-327 > /dev/null 2>&1; then
+	unum=327
+	centos=1
+	centos72=1
+fi
 
 kernel49=0
 uname -r | grep 4.9 > /dev/null 2>&1 && kernel49=1
 
 centos74=0
-uname -r | grep 3.10.0-693 > /dev/null 2>&1 && centos74=1
+if uname -r | grep 3.10.0-693 > /dev/null 2>&1; then
+	unum=693
+	centos=1
+	centos74=1
+fi
 
 centos75=0
-uname -r | grep 3.10.0-862 > /dev/null 2>&1 && centos75=1
+if uname -r | grep 3.10.0-862 > /dev/null 2>&1; then
+	unum=862
+	centos=1
+	centos75=1
+fi
+
+centos76=0
+if uname -r | grep 3.10.0-957 > /dev/null 2>&1; then
+	unum=957
+	centos=1
+	centos76=1
+fi
 
 if [[ "$UID" == "0" ]]; then
 	dmidecode | grep "Red Hat" > /dev/null 2>&1
@@ -272,11 +292,21 @@ alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $linux_dir/vmlinux"
 alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $linux_dir/vmlinux"
 alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $linux_dir/vmlinux"
 alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $linux_dir/vmlinux"
-alias c10="$CRASH -i /root/.crash $crash_dir/vmcore.10 $linux_dir/vmlinux"
 
-alias cc0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
-alias cc1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
-alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
+if (( centos == 1 )); then
+	alias c="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
+
+	alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+	alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
+fi
 
 alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
 alias jd-vxlan="~chrism/bin/ct_lots_rule_vxlan.sh $rep2 $vx"
@@ -284,14 +314,6 @@ alias jd-vxlan2="~chrism/bin/ct_lots_rule_vxlan2.sh $rep2 $vx"
 alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
 alias jd-ovs-ttl="~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
 alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
-
-if (( centos75 == 1 || centos74 == 1 || centos72 == 1 )); then
-	alias c=cc0
-# 	alias c="$CRASH -i /root/.crash /images/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/vmlinux"
-fi
-
-# [[ "$(uname -r)" == "3.10.0" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0/build/vmlinux"
-# [[ "$(uname -r)" == "3.10.0+" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0+/build/vmlinux"
 
 alias pc='picocom -b 115200 /dev/ttyS0'
 alias pc='picocom -b 38400 /dev/ttyS1'
@@ -655,8 +677,8 @@ alias qlog='less /var/log/libvirt/qemu/vm1.log'
 # alias vd='virsh dumpxml vm1'
 alias simx='/opt/simx/bin/manage_vm_simx_support.py -n vm2'
 
-alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=16"
 alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=127"
+alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=16"
 alias vfq="mlxconfig -d $pci q"
 alias vfq2="mlxconfig -d $pci2 q"
 alias vfsm="mlxconfig -d $linik_bdf set NUM_VF_MSIX=6"
@@ -845,7 +867,7 @@ set +x
 }
 # alias vfs="cat /sys/class/net/$link/device/sriov_totalvfs"
 mac_prefix="02:25:d0:e2:18"
-function set_mac
+function set_mac2
 {
 	[[ $# != 1 ]] && return
 
@@ -870,6 +892,7 @@ function bind_all
 	done
 	echo "end bind_all"
 }
+alias bi='bind_all $link'
 
 function unbind_all
 {
@@ -883,6 +906,7 @@ function unbind_all
 	done
 	echo "end unbind_all"
 }
+alias un="unbind_all $link"
 
 function off_all
 {
@@ -1798,6 +1822,7 @@ alias m=make-all
 alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install -j 32'
+alias mi2='make -j 32; sudo make install -j 32; fr'
 alias m32='make -j 32'
 
 alias make-local='./configure; make -j 32; sudo make install'
@@ -4092,6 +4117,35 @@ function start_vm_all
 	done
 }
 
+function set_mac
+{
+	local port=1
+	[[ $# == 1 ]] && port=$1
+
+	echo "=========== port $port ($numvfs) =========="
+	local l
+	local pci_addr
+
+	if (( port == 1 )); then
+		l=$link
+		mac_prefix="02:25:d0:$host_num:$port"
+	elif (( port == 2 )); then
+		l=$link2
+		mac_prefix="02:25:d0:$host_num:$port"
+	fi
+
+	echo "link: $l"
+	mac_vf=1
+
+	# echo "Set mac: "
+	for vf in `ip link show $l | grep "vf " | awk {'print $2'}`; do
+		local mac_addr=$mac_prefix:$(printf "%x" $mac_vf)
+		echo "vf${vf} mac address: $mac_addr"
+		ip link set $l vf $vf mac $mac_addr
+		((mac_vf=mac_vf+1))
+	done
+}
+
 alias exe='ip netns exec'
 alias n0='exe n0'
 alias n1='exe n1'
@@ -4120,6 +4174,8 @@ alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
 alias mystart=start-switchdev-all
 function start-switchdev
 {
+	local port=$1
+	local mode=switchdev
 	if (( numvfs > 99 )); then
 		echo "numvfs = $numvfs, return to confirm"
 		read
@@ -4129,102 +4185,75 @@ function start-switchdev
 		echo "pci is null"
 		return
 	fi
-	local p=$1
-	echo "=========== port $p ($numvfs) =========="
-	local l
-	local pci_addr
-	if (( p == 1 )); then
+
+	if (( port == 1 )); then
 		l=$link
 		pci_addr=$pci
-		mac_prefix="02:25:d0:$host_num:$p"
-	elif (( p == 2 )); then
+	elif (( port == 2 )); then
 		l=$link2
 		pci_addr=$pci2
-		mac_prefix="02:25:d0:$host_num:$p"
 	fi
-	echo "link: $l"
-	mac_vf=1
-	mode=switchdev
-	link_mode=transport
 
 	time echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 
-	# echo "Set mac: "
-	for vf in `ip link show $l | grep "vf " | awk {'print $2'}`; do
-		local mac_addr=$mac_prefix:$(printf "%x" $mac_vf)
-		echo "vf${vf} mac address: $mac_addr"
-		ip link set $l vf $vf mac $mac_addr
-		((mac_vf=mac_vf+1))
-	done
+	set_mac $port
 
  	time unbind_all $l
-	# 64 vfs, sleep 30
-# 	sleep 60
-        sleep 1
-	if [[ "$1" != "legacy" ]]; then
-		echo "enable switchdev mode for: $pci_addr"
-		if (( centos72 == 1 )); then
-			sysfs_dir=/sys/class/net/$link/compat/devlink
-			echo switchdev >  $sysfs_dir/mode || echo "switchdev failed"
-			if (( cx5 == 0 )); then
-				echo transport > $sysfs_dir/inline 2>/dev/null|| echo "transport failed"
-			fi
-			echo basic > $sysfs_dir/encap || echo "baisc failed"
-		else
-			devlink dev eswitch set pci/$pci_addr mode switchdev
-			if (( cx5 == 0 )); then
-				devlink dev eswitch set pci/$pci_addr inline-mode transport
-			fi
-# 			devlink dev eswitch set pci/$pci_addr encap enable
-		fi
 
-		ip1
-# 	else
-# 		return
+	echo "enable switchdev mode for: $pci_addr"
+	if (( centos72 == 1 )); then
+		sysfs_dir=/sys/class/net/$link/compat/devlink
+		echo switchdev >  $sysfs_dir/mode || echo "switchdev failed"
+		if (( cx5 == 0 )); then
+			echo transport > $sysfs_dir/inline 2>/dev/null|| echo "transport failed"
+		fi
+# 		echo basic > $sysfs_dir/encap || echo "baisc failed"
+	else
+		devlink dev eswitch set pci/$pci_addr mode switchdev
+		if (( cx5 == 0 )); then
+			devlink dev eswitch set pci/$pci_addr inline-mode transport
+		fi
+# 		devlink dev eswitch set pci/$pci_addr encap enable
 	fi
 
 	sleep 1
-	time up_all_reps $p
+	time bind_all $l
+	sleep 1
+
+	ip1
+
+	sleep 1
+	time up_all_reps $port
 # 	hw_tc_all $p
 
-	if [[ "$1" == "vf" ]]; then
-		set +x
-		return
-	fi
-
-	if [[ "$1" == "bind" ]]; then
-		bind_all
-		ifconfig $vf1 1.1.1.2/16 up
-		ifconfig $vf2 up
-		set +x
-		return
-	fi
-
-	if [[ "$2" == "vm" ]]; then
-		del-br
-		start1
-		start2
-# 		start_vm_all 1
-		set +x
-		return
-	fi
-
-	if ip link show dev $link > /dev/null 2>&1; then
-		time bind_all $l
-	else
-		time bind_all ${l}_65534
-	fi
-
-# set +x
-# 	return
-
-	time set_netns_all $p
+	time set_netns_all $port
 
 # 	iptables -F
 # 	iptables -Z
 # 	iptables -X
 
 	return
+}
+
+
+function echo_dev
+{
+	local sysfs_dir=/sys/class/net/$link/compat/devlink
+	echo switchdev >  $sysfs_dir/mode || echo "switchdev failed"
+}
+
+function echo_dev3
+{
+	local sysfs_dir=/sys/class/net/$link/compat/devlink
+	echo switchdev >  $sysfs_dir/mode || echo "switchdev failed" &
+ 	echo switchdev >  $sysfs_dir/mode || echo "switchdev failed" &
+ 	echo switchdev >  $sysfs_dir/mode || echo "switchdev failed" &
+}
+
+function echo_legacy
+{
+	local sysfs_dir=/sys/class/net/$link/compat/devlink
+	echo legacy >  $sysfs_dir/mode || echo "switchdev failed"
 }
 
 function start-switchdev-all
@@ -5016,6 +5045,9 @@ set -x
  	vim $file
 set +x
 }
+
+
+alias gf1="git format-patch -o ~/tmp -1"
 
 function gt
 {
@@ -6023,8 +6055,16 @@ function addbr1
 
 alias force-stop='sudo /etc/init.d/openibd force-stop'
 alias force-start='sudo /etc/init.d/openibd force-start'
-alias force-restart='sudo /etc/init.d/openibd force-stop; sudo /etc/init.d/openibd force-start'
 alias fr=force-restart
+
+function force-restart
+{
+set -x
+	sudo  modprobe -rv ib_srpt ib_isert rpcrdma
+	sudo /etc/init.d/openibd force-stop
+	sudo /etc/init.d/openibd force-start
+set +x
+}
 
 alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j 32'
@@ -6038,9 +6078,9 @@ alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 # Redhat 7.5
 alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
-alias ofed-configure2='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
+alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
 
-alias ofed-configure-all='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
+alias ofed-configure='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
 
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
@@ -6233,8 +6273,19 @@ function book-noga
 # 	/etc/init.d/network restart
 # fi
 
-alias fixup='./ofed_scripts/backports_fixup_changes.sh'
-alias get-patches='./ofed_scripts/ofed_get_patches.sh'
+alias ofed1='./ofed_scripts/backports_fixup_changes.sh'
+alias ofed2='./ofed_scripts/ofed_get_patches.sh'
+
+function ofed3
+{
+	[[ $# == 0 ]] && return
+	git checkout $1
+	./ofed_scripts/backports_copy_patches.sh
+	git add backports
+	git commit -s backports/
+}
+
+alias ofed-meta='./devtools/add_metadata.sh'
 
 function ct1
 {
@@ -6753,10 +6804,12 @@ alias test-all='./test-all.py -g "test-tc-*" -e "test-tc-par*" -e "test-tc-traff
 alias test-all='./test-all.py -g "test-tc-*" -e "test-tc-par*" -e "test-tc-traff*" -e "test-tc-insert-rules-port2.sh" -e "test-tc-merged-esw-vf-pf.sh" -e "test-tc-merged-esw-vf-vf.sh" -e "test-tc-multi-prio-chains.sh" -e "test-tc-vf-remote-mirror.sh"'
 alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*" -e "test-tc-insert-rules-port2.sh" -e "test-tc-merged-esw-vf-pf.sh" -e "test-tc-merged-esw-vf-vf.sh" -e "test-tc-multi-prio-chains.sh" -e "test-tc-vf-remote-mirror.sh"'
 alias test-all='./test-all.py -e "test-tc-par*" -e "test-tc-traff*"'
-alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*"'
 alias test-all='./test-all.py -e "test-all-dev.py"'
 alias test-all-stop='./test-all.py -e "test-all-dev.py" --stop'
 alias from-test='./test-all.py --from_test'
+alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
+
+alias test-tc='./test-all.py -g "test-tc-*"'
 
 function get-diff
 {
@@ -7304,7 +7357,7 @@ set -x
 set +x
 }
 
-alias f1="flint -d $pci q"
+alias f1="sudo flint -d $pci q"
 alias cat1="cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct"
 
 alias dis="ethtool -S $link | grep dis"
@@ -7381,8 +7434,6 @@ function git-push
 	git push origin HEAD:refs/for/$1/$2
 }
 
-alias un="unbind_all $link"
-
 function load-ofed
 {
 set -x
@@ -7399,19 +7450,6 @@ set +x
 }
 
 alias dev=switchdev
-
-if (( centos72 == 1 )); then
-	alias c0='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.0 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c1='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.1 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c2='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.2 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c3='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.3 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c4='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.4 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c5='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.5 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c6='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.6 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c7='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.7 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c8='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.8 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-	alias c9='/images/chrism/crash/crash -i /root/.crash /var/crash/vmcore.9 /usr/lib/debug/lib/modules/3.10.0-327.el7.x86_64/vmlinux'
-fi
 
 function sun1
 {
