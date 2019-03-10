@@ -1,6 +1,6 @@
 sudo apt-get install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 	git make build-essential flex bison libssl-dev libelf-dev		\
-	ethtool tree
+	ethtool tree linux-tools-generic
 
 # For bionic bcc
 sudo apt-get -y install bison build-essential cmake flex git libedit-dev	\
@@ -10,3 +10,6 @@ sudo apt-get -y install bison build-essential cmake flex git libedit-dev	\
 sudo apt-get -y install luajit luajit-5.1-dev 
 
 sudo apt-get -y netperf iperf iperf3
+
+# For systemtap
+sudo apt-get -y libdw-dev
