@@ -55,6 +55,7 @@ map <F9> :w<CR>:!make run<CR>
 
 map <F10> :!make clean<CR>
 " map <F11> :!make clean<CR>:!make<CR>:!make run<CR>
+map <F11> :%s/\s\+$//g<CR>
 map <F12> :set hlsearch!<CR>
 
 map <c-w><c-o> <c-w><c-p>
