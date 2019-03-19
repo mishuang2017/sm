@@ -4,7 +4,13 @@ from __future__ import print_function
 from bcc import BPF
 from bcc.utils import printb
 import commands
+import argparse
 import sys
+
+parser = argparse.ArgumentParser(description='/sys/kernel/debug/tracing/events')
+parser.add_argument("-c", "--command")
+
+args = parser.parse_args()
 
 # load BPF program
 b = BPF(text="""
@@ -15,11 +21,11 @@ TRACEPOINT_PROBE(net, net_dev_xmit) {
 }
 """)
 
-if len(sys.argv) == 2:
-    cmd="pgrep " + sys.argv[1]
+if args.command:
+    cmd="pgrep " + args.command
     (status, output) = commands.getstatusoutput(cmd)
     if status != 0:
-        exit(sys.argv[1] + " not found")
+        exit(args.command + " not found")
 
 # header
 print("%-18s %-16s %-6s %s" % ("TIME(s)", "COMM", "PID", "LEN"))
@@ -32,7 +38,7 @@ while 1:
         continue
     except KeyboardInterrupt:
         exit()
-    if len(sys.argv) == 2:
+    if args.command:
         if pid == int(output):
             printb(b"%-18.9f %-16s %-6d %s" % (ts, task, pid, msg))
     else:
