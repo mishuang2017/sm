@@ -10,7 +10,7 @@ b = BPF(text="""
 #include <linux/device.h>
 
 void trace_completion(struct pt_regs *ctx, struct device *dev) {
-    bpf_trace_printk("%llx %s\\n", (long)dev, dev->kobj.name);
+    bpf_trace_printk("%llx %s\\n", dev, dev->kobj.name);
 }
 """)
 
