@@ -45,6 +45,7 @@ map <F2> :set number!<CR>
 map <F3> :call CComment2()<CR>
 map <F4> :call SComment()<CR>
 map <F5> :call RemovePlus()<CR>
+map <F6> :call Endif()<CR>
 
 map <F7> :retab!<CR>
 " map <F7> :!make<CR>:!make run<CR>
@@ -55,7 +56,6 @@ map <F9> :w<CR>:!make run<CR>
 
 map <F10> :!make clean<CR>
 " map <F11> :!make clean<CR>:!make<CR>:!make run<CR>
-map <F11> :%s/\s\+$//g<CR>
 map <F12> :set hlsearch!<CR>
 
 map <c-w><c-o> <c-w><c-p>
@@ -107,8 +107,12 @@ endfunc
 function RemovePlus()
 	let line = getline(".")
 	if line[0][0] == "\+"
-		:s/^+//
+		:%s/^+//
 	endif
+endfunc
+
+function Endif()
+	s/$/\r#endif/
 endfunc
 
 " colorscheme darkZ
@@ -131,4 +135,4 @@ highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=W
 
 " set noswapfile
 
-" set term=screen
+set term=screen
