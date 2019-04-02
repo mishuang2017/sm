@@ -14,4 +14,8 @@ mkdir -p /labhome/chrism/
 chown chrism.mtl /labhome/chrism/
 mount 10.200.0.25:/vol/labhome/chrism /labhome/chrism/
 
+# list installed files on a package
 dpkg-query -L crash
+
+# add a user to sudoer
+usermod -aG sudo chrism
