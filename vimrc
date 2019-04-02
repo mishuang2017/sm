@@ -136,3 +136,7 @@ highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=W
 " set noswapfile
 
 set term=screen
+
+" set csprg=/usr/bin/cscope
+
+cs add cscope.out
