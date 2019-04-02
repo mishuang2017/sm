@@ -42,6 +42,13 @@ if uname -r | grep 3.10.0-693 > /dev/null 2>&1; then
 	centos74=1
 fi
 
+jd_kernel=0
+if uname -r | grep 3.10.0-693.21.3 > /dev/null 2>&1; then
+	unum=693
+	centos=1
+	jd_kernel=1
+fi
+
 centos75=0
 if uname -r | grep 3.10.0-862 > /dev/null 2>&1; then
 	unum=862
@@ -68,10 +75,14 @@ elif [[ "$(hostname -s)" == "dev-r630-03" ]]; then
 	host_num=13
 elif [[ "$(hostname -s)" == "dev-r630-04" ]]; then
 	host_num=14
-elif [[ "$(hostname -s)" == "gen-h-vrt-023" ]]; then
-	host_num=23
-elif [[ "$(hostname -s)" == "gen-h-vrt-024" ]]; then
-	host_num=24
+elif [[ "$(hostname -s)" == "gen-h-vrt-011" ]]; then
+	host_num=11
+elif [[ "$(hostname -s)" == "gen-h-vrt-012" ]]; then
+	host_num=12
+elif [[ "$(hostname -s)" == "gen-h-vrt-027" ]]; then
+	host_num=27
+elif [[ "$(hostname -s)" == "gen-h-vrt-028" ]]; then
+	host_num=28
 elif [[ "$(hostname -s)" == "dev-chrism-vm1" ]]; then
 	host_num=15
 elif [[ "$(hostname -s)" == "dev-chrism-vm2" ]]; then
@@ -156,28 +167,32 @@ elif (( host_num == 14 || host_num == 6 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-elif (( host_num == 23 )); then
+elif (( host_num == 27 )); then
 	link=ens1f0
 	link2=ens1f1
-	link_remote_ip=192.168.1.24
-	link_remote_ip2=192.168.2.24
-	link_remote_ipv6=1::24
+	link_remote_ip=192.168.1.28
+	link_remote_ip2=192.168.2.28
+	link_remote_ipv6=1::28
 
 	vf1=ens1f2
 	vf2=ens1f3
 	vf3=ens1f4
 
-elif (( host_num == 24 )); then
+elif (( host_num == 28 )); then
 	link=ens1f0
 	link2=ens1f1
-	link_remote_ip=192.168.1.23
-	link_remote_ip2=192.168.2.23
-	link_remote_ipv6=1::23
+	link_remote_ip=192.168.1.27
+	link_remote_ip2=192.168.2.27
+	link_remote_ipv6=1::27
 
 	vf1=ens1f2
 	vf2=ens1f3
 	vf3=ens1f4
 
+elif (( host_num == 11 )); then
+	link=enp66s0f0
+elif (( host_num == 12 )); then
+	link=enp66s0f0
 elif (( host_num == 15 )); then
 	link=ens9
 elif (( host_num == 16 )); then
@@ -294,7 +309,7 @@ alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $linux_dir/vmlinux"
 alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $linux_dir/vmlinux"
 alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $linux_dir/vmlinux"
 
-if (( centos == 1 )); then
+if (( centos == 1 && jd_kernel == 0 )); then
 	alias c="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 
 	alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
@@ -389,6 +404,9 @@ alias dmesg='dmesg -T'
 
 alias git-log='git log --tags --source'
 alias v4.20='git checkout v4.20; git checkout -b v4.20'
+alias v4.10='git checkout v4.10; git checkout -b v4.10'
+alias v4.8='git checkout v4.8; git checkout -b v4.8'
+alias v4.4='git checkout v4.4; git checkout -b v4.4'
 alias ab='rej; git am --abort'
 alias gr='git add -u; git am --resolved'
 alias gar='git add -A; git am --resolved'
@@ -483,7 +501,19 @@ if [[ "$USER" == "mi" ]]; then
 	arch=$(uname -m)
 fi
 
-alias sm7="cd /$images/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.centos.x86_64"
+function sm7
+{
+	local dir
+
+	dir=/$images/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64
+	if test -d $dir; then
+		cd $dir
+	fi
+	dir=/$images/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.centos.x86_64
+	if test -d $dir; then
+		cd $dir
+	fi
+}
 alias sm4="cd /$images/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64"
 alias cf4='sm4; cscope -d'
 alias sm5="cd /$images/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64"
@@ -843,6 +873,12 @@ function ln-profile
 	chown chrism.mtl /images/chrism
 }
 
+function rc2
+{
+	unlink ~/.bashrc
+	mv ~/bashrc.orig ~/.bashrc
+}
+
 function bind5
 {
 set -x
@@ -878,7 +914,9 @@ function set_mac2
 
 alias on_sriov="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
 alias on_sriov="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
+alias on_sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.1/sriov_numvfs"
 alias on1='on_sriov; un'
+alias un2="unbind_all $link2"
 alias off_sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
 
 function bind_all
@@ -913,7 +951,7 @@ function off_all
 {
 	local l
 # 	for l in $link; do
-	for l in $link $link2 $link_new; do
+	for l in $link $link2 eth0; do
 		[[ ! -d /sys/class/net/$l ]] && continue
 		n=$(cat /sys/class/net/$l/device/sriov_numvfs)
 		echo "$l has $n vfs"
@@ -937,14 +975,14 @@ function off_pci
 {
 	cd /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0
 	echo 0 > sriov_numvfs
+	cd -
 }
 
-function switchdev
+function set-switchdev
 {
 set -x
 	devlink dev eswitch show pci/$pci
 	if [[ $# == 0 ]]; then
-		devlink dev eswitch set pci/$pci mode switchdev
 		devlink dev eswitch set pci/$pci mode switchdev
 	fi
 	if [[ $# == 1 && "$1" == "off" ]]; then
@@ -953,6 +991,7 @@ set -x
 	devlink dev eswitch show pci/$pci
 set +x
 }
+alias dev=set-switchdev
 
 function inline-mode
 {
@@ -1448,14 +1487,9 @@ alias bnetfilter='b4 nft_gen_flow_offload'
 # modprobe -v cls_flower tuple_offload=0
 function reprobe
 {
-	if (( centos72 == 1 )); then
-		tc2
-		del-br
-		sudo modprobe -r cls_flower
-		sudo /etc/init.d/openibd force-stop
-	fi
 # 	sudo /etc/init.d/openibd stop
 	sudo modprobe -r cls_flower
+	sudo modprobe -r mlx5_fpga_tools
 	sudo modprobe -r mlx5_ib
 	sudo modprobe -r mlx5_core
 	sudo modprobe -v mlx5_core
@@ -1937,7 +1971,7 @@ function tc2
 {
 	local l
 # 	for link in p2p1 $rep1 $rep2 $vx_rep; do
-	for l in $link_new $link $rep1 $rep2 $rep3; do
+	for l in $link $rep1 $rep2 $rep3; do
 		ip link show $l > /dev/null 2>&1 || continue
 		tc qdisc show dev $l ingress | grep ffff > /dev/null 2>&1
 		if (( $? == 0 )); then
@@ -2082,10 +2116,6 @@ set -x
 	src_mac=02:25:d0:$host_num:01:02
 	dst_mac=02:25:d0:$host_num:01:03
 	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
-# 	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
-# set +x
-# 	return
-
 	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
 	$TC filter add dev $rep2 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
 	src_mac=02:25:d0:$host_num:01:03
@@ -3888,6 +3918,7 @@ set +x
 }
 
 alias brv='create-br vlan'
+alias bru='create-br uplink'
 alias br='create-br nomal'
 alias brx='create-br vxlan'
 alias brx6='create-br vxlan6'
@@ -3913,6 +3944,7 @@ set -x
 	[[ "$1" == "vxlan" ]] && vxlan1
 	[[ "$1" == "vxlan6" ]] && vxlan6
 	[[ "$1" == "vlan" ]] && vs add-port $br $link
+	[[ "$1" == "uplink" ]] && vs add-port $br $link
 	[[ "$1" == "vlan" ]] && tag="tag=$vid" || tag=""
 	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
@@ -4265,7 +4297,13 @@ function start-switchdev
 # 		devlink dev eswitch set pci/$pci_addr encap enable
 	fi
 
-	sleep 1
+# 	local time=0
+# 	while ! ip link show $link > /dev/null; do
+# 		sleep 1
+# 		(( time ++ ))
+# 		(( time > 10 )) && return
+# 	done
+	sleep 5
 	time bind_all $l
 	sleep 1
 
@@ -4302,6 +4340,13 @@ function echo_dev
 	echo $?
 }
 
+function echo_dev2
+{
+	local sysfs_dir=/sys/class/net/$link2/compat/devlink
+	echo switchdev >  $sysfs_dir/mode
+	echo $?
+}
+
 function echo_dev3
 {
 	local sysfs_dir=/sys/class/net/$link/compat/devlink
@@ -4313,6 +4358,13 @@ function echo_dev3
 function echo_legacy
 {
 	local sysfs_dir=/sys/class/net/$link/compat/devlink
+	echo legacy >  $sysfs_dir/mode
+	echo $?
+}
+
+function echo_legacy2
+{
+	local sysfs_dir=/sys/class/net/$link2/compat/devlink
 	echo legacy >  $sysfs_dir/mode
 	echo $?
 }
@@ -5036,8 +5088,8 @@ set -x
 	version=fw-4119-rel-16_24_0310
 	version=fw-4119-rel-16_99_6408
 	version=fw-4119-rel-16_22_1000
-	version=fw-4119-rel-16_25_0212
 	version=last_revision
+	version=fw-4119-rel-16_25_0262
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -5084,30 +5136,6 @@ set -x
 set +x
 }
 
-list_file=/labhome/chrism/list/ct-flow-table.txt
-list_file=/labhome/chrism/backport/vlad/list2.txt
-alias vi-list="vi $list_file"
-
-jd_dir=/labhome/chrism/ct2/driver-patch
-jd_dir=/labhome/chrism/ct2/flow-table
-jd_dir=/labhome/chrism/ct2/vlad-mlx5
-function gf
-{
-set -x
-	sm9
-	local file=$list_file
-	[[ $# > 2 ]] && return
-	local commit=$2
-	[[ "$USER" != "chrism" ]] && return
-	mkdir -p $jd_dir/$1
-	[[ $# == 1 ]] && commit=$(grep "   $1" $file | head -1 | awk '{print $2}')
-	echo $commit
-	local file=$(git format-patch -1 $commit -o $jd_dir/$1)
- 	vim $file
-set +x
-}
-
-
 alias gf1="git format-patch -o ~/tmp -1"
 
 function gt
@@ -5122,14 +5150,29 @@ function gt
 function ga
 {
 	[[ $# == 0 ]] && return
-	git apply --reject $jd_dir/$1/0001*
+	rej
+	local file=$(printf "/labhome/chrism/jd/vlad/*%02d-net*" $1)
+	echo $file
+	git apply --reject $file
+}
+alias cdv='cd ~/vlad'
+
+function git-am
+{
+	[[ $# != 3 ]] && return
+	local dir=$1
+	local start=$2
+	local end=$3
+	local file
+
+	for ((i = start; i <= end; i ++)); do
+		file=$(printf "$dir/00%02d-*" $i)
+		echo $file
+		git am $file
+	done
 }
 
-function gam
-{
-	[[ $# == 0 ]] && return
-	git am $jd_dir/$1/0001*
-}
+alias git-am1="git-am /labhome/chrism/bp/17"
 
 function git-checkout
 {
@@ -5146,6 +5189,17 @@ function git-patch
 	local dir=$1
 	mkdir -p $dir
 	git format-patch -o $dir -$n HEAD
+}
+
+function git-patch2
+{
+	[[ $# > 2 ]] && return
+	local commit=$2
+	[[ $# == 1 ]] && n=1
+	local dir=$1
+	mkdir -p $dir
+# 	git format-patch -o $dir c00f5a7..
+	git format-patch -o $dir ${commit}..
 }
 
 linux_file=~/idr/
@@ -5678,7 +5732,9 @@ function reboot1
 	[[ $# == 1 ]] && uname=$1
 
 	sync
+	sleep 1
 	sync
+	sleep 1
 	sync
 	sleep 1
 	local cmdline=$(cat /proc/cmdline | cut -d " " -f 2-)
@@ -5709,6 +5765,8 @@ function disable-firewall
 
 alias udevadm1="udevadm info -a --path=/sys/class/net/$link"
 alias udevadm2="udevadm info -a --path=/sys/class/net/$link2"
+
+alias udevadm_1="udevadm info -a --path=/sys/class/net/$rep2"
 
 function udev-old
 {
@@ -6121,18 +6179,42 @@ function addbr1
 
 ###ofed###
 
-alias force-stop='sudo /etc/init.d/openibd force-stop'
-alias force-start='sudo /etc/init.d/openibd force-start'
 alias fr=force-restart
+
+function ofed-unload
+{
+	for i in ib_srpt ib_isert rpcrdma xprtrdma mlx5_fpga_tools; do
+		lsmod | grep $i && sudo modprobe -r $i
+	done
+}
+
+function force-stop
+{
+set -x
+	ofed-unload
+	sudo /etc/init.d/openibd force-stop
+set +x
+}
+
+function force-start
+{
+set -x
+	ofed-unload
+	sudo /etc/init.d/openibd force-start
+	sudo systemctl restart systemd-udevd.service
+set +x
+}
 
 function force-restart
 {
 set -x
-	sudo  modprobe -rv ib_srpt ib_isert rpcrdma
+	ofed-unload
 	sudo /etc/init.d/openibd force-stop
 	sudo /etc/init.d/openibd force-start
+	sudo systemctl restart systemd-udevd.service
 set +x
 }
+alias restart-udev='sudo systemctl restart systemd-udevd.service'
 
 alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j 32'
@@ -6261,10 +6343,6 @@ function get_vf
 
 	local l=$link
 	local dir1=/sys/class/net/$l
-	if [[ ! -d $dir1 ]]; then
-		local l=$link_new
-		local dir1=/sys/class/net/$l
-	fi
 	[[ ! -d $dir1 ]] && return
 
 	local dir2=$(readlink $dir1)
@@ -6341,17 +6419,25 @@ function book-noga
 # 	/etc/init.d/network restart
 # fi
 
+function disable-networkmanager
+{
+	systemctl stop NetworkManager
+	systemctl disable NetworkManager
+}
+
 alias ofed1='./ofed_scripts/backports_fixup_changes.sh'
 alias ofed2='./ofed_scripts/ofed_get_patches.sh'
 
 function ofed3
 {
-	[[ $# == 0 ]] && return
-	git checkout $1
+# 	[[ $# == 0 ]] && return
+	git checkout mlnx_ofed_4_6
 	./ofed_scripts/backports_copy_patches.sh
 	git add backports
 	git commit -s backports/
 }
+
+alias ofed='rej; git add -u; ofed1; ofed2; ofed3'
 
 alias ofed-meta='./devtools/add_metadata.sh'
 
@@ -6878,8 +6964,9 @@ alias from-test='./test-all.py --from_test'
 alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
+alias test-tc='./test-all.py -g "test-tc-*"'
 
-TEST=test-tc-hairpin-disable-sriov.sh
+TEST=test-tc-insert-rules-port2.sh
 alias test1="./$TEST"
 alias vi-test1="vi ./$TEST"
 
@@ -7507,8 +7594,6 @@ set -x
 set +x
 }
 
-alias dev=switchdev
-
 function sun1
 {
 	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
@@ -7640,5 +7725,40 @@ set -x
 		vlan_id $vid2 \
 		action vlan pop pipe action vlan push id $vid pipe \
 		action mirred egress redirect dev $rep2
+set +x
+}
+
+alias ip-set-rate2="ip link set $link vf 0 rate 100"
+alias ip-set-rate="ip link set $link vf 0 max_tx_rate 300 min_tx_rate 200"
+alias group0="echo 0 > /sys/class/net/$link/device/sriov/0/group"
+alias group1="echo 2 > /sys/class/net/$link/device/sriov/0/group"
+alias group2="echo 100 > /sys/class/net/$link/device/sriov/groups/2/max_tx_rate"
+
+alias cd-sriov="cd /sys/class/net/$link/device/sriov"
+
+function dist
+{
+	local file=/etc/depmod.d/dist.conf
+	if [[ -f $file ]]; then
+		echo "$file exists"
+		return
+	fi
+
+cat << EOF > $file
+#
+# depmod.conf
+#
+
+# override default search ordering for kmod packaging
+search updates extra built-in weak-updates
+EOF
+}
+
+function set-time
+{
+set -x
+	cd /etc
+	/bin/rm -rf  localtime
+	ln -s ../usr/share/zoneinfo/Asia/Shanghai  localtime
 set +x
 }
