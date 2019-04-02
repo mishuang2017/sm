@@ -4,7 +4,7 @@ sudo apt-get -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 
 # For bionic bcc
 sudo apt-get -y install bison build-essential cmake flex git libedit-dev	\
-	libllvm3.7 llvm-3.7-dev libclang-3.7-dev python zlib1g-dev libelf-dev
+	llvm libclang python zlib1g-dev libelf-dev
 
 # For Lua support
 sudo apt-get -y install luajit luajit-5.1-dev 
