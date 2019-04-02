@@ -19,3 +19,5 @@ dpkg-query -L crash
 
 # add a user to sudoer
 usermod -aG sudo chrism
+
+# edit /etc/vim/vimrc to uncomment autocmd to remember last position
