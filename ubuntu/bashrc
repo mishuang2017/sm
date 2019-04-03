@@ -104,10 +104,7 @@ alias p6="ping6 2017::14"
 alias 3.10='cd /usr/src/debug/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64'
 alias restart-network='/etc/init.d/network restart'
 
-alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
-
 CRASH='sudo /home/chrism/crash/crash'
-
 alias crash1="$CRASH -i /root/.crash $linux_dir/vmlinux"
 alias c=crash1
 
@@ -128,9 +125,11 @@ alias cc0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules
 alias cc1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 alias cc0="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
 
+alias x='~chrism/bin/x.py'
+
 # if (( ofed == 1 )); then
 # 	alias c=cc0
-# 	alias c="$CRASH -i /root/.crash /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/vmlinux"
+# 	alias c="$CRASH -i /root/.crash /home/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/vmlinux"
 # fi
 
 [[ "$(uname -r)" == "3.10.0" ]] && alias c="$CRASH -i /root/.crash /lib/modules/3.10.0/build/vmlinux"
@@ -207,7 +206,8 @@ alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg'
 alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
-alias clone-crash='git clone git@github.com:crash-utility/crash.git'
+alias clone-crash-upstream='git clone git@github.com:crash-utility/crash.git'
+alias clone-crash='git clone git@github.com:mishuang2017/crash.git'
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone git@github.com:iovisor/bpftrace.git'
 
@@ -294,12 +294,6 @@ alias iso='cd /mnt/d/software/iso'
 
 # alias uperf="$nfs_dir/uperf-1.0.5/src/uperf"
 
-function vmcore
-{
-	[[ $# != 1 ]] && return
-	$nfs_dir/crash/crash -i ~chrism/.crash $1 $linux_dir/vmlinux
-}
-
 alias chown1="sudo chown -R chrism.mtl $linux_dir"
 alias sb='tmux save-buffer'
 
@@ -308,24 +302,22 @@ alias sm1="cd $linux_dir"
 if [[ "$USER" == "mi" ]]; then
 	kernel=$(uname -r | cut -d. -f 1-6)
 	arch=$(uname -m)
-# 	alias sm1="cd /home1/mi/rpmbuild/BUILD/kernel-$kernel/linux-$kernel.$arch"
-# 	(( host_num == 13 )) && alias sm1='cd /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64'
+# 	alias sm1="cd /home/mi/rpmbuild/BUILD/kernel-$kernel/linux-$kernel.$arch"
+# 	(( host_num == 13 )) && alias sm1='cd /home/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64'
 fi
 
-alias sml='cd /home1/chrism/linux'
-alias sm9='cd /home1/chrism/linux-4.19'
-alias sm14='cd /home1/chrism/linux-4.14.78'
-alias smm='cd /home1/chrism/mlnx-ofa_kernel-4.0'
-alias smm5='cd /home1/chrism/mlnx-ofa_kernel-4.5'
+alias sml='cd /home/chrism/linux'
+alias sm9='cd /home/chrism/linux-4.19'
+alias sm14='cd /home/chrism/linux-4.14.78'
+alias smm='cd /home/chrism/mlnx-ofa_kernel-4.0'
+alias smm5='cd /home/chrism/mlnx-ofa_kernel-4.5'
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
-alias ovs="cd $nfs_dir/ovs/openvswitch"
-alias ovs="cd /home1/chrism/openvswitch"
-alias smo="cd /home1/chrism/openvswitch"
-alias smt='cd /home1/chrism/ovs-tests'
-alias cfo="cd /home1/chrism/openvswitch; cscope -d"
-alias ovs2="cd $nfs_dir/ovs/test/ovs-tests"
+alias ovs="cd /home/chrism/openvswitch"
+alias smo="cd /home/chrism/openvswitch"
+alias smt='cd /home/chrism/ovs-tests'
+alias cfo="cd /home/chrism/openvswitch; cscope -d"
 alias ipa='ip a'
 alias ipl='ip l'
 alias ipal='ip a l'
@@ -334,10 +326,9 @@ alias rmswp='sm1; find . -name *.swp -exec rm {} \;'
 alias rmswp1='find . -name *.swp -exec rm {} \;'
 
 alias mount-fedora="mount /dev/mapper/fedora-root /mnt"
-alias cfl='cd /home1/chrism/linux; cscope -d'
+alias cfl='cd /home/chrism/linux; cscope -d'
 
-alias sm2="cd $nfs_dir"
-alias smc="sm; cd crash; vi net.c"
+alias smc="cd; cd crash; vi net.c"
 alias smi='cd /var/lib/libvirt/images'
 alias smi2='cd /etc/libvirt/qemu'
 
@@ -352,10 +343,11 @@ alias app1='ovs-appctl dpctl/dump-flows'
 alias appn='ovs-appctl dpctl/dump-flows --names'
 # systemctl start openvswitch.service
 
+default_router='ip route  | grep default | cut -d " " -f 3'
+alias px="ping $default_router"
 alias p2='n0 ping 1.1.1.2'
 alias p9='n0 ping 1.1.1.19'
-alias p="ping $link_remote_ip"
-alias px="ping $link_remote_ip"
+alias p="ping 192.168.31.1"
 alias p11='n0 ping 1.1.1.11'
 alias p5='n0 ping 1.1.1.5'
 alias p3='n0 ping 1.1.1.3'
@@ -461,7 +453,6 @@ alias vib='vi ~/Documents/bug.txt'
 alias vip='vi ~/Documents/private.txt'
 alias vig='sudo vim /boot/grub/grub.cfg'
 alias vig2='sudo vim /etc/default/grub'
-alias viu="vi $nfs_dir/uperf-1.0.5/workloads/netperf.xml"
 alias vit='vi ~/.tmux.conf'
 alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
@@ -507,14 +498,14 @@ alias tune1="ethtool -C $link adaptive-rx off rx-usecs 64 rx-frames 128 tx-usecs
 alias tune2="ethtool -C $link adaptive-rx on"
 alias tune3="ethtool -c $link"
 
-alias ethtool2=/home1/chrism/ethtool/ethtool
+alias ethtool2=/home/chrism/ethtool/ethtool
 
 # alias a=ovs-arp-responder.sh
 
 alias restart-virt='systemctl restart libvirtd.service'
 
 export PATH=$PATH:~/bin
-# export PATH=$PATH:/home1/chrism/dpdk-stable-17.11.2/install
+# export PATH=$PATH:/home/chrism/dpdk-stable-17.11.2/install
 export EDITOR=vim
 export TERM=xterm
 export TERM=xterm-256color
@@ -580,8 +571,8 @@ set +x
 
 function call
 {
-	make tags ARCH=x86 &
-	make cscope ARCH=x86
+	time make tags ARCH=x86 &
+	time make cscope ARCH=x86
 }
 
 function cone
@@ -785,7 +776,7 @@ function drop_tc
 
 function tc-drop
 {
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	$TC qdisc del dev $link ingress
 	ethtool -K $link hw-tc-offload on 
@@ -839,7 +830,7 @@ alias stap='/usr/local/bin/stap --all-modules -v'
 stap_str="--all-modules -d /bin/ping -d /lib/x86_64-linux-gnu/libc-2.27.so"
 STAP="/usr/local/bin/stap -v"
 
-# stap_str="-d /usr/lib64/libpthread-2.17.so -d //lib/modules/3.10.0-862.2.3.el7.x86_64.debug/extra/mlnx-ofa_kernel/drivers/infiniband/hw/mlx5/mlx5_ib.ko -d /usr/lib64/libibverbs.so.1.1.16.0  -d /usr/lib64/libmlx5.so.1.3.16.0  -d /home1/chrism/dpdk-18.05/build/app/testpmd"
+# stap_str="-d /usr/lib64/libpthread-2.17.so -d //lib/modules/3.10.0-862.2.3.el7.x86_64.debug/extra/mlnx-ofa_kernel/drivers/infiniband/hw/mlx5/mlx5_ib.ko -d /usr/lib64/libibverbs.so.1.1.16.0  -d /usr/lib64/libmlx5.so.1.3.16.0  -d /home/chrism/dpdk-18.05/build/app/testpmd"
 
 # make oldconfig
 # make prepare
@@ -1222,31 +1213,9 @@ alias b4=mybuild4
 # modprobe -v cls_flower tuple_offload=0
 function reprobe
 {
-# 	if (( centos72 == 1 )); then
-# 		tc2
-# 		del-br
-# 		sudo modprobe -r cls_flower
-# 		sudo /etc/init.d/openibd stop
-# 	fi
-	sudo /etc/init.d/openibd stop
-	sudo modprobe -r cls_flower
-	sudo modprobe -r mlx5_ib
-	sudo modprobe -r mlx5_core
-	sudo modprobe -v mlx5_core
-# 	sudo modprobe -v mlx5_ib
-
-# 	/etc/init.d/network restart
+	sudo modprobe -r iwlwifi
+	sudo modprobe -v iwlwifi
 }
-
-function reprobe-ib
-{
-	sudo modprobe -r mlx5_ib
-	sudo modprobe -r mlx5_core
-	sudo modprobe -v mlx5_core
-	sudo modprobe -v mlx5_ib
-}
-
-
 
 function build_vxlan
 {
@@ -1571,7 +1540,7 @@ cat << EOF > Makefile
 
 obj-m := ${p}.o
 CURRENT_PATH := \$(shell pwd)
-KERNEL_SRC :=/home1/chrism/linux
+KERNEL_SRC :=/home/chrism/linux
 
 KVERSION = \$(shell uname -r)
 obj-m = ${p}.o
@@ -1644,8 +1613,6 @@ function make-all
 	sudo make  modules_install -j 8
 	sudo make install
 	date > ~/end
-
-	/bin/rm -rf ~/.ccache
 }
 
 alias make-local='./configure; make -j 8; sudo make install'
@@ -1675,7 +1642,7 @@ function iperfs
 function ttl1
 {
 set -x
-	cd /home1/chrism/tc-scripts
+	cd /home/chrism/tc-scripts
 	p2p1
 	ethtool -K p2p1 hw-tc-offload on
 # 	ethtool -K p2p1 hw-tc-offload off
@@ -1688,7 +1655,7 @@ set +x
 function ttl2
 {
 set -x
-	cd /home1/chrism/tc-scripts
+	cd /home/chrism/tc-scripts
 	./tc qdisc del dev p2p1 ingress
 set +x
 }
@@ -1776,7 +1743,7 @@ function block
 {
 set -x
 	TC=tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	$TC qdisc del dev $link ingress
 
@@ -1798,9 +1765,9 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/tc-scripts/tc
+	TC=/home/chrism/tc-scripts/tc
 	TC=tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	$TC qdisc del dev $rep2 ingress
 	$TC qdisc del dev $link ingress
@@ -1837,9 +1804,9 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/tc-scripts/tc
+	TC=/home/chrism/tc-scripts/tc
 	TC=tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	$TC qdisc del dev $rep2 ingress
 	$TC qdisc del dev $link ingress
@@ -1877,7 +1844,7 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
@@ -1908,7 +1875,7 @@ set +x
 function tc-setup
 {
 	[[ $# != 1 ]] && return
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 	local link=$1
 	$TC qdisc del dev $link ingress > /dev/null 2>&1
@@ -1923,7 +1890,7 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
@@ -1955,7 +1922,7 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
@@ -1988,7 +1955,7 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
@@ -2028,7 +1995,7 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
@@ -2061,8 +2028,8 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/tc-scripts/tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/tc-scripts/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
@@ -2095,8 +2062,8 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/home1/chrism/tc-scripts/tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/tc-scripts/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress > /dev/null 2>&1
@@ -2136,7 +2103,7 @@ set -x
 	mirror=$rep1
 	dest=$rep3
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $dest ingress > /dev/null 2>&1
@@ -2185,7 +2152,7 @@ set -x
 	mirror=$rep1
 	dest=$rep3
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $dest ingress > /dev/null 2>&1
@@ -2238,7 +2205,7 @@ set -x
 	dest=$rep3
 
 	TC=tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	src_mac=02:25:d0:$host_num:01:02
 	dst_mac=02:25:d0:$host_num:01:03
@@ -2275,7 +2242,7 @@ set -x
 	dest=$rep3
 
 	TC=tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	src_mac=02:25:d0:$host_num:01:02
 	dst_mac=02:25:d0:$host_num:01:03
@@ -2335,7 +2302,7 @@ set -x
 	redirect=$rep2
 	mirror=$rep1
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $link ingress > /dev/null 2>&1
@@ -4139,7 +4106,7 @@ set +x
 function tcchange
 {
 	TC=tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 # 	tc filter change  dev $link prio 1 protocol ip handle 1 parent ffff: flower skip_hw src_mac e4:11:0:0:0:4 dst_mac e4:12:0:0:0:4 action drop
 	$TC filter change dev $link prio 1 protocol ip handle 1 parent ffff: flower skip_hw src_mac e4:11:00:00:00:04 dst_mac e4:12:00:00:00:04 action drop
 }
@@ -4147,7 +4114,7 @@ function tcchange
 function tcm
 {
 # 	tc2
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 	tc qdisc delete dev $link ingress > /dev/null 2>&1
 	sudo $TC qdisc add dev $link ingress
@@ -4294,7 +4261,7 @@ function tca1
 {
 set -x
 	TC=tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	time $TC action add action ok index 1 action ok index 2 action ok index 3
 	$TC action ls action gact
 	$TC actions flush action gact
@@ -4304,7 +4271,7 @@ set +x
 function tca3
 {
 set -x
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 	time tc action add action ok index 1
 	time tc action add action ok index 2
@@ -4362,7 +4329,7 @@ set -x
 # 	local l=$rep2
 	local l=$link
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 # 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
@@ -4379,7 +4346,7 @@ set +x
 function tca2
 {
 set -x
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	$TC actions flush action gact
 	$TC actions add action pass index 1
@@ -4400,7 +4367,7 @@ set -x
 
 	file=/tmp/a.txt
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 # 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
@@ -4422,7 +4389,7 @@ set -x
 	file=/tmp/b.txt
 
 	TC=/auto/mtbcswgwork/chrism/iproute2/tc/tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	sudo $TC qdisc del dev $link ingress > /dev/null 2>&1
@@ -4445,7 +4412,7 @@ set -x
 
 	TC=tc
 	TC=/auto/mtbcswgwork/chrism/iproute2/tc/tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 # 	$linux_dir/tools/testing/selftests/tc-testing/tdc_batch.py -n $n $link $file
 # 	sudo ~chrism/bin/tdc_batch.py -s -n $n $link $file
@@ -4463,7 +4430,7 @@ set -x
 
 	TC=tc
 	TC=/auto/mtbcswgwork/chrism/iproute2/tc/tc
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 
 	sudo $TC qdisc del dev $link ingress > /dev/null 2>&1
 # 	sudo $TC qdisc add dev $link ingress
@@ -4636,7 +4603,7 @@ set -x
 set +x
 }
 
-jd_dir=/home1/chrism/backport-driver
+jd_dir=/home/chrism/backport-driver
 function gf
 {
 set -x
@@ -5878,7 +5845,7 @@ function fetch
 function tcs
 {
 	[[ $# != 1 ]] && return
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 	$TC -s filter show dev $1 root
 }
@@ -6100,7 +6067,7 @@ function centos-uninstall
 	kernel=3.10.0-693.el7.x86_64
 	kernel=3.10.0-693.21.3.el7.x86_64
 
-	cd /home1/mi/rpmbuild/RPMS/x86_64
+	cd /home/mi/rpmbuild/RPMS/x86_64
 	sudo rpm -e kernel-headers-$kernel --nodeps
 	sudo rpm -e kernel-debuginfo-common-x86_64-$kernel --nodeps
 	sudo rpm -e kernel-tools-$kernel --nodeps
@@ -6109,7 +6076,7 @@ function centos-uninstall
 
 function centos-install
 {
-	cd /home1/mi/rpmbuild/RPMS/x86_64
+	cd /home/mi/rpmbuild/RPMS/x86_64
 	sudo rpm -ivh kernel-*.rpm --force
 }
 
@@ -6117,8 +6084,8 @@ function cp1
 {
 set -x
 	[[ $# != 1 ]] && return
-# 	cp /home1/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64/$1 $1
-	cp /home1/chrism/linux/$1 $1
+# 	cp /home/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64/$1 $1
+	cp /home/chrism/linux/$1 $1
 set +x
 }
 
@@ -6128,9 +6095,9 @@ function cp2
 	local d d1 d2
 
 	for d in net/sched include/uapi/linux/tc_act include/net/tc_act; do
-# 		d1=/home1/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64/$d
-		d1=/home1/chrism/linux/$d
-		d2=/home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/$d
+# 		d1=/home/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64/$d
+		d1=/home/chrism/linux/$d
+		d2=/home/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/$d
 		for i in $d1/*; do
 			file=$(basename $i)
 			if [[ ! -f $d2/$file ]]; then
@@ -6294,8 +6261,8 @@ set -x
 set +x
 }
 
-pg_linux=/home1/chrism/linux
-uname -r | grep 3.10.0 > /dev/null && pg_linux=/home1/chrism/linux-4.19
+pg_linux=/home/chrism/linux
+uname -r | grep 3.10.0 > /dev/null && pg_linux=/home/chrism/linux-4.19
 alias gen='$pg_linux/samples/pktgen/pktgen_sample01_simple.sh'
 alias genm='$pg_linux/samples/pktgen/pktgen_sample04_many_flows.sh'
 alias gen2='gen -i $vf2 -m 02:25:d0:13:01:03 -d 1.1.1.23'
@@ -6425,7 +6392,7 @@ set -x
 	ip2="2001:0db8:85a3::8a2e:0370:7335"
 	ip=ipv6
 
-	TC=/home1/chrism/iproute2/tc/tc
+	TC=/home/chrism/iproute2/tc/tc
 	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
@@ -6569,7 +6536,7 @@ function diff1
 {
 set -x
 	local dir=drivers/net/ethernet/mellanox/mlx5/core/
-	colordiff -u /home1/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/$dir/$1 /home1/chrism/linux-4.19/$dir/$1 | less -r
+	colordiff -u /home/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64/$dir/$1 /home/chrism/linux-4.19/$dir/$1 | less -r
 set +x
 }
 
@@ -6701,6 +6668,7 @@ alias resolv='/bin/rm -rf /etc/resolv.conf; ln -s  /run/resolvconf/resolv.conf  
 alias trace="/$images/chrism/bcc/tools/trace.py"
 alias execsnoop="/$images/chrism/bcc/tools/execsnoop.py"
 
+alias smb2='cd /home/chrism/bcc/examples/tracing'
 alias smb='cd /home/chrism/bcc/tools'
 
 function build-bcc
@@ -6717,4 +6685,12 @@ function github-push
 	git remote rm origin
 	git remote add origin git@github.com:mishuang2017/sm.git
 	git push -u origin master
+}
+
+alias iwl='sml; cd drivers/net/wireless/intel/iwlwifi'
+
+function vpn
+{
+	sudo apt remove network-manager-openconnect-gnome
+	sudo apt install network-manager-openconnect-gnome
 }
