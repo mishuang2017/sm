@@ -21,3 +21,7 @@ dpkg-query -L crash
 usermod -aG sudo chrism
 
 # edit /etc/vim/vimrc to uncomment autocmd to remember last position
+
+# install broadcom wifi driver
+sudo apt-get update
+sudo apt-get install bcmwl-kernel-source
