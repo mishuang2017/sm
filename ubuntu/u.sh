@@ -25,3 +25,5 @@ usermod -aG sudo chrism
 # install broadcom wifi driver
 sudo apt-get update
 sudo apt-get install bcmwl-kernel-source
+
+# ctrl + shit + M to show konsole menu bar
