@@ -40,6 +40,7 @@ export INSTALL_MOD_STRIP=1
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib
 
 linux_dir=/home/chrism/linux
+linux_dir=$(readlink /lib/modules/$(uname -r)/build)
 link=wlan0
 
 # export DISPLAY=:0.0
@@ -507,8 +508,8 @@ alias restart-virt='systemctl restart libvirtd.service'
 export PATH=$PATH:~/bin
 # export PATH=$PATH:/home/chrism/dpdk-stable-17.11.2/install
 export EDITOR=vim
-export TERM=xterm
 export TERM=xterm-256color
+export TERM=xterm
 unset PROMPT_COMMAND
 
 n_time=20
