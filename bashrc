@@ -21,6 +21,7 @@ ports=1
 
 # Append to history
 shopt -s histappend
+shopt -s autocd
 ofed=0
 uname -r | grep 3.10 > /dev/null 2>&1 && ofed=1
 
@@ -403,10 +404,11 @@ alias gg='git grep -n'
 alias dmesg='dmesg -T'
 
 alias git-log='git log --tags --source'
-alias v4.20='git checkout v4.20; git checkout -b v4.20'
-alias v4.10='git checkout v4.10; git checkout -b v4.10'
-alias v4.8='git checkout v4.8; git checkout -b v4.8'
-alias v4.4='git checkout v4.4; git checkout -b v4.4'
+alias v4.20='git checkout v4.20; git checkout -b 4.20'
+alias v4.10='git checkout v4.10; git checkout -b 4.10'
+alias v4.8='git checkout v4.8; git checkout -b 4.8'
+alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
+alias v4.4='git checkout v4.4; git checkout -b 4.4'
 alias ab='rej; git am --abort'
 alias gr='git add -u; git am --resolved'
 alias gar='git add -A; git am --resolved'
@@ -459,6 +461,7 @@ alias w4='watch -d -n 1 sar -n DEV 1'
 # pidstat -t -p 3794
 alias ct=conntrack
 alias rej='find . -name *rej -exec rm {} \;'
+alias f='find . -name'
 
 alias up="mlxlink -d $pci -p 1 -a UP"
 alias down="mlxlink -d $pci -p 1 -a DN"
@@ -7761,4 +7764,24 @@ set -x
 	/bin/rm -rf  localtime
 	ln -s ../usr/share/zoneinfo/Asia/Shanghai  localtime
 set +x
+}
+
+# dos2unix -o *
+function dos
+{
+	local name
+	local num=11
+	for i in $(seq $num); do
+		name=$(printf "%02d_$num" $i)
+		echo $name
+		dos2unix -n *${name}* ${name}.patch
+	done
+}
+
+b=$(test -f .git/index > /dev/null 2>&1 && git branch | grep \* | cut -d ' ' -f2)
+
+function branch
+{
+	test -f .git/index > /dev/null 2>&1 || return
+	git branch | grep \* | cut -d ' ' -f2
 }
