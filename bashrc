@@ -7662,6 +7662,16 @@ BCC_DIR=/images/chrism/bcc
 alias trace="$BCC_DIR/tools/trace.py"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
 
+function tracer
+{
+	[[ $# != 1 ]] && return
+	local file=/tmp/1.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace.py 'r::$1 "%x", retval'
+EOF
+	bash $file
+}
+
 function bcc-mlx5e_xmit
 {
 	 trace -K -U 'mlx5e_xmit "%s", arg2'
