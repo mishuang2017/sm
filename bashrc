@@ -7665,10 +7665,11 @@ alias execsnoop="$BCC_DIR/tools/execsnoop.py"
 function tracer
 {
 	[[ $# != 1 ]] && return
-	local file=/tmp/1.sh
+	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
 $BCC_DIR/tools/trace.py 'r::$1 "%x", retval'
 EOF
+	echo $file
 	bash $file
 }
 
