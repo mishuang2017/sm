@@ -425,6 +425,7 @@ alias git1='git slog v4.11.. drivers/net/ethernet/mellanox/mlx5/core/'
 alias gita='git log --tags --source --author="chrism@mellanox.com"'
 alias git-linux-origin='git remote set-url origin ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias git-linus='git remote add linus git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git; git fetch --tags linus'
+alias git-vlad='git remote add vlad git@github.com:vbuslov/linux.git'
 # git checkout v4.12
 
 # for legacy
@@ -533,12 +534,10 @@ alias smm5="cd /images/chrism/mlnx-ofa_kernel-4.5"
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
-alias ovs="cd $nfs_dir/ovs/openvswitch"
 alias ovs="cd /$images/chrism/openvswitch"
 alias smo="cd /$images/chrism/openvswitch"
 alias smt="cd /$images/chrism/ovs-tests"
 alias cfo="cd /$images/chrism/openvswitch; cscope -d"
-alias ovs2="cd $nfs_dir/ovs/test/ovs-tests"
 alias ipa='ip a'
 alias ipl='ip l'
 alias ipal='ip a l'
@@ -7661,13 +7660,14 @@ function bcc1
 BCC_DIR=/images/chrism/bcc
 alias trace="$BCC_DIR/tools/trace.py"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
+alias funccount="$BCC_DIR/tools/funccount.py"
 
 function tracer
 {
 	[[ $# != 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py 'r::$1 "%x", retval'
+$BCC_DIR/tools/trace.py 'r::$1 "%lx", retval'
 EOF
 	echo $file
 	bash $file
