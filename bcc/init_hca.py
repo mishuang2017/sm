@@ -77,7 +77,7 @@ print("%-25s%-18s%-15s%-10s%-10s" % ("function", "timestamp", "PCI", "func_id", 
 def print_give_pages(cpu, data, size):
     event = b["events"].event(data)
     print("%-25s" % event.name, end="")
-    if event.name.find('ret') != -1:
+    if '_ret' in event.name:
         print("%-18.4f" % (float(event.ts) / 1000000))
     else:
         print("%-18.4f" % (float(event.ts) / 1000000), end="")
