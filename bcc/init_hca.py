@@ -18,11 +18,7 @@ struct data_t {
     int npages;
 };
 
-struct mlx5_core_dev {
-    struct pci_dev *pdev;
-};
-
-void kprobe__give_pages(struct pt_regs *ctx, void *dev, u16 func_id, int npages) {
+void kprobe__give_pages(struct pt_regs *ctx, struct pci_dev **dev, u16 func_id, int npages) {
     u64 tsp = bpf_ktime_get_ns();
     struct data_t data = {};
     char name[] = "give_pages";
@@ -31,7 +27,7 @@ void kprobe__give_pages(struct pt_regs *ctx, void *dev, u16 func_id, int npages)
     data.func_id = func_id;
     data.ts = tsp / 1000;
     bpf_probe_read_str(&data.name, sizeof(data.name), name);
-    bpf_probe_read_str(&data.pci, sizeof(data.pci), ((struct mlx5_core_dev *)dev)->pdev->dev.kobj.name);
+    bpf_probe_read_str(&data.pci, sizeof(data.pci), (*dev)->dev.kobj.name);
 
     events.perf_submit(ctx, &data, sizeof(data));
 }
@@ -47,14 +43,14 @@ void kretprobe__give_pages(struct pt_regs *ctx) {
     events.perf_submit(ctx, &data, sizeof(data));
 }
 
-void kprobe__mlx5_cmd_init_hca(struct pt_regs *ctx, void *dev) {
+void kprobe__mlx5_cmd_init_hca(struct pt_regs *ctx, struct pci_dev **dev) {
     u64 tsp = bpf_ktime_get_ns();
     struct data_t data = {};
     char name[] = "mlx5_cmd_init_hca";
 
     data.ts = tsp / 1000;
     bpf_probe_read_str(&data.name, sizeof(data.name), name);
-    bpf_probe_read_str(&data.pci, sizeof(data.pci), ((struct mlx5_core_dev *)dev)->pdev->dev.kobj.name);
+    bpf_probe_read_str(&data.pci, sizeof(data.pci), (*dev)->dev.kobj.name);
 
     events.perf_submit(ctx, &data, sizeof(data));
 }
