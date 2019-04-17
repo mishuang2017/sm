@@ -27,3 +27,8 @@ sudo apt-get update
 sudo apt-get install bcmwl-kernel-source
 
 # ctrl + shit + M to show konsole menu bar
+
+# kdump
+# apt-get install linux-crashdump
+
+# /usr/sbin/kdump-config

@@ -22,6 +22,7 @@ images=home
 
 # Append to history
 shopt -s histappend
+shopt -s autocd
 ofed=0
 uname -r | grep 3.10 > /dev/null 2>&1 && ofed=1
 
@@ -40,7 +41,6 @@ export INSTALL_MOD_STRIP=1
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib
 
 linux_dir=/home/chrism/linux
-linux_dir=$(readlink /lib/modules/$(uname -r)/build)
 link=wlan0
 
 # export DISPLAY=:0.0
@@ -3882,19 +3882,31 @@ function stop-vm
 function grub
 {
 set -x
-	[[ $# == 0 ]] && kernel=0 || kernel=$1
-	file=/etc/default/grub
-	MKCONFIG=grub-mkconfig
-# 	[[ -f /usr/local/sbin/grub-mkconfig ]] && MKCONFIG=/usr/local/sbin/grub-mkconfig
-	sudo sed -i '/GRUB_DEFAULT/d' $file
-# 	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
-	sudo echo "GRUB_DEFAULT=$kernel" >> $file
+        local kernel
+        [[ $# == 1 ]] && kernel=$1
+        file=/etc/default/grub
+        MKCONFIG=grub-mkconfig
+#       [[ -f /usr/local/sbin/grub-mkconfig ]] && MKCONFIG=/usr/local/sbin/grub-mkconfig
+        sudo sed -i '/GRUB_DEFAULT/d' $file
+        sudo sed -i '/GRUB_SAVEDEFAULT/d' $file
+        sudo sed -i '/GRUB_CMDLINE_LINUX/d' $file
+#       sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
 
-	sudo /bin/rm -rf /boot/*.old
-	sudo $MKCONFIG -o /boot/grub/grub.cfg
+        sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+
+        if [[ $# == 0 ]]; then
+                sudo echo "GRUB_DEFAULT=saved" >> $file
+                sudo echo "GRUB_SAVEDEFAULT=true" >> $file
+        else
+                sudo echo "GRUB_DEFAULT=$kernel" >> $file
+        fi
+
+        sudo /bin/rm -rf /boot/*.old
+        sudo mv /boot/grub/grub.cfg /boot/grub/grub.cfg.orig
+        sudo $MKCONFIG -o /boot/grub/grub.cfg
 
 set +x
-	sudo cat $file
+        sudo cat $file
 }
 
 #======================roi========================
