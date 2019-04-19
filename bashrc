@@ -383,8 +383,8 @@ alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/li
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
 
-alias clone-ubuntu-xenial='git clone git://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/xenial'
-alias clone-ubuntu='git clone git://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/bionic'
+alias clone-ubuntu-xenial='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-xential.git'
+alias clone-ubuntu='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-bionic.git'
 # https://packages.ubuntu.com/source/xenial/linux
 # http://archive.ubuntu.com/ubuntu/pool/main/l/linux/linux_4.4.0.orig.tar.gz
 # http://archive.ubuntu.com/ubuntu/pool/main/l/linux/linux_4.4.0-145.171.diff.gz
@@ -6423,7 +6423,7 @@ alias ofed2='./ofed_scripts/ofed_get_patches.sh'
 function ofed3
 {
 #	[[ $# == 0 ]] && return
-	git checkout mlnx_ofed_4_6
+	git checkout mlnx_ofed_4_6_vz
 	./ofed_scripts/backports_copy_patches.sh
 	git add backports
 	git commit -s backports/
@@ -7851,6 +7851,7 @@ set -x
 
 	local cmdline=$(cat /proc/cmdline | cut -d " " -f 2-)
 	sudo kexec -l /boot/vmlinuz-$uname --append="BOOT_IMAGE=/vmlinuz-$uname $cmdline" --initrd=/boot/initrd.img-$uname
+	return
 	sudo kexec -e
 set +x
 }
@@ -7865,7 +7866,8 @@ set -x
 	sudo sed -i '/GRUB_DEFAULT/d' $file
 	sudo sed -i '/GRUB_SAVEDEFAULT/d' $file
 	sudo sed -i '/GRUB_CMDLINE_LINUX/d' $file
-	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc\"" >> $file
+	# for crashkernel, configure /etc/default/grub.d/kdump-tools.cfg
 
 	if [[ $# == 0 ]]; then
 		sudo echo "GRUB_DEFAULT=saved" >> $file
