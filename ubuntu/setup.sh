@@ -22,3 +22,4 @@ sudo apt-get -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev lib
 apt install linux-crashdump
 # dpkg-reconfigure kdump-tools
 # /usr/sbin/kdump-config
+# /etc/default/grub.d/kdump-tools.cfg

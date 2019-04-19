@@ -106,22 +106,16 @@ domain lab.mtl.com server 10.12.68.102
 EOF
 
 	echo lab.mtl.com > /etc/defaultdomain
-
-	for i in nfs-client.target ypbind.service autofs.service; do
-		systemctl enable $i
-		sleep 1
-		systemctl start $i
-		sleep 1
-	done
-
-	yptest | head -n 20
 }
 
 config-nis
 
-apt -y install nis yp-tools autofs nfs-client
+apt -y install yp-tools
+apt -y install nis
+apt -y install nfs-common
+apt -y install autofs
 
-for i in nis autofs nfs-client.targ; do
+for i in nis autofs; do
 	systemctl enable $i
 	systemctl start $i
 done
