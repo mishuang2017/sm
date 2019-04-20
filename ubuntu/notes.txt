@@ -5,6 +5,8 @@ dpkg-query -l | grep crash
 
 dpkg-query -S /usr/bin/crash
 
+dpkg -i linux-image-unsigned-4.18.0-17-generic-dbgsym_4.18.0-17.18_amd64.ddeb
+
 # add a user to sudoer
 usermod -aG sudo chrism
 
@@ -15,3 +17,4 @@ sudo apt-get update
 sudo apt-get install bcmwl-kernel-source
 
 # ctrl + shit + M to show konsole menu bar
+
