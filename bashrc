@@ -101,7 +101,7 @@ elif (( rh == 0 )); then
 fi
 
 # export DISPLAY=:0.0
-export DISPLAY=MTBC-CHRISM:0.0
+# export DISPLAY=MTBC-CHRISM:0.0
 
 #	 --add-kernel-support		    --upstream-libs --dpdk
 # export DPDK_DIR=/images/chrism/dpdk-stable-17.11.2
@@ -7891,3 +7891,5 @@ function disable-gdm3
 	systemctl disable gdm3
 	systemctl set-default multi-user.target
 }
+
+[[ "$USER" == "chrism" ]] && alias s='sudo su -'
