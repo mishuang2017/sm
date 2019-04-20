@@ -7895,14 +7895,8 @@ function disable-gdm3
 
 function ln-crash
 {
-set -x
 	cd $crash_dir
 	local dir=$(ls -td $(date +%Y)*/ | head -1)
 	local n=$(ls vmcore* | wc -l)
-	if [[ -f ${dir}dump* ]]; then
-		echo "no vmcore"
-	else
-		ln -s ${dir}dump* vmcore.$n
-	fi
-set +x
+	ln -s ${dir}dump* vmcore.$n
 }
