@@ -23,3 +23,4 @@ apt install linux-crashdump
 # dpkg-reconfigure kdump-tools
 # /usr/sbin/kdump-config
 # /etc/default/grub.d/kdump-tools.cfg
+# /etc/default/kdump-tools
