@@ -7833,6 +7833,7 @@ function vt
 [[ -f /usr/bin/lsb_release ]] || return
 
 alias vig='sudo vim /boot/grub/grub.cfg'
+[[ "$USER" == "chrism" ]] && alias s='sudo su -'
 
 function root-login
 {
@@ -7892,4 +7893,16 @@ function disable-gdm3
 	systemctl set-default multi-user.target
 }
 
-[[ "$USER" == "chrism" ]] && alias s='sudo su -'
+function ln-crash
+{
+set -x
+	cd $crash_dir
+	local dir=$(ls -td $(date +%Y)*/ | head -1)
+	local n=$(ls vmcore* | wc -l)
+	if [[ -f ${dir}dump* ]]; then
+		echo "no vmcore"
+	else
+		ln -s ${dir}dump* vmcore.$n
+	fi
+set +x
+}
