@@ -24,3 +24,6 @@ apt install linux-crashdump
 # /usr/sbin/kdump-config
 # /etc/default/grub.d/kdump-tools.cfg
 # /etc/default/kdump-tools
+# /etc/sysctl.conf
+#	vm.min_free_kbytes=65536
+# sysctl vm.min_free_kbytes

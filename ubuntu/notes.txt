@@ -18,3 +18,6 @@ sudo apt-get install bcmwl-kernel-source
 
 # ctrl + shit + M to show konsole menu bar
 
+http://ddebs.ubuntu.com/pool/main/l/linux/
+
+/usr/lib/debug/boot
