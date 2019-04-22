@@ -283,6 +283,11 @@ alias crash1="$CRASH -i /root/.crash $VMLINUX"
 alias c=crash1
 
 # -d8 to add debug info
+if (( centos == 1 && jd_kernel == 0 )); then
+	VMLINUX=/usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux
+	alias c="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
+fi
+
 alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
 alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
 alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 $VMLINUX"
@@ -294,20 +299,6 @@ alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
 alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
 alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
 
-if (( centos == 1 && jd_kernel == 0 )); then
-	alias c="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
-
-	alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-	alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 /usr/lib/debug/lib/modules/3.10.0-${unum}.el7.x86_64/vmlinux"
-fi
 
 alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
 alias jd-vxlan="~chrism/bin/ct_lots_rule_vxlan.sh $rep2 $vx"
