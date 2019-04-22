@@ -101,7 +101,6 @@ elif (( rh == 0 )); then
 fi
 
 # export DISPLAY=:0.0
-# export DISPLAY=MTBC-CHRISM:0.0
 
 #	 --add-kernel-support		    --upstream-libs --dpdk
 # export DPDK_DIR=/images/chrism/dpdk-stable-17.11.2
@@ -135,7 +134,9 @@ images=images
 
 if (( host_num == 9 )); then
 	link=ens9
-elif (( host_num == 13 || host_num == 5)); then
+elif (( host_num == 13 )); then
+	export DISPLAY=MTBC-CHRISM:0.0
+
 	link=enp4s0f0
 	link2=enp4s0f1
 	link2_new=${link2}_65534
@@ -148,7 +149,9 @@ elif (( host_num == 13 || host_num == 5)); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-elif (( host_num == 14 || host_num == 6 )); then
+elif (( host_num == 14 )); then
+	export DISPLAY=MTBC-CHRISM:0.0
+
 	link=enp4s0f0
 	link2=enp4s0f1
 	link_remote_ip=192.168.1.13
