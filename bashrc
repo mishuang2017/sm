@@ -72,10 +72,10 @@ elif [[ "$(hostname -s)" == "dev-r630-03" ]]; then
 	host_num=13
 elif [[ "$(hostname -s)" == "dev-r630-04" ]]; then
 	host_num=14
-elif [[ "$(hostname -s)" == "gen-h-vrt-011" ]]; then
-	host_num=11
-elif [[ "$(hostname -s)" == "gen-h-vrt-012" ]]; then
-	host_num=12
+elif [[ "$(hostname -s)" == "gen-h-vrt-021" ]]; then
+	host_num=21
+elif [[ "$(hostname -s)" == "gen-h-vrt-022" ]]; then
+	host_num=22
 elif [[ "$(hostname -s)" == "gen-h-vrt-027" ]]; then
 	host_num=27
 elif [[ "$(hostname -s)" == "gen-h-vrt-028" ]]; then
@@ -175,10 +175,12 @@ elif (( host_num == 28 )); then
 	vf2=ens1f3
 	vf3=ens1f4
 
-elif (( host_num == 11 )); then
-	link=enp66s0f0
-elif (( host_num == 12 )); then
-	link=enp66s0f0
+elif (( host_num == 21 )); then
+	link=ens1f0
+	link2=ens1f1
+elif (( host_num == 22 )); then
+	link=ens1f0
+	link2=ens1f1
 elif (( host_num == 15 )); then
 	link=ens9
 elif (( host_num == 16 )); then
