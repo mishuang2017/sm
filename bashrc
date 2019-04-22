@@ -4369,7 +4369,7 @@ function start-switchdev-all
 #	enable-multipath
 #	ifconfig $link2 up
 
-#	start-ovs
+	start-ovs
 	for i in $(seq $ports); do
 		start-switchdev $i
 	done
@@ -6422,14 +6422,15 @@ alias ofed2='./ofed_scripts/ofed_get_patches.sh'
 
 function ofed3
 {
-#	[[ $# == 0 ]] && return
-	git checkout mlnx_ofed_4_6_vz
+	[[ $# == 0 ]] && return
+
+	git checkout $1
 	./ofed_scripts/backports_copy_patches.sh
 	git add backports
 	git commit -s backports/
 }
 
-alias ofed='rej; git add -u; ofed1; ofed2; ofed3'
+alias ofed='rej; git add -u; ofed1; ofed2'
 
 alias ofed-meta='./devtools/add_metadata.sh'
 
