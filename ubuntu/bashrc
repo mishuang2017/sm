@@ -6707,3 +6707,5 @@ function vpn
 	sudo apt remove network-manager-openconnect-gnome
 	sudo apt install network-manager-openconnect-gnome
 }
+
+alias crash1="$CRASH -i /root/.crash /usr/lib/debug/boot/vmlinux-$(uname r)"

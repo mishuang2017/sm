@@ -278,22 +278,21 @@ alias restart-network='/etc/init.d/network restart'
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 
 CRASH=/$images/chrism/crash/crash
-
-alias crash1="$CRASH -i /root/.crash $linux_dir/vmlinux"
+VMLINUX=$linux_dir/vmlinux
+alias crash1="$CRASH -i /root/.crash $VMLINUX"
 alias c=crash1
 
 # -d8 to add debug info
-alias crash="$CRASH -i ~/.crash"
-alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $linux_dir/vmlinux"
-alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $linux_dir/vmlinux"
-alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 $linux_dir/vmlinux"
-alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 $linux_dir/vmlinux"
-alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 $linux_dir/vmlinux"
-alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 $linux_dir/vmlinux"
-alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $linux_dir/vmlinux"
-alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $linux_dir/vmlinux"
-alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $linux_dir/vmlinux"
-alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $linux_dir/vmlinux"
+alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
+alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
+alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 $VMLINUX"
+alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 $VMLINUX"
+alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 $VMLINUX"
+alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 $VMLINUX"
+alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $VMLINUX"
+alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
+alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
+alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
 
 if (( centos == 1 && jd_kernel == 0 )); then
 	alias c="$CRASH -i /root/.crash /usr/lib/debug/lib/modules/$(uname -r)/vmlinux"
@@ -7901,3 +7900,17 @@ function ln-crash
 	local n=$(ls vmcore* | wc -l)
 	ln -s ${dir}dump* vmcore.$n
 }
+
+VMLINUX=/usr/lib/debug/boot/vmlinux-$(uname -r)
+alias crash1="$CRASH -i /root/.crash $VMLINUX"
+
+alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
+alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
+alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 $VMLINUX"
+alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 $VMLINUX"
+alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 $VMLINUX"
+alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 $VMLINUX"
+alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $VMLINUX"
+alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
+alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
+alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
