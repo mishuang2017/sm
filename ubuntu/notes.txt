@@ -21,3 +21,5 @@ sudo apt-get install bcmwl-kernel-source
 http://ddebs.ubuntu.com/pool/main/l/linux/
 
 /usr/lib/debug/boot
+
+https://wiki.ubuntu.com/Debug%20Symbol%20Packages
