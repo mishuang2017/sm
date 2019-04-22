@@ -32,4 +32,4 @@ deb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted universe
 sudo apt install ubuntu-dbgsym-keyring
 
 sudo apt-get update
-sudo apt -y install linux-image-4.15.0-48-generic-dbgsym
+sudo apt -y install linux-image-$(uname -r)-dbgsym
