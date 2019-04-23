@@ -7910,3 +7910,15 @@ alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $VMLINUX"
 alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
 alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
 alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
+
+function install-dbgsym
+{
+	echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse
+	deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse
+	deb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
+
+	sudo apt install ubuntu-dbgsym-keyring
+
+	sudo apt-get update
+	sudo apt -y install linux-image-$(uname -r)-dbgsym
+}
