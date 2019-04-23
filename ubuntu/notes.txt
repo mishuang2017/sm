@@ -35,3 +35,6 @@ sudo apt-get update
 sudo apt -y install linux-image-$(uname -r)-dbgsym
 
 sudo apt-get install linux-source
+
+# install 4.18 kernel on 18.04.2
+sudo apt install linux-generic-hwe-18.04
