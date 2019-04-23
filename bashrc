@@ -7911,6 +7911,8 @@ alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
 alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
 alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
 
+alias ls='ls --color=auto'
+
 function install-dbgsym
 {
 	echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse
