@@ -72,8 +72,8 @@ elif [[ "$(hostname -s)" == "dev-r630-03" ]]; then
 	host_num=13
 elif [[ "$(hostname -s)" == "dev-r630-04" ]]; then
 	host_num=14
-elif [[ "$(hostname -s)" == "gen-h-vrt-021" ]]; then
-	host_num=21
+elif [[ "$(hostname -s)" == "r-vrt-24-120" ]]; then
+	host_num=24
 elif [[ "$(hostname -s)" == "gen-h-vrt-022" ]]; then
 	host_num=22
 elif [[ "$(hostname -s)" == "gen-h-vrt-027" ]]; then
@@ -90,12 +90,6 @@ elif [[ "$(hostname -s)" == "dev-chrism-vm4" ]]; then
 	host_num=18
 elif [[ "$(hostname -s)" == "qa-h-vrt-089" ]]; then
 	host_num=89
-elif [[ "$(hostname -s)" == "reg-l-vrt-224" ]]; then
-	host_num=24
-	crash_dir=/images/crash
-elif [[ "$(hostname -s)" == "gen-h-vrt-006" ]]; then
-	host_num=6
-	crash_dir=/images/crash
 elif (( rh == 0 )); then
 	host_num=9
 fi
@@ -163,9 +157,8 @@ elif (( host_num == 14 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-elif (( host_num == 89 )); then
-	link=enp5s0f0
-	link2=enp5s0f1
+elif (( host_num == 24 )); then
+	link=ens1f0
 
 elif (( host_num == 28 )); then
 	link=ens1f0
@@ -600,6 +593,7 @@ alias tcs-arp-rep="tc filter show dev $rep1 protocol arp parent ffff:"
 
 alias suc='[[ $UID == 0 ]] && su - chrism'
 alias s=suc
+[[ "$USER" == "chrism" ]] && alias s='sudo su -'
 alias s2='su - mi'
 alias s0='[[ $UID == 0 ]] && su chrism'
 alias e=exit
@@ -6917,7 +6911,7 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=./test-tc-insert-rule-without-match.sh
+test1=./test-eswitch-no-carrier.sh
 alias test1="./$test1"
 alias vi-test1="vi ./$test1"
 
@@ -7792,7 +7786,6 @@ function vt
 [[ -f /usr/bin/lsb_release ]] || return
 
 alias vig='sudo vim /boot/grub/grub.cfg'
-[[ "$USER" == "chrism" ]] && alias s='sudo su -'
 
 function root-login
 {
