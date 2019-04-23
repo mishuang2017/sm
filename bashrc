@@ -4025,28 +4025,6 @@ set -x
 set +x
 }
 
-function del_ovs2
-{
-set -x
-	vs del-port $br vnet1
-	vs del-port $br vnet3
-	vs del-br $br
-
-	brctl delif virbr0 vnet1
-	brctl delif virbr0 vnet3
-set +x
-}
-
-function start_ovs2
-{
-set -x
-	vs add-br $br
-
-	vs add-port $br vnet1
-	vs add-port $br vnet3
-set +x
-}
-
 function vlan-ns
 {
 set -x
@@ -5829,16 +5807,6 @@ function macvlan2
 	done
 }
 
-function brctl-virbr
-{
-	for (( i = 0; i < 2; i++)); do
-		brctl delif br2 vnet$i
-	done
-	for (( i = 0; i < 2; i++)); do
-		brctl addif br0 vnet$i
-	done
-}
-
 function vcpu
 {
 	[[ $# != 1 ]] && return
@@ -6154,14 +6122,9 @@ function sub
 	printf -v c "%#x" $[a-b] ; echo $c
 }
 
-function addbr1
+function enable-br
 {
-	brctl addbr br1
-	ifconfig br1 up
-	brctl addif br1 $rep1
-	brctl addif br1 $rep2
-	brctl addif br1 $rep3
-	brctl addif br1 $rep4
+	echo 0 > /proc/sys/net/bridge/bridge-nf-call-iptables
 }
 
 ###ofed###
