@@ -94,6 +94,7 @@ elif (( rh == 0 )); then
 	host_num=9
 fi
 
+export LC_ALL=en_US.UTF-8
 # export DISPLAY=:0.0
 
 #	 --add-kernel-support		    --upstream-libs --dpdk
