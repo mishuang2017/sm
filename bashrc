@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=2
 vni=200
 vni=100
 vid=5
