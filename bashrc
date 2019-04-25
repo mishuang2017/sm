@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=2
+numvfs=3
 vni=200
 vni=100
 vid=5
@@ -72,14 +72,10 @@ elif [[ "$(hostname -s)" == "dev-r630-03" ]]; then
 	host_num=13
 elif [[ "$(hostname -s)" == "dev-r630-04" ]]; then
 	host_num=14
-elif [[ "$(hostname -s)" == "r-vrt-24-120" ]]; then
-	host_num=24
-elif [[ "$(hostname -s)" == "gen-h-vrt-022" ]]; then
-	host_num=22
-elif [[ "$(hostname -s)" == "gen-h-vrt-027" ]]; then
-	host_num=27
-elif [[ "$(hostname -s)" == "gen-h-vrt-028" ]]; then
-	host_num=28
+elif [[ "$(hostname -s)" == "gen-h-vrt-015" ]]; then
+	host_num=5
+elif [[ "$(hostname -s)" == "gen-h-vrt-016" ]]; then
+	host_num=6
 elif [[ "$(hostname -s)" == "dev-chrism-vm1" ]]; then
 	host_num=15
 elif [[ "$(hostname -s)" == "dev-chrism-vm2" ]]; then
@@ -88,8 +84,6 @@ elif [[ "$(hostname -s)" == "dev-chrism-vm3" ]]; then
 	host_num=17
 elif [[ "$(hostname -s)" == "dev-chrism-vm4" ]]; then
 	host_num=18
-elif [[ "$(hostname -s)" == "qa-h-vrt-089" ]]; then
-	host_num=89
 elif (( rh == 0 )); then
 	host_num=9
 fi
@@ -158,26 +152,12 @@ elif (( host_num == 14 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-elif (( host_num == 24 )); then
-	link=ens1f0
-
-elif (( host_num == 28 )); then
-	link=ens1f0
-	link2=ens1f1
-	link_remote_ip=192.168.1.27
-	link_remote_ip2=192.168.2.27
-	link_remote_ipv6=1::27
-
-	vf1=ens1f2
-	vf2=ens1f3
-	vf3=ens1f4
-
-elif (( host_num == 21 )); then
-	link=ens1f0
-	link2=ens1f1
-elif (( host_num == 22 )); then
-	link=ens1f0
-	link2=ens1f1
+elif (( host_num == 5 )); then
+	link=enp129s0f0
+	link2=enp129s0f1
+elif (( host_num == 6 )); then
+	link=p2p1
+	link2=p2p2
 elif (( host_num == 15 )); then
 	link=ens9
 elif (( host_num == 16 )); then
@@ -854,6 +834,13 @@ function ln-profile
 
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
+}
+
+function unprofile
+{
+	cd /root
+	unlink ~/.bashrc
+	mv bashrc.orig .bashrc
 }
 
 function rc2
@@ -5047,8 +5034,9 @@ function burn5
 {
 set -x
 	pci=0000:04:00.0
-	version=fw-4119-rel-16_25_0328
 	version=last_revision
+	version=fw-4119-rel-16_99_6804
+	version=fw-4119-rel-16_25_0328
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -6146,7 +6134,7 @@ function force-start
 set -x
 	ofed-unload
 	sudo /etc/init.d/openibd force-start
-	sudo systemctl restart systemd-udevd.service
+# 	sudo systemctl restart systemd-udevd.service
 set +x
 }
 
@@ -6156,14 +6144,16 @@ set -x
 	ofed-unload
 	sudo /etc/init.d/openibd force-stop
 	sudo /etc/init.d/openibd force-start
-	sudo systemctl restart systemd-udevd.service
+# 	sudo systemctl restart systemd-udevd.service
 set +x
 }
 alias restart-udev='sudo systemctl restart systemd-udevd.service'
 
 alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j 32'
+
 alias ofed-configure2='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j 32'
+
 alias ofed-configure3='./configure --with-mlx5-core-and-en-mod --with-core-mod --with-ipoib-mod --with-mlx5-mod -j 32'
 alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j 32'
 alias ofed-configure-all2='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
@@ -7780,6 +7770,30 @@ function vt
 	local f=$(echo \"$1\" | cut -d "(" -f 1)
 	echo $f
 #	vi -t $f
+}
+
+function install-tools
+{
+	sm
+	clone-crash
+	cd crash
+	make -j 32
+
+	sm
+	clone-systemtap
+	cd systemtap
+	make-local
+
+	if (( centos == 0 )); then
+		sm
+		clone-bcc
+		install-bcc
+	fi
+}
+
+function install-debuginfo
+{
+	yum --enablerepo=base-debuginfo install -y kernel-debuginfo-$(uname -r)
 }
 
 ######## ubuntu #######
