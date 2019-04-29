@@ -156,8 +156,8 @@ elif (( host_num == 5 )); then
 	link=enp129s0f0
 	link2=enp129s0f1
 elif (( host_num == 6 )); then
-	link=p2p1
-	link2=p2p2
+	link=enp129s0f0
+	link2=enp129s0f1
 elif (( host_num == 15 )); then
 	link=ens9
 elif (( host_num == 16 )); then
@@ -882,10 +882,10 @@ function set_mac2
 	ip link set $link vf $vf mac $mac_prefix:$mac_vf
 }
 
-alias on_sriov_old="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
-alias on_sriov="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
-alias on_sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.1/sriov_numvfs"
-alias on1='on_sriov; un'
+alias on-sriov1="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
+alias on-sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.1/sriov_numvfs"
+alias on-sriov="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
+alias on1='on-sriov; set_mac 1; un; ip link set $link vf 0 spoofchk on'
 alias un2="unbind_all $link2"
 alias off_sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
 
@@ -1872,8 +1872,18 @@ alias m=make-all
 alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install -j 32'
-alias mi2='make -j 32; sudo make install -j 32; fr; sudo depmod'
 alias m32='make -j 32'
+
+function mi2
+{
+set -x
+	sudo echo 0 > /sys/class/net/$link/device/sriov_numvfs;
+	make -j 32; sudo make install -j 32;
+	/bin/rm -rf ./drivers/infiniband/hw/mlx5/mlx5_ib.ko;
+	sudo /bin/rm -rf /lib/modules/3.10.0-957.el7.x86_64/extra/mlnx-ofa_kernel/drivers/infiniband/hw/mlx5/mlx5_ib.ko
+	force-restart
+set +x
+}
 
 alias make-local='./configure; make -j 32; sudo make install'
 alias ml=make-local
@@ -5034,9 +5044,10 @@ function burn5
 {
 set -x
 	pci=0000:04:00.0
-	version=last_revision
-	version=fw-4119-rel-16_99_6804
 	version=fw-4119-rel-16_25_0328
+	version=last_revision
+	version=fw-4119-rel-16_25_1000
+	version=fw-4119-rel-16_99_6804
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -6147,6 +6158,25 @@ set -x
 # 	sudo systemctl restart systemd-udevd.service
 set +x
 }
+
+if (( centos72 )); then
+	function force-restart
+	{
+	set -x
+		stop-ovs
+		ofed-unload
+		sudo /etc/init.d/openibd force-stop
+		reprobe
+		sleep 1
+		pkill udev
+		sleep 1
+		sudo systemctl restart systemd-udevd.service
+		sleep 1
+		pgrep udev
+	set +x
+	}
+fi
+
 alias restart-udev='sudo systemctl restart systemd-udevd.service'
 
 alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
@@ -7759,7 +7789,7 @@ function git-send-ovs
 
 function rule
 {
-	on_sriov
+	on-sriov
 	tc-setup $link
 	tc filter add dev $link parent ffff: prio 1 flower skip_sw action drop
 }
