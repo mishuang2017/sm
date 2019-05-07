@@ -7,6 +7,7 @@ numvfs=3
 vni=200
 vni=100
 vid=5
+svid=1000
 vid2=6
 vxlan_port=4000
 vxlan_port=4789
@@ -129,9 +130,10 @@ elif (( host_num == 13 )); then
 	link=enp4s0f0
 	link2=enp4s0f1
 	link2_new=${link2}_65534
-	link_remote_ip=192.168.1.14
-	link_remote_ip2=192.168.2.14
-	link_remote_ipv6=1::14
+	rhost_num=14
+	link_remote_ip=192.168.1.$rhost_num
+	link_remote_ip2=192.168.2.$rhost_num
+	link_remote_ipv6=1::$rhost_num
 	remote_mac=24:8a:07:88:27:ca
 
 	vf1=enp4s0f2
@@ -143,9 +145,10 @@ elif (( host_num == 14 )); then
 
 	link=enp4s0f0
 	link2=enp4s0f1
-	link_remote_ip=192.168.1.13
-	link_remote_ip2=192.168.2.13
-	link_remote_ipv6=1::13
+	rhost_num=13
+	link_remote_ip=192.168.1.$rhost_num
+	link_remote_ip2=192.168.2.$rhost_num
+	link_remote_ipv6=1::$rhost_num
 	remote_mac=24:8a:07:88:27:9a
 
 	vf1=enp4s0f2
@@ -155,9 +158,19 @@ elif (( host_num == 14 )); then
 elif (( host_num == 5 )); then
 	link=enp129s0f0
 	link2=enp129s0f1
+
+	vf1=enp129s0f2
+	vf2=enp129s0f3
+	vf3=enp129s0f4
+
 elif (( host_num == 6 )); then
 	link=enp129s0f0
 	link2=enp129s0f1
+
+	vf1=enp129s0f2
+	vf2=enp129s0f3
+	vf3=enp129s0f4
+
 elif (( host_num == 15 )); then
 	link=ens9
 elif (( host_num == 16 )); then
@@ -873,7 +886,7 @@ set +x
 }
 # alias vfs="cat /sys/class/net/$link/device/sriov_totalvfs"
 mac_prefix="02:25:d0:e2:18"
-function set_mac2
+function set-mac2
 {
 	[[ $# != 1 ]] && return
 
@@ -885,7 +898,7 @@ function set_mac2
 alias on-sriov1="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
 alias on-sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.1/sriov_numvfs"
 alias on-sriov="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
-alias on1='on-sriov; set_mac 1; un; ip link set $link vf 0 spoofchk on'
+alias on1='on-sriov; set-mac 1; un; ip link set $link vf 0 spoofchk on'
 alias un2="unbind_all $link2"
 alias off_sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
 
@@ -2116,6 +2129,38 @@ set -x
 set +x
 }
 
+function tc-vf
+{
+set -x
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	TC=/images/chrism/iproute2/tc/tc
+	TC=tc
+
+	$TC qdisc del dev $rep2 ingress
+	$TC qdisc del dev $rep3 ingress
+
+	ethtool -K $rep2 hw-tc-offload on 
+	ethtool -K $rep3 hw-tc-offload on 
+
+	$TC qdisc add dev $rep2 ingress 
+	$TC qdisc add dev $rep3 ingress 
+
+	src_mac=02:25:d0:$host_num:01:02
+	dst_mac=02:25:d0:$host_num:01:03
+	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
+	src_mac=02:25:d0:$host_num:01:03
+	dst_mac=02:25:d0:$host_num:01:02
+	$TC filter add dev $rep3 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 prio 3 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
+set +x
+}
+
 function tc-vf-ttl
 {
 set -x
@@ -2729,26 +2774,194 @@ set -x
 	ip link set $link promisc on
 
 	src_mac=02:25:d0:$host_num:01:02	# local vm mac
+	dst_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
+	$TC filter add dev $redirect protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac	dst_mac $dst_mac \
+		action vlan push id $vid		\
+		action mirred egress redirect dev $link
+	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
+		action vlan push id $vid		\
+		action mirred egress redirect dev $link
+	$TC filter add dev $redirect protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
+		action vlan push id $vid		\
+		action mirred egress redirect dev $link
+
+	src_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
+	dst_mac=02:25:d0:$host_num:01:02	# local vm mac
+	$TC filter add dev $link protocol 802.1Q prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1Q prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1Q prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+
+set +x
+}
+
+function tc-qinq
+{
+set -x
+	offload=""
+
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+	mirror=$rep1
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	ip link set $link promisc on
+
+	src_mac=02:25:d0:$host_num:01:02	# local vm mac
+	dst_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
+	$TC filter add dev $redirect protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac	dst_mac $dst_mac \
+		action vlan push protocol 802.1ad id $svid	\
+		action vlan push id $vid			\
+		action mirred egress redirect dev $link
+	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
+		action vlan push protocol 802.1ad id $svid	\
+		action vlan push id $vid			\
+		action mirred egress redirect dev $link
+	$TC filter add dev $redirect protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
+		action vlan push protocol 802.1ad id $svid	\
+		action vlan push id $vid			\
+		action mirred egress redirect dev $link
+
+	src_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
+	dst_mac=02:25:d0:$host_num:01:02	# local vm mac
+
+	$TC filter add dev $link protocol 802.1ad prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
+		vlan_id $svid				\
+		vlan_ethtype 802.1q cvlan_id $vid	\
+		cvlan_ethtype ip			\
+		action vlan pop				\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1ad prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac		\
+		vlan_id $svid				\
+		vlan_ethtype 802.1q cvlan_id $vid	\
+		cvlan_ethtype arp			\
+		action vlan pop				\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1ad prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac		\
+		vlan_id $svid				\
+		vlan_ethtype 802.1q cvlan_id $vid	\
+		cvlan_ethtype arp			\
+		action vlan pop				\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+set +x
+}
+
+function tc-qinq-good
+{
+set -x
+	offload=""
+
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+	mirror=$rep1
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	ip link set $link promisc on
+
+	src_mac=02:25:d0:$host_num:01:02	# local vm mac
+	dst_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
+	$TC filter add dev $redirect protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac	dst_mac $dst_mac \
+		action vlan push id $vid			\
+		action vlan push protocol 802.1ad id $svid	\
+		action mirred egress redirect dev $link
+	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
+		action vlan push id $vid			\
+		action vlan push protocol 802.1ad id $svid	\
+		action mirred egress redirect dev $link
+	$TC filter add dev $redirect protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
+		action vlan push id $vid			\
+		action vlan push protocol 802.1ad id $svid	\
+		action mirred egress redirect dev $link
+
+	src_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
+	dst_mac=02:25:d0:$host_num:01:02	# local vm mac
+	$TC filter add dev $link protocol 802.1Q prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1Q prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1Q prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+
+set +x
+}
+
+function tc-vlan-pf
+{
+set -x
+	offload=""
+
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+	mirror=$rep1
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	ip link set $link promisc on
+
+	src_mac=02:25:d0:$host_num:01:02	# local vm mac
 	dst_mac=$remote_mac			# remote vm mac
 	$TC filter add dev $redirect protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac	dst_mac $dst_mac \
 		action vlan push id $vid		\
 		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
+	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
 		action vlan push id $vid		\
 		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
+	$TC filter add dev $redirect protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
 		action vlan push id $vid		\
 		action mirred egress redirect dev $link
 
 	src_mac=$remote_mac			# remote vm mac
 	dst_mac=02:25:d0:$host_num:01:02	# local vm mac
-	$TC filter add dev $link protocol 802.1Q handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0	\
+	$TC filter add dev $link protocol 802.1Q prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0	\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1Q parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+	$TC filter add dev $link protocol 802.1Q prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1Q parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+	$TC filter add dev $link protocol 802.1Q prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
 
@@ -3953,6 +4166,19 @@ set -x
 set +x
 }
 
+function qinq
+{
+	vs del-br $br
+	vs add-br $br
+set -x
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep vlan_mode=native-tagged tag=$vid trunks=$svid
+	done
+	vs add-port $br $link vlan_mode=dot1q-tunnel tag=$svid cvlans=$vid -- set Interface $link ofport_request=5 other-config:qinq-ethtype=802.1q
+set +x
+}
+
 function create-br2
 {
 set -x
@@ -4158,7 +4384,7 @@ function start_vm_all
 	done
 }
 
-function set_mac
+function set-mac
 {
 	local port=1
 	[[ $# == 1 ]] && port=$1
@@ -4237,7 +4463,7 @@ function start-switchdev
 
 	time echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 
-	set_mac $port
+	set-mac $port
 
 	time unbind_all $l
 
@@ -5044,10 +5270,10 @@ function burn5
 {
 set -x
 	pci=0000:04:00.0
-	version=fw-4119-rel-16_25_0328
 	version=last_revision
 	version=fw-4119-rel-16_25_1000
 	version=fw-4119-rel-16_99_6804
+	version=fw-4119-rel-16_25_0328
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -5675,6 +5901,18 @@ function mlxconfig-enable-eth
 {
 	mlxconfig -d $pci set LINK_TYPE_P1=2 LINK_TYPE_P2=2
 	mlxconfig -d $pci2 set LINK_TYPE_P1=2 LINK_TYPE_P2=2
+	sudo mlxfwreset -y -d $pci reset
+}
+
+function mlxconfig-enable-prio-tag
+{
+	mlxconfig -d $pci set PRIO_TAG_REQUIRED_EN=1
+	sudo mlxfwreset -y -d $pci reset
+}
+
+function mlxconfig-disable-prio-tag
+{
+	mlxconfig -d $pci set PRIO_TAG_REQUIRED_EN=0
 	sudo mlxfwreset -y -d $pci reset
 }
 
@@ -6932,8 +7170,9 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=./test-eswitch-no-carrier.sh
+test1=./test-tc-qinq-rules.sh
 alias test1="./$test1"
+alias vi-test="vi ./$test1"
 alias vi-test1="vi ./$test1"
 
 test2=./test-eswitch-add-in-mode1-del-in-mode2.sh
