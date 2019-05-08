@@ -716,6 +716,8 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
+alias r3='sudo ~chrism/bin/test_router3.sh'
+
 corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
 alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
@@ -2825,42 +2827,60 @@ set -x
 	src_mac=02:25:d0:$host_num:01:02	# local vm mac
 	dst_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
 	$TC filter add dev $redirect protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac	dst_mac $dst_mac \
-		action vlan push protocol 802.1ad id $svid	\
 		action vlan push id $vid			\
+		action vlan push protocol 802.1ad id $svid	\
 		action mirred egress redirect dev $link
 	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
-		action vlan push protocol 802.1ad id $svid	\
 		action vlan push id $vid			\
+		action vlan push protocol 802.1ad id $svid	\
 		action mirred egress redirect dev $link
 	$TC filter add dev $redirect protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
-		action vlan push protocol 802.1ad id $svid	\
 		action vlan push id $vid			\
+		action vlan push protocol 802.1ad id $svid	\
 		action mirred egress redirect dev $link
 
 	src_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
 	dst_mac=02:25:d0:$host_num:01:02	# local vm mac
 
-	$TC filter add dev $link protocol 802.1ad prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
+
+
+
+	$TC filter add dev $link protocol 802.1ad prio 6 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
 		vlan_id $svid				\
 		vlan_ethtype 802.1q cvlan_id $vid	\
 		cvlan_ethtype ip			\
 		action vlan pop				\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1ad prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac		\
+	$TC filter add dev $link protocol 802.1ad prio 5 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac		\
 		vlan_id $svid				\
 		vlan_ethtype 802.1q cvlan_id $vid	\
 		cvlan_ethtype arp			\
 		action vlan pop				\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1ad prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac		\
+	$TC filter add dev $link protocol 802.1ad prio 4 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac		\
 		vlan_id $svid				\
 		vlan_ethtype 802.1q cvlan_id $vid	\
 		cvlan_ethtype arp			\
 		action vlan pop				\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
+
+
+
+
+
+	$TC filter add dev $link protocol 802.1Q prio 3 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1Q prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+	$TC filter add dev $link protocol 802.1Q prio 1 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
+		action vlan pop				\
+		action mirred egress redirect dev $redirect
+
 set +x
 }
 
@@ -4139,7 +4159,7 @@ set -x
 	[[ "$1" == "vxlan" ]] && vxlan1
 	[[ "$1" == "vxlan6" ]] && vxlan6
 	[[ "$1" == "vlan" ]] && vs add-port $br $link
-	[[ "$1" == "uplink" ]] && vs add-port $br $link
+	[[ "$1" == "uplink" ]] && vs add-port $br $link -- set Interface $link ofport_request=5
 	[[ "$1" == "vlan" ]] && tag="tag=$vid" || tag=""
 	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
@@ -8063,6 +8083,11 @@ function install-tools
 function install-debuginfo
 {
 	yum --enablerepo=base-debuginfo install -y kernel-debuginfo-$(uname -r)
+}
+
+function snat1
+{
+	ovs-ofctl add-flow $br table=0,in_port=1,arp,arp_tpa=10.0.0.1,arp_op=1,actions=move:"NXM_OF_ETH_SRC[]->NXM_OF_ETH_DST[]",mod_dl_src:"02:ac:10:ff:01:01",load:"0x02->NXM_OF_ARP_OP[]",move:"NXM_NX_ARP_SHA[]->NXM_NX_ARP_THA[]",load:"0x02ac10ff0101->NXM_NX_ARP_SHA[]",move:"NXM_OF_ARP_SPA[]->NXM_OF_ARP_TPA[]",load:"0x0a000001->NXM_OF_ARP_SPA[]",in_port
 }
 
 ######## ubuntu #######

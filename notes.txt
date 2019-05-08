@@ -885,10 +885,6 @@ __queue_work
 	struct worker_pool
 		worklist
 
-===nat===
-
-ovs-ofctl del-flows br1 in_port=1,ip,action=ct"("commit,zone=1,nat"("src=10.1.1.240-10.1.1.255"))",2
-
 ===vm===
 
 virsh net-destroy  default
@@ -1697,6 +1693,32 @@ struct tcf_proto {
                                             const struct tcf_proto *,
                                             struct tcf_result *);
 tcf_action_exec
+
+0       0       swapper/13      skb_vlan_push
+        skb_vlan_push+0x1 [kernel]
+        tcf_action_exec+0x7b [kernel]
+        fl_classify+0x2e1 [kernel]
+        tcf_classify+0x60 [kernel]
+        __netif_receive_skb_core+0x5d4 [kernel]
+        __netif_receive_skb_one_core+0x3b [kernel]
+        __netif_receive_skb+0x18 [kernel]
+        netif_receive_skb_internal+0x45 [kernel]
+        napi_gro_receive+0x120 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq+0x279 [kernel]
+        mlx5e_poll_rx_cq+0xdd [kernel]
+        mlx5e_napi_poll+0xbb [kernel]
+        net_rx_action+0x14d [kernel]
+        __softirqentry_text_start+0xde [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        finish_task_switch+0x80 [kernel]
+        __schedule+0x24e [kernel]
+        schedule_idle+0x22 [kernel]
+        do_idle+0x161 [kernel]
+        cpu_startup_entry+0x1d [kernel]
+        start_secondary+0x16f [kernel]
+        secondary_startup_64+0xa4 [kernel]
 
  0xffffffff81618f70 : skb_vlan_pop               +0x0/0xc0 [kernel]
  0xffffffffa010064c : tcf_vlan               +0xbc/0x250 [act_vlan]
@@ -2687,7 +2709,6 @@ mlx5e_attach_encap
 mlx5e_create_encap_header_ipv4
 	mlx5e_route_lookup_ipv4
 mlx5_encap_alloc
-MLX5_CMD_OP_ALLOC_ENCAP_HEADER
 
 vxlan_netdevice_event
 vxlan_push_rx_ports
@@ -6857,12 +6878,17 @@ enum {
         MLX5_FLOW_CONTEXT_ACTION_DROP      = 0x2,
         MLX5_FLOW_CONTEXT_ACTION_FWD_DEST  = 0x4,
         MLX5_FLOW_CONTEXT_ACTION_COUNT     = 0x8,
-        MLX5_FLOW_CONTEXT_ACTION_ENCAP     = 0x10,
+        MLX5_FLOW_CONTEXT_ACTION_PACKET_REFORMAT = 0x10,
         MLX5_FLOW_CONTEXT_ACTION_DECAP     = 0x20,
         MLX5_FLOW_CONTEXT_ACTION_MOD_HDR   = 0x40,
         MLX5_FLOW_CONTEXT_ACTION_VLAN_POP  = 0x80,
         MLX5_FLOW_CONTEXT_ACTION_VLAN_PUSH = 0x100,
+        MLX5_FLOW_CONTEXT_ACTION_VLAN_POP_2  = 0x400,
+        MLX5_FLOW_CONTEXT_ACTION_VLAN_PUSH_2 = 0x800,
 };
+
+0x90c for qinq push
+0x48c for qinq pop
 
 mlx5e_set_netdev_dev_addr
 eth_hw_addr_random	# for rep
@@ -8301,6 +8327,8 @@ May 23 02:19:19 localhost.localdomain systemd[1]: Started Crash recovery kernel 
 
 ===crash===
 
+mod -s mlx5_core /lib/modules/3.10.0-957.el7.x86_64/extra/mlnx-ofa_kernel/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.ko
+
 CONFIG_RELOCATABLE=y
 CONFIG_RANDOMIZE_BASE=y
 CONFIG_DEBUG_INFO_REDUCED=n
@@ -8494,10 +8522,6 @@ execname: devlink
 esw_create_offloads_fast_fdb_table
     esw_size = min_t(int, MLX5_CAP_GEN(dev, max_flow_counter) * ESW_OFFLOADS_NUM_GROUPS,
                      1 << MLX5_CAP_ESW_FLOWTABLE_FDB(dev, log_max_ft_size));
-
-    printk(KERN_WARNING "%s: esw_size: %x", __func__, esw_size);
-    if (esw->offloads.encap != DEVLINK_ESWITCH_ENCAP_MODE_NONE)
-            flags |= MLX5_FLOW_TABLE_TUNNEL_EN;
 
     fdb = mlx5_create_auto_grouped_flow_table(root_ns, FDB_FAST_PATH,
                                               esw_size,
@@ -9121,6 +9145,109 @@ sys     56m27.614s
 
 ===ovs_ct===
 
+* nat
+
+https://wiki.aalto.fi/download/attachments/69901948/netfilter-paper.pdf
+
+nf_nat_ipv4_in
+
+nf_nat_setup_info
+nf_nat_packet
+nf_nat_manip_pkt	# important
+
+0       0       swapper/6       nf_nat_manip_pkt
+        nf_nat_manip_pkt+0x1 [kernel]
+        __ovs_ct_lookup+0x720 [kernel]
+        ovs_ct_execute+0x424 [kernel]
+        do_execute_actions+0x3bb [kernel]
+        ovs_execute_actions+0x4c [kernel]
+        ovs_dp_process_packet+0x84 [kernel]
+        ovs_vport_receive+0x76 [kernel]
+        netdev_frame_hook+0xd0 [kernel]
+        __netif_receive_skb_core+0x2ba [kernel]
+        __netif_receive_skb_one_core+0x3b [kernel]
+        __netif_receive_skb+0x18 [kernel]
+        netif_receive_skb_internal+0x45 [kernel]
+        napi_gro_receive+0x120 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq+0x26f [kernel]
+        mlx5e_poll_rx_cq+0xdd [kernel]
+        mlx5e_napi_poll+0xbb [kernel]
+        net_rx_action+0x14d [kernel]
+        __softirqentry_text_start+0xde [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xb4 [kernel]
+        cpuidle_enter+0x17 [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1e1 [kernel]
+        cpu_startup_entry+0x1d [kernel]
+        start_secondary+0x16f [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
+
+0       0       swapper/13      nf_nat_packet
+        nf_nat_packet+0x1 [kernel]
+        ovs_ct_execute+0x424 [kernel]
+        do_execute_actions+0x3bb [kernel]
+        ovs_execute_actions+0x4c [kernel]
+        ovs_dp_process_packet+0x84 [kernel]
+        ovs_vport_receive+0x76 [kernel]
+        netdev_frame_hook+0xd0 [kernel]
+        __netif_receive_skb_core+0x2ba [kernel]
+        __netif_receive_skb_one_core+0x3b [kernel]
+        __netif_receive_skb+0x18 [kernel]
+        netif_receive_skb_internal+0x45 [kernel]
+        napi_gro_receive+0x120 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq+0x26f [kernel]
+        mlx5e_poll_rx_cq+0xdd [kernel]
+        mlx5e_napi_poll+0xbb [kernel]
+        net_rx_action+0x14d [kernel]
+        __softirqentry_text_start+0xde [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xb4 [kernel]
+        cpuidle_enter+0x17 [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1e1 [kernel]
+        cpu_startup_entry+0x1d [kernel]
+        start_secondary+0x16f [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
+0       0       swapper/8       nf_nat_packet
+        nf_nat_packet+0x1 [kernel]
+        nf_nat_ipv4_fn+0x4b [kernel]
+        nf_hook_slow+0x48 [kernel]
+        ip_local_deliver+0xcd [kernel]
+        ip_rcv_finish+0x84 [kernel]
+        ip_rcv+0xc7 [kernel]
+        __netif_receive_skb_one_core+0x57 [kernel]
+        __netif_receive_skb+0x18 [kernel]
+        netif_receive_skb_internal+0x45 [kernel]
+        napi_gro_receive+0x120 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq+0x26f [kernel]
+        mlx5e_poll_rx_cq+0xdd [kernel]
+        mlx5e_napi_poll+0xbb [kernel]
+        net_rx_action+0x14d [kernel]
+        __softirqentry_text_start+0xde [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xb4 [kernel]
+        cpuidle_enter+0x17 [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1e1 [kernel]
+        cpu_startup_entry+0x1d [kernel]
+        start_secondary+0x16f [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
+
+https://gmd20.github.io/blog/openvswitch%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8BCT%E5%92%8CNAT-action%E7%9A%84%E5%AE%9E%E7%8E%B0/
+
+* openvswitch: NAT support.
+https://lists.openwall.net/netdev/2015/11/09/115
+
 OpenvSwtich架构
 http://www.cnblogs.com/CasonChan/p/4754620.html
 
@@ -9493,6 +9620,8 @@ nf_conntrack_alloc
 000000000006e270 T mlx5e_stats_flower
 
 ===centos===
+
+http://vault.centos.org/7.2.1511/isos/x86_64/CentOS-7-x86_64-DVD-1511.iso
 
 centos 7.4:
 
