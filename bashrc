@@ -717,6 +717,7 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
 alias r3='sudo ~chrism/bin/test_router3.sh'
+alias r2='sudo ~chrism/bin/test_router2.sh'
 
 corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
@@ -6294,19 +6295,19 @@ alias lag2="echo 2 > /sys/kernel/debug/mlx5/$pci/lag_affinity"
 
 alias show-links="ip link show dev $link; ip link show dev $link2"
 
-function r0
+function ip-r0
 {
 	cmd_on $HOST1 "ip r d $HOST2_TUN_NET"
 	cmd_on $HOST1 "ip r a $HOST2_TUN_NET nexthop via $R1_P2_IP dev $HOST1_P2 weight 1 nexthop via $R1_P1_IP dev $HOST1_P1 weight 1"
 }
 
-function r1
+function ip-r1
 {
 	cmd_on $HOST1 "ip r d $HOST2_TUN_NET"
 	cmd_on $HOST1 "ip r a $HOST2_TUN_NET nexthop via $R1_P1_IP dev $HOST1_P1 weight 1"
 }
 
-function r2
+function ip-r2
 {
 	cmd_on $HOST1 "ip r d $HOST2_TUN_NET"
 	cmd_on $HOST1 "ip r a $HOST2_TUN_NET nexthop via $R1_P2_IP dev $HOST1_P2 weight 1"
