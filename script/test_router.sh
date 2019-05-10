@@ -12,7 +12,11 @@ ip netns add host2_ns
 ip netns add host1_ns
 
 ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
-service openvswitch restart
+if lsb_release -a | grep Ubuntu > /dev/null; then
+	service ovs-vswitchd restart
+else
+	service openvswitch restart
+fi
 ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
 sleep 2
 
