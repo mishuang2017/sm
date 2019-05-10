@@ -6,7 +6,7 @@ fi
 numvfs=3
 vni=200
 vni=100
-vid=5
+vid=1000
 svid=1000
 vid2=6
 vxlan_port=4000
@@ -15,6 +15,8 @@ vxlan_mac=24:25:d0:e2:00:00
 ecmp=0
 ports=2
 ports=1
+
+base_baud=9600
 
 # Append to history
 shopt -s histappend
@@ -299,8 +301,7 @@ alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
 alias jd-ovs-ttl="~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
 alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
 
-alias pc='picocom -b 115200 /dev/ttyS0'
-alias pc='picocom -b 38400 /dev/ttyS1'
+alias pc="picocom -b $base_baud /dev/ttyS1"
 
 alias rq='echo g > /proc/sysrq-trigger'
 
@@ -716,8 +717,10 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
-alias r3='sudo ~chrism/bin/test_router3.sh'
-alias r2='sudo ~chrism/bin/test_router2.sh'
+alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat with out nat action
+alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat
+alias r2='sudo ~chrism/bin/test_router2.sh'	# snat
+alias r1='sudo ~chrism/bin/test_router.sh'	# veth arp responder
 
 corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
@@ -1021,6 +1024,7 @@ function tc-drop
 # ovs-ofctl add-flow br -O openflow13 "in_port=2,dl_type=0x86dd,nw_proto=58,icmp_type=128,action=set_field:0x64->tun_id,output:5"
 
 alias ofd="ovs-ofctl dump-flows $br"
+alias ofd2="ovs-ofctl dump-flows br2" 
 
 alias drop3="ovs-ofctl add-flow $br 'nw_dst=1.1.3.2 action=drop'"
 alias del3="ovs-ofctl del-flows $br 'nw_dst=1.1.3.2'"
@@ -1443,7 +1447,7 @@ set -x;
 
 	sudo modprobe -r $module
 	sudo modprobe -v $module
-
+	brv
 set +x
 }
 
@@ -2831,21 +2835,13 @@ set -x
 		action vlan push id $vid			\
 		action vlan push protocol 802.1ad id $svid	\
 		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
-		action vlan push id $vid			\
-		action vlan push protocol 802.1ad id $svid	\
-		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
+	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload \
 		action vlan push id $vid			\
 		action vlan push protocol 802.1ad id $svid	\
 		action mirred egress redirect dev $link
 
 	src_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
 	dst_mac=02:25:d0:$host_num:01:02	# local vm mac
-
-
-
-
 	$TC filter add dev $link protocol 802.1ad prio 6 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
 		vlan_id $svid				\
 		vlan_ethtype 802.1q cvlan_id $vid	\
@@ -2853,90 +2849,13 @@ set -x
 		action vlan pop				\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1ad prio 5 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac		\
+	$TC filter add dev $link protocol 802.1ad prio 5 parent ffff: flower $offload \
 		vlan_id $svid				\
 		vlan_ethtype 802.1q cvlan_id $vid	\
 		cvlan_ethtype arp			\
 		action vlan pop				\
 		action vlan pop				\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1ad prio 4 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac		\
-		vlan_id $svid				\
-		vlan_ethtype 802.1q cvlan_id $vid	\
-		cvlan_ethtype arp			\
-		action vlan pop				\
-		action vlan pop				\
-		action mirred egress redirect dev $redirect
-
-
-
-
-
-	$TC filter add dev $link protocol 802.1Q prio 3 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0	\
-		action vlan pop				\
-		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1Q prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
-		action vlan pop				\
-		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1Q prio 1 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
-		action vlan pop				\
-		action mirred egress redirect dev $redirect
-
-set +x
-}
-
-function tc-qinq-good
-{
-set -x
-	offload=""
-
-	[[ "$1" == "hw" ]] && offload="skip_sw"
-	[[ "$1" == "sw" ]] && offload="skip_hw"
-
-	TC=tc
-	redirect=$rep2
-	mirror=$rep1
-
-	$TC qdisc del dev $link ingress > /dev/null 2>&1
-	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
-
-	ethtool -K $link hw-tc-offload on 
-	ethtool -K $redirect hw-tc-offload on 
-
-	$TC qdisc add dev $link ingress 
-	$TC qdisc add dev $redirect ingress 
-	ip link set $link promisc on
-
-	src_mac=02:25:d0:$host_num:01:02	# local vm mac
-	dst_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
-	$TC filter add dev $redirect protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac	dst_mac $dst_mac \
-		action vlan push id $vid			\
-		action vlan push protocol 802.1ad id $svid	\
-		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac	\
-		action vlan push id $vid			\
-		action vlan push protocol 802.1ad id $svid	\
-		action mirred egress redirect dev $link
-	$TC filter add dev $redirect protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac	\
-		action vlan push id $vid			\
-		action vlan push protocol 802.1ad id $svid	\
-		action mirred egress redirect dev $link
-
-	src_mac=02:25:d0:$rhost_num:01:02	# remote vm mac
-	dst_mac=02:25:d0:$host_num:01:02	# local vm mac
-	$TC filter add dev $link protocol 802.1Q prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0	\
-		action vlan pop				\
-		action vlan pop				\
-		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1Q prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
-		action vlan pop				\
-		action vlan pop				\
-		action mirred egress redirect dev $redirect
-	$TC filter add dev $link protocol 802.1Q prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0	\
-		action vlan pop				\
-		action vlan pop				\
-		action mirred egress redirect dev $redirect
-
 set +x
 }
 
@@ -4458,7 +4377,7 @@ alias start-vm='start-switchdev 1 vm'
 alias start-vf='start-switchdev vf'
 alias start-bind='start-switchdev bind'
 alias restart='off; start'
-alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
+# alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
 alias mystart=start-switchdev-all
 function start-switchdev
 {
@@ -4582,6 +4501,8 @@ function start-switchdev-all
 #	ifconfig $link2 up
 
 	start-ovs
+	# workaround for JD kernel
+	ethtool -K $link hw-tc-offload on
 	for i in $(seq $ports); do
 		start-switchdev $i
 	done
@@ -4638,9 +4559,15 @@ set -x
 	sudo sed -i '/GRUB_DEFAULT/d' $file
 	sudo sed -i '/GRUB_SAVEDEFAULT/d' $file
 	sudo sed -i '/GRUB_CMDLINE_LINUX/d' $file
+	sudo sed -i '/GRUB_TERMINAL_OUTPUT/d' $file
+	sudo sed -i '/GRUB_SERIAL_COMMAND/d' $file
 #	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
 
-	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+# 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty1 console=ttyS1,$base_baud\"" >> $file
+	sudo echo "GRUB_TERMINAL_OUTPUT=\"console\"" >> $file
+# 	sudo echo "GRUB_TERMINAL_OUTPUT=\"serial\"" >> $file
+# 	sudo echo "GRUB_SERIAL_COMMAND=\"serial --speed=$base_baud --unit=1 --word=8 --parity=no --stop=1\"" >> $file
 
 	if [[ $# == 0 ]]; then
 		sudo echo "GRUB_DEFAULT=saved" >> $file
@@ -5956,7 +5883,9 @@ function reboot1
 	sync
 	sleep 1
 	cmdline=$(cat /proc/cmdline | cut -d " " -f 2-)
+set -x
 	sudo kexec -l /boot/vmlinuz-$uname --append="BOOT_IMAGE=/vmlinuz-$uname $cmdline" --initrd=/boot/initramfs-$uname.img
+set +x
 	sudo kexec -e
 }
 
@@ -8086,9 +8015,62 @@ function install-debuginfo
 	yum --enablerepo=base-debuginfo install -y kernel-debuginfo-$(uname -r)
 }
 
-function snat1
+function qinq-br
 {
-	ovs-ofctl add-flow $br table=0,in_port=1,arp,arp_tpa=10.0.0.1,arp_op=1,actions=move:"NXM_OF_ETH_SRC[]->NXM_OF_ETH_DST[]",mod_dl_src:"02:ac:10:ff:01:01",load:"0x02->NXM_OF_ARP_OP[]",move:"NXM_NX_ARP_SHA[]->NXM_NX_ARP_THA[]",load:"0x02ac10ff0101->NXM_NX_ARP_SHA[]",move:"NXM_OF_ARP_SPA[]->NXM_OF_ARP_TPA[]",load:"0x0a000001->NXM_OF_ARP_SPA[]",in_port
+	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
+	ovs-vsctl add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+
+	ovs-vsctl add-br br2
+# 	ovs-vsctl add-port br2 $link tag=1000 -- set Interface $link ofport_request=5
+	ovs-vsctl add-port br2 vlan1000 -- set Interface vlan1000 ofport_request=5
+
+	ovs-vsctl		\
+		-- add-port $br patch1	\
+		-- set interface patch1 type=patch options:peer=patch2	\
+		-- add-port br2 patch2	\
+		-- set interface patch2 type=patch options:peer=patch1
+}
+
+# ovs-ofctl -O OpenFlow13 add-flow ovs-br0 in_port=patch0,actions=push_vlan:0x88a8,mod_vlan_vid=1000,output=ens2f1
+# ovs-ofctl -O OpenFlow13 add-flow ovs-br0 dl_vlan=1000,actions=strip_vlan,patch0
+# 
+# 
+# ovs-ofctl -O OpenFlow13 add-flow ovs-br1 in_port=patch1,arp,dl_vlan=6,actions=strip_vlan,ens2f1_0,ens2f1_1
+# ovs-ofctl -O OpenFlow13 add-flow ovs-br1 in_port=patch1,arp,dl_vlan=3,actions=strip_vlan,ens2f1_1,ens2f1_0
+# 
+# ovs-ofctl -O OpenFlow13 add-flow ovs-br1 dl_vlan=6,dl_dst=e4:11:22:33:25:50,actions=strip_vlan,ens2f1_0
+# ovs-ofctl -O OpenFlow13 add-flow ovs-br1 dl_vlan=3,dl_dst=e4:11:22:33:25:50,actions=strip_vlan,ens2f1_0
+# ovs-ofctl -O OpenFlow13 add-flow ovs-br1 dl_vlan=6,dl_dst=e4:11:22:33:25:51,actions=strip_vlan,ens2f1_1
+# 
+# ovs-ofctl -O Openflow13 add-flow ovs-br1 in_port=ens2f1_0,dl_dst=e4:11:22:33:25:51,actions=output=ens2f1_1
+# ovs-ofctl -O Openflow13 add-flow ovs-br1 in_port=ens2f1_0,ipv4,actions=push_vlan:0x8100,mod_vlan_vid=6,output=patch1
+# ovs-ofctl -O Openflow13 add-flow ovs-br1 in_port=ens2f1_0,arp,actions=output=ens2f1_1,push_vlan:0x8100,mod_vlan_vid=6,output=patch1
+# 
+# ovs-ofctl -O Openflow13 add-flow ovs-br1 in_port=ens2f1_1,dl_dst=e4:11:22:33:25:50,actions=output=ens2f1_0
+# ovs-ofctl -O Openflow13 add-flow ovs-br1 in_port=ens2f1_1,ipv4,actions=push_vlan:0x8100,mod_vlan_vid=3,output=patch1
+# ovs-ofctl -O Openflow13 add-flow ovs-br1 in_port=ens2f1_1,arp,actions=output=ens2f1_0,push_vlan:0x8100,mod_vlan_vid=3,output=patch1
+
+alias rxvlan-off="ethtool -K $link rxvlan off"
+ 
+alias vm-vlan="ip l d vlan5; vlan $vf2 5 1.1.$host_num.1"
+alias vm-ip="ip l d vlan5; ip addr add dev $vf2 1.1.$host_num.1/16"
+alias q-rule=qinq-rule
+function qinq-rule
+{
+set -x
+	qinq-br
+# 	ovs-ofctl -O OpenFlow13 add-flow br2 in_port=patch2,actions=push_vlan:0x88a8,mod_vlan_vid=$svid,output=$link
+# 	ovs-ofctl -O OpenFlow13 add-flow br2 in_port=patch2,actions=push_vlan:0x8100,mod_vlan_vid=$svid,output=$link
+# 	ovs-ofctl -O OpenFlow13 add-flow br2 dl_vlan=$svid,actions=strip_vlan,patch2
+
+# 	ovs-ofctl -O OpenFlow13 add-flow $br in_port=patch1,arp,dl_vlan=$vid,actions=strip_vlan,$rep2
+# 	ovs-ofctl -O OpenFlow13 add-flow $br dl_vlan=$vid,dl_dst=02:25:d0:$host_num:01:02,actions=strip_vlan,$rep2
+# 	ovs-ofctl -O Openflow13 add-flow $br in_port=$rep2,ipv4,actions=push_vlan:0x8100,mod_vlan_vid=$vid,output=patch1
+set +x
 }
 
 ######## ubuntu #######
