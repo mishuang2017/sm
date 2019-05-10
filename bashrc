@@ -1566,7 +1566,7 @@ set -x
 	ovs
 	make -j 32
 	sudo make install
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 set +x
 }
 
@@ -5127,7 +5127,7 @@ function skip_hw
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_hw
 #	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 	vsconfig
 }
 
@@ -5136,7 +5136,7 @@ function skip_sw
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_sw
 #	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 # (10 minutes) 
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 	vsconfig
 }
 
@@ -5147,7 +5147,7 @@ function none1
 	ovs-vsctl set Open_vSwitch . other_config:max-idle=30000
 #	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=5000
 #	ovs-vsctl set Open_vSwitch . other_config:min_revalidate_pps=1
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 	vsconfig
 }
 
@@ -5155,7 +5155,7 @@ function none
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 	vsconfig
 }
 
@@ -5164,7 +5164,7 @@ function none2
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
 	ovs-vsctl set Open_vSwitch . other_config:max-idle=60000000
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 	vsconfig
 }
 
@@ -5173,7 +5173,7 @@ function none3
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
 	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=100000000
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 	vsconfig
 }
 
@@ -5184,7 +5184,7 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config max-idle
 	ovs-vsctl remove Open_vSwitch . other_config max-revalidator
 	ovs-vsctl remove Open_vSwitch . other_config min_revalidate_pps
-	sudo systemctl restart openvswitch.service
+	restart-ovs
 	vsconfig
 }
 
@@ -8171,4 +8171,19 @@ function install-dbgsym
 
 	sudo apt-get update
 	sudo apt -y install linux-image-$(uname -r)-dbgsym
+}
+
+function start-ovs
+{
+	sudo systemctl start ovs-vswitchd.service
+}
+
+function restart-ovs
+{
+	sudo systemctl restart ovs-vswitchd.service
+}
+
+function stop-ovs
+{
+	sudo systemctl stop ovs-vswitchd.service
 }
