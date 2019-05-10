@@ -8073,6 +8073,33 @@ set -x
 set +x
 }
 
+function br-veth
+{
+	ip link del host1 &> /dev/null
+	ip link del host1_rep &> /dev/null
+	ip netns del n11 &> /dev/null
+
+	ip netns add n11
+
+	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
+	if lsb_release -a | grep Ubuntu > /dev/null; then
+		service ovs-vswitchd restart
+	else
+		service openvswitch restart
+	fi
+	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
+	sleep 2
+
+	ip link add host1 type veth peer name host1_rep
+	ip link set host1 netns n11
+	ip netns exec n11 ifconfig host1 1.1.$host_num.1/24 up
+	ifconfig host1_rep 0 up
+
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br host1_rep -- set Interface host1_rep ofport_request=2
+	ovs-vsctl add-port $br $link -- set Interface $link ofport_request=5
+}
+
 ######## ubuntu #######
 
 [[ -f /usr/bin/lsb_release ]] || return
@@ -8175,7 +8202,15 @@ function install-dbgsym
 
 function start-ovs
 {
+	smo
+# 	mkdir -p /etc/openvswitch
+# 	ovsdb-tool create /etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
+set -x
+	ovsdb-server /etc/openvswitch/conf.db -vconsole:emer -vsyslog:err -vfile:info --remote=punix:/usr/local/var/run/openvswitch/db.sock --private-key=db:Open_vSwitch,SSL,private_key --certificate=db:Open_vSwitch,SSL,certificate --bootstrap-ca-cert=db:Open_vSwitch,SSL,ca_cert --no-chdir --log-file=/usr/local/var/log/openvswitch/ovsdb-server.log --pidfile=/usr/local/var/run/openvswitch/ovsdb-server.pid --detach --monitor
+	ovs-vswitchd unix:/usr/local/var/run/openvswitch/db.sock -vconsole:emer -vsyslog:err -vfile:info --mlockall --no-chdir --log-file=/usr/local/var/log/openvswitch/ovs-vswitchd.log --pidfile=/usr/local/var/run/openvswitch/ovs-vswitchd.pid --detach --monitor
+	sudo systemctl start ovsdb-server.service
 	sudo systemctl start ovs-vswitchd.service
+set +x
 }
 
 function restart-ovs
@@ -8186,4 +8221,5 @@ function restart-ovs
 function stop-ovs
 {
 	sudo systemctl stop ovs-vswitchd.service
+	sudo systemctl stop ovsdb-server.service
 }
