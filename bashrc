@@ -3,6 +3,8 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+alias get-bashrc='wget https://raw.githubusercontent.com/mishuang2017/sm/master/bashrc'
+
 numvfs=3
 vni=200
 vni=100
