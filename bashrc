@@ -6,7 +6,7 @@ fi
 numvfs=3
 vni=200
 vni=100
-vid=1000
+vid=5
 svid=1000
 vid2=6
 vxlan_port=4000
@@ -352,6 +352,7 @@ alias restart-all='stop-all; start-all'
 
 alias dud='du -h -d 1'
 
+alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
 alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
@@ -693,6 +694,25 @@ alias tune1="ethtool -C $link adaptive-rx off rx-usecs 64 rx-frames 128 tx-usecs
 alias tune2="ethtool -C $link adaptive-rx on"
 alias tune3="ethtool -c $link"
 
+ETHTOOL=/images/chrism/ethtool/ethtool
+function ethtool-rxvlan-off
+{
+# 	$ETHTOOL -k $link | grep rx-vlan-offload
+	$ETHTOOL -K $link rxvlan off
+# 	$ETHTOOL -k $link | grep rx-vlan-offload
+}
+
+alias eoff=ethtool-rxvlan-off
+
+function ethtool-rxvlan-on
+{
+# 	$ETHTOOL -k $link | grep rx-vlan-offload
+	$ETHTOOL -K $link rxvlan on
+# 	$ETHTOOL -k $link | grep rx-vlan-offload
+}
+
+alias eon=ethtool-rxvlan-on
+
 alias ethtool2=/images/chrism/ethtool/ethtool
 
 # alias a=ovs-arp-responder.sh
@@ -717,7 +737,8 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
-alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat with out nat action
+alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script
+alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat
 alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat
 alias r2='sudo ~chrism/bin/test_router2.sh'	# snat
 alias r1='sudo ~chrism/bin/test_router.sh'	# veth arp responder
@@ -736,6 +757,14 @@ function ip1
 	ip addr flush $l
 	ip addr add dev $l $link_ip/24
 	ip addr add $link_ipv6/64 dev $l
+	ip link set $l up
+}
+
+function ip8
+{
+	local l=$link
+	ip addr flush $l
+	ip addr add dev $l 8.9.10.11/24
 	ip link set $l up
 }
 
@@ -1447,7 +1476,7 @@ set -x;
 
 	sudo modprobe -r $module
 	sudo modprobe -v $module
-	brv
+# 	brv
 set +x
 }
 
@@ -4053,6 +4082,9 @@ set +x
 }
 
 alias brv='create-br vlan'
+alias brv-tagged='create-br vlan2'
+alias brv-untagged='create-br vlan3'
+alias brv-dot1q='create-br vlan4'
 alias bru='create-br uplink'
 alias br='create-br nomal'
 alias brx='create-br vxlan'
@@ -4078,12 +4110,24 @@ set -x
 	vs add-br $br
 	[[ "$1" == "vxlan" ]] && vxlan1
 	[[ "$1" == "vxlan6" ]] && vxlan6
-	[[ "$1" == "vlan" ]] && vs add-port $br $link
+	[[ "${1:0:4}" == "vlan" ]] && vs add-port $br $link
 	[[ "$1" == "uplink" ]] && vs add-port $br $link -- set Interface $link ofport_request=5
-	[[ "$1" == "vlan" ]] && tag="tag=$vid" || tag=""
+	tag=""
+	if [[ "$1" == "vlan" ]]; then
+		tag="tag=$vid"
+	elif [[ "$1" == "vlan2" ]]; then
+		tag="tag=$svid vlan-mode=native-tagged"
+	elif [[ "$1" == "vlan3" ]]; then
+		tag="tag=$svid vlan-mode=native-untagged"
+	elif [[ "$1" == "vlan4" ]]; then
+		tag="tag=$svid vlan-mode=dot1q-tunnel"
+# 		tag="tag=$svid vlan-mode=dot1q-tunnel"
+	fi
 	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep $tag -- set Interface $rep ofport_request=$((i+1))
+# 		[[ "$1" == "vlan4" && "$rep" == "$rep2" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1q
+# 		[[ "$1" == "vlan4" && "$rep" == "$rep2" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1ad
 	done
 #	  vs add-port $br $link
 #	  vs add-port $br $bond
@@ -4167,6 +4211,11 @@ set +x
 function del-br
 {
 set -x
+	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
+	sleep 1
+set +x
+	return
+
 	for (( i = 0; i < numvfs; i++)); do
 		rep=$(get_rep $i)
 		rep=${link}_$i
@@ -4564,7 +4613,8 @@ set -x
 #	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
 
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
-	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty1 console=ttyS1,$base_baud\"" >> $file
+# 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
+	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud\"" >> $file
 	sudo echo "GRUB_TERMINAL_OUTPUT=\"console\"" >> $file
 # 	sudo echo "GRUB_TERMINAL_OUTPUT=\"serial\"" >> $file
 # 	sudo echo "GRUB_SERIAL_COMMAND=\"serial --speed=$base_baud --unit=1 --word=8 --parity=no --stop=1\"" >> $file
@@ -5184,6 +5234,8 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config max-idle
 	ovs-vsctl remove Open_vSwitch . other_config max-revalidator
 	ovs-vsctl remove Open_vSwitch . other_config min_revalidate_pps
+	ovs-vsctl remove Open_vSwitch . other_config vlan-limit
+	ovs-vsctl remove Open_vSwitch . other_config qinq-ethtype
 	restart-ovs
 	vsconfig
 }
@@ -5443,6 +5495,16 @@ function panic
 {
 	echo 1 > /proc/sys/kernel/sysrq
 	echo c > /proc/sysrq-trigger
+}
+
+function echo-g
+{
+	echo g > /proc/sysrq-trigger
+}
+
+function echo-suc
+{
+	cat /sys/module/mlx5_core/parameters/nr_mf_succ
 }
 
 NEXT=${NEXT:-0}
@@ -8025,8 +8087,7 @@ function qinq-br
 	done
 
 	ovs-vsctl add-br br2
-# 	ovs-vsctl add-port br2 $link tag=1000 -- set Interface $link ofport_request=5
-	ovs-vsctl add-port br2 vlan1000 -- set Interface vlan1000 ofport_request=5
+	ovs-vsctl add-port br2 $link -- set Interface $link ofport_request=5
 
 	ovs-vsctl		\
 		-- add-port $br patch1	\
@@ -8063,13 +8124,12 @@ function qinq-rule
 {
 set -x
 	qinq-br
-# 	ovs-ofctl -O OpenFlow13 add-flow br2 in_port=patch2,actions=push_vlan:0x88a8,mod_vlan_vid=$svid,output=$link
-# 	ovs-ofctl -O OpenFlow13 add-flow br2 in_port=patch2,actions=push_vlan:0x8100,mod_vlan_vid=$svid,output=$link
-# 	ovs-ofctl -O OpenFlow13 add-flow br2 dl_vlan=$svid,actions=strip_vlan,patch2
+	ovs-ofctl -O OpenFlow13 add-flow br2 in_port=patch2,actions=push_vlan:0x88a8,mod_vlan_vid=$svid,output=$link
+	ovs-ofctl -O OpenFlow13 add-flow br2 dl_vlan=$svid,actions=strip_vlan,patch2
 
-# 	ovs-ofctl -O OpenFlow13 add-flow $br in_port=patch1,arp,dl_vlan=$vid,actions=strip_vlan,$rep2
-# 	ovs-ofctl -O OpenFlow13 add-flow $br dl_vlan=$vid,dl_dst=02:25:d0:$host_num:01:02,actions=strip_vlan,$rep2
-# 	ovs-ofctl -O Openflow13 add-flow $br in_port=$rep2,ipv4,actions=push_vlan:0x8100,mod_vlan_vid=$vid,output=patch1
+	ovs-ofctl -O OpenFlow13 add-flow $br in_port=patch1,arp,dl_vlan=$vid,actions=strip_vlan,$rep2
+	ovs-ofctl -O OpenFlow13 add-flow $br dl_vlan=$vid,dl_dst=02:25:d0:$host_num:01:02,priority=10,actions=strip_vlan,$rep2
+	ovs-ofctl -O Openflow13 add-flow $br in_port=$rep2,ipv4,actions=push_vlan:0x8100,mod_vlan_vid=$vid,output=patch1
 set +x
 }
 
@@ -8088,15 +8148,15 @@ function br-veth
 		service openvswitch restart
 	fi
 	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
-	sleep 2
+	sleep 1
 
 	ip link add host1 type veth peer name host1_rep
 	ip link set host1 netns n11
-	ip netns exec n11 ifconfig host1 1.1.$host_num.1/24 up
+	ip netns exec n11 ifconfig host1 1.1.$host_num.1/16 up
 	ifconfig host1_rep 0 up
 
 	ovs-vsctl add-br $br
-	ovs-vsctl add-port $br host1_rep -- set Interface host1_rep ofport_request=2
+	ovs-vsctl add-port $br host1_rep tag=$vid -- set Interface host1_rep ofport_request=2
 	ovs-vsctl add-port $br $link -- set Interface $link ofport_request=5
 }
 
