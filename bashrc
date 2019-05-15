@@ -737,6 +737,7 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
+alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
 alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script
 alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat
 alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat
