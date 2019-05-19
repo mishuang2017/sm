@@ -18,6 +18,7 @@ ecmp=0
 ports=2
 ports=1
 
+base_baud=115200
 base_baud=9600
 
 # Append to history
@@ -256,7 +257,8 @@ alias vx='vxlan2; vxlan1'
 
 alias ipmirror="ifconfig $link 0; ip addr add dev $link $link_ip_vlan/16; ip link set $link up"
 
-alias vsconfig='ovs-vsctl get Open_vSwitch . other_config'
+alias vsconfig="ovs-vsctl get Open_vSwitch . other_config"
+alias vsconfig3="ovs-vsctl get Open_vSwitch . other_config; ovs-vsctl get Port $rep2 other_config"
 alias vsconfig-idle='ovs-vsctl set Open_vSwitch . other_config:max-idle=30000'
 alias vsconfig-hw='ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"'
 alias vsconfig-sw='ovs-vsctl set Open_vSwitch . other_config:hw-offload="false"'
@@ -354,6 +356,7 @@ alias restart-all='stop-all; start-all'
 
 alias dud='du -h -d 1'
 
+alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
@@ -676,7 +679,7 @@ alias cdr="cd /lib/modules/$(uname -r)"
 alias cd-swg='cd /swgwork/chrism'
 
 alias nc-server='nc -l -p 80 < /dev/zero'
-alias nc-client='nc 1.1.1.19 80 > /dev/null'
+alias nc-client='nc localhost 80 > /dev/null'
 
 # password is windows password
 alias mount-setup='mkdir -p /mnt/setup; mount  -o username=chrism //10.200.0.25/Setup /mnt/setup'
@@ -699,18 +702,18 @@ alias tune3="ethtool -c $link"
 ETHTOOL=/images/chrism/ethtool/ethtool
 function ethtool-rxvlan-off
 {
-# 	$ETHTOOL -k $link | grep rx-vlan-offload
+	$ETHTOOL -k $link | grep rx-vlan-offload
 	$ETHTOOL -K $link rxvlan off
-# 	$ETHTOOL -k $link | grep rx-vlan-offload
+	$ETHTOOL -k $link | grep rx-vlan-offload
 }
 
 alias eoff=ethtool-rxvlan-off
 
 function ethtool-rxvlan-on
 {
-# 	$ETHTOOL -k $link | grep rx-vlan-offload
+	$ETHTOOL -k $link | grep rx-vlan-offload
 	$ETHTOOL -K $link rxvlan on
-# 	$ETHTOOL -k $link | grep rx-vlan-offload
+	$ETHTOOL -k $link | grep rx-vlan-offload
 }
 
 alias eon=ethtool-rxvlan-on
@@ -4109,7 +4112,7 @@ function create-br
 set -x
 	[[ $# != 1 ]] && return
 	local rep
-	vs del-br $br
+	del-br
 	vs add-br $br
 	[[ "$1" == "vxlan" ]] && vxlan1
 	[[ "$1" == "vxlan6" ]] && vxlan6
@@ -4130,7 +4133,7 @@ set -x
 		local rep=$(get_rep $i)
 		vs add-port $br $rep $tag -- set Interface $rep ofport_request=$((i+1))
 # 		[[ "$1" == "vlan4" && "$rep" == "$rep2" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1q
-# 		[[ "$1" == "vlan4" && "$rep" == "$rep2" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1ad
+		[[ "$1" == "vlan4" && "$rep" == "$rep2" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1ad
 	done
 #	  vs add-port $br $link
 #	  vs add-port $br $bond
@@ -4213,26 +4216,11 @@ set +x
 # rep=$(eval echo '$'rep"$i")
 function del-br
 {
-set -x
 	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
 	sleep 1
-set +x
 	return
-
-	for (( i = 0; i < numvfs; i++)); do
-		rep=$(get_rep $i)
-		rep=${link}_$i
-		vs del-port $rep
-		rep=${link2}_$i
-		vs del-port $rep
-	done
-
-	vs del-port $link
-	vs del-br $br
-	vs del-br $br2
 	ip l d $vx_rep
 	ip l d dummy0 > /dev/null 2>&1
-set +x
 }
 
 function vlan-ns
@@ -4617,7 +4605,8 @@ set -x
 
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
-	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud\"" >> $file
+	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
+
 	sudo echo "GRUB_TERMINAL_OUTPUT=\"console\"" >> $file
 # 	sudo echo "GRUB_TERMINAL_OUTPUT=\"serial\"" >> $file
 # 	sudo echo "GRUB_SERIAL_COMMAND=\"serial --speed=$base_baud --unit=1 --word=8 --parity=no --stop=1\"" >> $file
@@ -5204,6 +5193,11 @@ function none1
 	vsconfig
 }
 
+function vlan-limit
+{
+	ovs-vsctl set Open_vSwitch . other_config:vlan-limit=2
+}
+
 function none
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
@@ -5238,7 +5232,6 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config max-revalidator
 	ovs-vsctl remove Open_vSwitch . other_config min_revalidate_pps
 	ovs-vsctl remove Open_vSwitch . other_config vlan-limit
-	ovs-vsctl remove Open_vSwitch . other_config qinq-ethtype
 	restart-ovs
 	vsconfig
 }
@@ -5504,6 +5497,12 @@ function echo-g
 {
 	echo g > /proc/sysrq-trigger
 }
+
+alias cat-tty="stty < /dev/ttyS1"
+alias cat-serial="cat /proc/tty/driver/serial"
+alias echo-a="echo aaaa > /dev/ttyS1"
+alias cat-a="cat /dev/ttyS1"
+alias restart-getty="systemctl restart serial-getty@ttyS1.service"
 
 function echo-suc
 {
@@ -7185,14 +7184,13 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=./test-tc-qinq-rules.sh
+test1=test-ovs-qinq-1.sh
 alias test1="./$test1"
-alias vi-test="vi ./$test1"
-alias vi-test1="vi ./$test1"
+alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 
-test2=./test-eswitch-add-in-mode1-del-in-mode2.sh
+test2=test-ovs-qinq-2.sh
 alias test2="./$test2"
-alias vi-test2="vi ./$test2"
+alias vi-test2="vi ~chrism/asap_dev_reg/$test2"
 
 function get-diff
 {
