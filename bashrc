@@ -3,9 +3,73 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-alias get-bashrc='wget https://raw.githubusercontent.com/mishuang2017/sm/master/bashrc'
-
 numvfs=3
+
+[[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
+[[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
+[[ "$(hostname -s)" == "gen-h-vrt-015" ]] && host_num=5
+[[ "$(hostname -s)" == "gen-h-vrt-016" ]] && host_num=6
+[[ "$(hostname -s)" == "dev-chrism-vm1" ]] && host_num=15
+[[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
+[[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
+[[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
+
+if (( host_num == 13 )); then
+	export DISPLAY=MTBC-CHRISM:0.0
+
+	link=enp4s0f0
+	link2=enp4s0f1
+	rhost_num=14
+	link_remote_ip=192.168.1.$rhost_num
+	link_remote_ip2=192.168.2.$rhost_num
+	link_remote_ipv6=1::$rhost_num
+	remote_mac=24:8a:07:88:27:ca
+
+	vf1=enp4s0f2
+	vf2=enp4s0f3
+	vf3=enp4s0f4
+
+elif (( host_num == 14 )); then
+	export DISPLAY=MTBC-CHRISM:0.0
+
+	link=enp4s0f0
+	link2=enp4s0f1
+	rhost_num=13
+	link_remote_ip=192.168.1.$rhost_num
+	link_remote_ip2=192.168.2.$rhost_num
+	link_remote_ipv6=1::$rhost_num
+	remote_mac=24:8a:07:88:27:9a
+
+	vf1=enp4s0f2
+	vf2=enp4s0f3
+	vf3=enp4s0f4
+
+elif (( host_num == 5 )); then
+	link=enp129s0f0
+	link2=enp129s0f1
+
+	vf1=enp129s0f2
+	vf2=enp129s0f3
+	vf3=enp129s0f4
+
+elif (( host_num == 6 )); then
+	link=enp129s0f0
+	link2=enp129s0f1
+
+	vf1=enp129s0f2
+	vf2=enp129s0f3
+	vf3=enp129s0f4
+
+elif (( host_num == 15 )); then
+	link=ens9
+elif (( host_num == 16 )); then
+	link=ens9
+elif (( host_num == 17 )); then
+	link=ens9
+elif (( host_num == 18 )); then
+	link=ens9
+fi
+
 vni=200
 vni=100
 vid=5
@@ -20,6 +84,11 @@ ports=1
 
 base_baud=115200
 base_baud=9600
+
+nfs_dir='/auto/mtbcswgwork/chrism'
+crash_dir=/var/crash
+linux_dir=$(readlink /lib/modules/$(uname -r)/build)
+images=images
 
 # Append to history
 shopt -s histappend
@@ -71,29 +140,6 @@ if [[ "$UID" == "0" ]]; then
 	rh=$?
 fi
 
-crash_dir=/var/crash
-if [[ "$(hostname -s)" == "bc-vnc02" ]]; then
-	host_num=20
-elif [[ "$(hostname -s)" == "dev-r630-03" ]]; then
-	host_num=13
-elif [[ "$(hostname -s)" == "dev-r630-04" ]]; then
-	host_num=14
-elif [[ "$(hostname -s)" == "gen-h-vrt-015" ]]; then
-	host_num=5
-elif [[ "$(hostname -s)" == "gen-h-vrt-016" ]]; then
-	host_num=6
-elif [[ "$(hostname -s)" == "dev-chrism-vm1" ]]; then
-	host_num=15
-elif [[ "$(hostname -s)" == "dev-chrism-vm2" ]]; then
-	host_num=16
-elif [[ "$(hostname -s)" == "dev-chrism-vm3" ]]; then
-	host_num=17
-elif [[ "$(hostname -s)" == "dev-chrism-vm4" ]]; then
-	host_num=18
-elif (( rh == 0 )); then
-	host_num=9
-fi
-
 export LC_ALL=en_US.UTF-8
 # export DISPLAY=:0.0
 
@@ -111,8 +157,6 @@ export CONFIG=config_chrism_cx5.sh
 # export INSTALL_MOD_STRIP=1
 unset CONFIG_LOCALVERSION_AUTO
 
-nfs_dir='/auto/mtbcswgwork/chrism'
-
 link_ip=192.168.1.$host_num
 link2_ip=192.168.2.$host_num
 link_ipv6=1::$host_num
@@ -123,70 +167,6 @@ br2=br2
 vx=vxlan0
 vx2=vxlan1
 bond=bond0
-
-linux_dir=$(readlink /lib/modules/$(uname -r)/build)
-images=images
-
-if (( host_num == 9 )); then
-	link=ens9
-elif (( host_num == 13 )); then
-	export DISPLAY=MTBC-CHRISM:0.0
-
-	link=enp4s0f0
-	link2=enp4s0f1
-	link2_new=${link2}_65534
-	rhost_num=14
-	link_remote_ip=192.168.1.$rhost_num
-	link_remote_ip2=192.168.2.$rhost_num
-	link_remote_ipv6=1::$rhost_num
-	remote_mac=24:8a:07:88:27:ca
-
-	vf1=enp4s0f2
-	vf2=enp4s0f3
-	vf3=enp4s0f4
-
-elif (( host_num == 14 )); then
-	export DISPLAY=MTBC-CHRISM:0.0
-
-	link=enp4s0f0
-	link2=enp4s0f1
-	rhost_num=13
-	link_remote_ip=192.168.1.$rhost_num
-	link_remote_ip2=192.168.2.$rhost_num
-	link_remote_ipv6=1::$rhost_num
-	remote_mac=24:8a:07:88:27:9a
-
-	vf1=enp4s0f2
-	vf2=enp4s0f3
-	vf3=enp4s0f4
-
-elif (( host_num == 5 )); then
-	link=enp129s0f0
-	link2=enp129s0f1
-
-	vf1=enp129s0f2
-	vf2=enp129s0f3
-	vf3=enp129s0f4
-
-elif (( host_num == 6 )); then
-	link=enp129s0f0
-	link2=enp129s0f1
-
-	vf1=enp129s0f2
-	vf2=enp129s0f3
-	vf3=enp129s0f4
-
-elif (( host_num == 15 )); then
-	link=ens9
-elif (( host_num == 16 )); then
-	link=ens9
-elif (( host_num == 17 )); then
-	link=ens9
-elif (( host_num == 18 )); then
-	link=ens9
-elif (( host_num == 20 )); then
-	linux_dir=/auto/mtbcswgwork/chrism/linux
-fi
 
 # if [[ "$USER" == "root" ]]; then
 #	if [[ "$(virt-what)" == "" && $centos72 != 1 ]]; then
@@ -813,7 +793,7 @@ function vlan
 
 	modprobe 8021q
 	ifconfig $link 0
-	ip link add link $link name $vlan type vlan id $2
+	ip link add link $link name $vlan type vlan id $vid
 	ip link set dev $vlan up
 	ip addr add $ip/16 brd + dev $vlan
 	ip addr add $link_ipv6/64 dev $vlan
