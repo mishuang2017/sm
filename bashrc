@@ -238,7 +238,13 @@ alias vx='vxlan2; vxlan1'
 alias ipmirror="ifconfig $link 0; ip addr add dev $link $link_ip_vlan/16; ip link set $link up"
 
 alias vsconfig="ovs-vsctl get Open_vSwitch . other_config"
-alias vsconfig3="ovs-vsctl get Open_vSwitch . other_config; ovs-vsctl get Port $rep2 other_config"
+function vsconfig3
+{
+set -x
+	ovs-vsctl get Open_vSwitch . other_config
+	ovs-vsctl get Port $rep2 other_config
+set +x
+}
 alias vsconfig-idle='ovs-vsctl set Open_vSwitch . other_config:max-idle=30000'
 alias vsconfig-hw='ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"'
 alias vsconfig-sw='ovs-vsctl set Open_vSwitch . other_config:hw-offload="false"'
@@ -4030,16 +4036,6 @@ set -x
 set +x
 }
 
-function remove-tags
-{
-set -x
-#	ovs-vsctl remove port $rep1 tag $vid
-	ovs-vsctl remove port $rep2 tag $vid
-	ovs-vsctl remove port $rep3 tag $vid
-	ovs-vsctl remove port $vx tag $vid
-set +x
-}
-
 function remove-tag
 {
 set -x
@@ -4048,75 +4044,69 @@ set -x
 set +x
 }
 
-function add-tag
+function br-dot1q
 {
 set -x
-	[[ $# != 1 ]] && return
-	ovs-vsctl add port $1 tag $vid
-set +x
-}
-
-
-function add-tags
-{
-set -x
-#	ovs-vsctl add port $rep1 tag $vid
-	ovs-vsctl add port $rep2 tag $vid
-	ovs-vsctl add port $rep3 tag $vid
-	ovs-vsctl add port $vx tag $vid
-set +x
-}
-
-alias brv='create-br vlan'
-alias brv-tagged='create-br vlan2'
-alias brv-untagged='create-br vlan3'
-alias brv-dot1q='create-br vlan4'
-alias bru='create-br uplink'
-alias br='create-br nomal'
-alias brx='create-br vxlan'
-alias brx6='create-br vxlan6'
-
-function create-br-all
-{
-	del-br
-	brx
-	if (( ports == 2 )); then
-		ip2
-		create-br2 vxlan
-		restart-ovs
-	fi
-}
-
-function create-br
-{
-set -x
-	[[ $# != 1 ]] && return
-	local rep
 	del-br
 	vs add-br $br
-	[[ "$1" == "vxlan" ]] && vxlan1
-	[[ "$1" == "vxlan6" ]] && vxlan6
-	[[ "${1:0:4}" == "vlan" ]] && vs add-port $br $link
-	[[ "$1" == "uplink" ]] && vs add-port $br $link -- set Interface $link ofport_request=5
-	tag=""
-	if [[ "$1" == "vlan" ]]; then
-		tag="tag=$vid"
-	elif [[ "$1" == "vlan2" ]]; then
-		tag="tag=$svid vlan-mode=native-tagged"
-	elif [[ "$1" == "vlan3" ]]; then
-		tag="tag=$svid vlan-mode=native-untagged"
-	elif [[ "$1" == "vlan4" ]]; then
-		tag="tag=$svid vlan-mode=dot1q-tunnel"
-# 		tag="tag=$svid vlan-mode=dot1q-tunnel"
-	fi
+	eoff
+	vlan-limit
+	vs add-port $br $link
+	tag="tag=$svid vlan-mode=dot1q-tunnel"
+	vs add-port $br $rep2 $tag
+	[[ "$1" == "cmcc" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1q
+set +x
+}
+
+function brv
+{
+set -x
+	del-br
+	vs add-br $br
+	vs add-port $br $link -- set Interface $link ofport_request=5
+	tag="tag=$vid"
 	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep $tag -- set Interface $rep ofport_request=$((i+1))
-# 		[[ "$1" == "vlan4" && "$rep" == "$rep2" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1q
-		[[ "$1" == "vlan4" && "$rep" == "$rep2" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1ad
 	done
-#	  vs add-port $br $link
-#	  vs add-port $br $bond
+set +x
+}
+
+function bru
+{
+set -x
+	del-br
+	vs add-br $br
+	vs add-port $br $link -- set Interface $link ofport_request=5
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+set +x
+}
+
+function br
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+set +x
+}
+
+function brx
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan1
 set +x
 }
 
@@ -4133,19 +4123,6 @@ set -x
 		local rep=$(get_rep $i)
 		vs add-port $br $rep $tag
 	done
-set +x
-}
-
-function qinq
-{
-	vs del-br $br
-	vs add-br $br
-set -x
-	for (( i = 0; i < numvfs; i++)); do
-		local rep=$(get_rep $i)
-		vs add-port $br $rep vlan_mode=native-tagged tag=$vid trunks=$svid
-	done
-	vs add-port $br $link vlan_mode=dot1q-tunnel tag=$svid cvlans=$vid -- set Interface $link ofport_request=5 other-config:qinq-ethtype=802.1q
 set +x
 }
 
@@ -4190,8 +4167,6 @@ set -x
 	vs add-port $br $rep1_2 $tag
 set +x
 }
-
-
 
 # rep=$(eval echo '$'rep"$i")
 function del-br
@@ -4324,7 +4299,9 @@ function hw_tc_all
 		echo "hw_tc_all error"
 		return
 	fi
+	echo
 	echo "start hw_tc_all"
+	echo "hw-tc-offload on $l"
 	$ETHTOOL -K $l hw-tc-offload on
 	for (( i = 0; i < numvfs; i++)); do
 		rep=${l}_$i
@@ -4457,7 +4434,7 @@ function start-switchdev
 
 	sleep 1
 	time up_all_reps $port
-#	hw_tc_all $p
+	hw_tc_all $port
 
 	time set_netns_all $port
 
@@ -4521,8 +4498,6 @@ function start-switchdev-all
 #	ifconfig $link2 up
 
 	start-ovs
-	# workaround for JD kernel
-	ethtool -K $link hw-tc-offload on
 	for i in $(seq $ports); do
 		start-switchdev $i
 	done
@@ -8061,6 +8036,8 @@ function install-debuginfo
 function qinq-br
 {
 	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
+	vlan-limit
+	eoff
 	ovs-vsctl add-br $br
 	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
@@ -8098,8 +8075,8 @@ function qinq-br
 
 alias rxvlan-off="ethtool -K $link rxvlan off"
  
-alias vm-vlan="ip l d vlan5; vlan $vf2 5 1.1.$host_num.1"
-alias vm-ip="ip l d vlan5; ip addr add dev $vf2 1.1.$host_num.1/16"
+alias vm-vlan="ip l d vlan5 &> /dev/null; vlan $vf2 5 1.1.$host_num.1"
+alias vm-ip="ip l d vlan5 &> /dev/null; ip addr add dev $vf2 1.1.$host_num.1/16"
 alias q-rule=qinq-rule
 function qinq-rule
 {
