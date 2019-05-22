@@ -586,6 +586,117 @@ ts: 14
 
 ===gdb===
 
+(gdb) disassemble /m
+Dump of assembler code for function mlx5e_xmit:
+439     {
+=> 0xffffffffc0275b10 <+0>:     nopl   0x0(%rax,%rax,1)
+   0xffffffffc0275bb2 <+162>:   push   %rbp
+   0xffffffffc0275bb3 <+163>:   mov    %rdi,%rsi
+   0xffffffffc0275bbc <+172>:   mov    %rsp,%rbp
+
+440             struct mlx5e_priv *priv = netdev_priv(dev);
+441             struct mlx5e_tx_wqe *wqe;
+442             struct mlx5e_txqsq *sq;
+443             u16 pi;
+444
+445             sq = priv->txq2sq[skb_get_queue_mapping(skb)];
+   0xffffffffc0275b15 <+5>:     movzwl 0x8c(%rdi),%eax
+   0xffffffffc0275b1c <+12>:    mov    0x8c0(%rsi,%rax,8),%rax
+
+446             mlx5e_sq_fetch_wqe(sq, &wqe, &pi);
+447
+448             /* might send skbs and update wqe and pi */
+449             skb = mlx5e_accel_handle_tx(skb, sq, dev, &wqe, &pi);
+450             if (unlikely(!skb))
+   0xffffffffc0275bad <+157>:   test   %rdi,%rdi
+   0xffffffffc0275bb0 <+160>:   je     0xffffffffc0275bdf <mlx5e_xmit+207>
+   0xffffffffc0275bd4 <+196>:   test   %rdi,%rdi
+   0xffffffffc0275bdd <+205>:   jne    0xffffffffc0275bb2 <mlx5e_xmit+162>
+
+451                     return NETDEV_TX_OK;
+   0xffffffffc0275bdf <+207>:   xor    %eax,%eax
+
+452
+453             return mlx5e_sq_xmit(sq, skb, wqe, pi);
+   0xffffffffc0275bb6 <+166>:   mov    %r9d,%ecx
+   0xffffffffc0275bb9 <+169>:   mov    %rax,%rdi
+   0xffffffffc0275bbf <+175>:   callq  0xffffffffc0275050 <mlx5e_sq_xmit>
+
+454     }
+   0xffffffffc0275bc4 <+180>:   pop    %rbp
+   0xffffffffc0275bc5 <+181>:   retq
+   0xffffffffc0275be1 <+209>:   retq
+   0xffffffffc0275be2:  nopl   0x0(%rax)
+   0xffffffffc0275be6:  nopw   %cs:0x0(%rax,%rax,1)
+
+End of assembler dump.
+
+#0  mlx5e_xmit (skb=0xffff88105638d600, dev=0xffff881055900000) at drivers/net/ethernet/mellanox/mlx5/core/en_tx.c:439
+#1  0xffffffff816af0e8 in __netdev_start_xmit (more=<optimized out>, dev=<optimized out>, skb=<optimized out>, ops=<optimized out>) at ./include/linux/netdevice.h:4376
+(More stack frames follow...)
+(gdb) disassemble 0xffffffff816af0e8
+
+no arg, disassemble current code
+(gdb) disassemble
+
+(gdb) bt 1
+#0  mlx5e_xmit (skb=0xffff88105638d600, dev=0xffff881055900000) at drivers/net/ethernet/mellanox/mlx5/core/en_tx.c:439
+# edit file
+edit mlx5e_xmit
+or
+edit 439
+
+To display the backtrace for several or all of the threads
+(gdb) thread apply all bt
+
+Print only the innermost n frames
+bt 2
+
+Print only the outermost n frames
+bt -2
+
+Print the values of the local variables
+bt full
+
+bt full 2
+
+(gdb) tbreak
+temporary break
+
+info program
+info regsiters
+
+(gdb) info b
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   0xffffffffc027dc00 in mlx5e_handle_rx_cqe_mpwrq at drivers/net/ethernet/mellanox/mlx5/core/en_rx.c:1200
+        breakpoint already hit 1 time
+(gdb) d 1
+
+(gdb) x/16xh 0xffff88875d92e040
+0xffff88875d92e040:     0xffff  0xffff  0xffff  0x2502  0x14d0  0x0201  0xa888  0xe803
+0xffff88875d92e050:     0x0608  0x0100  0x0008  0x0406  0x0100  0x2502  0x14d0  0x0201
+
+x 是 examine 的缩写
+
+n表示要显示的内存单元的个数
+
+f表示显示方式, 可取如下值
+x 按十六进制格式显示变量。
+d 按十进制格式显示变量。
+u 按十进制格式显示无符号整型。
+o 按八进制格式显示变量。
+t 按二进制格式显示变量。
+a 按十六进制格式显示变量。
+i 指令地址格式
+c 按字符格式显示变量。
+f 按浮点数格式显示变量。
+
+u表示一个地址单元的长度
+b表示单字节，
+h表示双字节，
+w表示四字节，
+g表示八字节
+
 generate-core-file [file]
 gcore [file]
 
