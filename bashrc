@@ -292,6 +292,7 @@ alias jd-ovs-ttl="~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
 alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
 
 alias pc="picocom -b $base_baud /dev/ttyS1"
+alias pcu="picocom -b $base_baud /dev/ttyUSB0"
 
 alias rq='echo g > /proc/sysrq-trigger'
 
@@ -371,6 +372,7 @@ alias dmesg='dmesg -T'
 
 alias git-log='git log --tags --source'
 alias v4.20='git checkout v4.20; git checkout -b 4.20'
+alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v4.10='git checkout v4.10; git checkout -b 4.10'
 alias v4.8='git checkout v4.8; git checkout -b 4.8'
 alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
@@ -628,7 +630,7 @@ alias visc='vi ~/.screenrc'
 alias vv='vi ~/.vimrc'
 alias rc='. ~/.bashrc'
 alias vis='vi ~/.ssh/known_hosts'
-alias vin='vi ~/Documents/notes.txt'
+alias vin='vi ~/sm/notes.txt'
 alias vij='vi ~/Documents/jd.txt'
 alias vi1='vi ~/Documents/ovs.txt'
 alias vi2='vi ~/Documents/mirror.txt'
@@ -728,6 +730,7 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
+alias r7='sudo ~chrism/bin/test_router7.sh'	# ct + snat with more recircs
 alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
 alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script for PF
 alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat, can't offload
@@ -4058,6 +4061,20 @@ set -x
 set +x
 }
 
+function brx-dot1q
+{
+set -x
+	del-br
+	vs add-br $br
+	eoff
+	vlan-limit
+	vxlan1
+	tag="tag=$svid vlan-mode=dot1q-tunnel"
+	vs add-port $br $rep2 $tag
+	[[ "$1" == "cmcc" ]] && ovs-vsctl set Port $rep2 other_config:qinq-ethtype=802.1q
+set +x
+}
+
 function brv
 {
 set -x
@@ -5459,10 +5476,14 @@ function echo-g
 }
 
 alias cat-tty="stty < /dev/ttyS1"
+alias cat-ttyu="stty < /dev/ttyUSB0"
 alias cat-serial="cat /proc/tty/driver/serial"
+alias cat-userial="cat /proc/tty/driver/usbserial"
 alias echo-a="echo aaaa > /dev/ttyS1"
 alias cat-a="cat /dev/ttyS1"
 alias restart-getty="systemctl restart serial-getty@ttyS1.service"
+alias stop-getty="systemctl stop serial-getty@ttyS1.service"
+alias start-getty="systemctl start serial-getty@ttyS1.service"
 
 function echo-suc
 {
@@ -6428,6 +6449,17 @@ function fetch
 	git fetch $repo $branch
 	git checkout FETCH_HEAD
 	git checkout -b $branch
+}
+
+alias git-lx='git apply  ~/sm/kgdb/lx-symbole.patch'
+
+function fetch-13
+{
+	[[ $# == 0 ]] && return
+	git branch -D 13
+	git fetch 13 $1
+	git checkout FETCH_HEAD
+	git checkout -b 13
 }
 
 function tcs
