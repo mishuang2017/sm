@@ -729,10 +729,10 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
 alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
-alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script
-alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat
-alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat
-alias r2='sudo ~chrism/bin/test_router2.sh'	# snat
+alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script for PF
+alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat, can't offload
+alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat, can't offload
+alias r2='sudo ~chrism/bin/test_router2.sh'	# snat, can offload
 alias r1='sudo ~chrism/bin/test_router.sh'	# veth arp responder
 
 corrupt_dir=corrupt_lat_linux
@@ -5151,6 +5151,11 @@ function none1
 function vlan-limit
 {
 	ovs-vsctl set Open_vSwitch . other_config:vlan-limit=2
+}
+
+function vlan-limit1
+{
+	ovs-vsctl set Open_vSwitch . other_config:vlan-limit=1
 }
 
 function none
