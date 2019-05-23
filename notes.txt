@@ -586,6 +586,8 @@ ts: 14
 
 ===gdb===
 
+p *array@len
+
 (gdb) disassemble /m
 Dump of assembler code for function mlx5e_xmit:
 439     {
@@ -3415,7 +3417,24 @@ ts: 23
 0x7f1ee28afe6f : clone                +0x3f/0x60 [/usr/lib64/libc-2.26.so]
 
 
+dpif_netlink_operate
 
+(gdb) bt
+#0  dpif_operate (dpif=0x557daa0f2d10, ops=ops@entry=0x7f5c05d2f608, n_ops=n_ops@entry=1, offload_type=offload_type@entry=DPIF_OFFLOAD_AUTO) at lib/dpif.c:1330
+#1  0x0000557da8cfa183 in dpif_execute (dpif=<optimized out>, execute=execute@entry=0x7f5c05d2f6a0) at lib/dpif.c:1314
+#2  0x0000557da8cfa562 in dpif_execute (execute=0x7f5c05d2f6a0, dpif=<optimized out>) at lib/dpif.c:1230
+#3  dpif_execute_helper_cb (aux_=aux_@entry=0x7f5c05d2fbf0, packets_=packets_@entry=0x7f5c05d2fc10, action=action@entry=0x7f5c05d51e5c, should_steal=<optimized out>)
+    at lib/dpif.c:1238
+#4  0x0000557da8d28c35 in odp_execute_actions (dp=dp@entry=0x7f5c05d2fbf0, batch=batch@entry=0x7f5c05d2fc10, steal=steal@entry=false, actions=<optimized out>,
+    actions_len=<optimized out>, dp_execute_action=dp_execute_action@entry=0x557da8cfa1d0 <dpif_execute_helper_cb>) at lib/odp-execute.c:794
+#5  0x0000557da8cf77ad in dpif_execute_with_help (dpif=dpif@entry=0x557daa0f2d10, execute=execute@entry=0x7f5c05d31230) at lib/dpif.c:1290
+#6  0x0000557da8cf9ad8 in dpif_operate (dpif=0x557daa0f2d10, ops=0x7f5c05d2fe00, n_ops=n_ops@entry=30, offload_type=offload_type@entry=DPIF_OFFLOAD_AUTO) at lib/dpif.c:1416
+#7  0x0000557da8cbabc4 in handle_upcalls (n_upcalls=<optimized out>, upcalls=0x7f5c05d51a00, udpif=<optimized out>) at ofproto/ofproto-dpif-upcall.c:1609
+#8  recv_upcalls (handler=<optimized out>, handler=<optimized out>) at ofproto/ofproto-dpif-upcall.c:855
+#9  0x0000557da8cbad84 in udpif_upcall_handler (arg=0x557daa160900) at ofproto/ofproto-dpif-upcall.c:759
+#10 0x0000557da8d7a87f in ovsthread_wrapper (aux_=<optimized out>) at lib/ovs-thread.c:352
+#11 0x00007f5c081186db in start_thread () from /lib/x86_64-linux-gnu/libpthread.so.0
+#12 0x00007f5c0789b88f in clone () from /lib/x86_64-linux-gnu/libc.so.6
 
 
 0xffffffffa0af711f : ovs_flow_cmd_new                +0xcf/0x560 [openvswitch]
