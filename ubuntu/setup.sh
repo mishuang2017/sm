@@ -15,6 +15,9 @@ sudo apt-get -y install netperf iperf iperf3
 # For systemtap
 sudo apt-get -y install libdw-dev
 
+# For binutils-gdb
+sudo apt-get -y install texinfo
+
 # For perf
 sudo apt-get -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev libbabeltrace-ctf-dev libiberty-dev libperl-dev
 # sudo apt install openjdk-8-jdk
