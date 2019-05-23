@@ -4114,6 +4114,19 @@ set -x
 set +x
 }
 
+function br0
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 1; i <= numvfs; i++)); do
+		local rep=eth$i
+		ifconfig $rep up
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+set +x
+}
+
 function brx
 {
 set -x

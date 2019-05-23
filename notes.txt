@@ -8299,6 +8299,8 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+find -type f -empty -exec rm {} \;
+
 %rdi，%rsi，%rdx，%rcx，%r8，%r9
 
 https://github.com/vim-scripts/Conque-GDB
