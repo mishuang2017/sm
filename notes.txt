@@ -3243,6 +3243,10 @@ static const struct dpctl_command all_commands[] = {
 
 ===ovs===
 
+#define MAX_DEPTH 64
+
+https://blog.csdn.net/vonzhoufz/column/info/ovs-code-learing
+
 [root@dev-r630-04 systemtap]# pidstat -t -p 3794
 Linux 5.0.0-rc7+ (dev-r630-04.mtbc.labs.mlnx)   02/26/2019      _x86_64_        (16 CPU)
 
@@ -9473,6 +9477,63 @@ crash> sk_buff.protocol,vlan_proto,vlan_tci,vlan_present ffff9e1fd80e7000
 
 ===ovs_ct===
 
+compose_conntrack_action
+
+/* Action structure for NXAST_CT.
+ *
+ * Pass traffic to the connection tracker.
+struct nx_action_conntrack {
+
+
+
+[root@dev-r630-03 ~]# ovs-appctl ofproto/trace br in_port=2,dl_dst=24:8a:07:ad:77:99,dl_src=02:25:d0:13:01:02,ip,nw_src=192.168.0.2,nw_dst=8.9.10.11
+Flow: ip,in_port=2,vlan_tci=0x0000,dl_src=02:25:d0:13:01:02,dl_dst=24:8a:07:ad:77:99,nw_src=192.168.0.2,nw_dst=8.9.10.11,nw_proto=0,nw_tos=0,nw_ecn=0,nw_ttl=0
+
+bridge("br")
+------------
+ 0. ct_state=-trk,ip, priority 10
+    ct(table=1,nat)
+    nat
+     -> A clone of the packet is forked to recirculate. The forked pipeline will be resumed at table 1.
+     -> Sets the packet to an untracked state, and clears all the conntrack fields.
+
+Final flow: unchanged
+Megaflow: recirc_id=0,ct_state=-trk,eth,ip,in_port=2,nw_frag=no
+Datapath actions: ct(nat),recirc(0x15)
+
+===============================================================================
+recirc(0x15) - resume conntrack with default ct_state=trk|new (use --ct-next to customize)
+===============================================================================
+
+Flow: recirc_id=0x15,ct_state=new|trk,eth,ip,in_port=2,vlan_tci=0x0000,dl_src=02:25:d0:13:01:02,dl_dst=24:8a:07:ad:77:99,nw_src=192.168.0.2,nw_dst=8.9.10.11,nw_proto=0,nw_tos=0,nw_ecn=0,nw_ttl=0
+
+bridge("br")
+------------
+    thaw
+        Resuming from table 1
+ 1. ct_state=+new+trk,ip,in_port=2, priority 32768
+    ct(commit,nat(src=8.9.10.1:5000-50000))
+    nat(src=8.9.10.1:5000-50000)
+     -> Sets the packet to an untracked state, and clears all the conntrack fields.
+    mod_dl_src:24:8a:07:ad:77:99
+    mod_dl_dst:24:8a:07:88:27:ca
+    output:5
+
+Final flow: recirc_id=0x15,eth,ip,in_port=2,vlan_tci=0x0000,dl_src=24:8a:07:ad:77:99,dl_dst=24:8a:07:88:27:ca,nw_src=192.168.0.2,nw_dst=8.9.10.11,nw_proto=0,nw_tos=0,nw_ecn=0,nw_ttl=0
+Megaflow: recirc_id=0x15,ct_state=+new+trk,eth,ip,in_port=2,dl_src=02:25:d0:13:01:02,dl_dst=24:8a:07:ad:77:99,nw_frag=no
+Datapath actions: ct(commit,nat(src=8.9.10.1:5000-50000)),set(eth(src=24:8a:07:ad:77:99,dst=24:8a:07:88:27:ca)),2
+
+
+
+
+ovs_ct_get_info
+
+IPS_CONFIRMED_BIT
+
+action=ct(commit)
+__nf_conntrack_confirm
+	ct->status |= IPS_CONFIRMED
+
 withtout ct
 
 filter protocol ip pref 1 flower chain 0
@@ -9644,6 +9705,7 @@ action=ct(nat(src=8.9.10.1-8.9.10.1:5000-50000)
         start_secondary  +0x16f [kernel]
         secondary_startup_64  +0xa4 [kernel]
 
+ ovs_ct_update_key
 
 0       0       swapper/13      nf_nat_packet
         nf_nat_packet  +0x1 [kernel]

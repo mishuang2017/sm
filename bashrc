@@ -2028,6 +2028,8 @@ function tc2
 		ip link show $i > /dev/null 2>&1 || continue
 		sudo ip l d $i
 	done
+
+	sudo modprobe -r act_ct
 }
 
 function block
@@ -4095,7 +4097,8 @@ set -x
 	del-br
 	vs add-br $br
 	vs add-port $br $link -- set Interface $link ofport_request=5
-	for (( i = 0; i < numvfs; i++)); do
+# 	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < 2; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
@@ -4588,9 +4591,13 @@ set -x
 	sudo sed -i '/GRUB_SERIAL_COMMAND/d' $file
 #	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
 
-# 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+	if (( host_num == 14)); then
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+	fi
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
-	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
+	if (( host_num == 13)); then
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
+	fi
 
 	sudo echo "GRUB_TERMINAL_OUTPUT=\"console\"" >> $file
 # 	sudo echo "GRUB_TERMINAL_OUTPUT=\"serial\"" >> $file
@@ -4928,6 +4935,8 @@ set -x
 set +x
 }
 
+# 250K e4:11:00:00:00:00 to e4:11:00:03:d0:8f
+
 function tca
 {
 set -x
@@ -5188,6 +5197,12 @@ function vlan-limit1
 	ovs-vsctl set Open_vSwitch . other_config:vlan-limit=1
 }
 
+function ovs-thread
+{
+	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
+	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
+}
+
 function none
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
@@ -5222,6 +5237,8 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config max-revalidator
 	ovs-vsctl remove Open_vSwitch . other_config min_revalidate_pps
 	ovs-vsctl remove Open_vSwitch . other_config vlan-limit
+	ovs-vsctl remove Open_vSwitch . other_config n-revalidator-threads
+	ovs-vsctl remove Open_vSwitch . other_config n-handler-threads
 	restart-ovs
 	vsconfig
 }
@@ -7895,6 +7912,21 @@ function tracer
 cat << EOF > $file
 $BCC_DIR/tools/trace.py 'r::$1 "%lx", retval'
 EOF
+	echo $file
+	bash $file
+}
+
+function traceo
+{
+	[[ $# < 1 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace.py 'ovs-vswitchd:$1 "%lx", arg1'
+EOF
+	if [[ $# == 2 ]]; then
+		sed -i 's/$/& -U/g' $file
+	fi
+	cat $file
 	echo $file
 	bash $file
 }
