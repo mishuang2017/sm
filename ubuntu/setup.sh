@@ -30,3 +30,6 @@ apt install linux-crashdump
 # /etc/sysctl.conf
 #	vm.min_free_kbytes=65536
 # sysctl vm.min_free_kbytes
+
+# For drgn
+apt install -y python3-setuptools
