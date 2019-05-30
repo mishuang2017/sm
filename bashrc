@@ -504,6 +504,7 @@ alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actio
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
 alias ovs="cd /$images/chrism/openvswitch"
 alias smo="cd /$images/chrism/openvswitch"
+alias smo2="cd /$images/chrism/ovs-ct-2.10"
 alias smt="cd /$images/chrism/ovs-tests"
 alias cfo="cd /$images/chrism/openvswitch; cscope -d"
 alias ipa='ip a'
@@ -5710,7 +5711,7 @@ function pktgen0
 set -x
 	sm1
 	cd ./samples/pktgen
-	./pktgen_sample01_simple.sh -i $link -s 1 -m 02:25:d0:e2:14:00 -d 1.1.1.1 -t 1 -n 0
+	./pktgen_sample01_simple.sh -i $link -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.22 -t 1 -n 0
 set +x
 }
 
@@ -8198,6 +8199,12 @@ function br-veth
 	ovs-vsctl add-br $br
 	ovs-vsctl add-port $br host1_rep tag=$vid -- set Interface host1_rep ofport_request=2
 	ovs-vsctl add-port $br $link -- set Interface $link ofport_request=5
+}
+
+alias wget8="wget 8.9.10.11:8000"
+function http-server
+{
+	python -m SimpleHTTPServer
 }
 
 ######## ubuntu #######
