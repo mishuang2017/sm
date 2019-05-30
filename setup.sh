@@ -55,6 +55,9 @@ set -x
 	# gdb needs makeinfo
 	yum -y instal texinfo
 
+	# drgn
+	yum -y install python3-devel
+
 	sleep 1
 	systemctl disable gdm
 	systemctl stop gdm
