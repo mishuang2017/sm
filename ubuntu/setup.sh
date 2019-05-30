@@ -33,3 +33,4 @@ apt install linux-crashdump
 
 # For drgn
 apt install -y python3-setuptools
+apt install -y python3-dev
