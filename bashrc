@@ -8280,7 +8280,7 @@ function ln-crash
 	ln -s ${dir}dump* vmcore.$n
 }
 
-VMLINUX=/usr/lib/debug/boot/vmlinux-$(uname -r)
+# VMLINUX=/usr/lib/debug/boot/vmlinux-$(uname -r)
 alias crash1="$CRASH -i /root/.crash $VMLINUX"
 
 alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
