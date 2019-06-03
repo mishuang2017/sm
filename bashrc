@@ -321,6 +321,7 @@ alias con6='virsh console vm6'
 alias con7='virsh console vm7'
 alias con8='virsh console vm8'
 
+alias mount-image='mount /dev/mapper/centos74-root /mnt'
 alias start1='virsh start vm1'
 alias start2='virsh start vm2'
 alias start3='virsh start vm3'
@@ -514,6 +515,8 @@ alias ipal='ip a l'
 alias smd='cd /usr/src/debug/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64'
 alias rmswp='find . -name *.swp -exec rm {} \;'
 alias rmswp1='find . -name *.swp -exec rm {} \;'
+alias cd-drgn='cd /usr/local/lib64/python3.6/site-packages/drgn-0.0.1-py3.6-linux-x86_64.egg/drgn/helpers/linux/'
+alias smdr="cd /$images/chrism/drgn/"
 
 alias mount-fedora="mount /dev/mapper/fedora-root /mnt"
 alias cfl="cd /$images/chrism/linux; cscope -d"
@@ -5199,6 +5202,13 @@ function vlan-limit1
 	ovs-vsctl set Open_vSwitch . other_config:vlan-limit=1
 }
 
+# ofproto_flow_limit
+function flow-limit
+{
+	ovs-vsctl set Open_vSwitch . other_config:flow-limit=1000000
+}
+
+# size_t n_handlers, n_revalidators;
 function ovs-thread
 {
 	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
@@ -5241,6 +5251,7 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config vlan-limit
 	ovs-vsctl remove Open_vSwitch . other_config n-revalidator-threads
 	ovs-vsctl remove Open_vSwitch . other_config n-handler-threads
+	ovs-vsctl remove Open_vSwitch . other_config flow-limit
 	restart-ovs
 	vsconfig
 }
@@ -5709,29 +5720,32 @@ alias d1="disable-tcp-offload $link"
 
 function pktgen0
 {
-set -x
 	sm1
 	cd ./samples/pktgen
-	./pktgen_sample01_simple.sh -i $link -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.22 -t 1 -n 0
-set +x
+	./pktgen_sample01_simple.sh -i $link -s 1 -m 02:25:d0:$rhost_num:01:02 -d 1.1.1.22 -t 1 -n 0
 }
 
 function pktgen1
 {
-set -x
+	mac_count=1
+	[[ $# == 1 ]] && mac_count=$1
 	sm1
 	cd ./samples/pktgen
-	./pktgen_sample02_multiqueue.sh -i $link -s 1 -m 02:25:d0:e2:14:50 -d 1.1.1.1 -t 2 -n 0
-set +x
+	export SRC_MAC_COUNT=$mac_count
+	./pktgen_sample02_multiqueue.sh -i $link -s 1 -m 02:25:d0:$rhost_num:01:02 -d 1.1.1.22 -t 16 -n 0
 }
 
 function pktgen2
 {
-set -x
 	sm1
 	cd ./samples/pktgen
 	./pktgen_sample02_multiqueue2.sh -i $link -s 1 -m 02:25:d0:e2:14:01 -d 1.1.1.2 -t 1 -n 0
-set +x
+}
+
+function used
+{
+	dpd > 1.txt
+	awk '{print $4}' 1.txt | sort > 2.txt
 }
 
 # virsh net-edit default
@@ -6622,14 +6636,14 @@ set +x
 
 # ssh chrism@ dev-chrism-vm4
 # echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
-# /root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:0a.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap
+# /root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap
 # testpmd> set fwd macswap
 # testpmd> start
 # testpmd> show port stats all
 
 # ssh chrism@ dev-chrism-vm3
 # echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
-# /root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4	-m=1024  -w 0000:00:0a.0 -- -i --rxq=2 --txq=2	--nb-cores=2
+# /root/dpdk-stable-17.11.4/x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4	-m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2	--nb-cores=2
 # testpmd> set fwd flowgen
 # testpmd> start
 # testpmd> show port stats all
@@ -6904,6 +6918,24 @@ function addflow
 	ovs-ofctl add-flows $br -O openflow13 $file
 	ovs-ofctl dump-flows $br | wc -l
 	set +x
+}
+
+function addflow-mac
+{
+	local file=/tmp/of.txt
+	count=1
+	[[ $# == 1 ]] && count=$1
+	cur=0
+	rm -f $file
+
+	~chrism/bin/of-mac.py -n $count $file
+
+set -x
+	br=br
+	ovs-ofctl del-flows $br
+	ovs-ofctl add-flows $br -O openflow13 $file
+	ovs-ofctl dump-flows $br | wc -l
+set +x
 }
 
 function addflow-port
@@ -7924,6 +7956,51 @@ function traceo
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
 $BCC_DIR/tools/trace.py 'ovs-vswitchd:$1 "%lx", arg1'
+EOF
+	if [[ $# == 2 ]]; then
+		sed -i 's/$/& -U/g' $file
+	fi
+	cat $file
+	echo $file
+	bash $file
+}
+
+function traceo2
+{
+	[[ $# < 1 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace.py 'ovs-vswitchd:$1 "%lx", arg2'
+EOF
+	if [[ $# == 2 ]]; then
+		sed -i 's/$/& -U/g' $file
+	fi
+	cat $file
+	echo $file
+	bash $file
+}
+
+function traceo3
+{
+	[[ $# < 1 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace.py 'ovs-vswitchd:$1 "%llx", arg3'
+EOF
+	if [[ $# == 2 ]]; then
+		sed -i 's/$/& -U/g' $file
+	fi
+	cat $file
+	echo $file
+	bash $file
+}
+
+function traceor
+{
+	[[ $# < 1 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace.py 'r:ovs-vswitchd:$1 "%lx", retval'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file

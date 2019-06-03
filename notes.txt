@@ -9477,6 +9477,23 @@ crash> sk_buff.protocol,vlan_proto,vlan_tci,vlan_present ffff9e1fd80e7000
 
 ===ovs_ct===
 
+add_flow_start
+rule_collection_add
+
+rule_dpif_lookup_from_table
+classifier_lookup__
+
+revalidate
+revalidate_ukey
+xlate_push_stats
+xlate_push_stats_entry
+rule_dpif_credit_stats
+rule_dpif_credit_stats__
+
+do_futex
+
+rule_get_stats
+
 WARNING: DWARF expression stack underflow in CFI
 WARNING: Missing unwind data for a module, rerun with 'stap -d (unknown; retry with -DDEBUG_UNWIND)'
  0xffffffffc0801010 : ovs_dp_upcall +0x0/0x60 [openvswitch]
