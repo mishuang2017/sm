@@ -4140,7 +4140,7 @@ function brx
 set -x
 	del-br
 	vs add-br $br
-	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i <= 1; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
@@ -4464,7 +4464,7 @@ function start-switchdev
 #		(( time ++ ))
 #		(( time > 10 )) && return
 #	done
-	sleep 1
+	sleep 5
 	time bind_all $l
 	sleep 1
 
