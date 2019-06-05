@@ -22,10 +22,10 @@ def show_hash(ht, type, memeber):
             if rhash_head.value_() & 1:
                 break;
             addr = rhash_head.value_()
-#             print("%lx" % addr)
+            print("mlx5e_tc_flow: %lx" % addr)
             obj = container_of(rhash_head, type, memeber)
             # pointer of cls_fl_filter
-            print("%lx" % obj.cookie)
+#             print("cookie: %lx" % obj.cookie)
             rhash_head = rhash_head.next
 
 for dev in list_for_each_entry('struct net_device', dev_base_head,
