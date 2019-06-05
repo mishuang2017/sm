@@ -55,7 +55,7 @@ def print_match(fte):
 
     ip_protocol = val[4].value_() & 0xff
     if ip_protocol:
-        print(" ip: %2d" % ip_protocol, end='')
+        print(" ip: %-2d" % ip_protocol, end='')
 
     tcp_flags = (val[4].value_() & 0xff000000) >> 24
     if tcp_flags:
@@ -63,7 +63,7 @@ def print_match(fte):
 
     ip_version = (val[4].value_() & 0xff0000) >> 17
     if ip_version:
-        print(" ipv: %2x" % ip_version, end='')
+        print(" ipv: %-2x" % ip_version, end='')
 
 #     print("\n  ", end='')
 

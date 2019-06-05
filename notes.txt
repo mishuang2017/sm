@@ -10041,6 +10041,30 @@ To reproduce the bug, run:
 
 ===ct===
 
+ct_list
+
+
+14855   14855   kworker/u36:1   mlx5_eswitch_del_offloaded_rule
+        mlx5_eswitch_del_offloaded_rule+0x1 [kernel]
+        mlx5e_tc_del_fdb_flow_simple+0x167 [kernel]
+        mlx5e_tc_del_fdb_flow+0x1ed [kernel]
+        mlx5e_tc_del_flow+0xb5 [kernel]
+        mlx5e_flow_put.part.66+0x12 [kernel]
+        mlx5e_del_miniflow_work+0x1dd [kernel]
+        process_one_work+0x1b3 [kernel]
+        worker_thread+0x37 [kernel]
+        kthread+0x121 [kernel]
+        ret_from_fork+0x35 [kernel]
+
+14855   14855   kworker/u36:1   mlx5_eswitch_add_offloaded_rule
+        mlx5_eswitch_add_offloaded_rule+0x1 [kernel]
+        mlx5e_tc_add_fdb_flow+0x150 [kernel]
+        miniflow_merge_work+0x614 [kernel]
+        process_one_work+0x1b3 [kernel]
+        worker_thread+0x37 [kernel]
+        kthread+0x121 [kernel]
+        ret_from_fork+0x35 [kernel]
+
 https://blog.csdn.net/jasonchen_gbd/article/details/44874321
 http://blog.chinaunix.net/uid-26517122-id-4293135.html
 https://www.jianshu.com/p/f1b266e42d93
