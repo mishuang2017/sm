@@ -2,6 +2,7 @@
 
 from drgn.helpers.linux import *
 from drgn import Object
+import socket
 
 miniflow_list = []
 
@@ -75,7 +76,7 @@ def print_cls_fl_filter(f):
     print("ct_zone: %d" % k.ct_zone.value_())
     print("ct_mark: 0x%x" % k.ct_mark.value_())
     print("ct_labels[0] %x: " % k.ct_labels[0].value_())
-    print("protocol: %x" % k.basic.n_proto)
+    print("protocol: %x" % socket.ntohs(k.basic.n_proto))
     print("dmac: ", end='')
     print_mac(k.eth.dst)
     print('')

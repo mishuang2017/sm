@@ -2,6 +2,7 @@
 
 from drgn.helpers.linux import *
 from drgn import Object
+import socket
 
 def print_nf_conntrack_tuple(tuple):
     print("src: ", end='')
@@ -41,7 +42,7 @@ def print_exts(e):
             print("commit: %d" % tcf_conntrack_info.commit.value_())
             print("nat: 0x%x" % tcf_conntrack_info.nat.value_())
             if tcf_conntrack_info.range.min_addr.ip:
-                print("snat ip: ", tcf_conntrack_info.range.min_addr.in6.in6_u.u6_addr8)
+                print("snat ip: %s" % ipv4(socket.ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
         if kind == "pedit":
             tcf_pedit = Object(prog, 'struct tcf_pedit', address=a.value_())
 #             print("%lx" % a.value_())
@@ -58,13 +59,22 @@ def print_exts(e):
         if kind == "gact":
             print("recirc_id: 0x%x, %d" % (a.goto_chain.index, a.goto_chain.index))
 
+def ipv4(addr):
+    ip=""
+    for i in range(4):
+        v = (addr >> (3 - i) * 8) & 0xff
+        ip+=str(v)
+        if i < 3:
+            ip+="."
+    return ip
+
 def print_cls_fl_filter(f):
     k = f.mkey
     print("ct_state: 0x%x" % k.ct_state.value_())
     print("ct_zone: %d" % k.ct_zone.value_())
     print("ct_mark: 0x%x" % k.ct_mark.value_())
     print("ct_labels[0] %x: " % k.ct_labels[0].value_())
-    print("protocol: %x" % k.basic.n_proto)
+    print("protocol: %x" % socket.ntohs(k.basic.n_proto))
     print("dmac: ", end='')
     print_mac(k.eth.dst)
     print('')
@@ -73,10 +83,10 @@ def print_cls_fl_filter(f):
     print('')
     if k.ipv4.src:
         print("src ip: ", end='')
-        print(k.ipv6.src.in6_u.u6_addr8)
+        print(ipv4(socket.ntohl(k.ipv4.src.value_())))
     if k.ipv4.dst:
         print("dst ip: ", end='')
-        print(k.ipv6.dst.in6_u.u6_addr8)
+        print(ipv4(socket.ntohl(k.ipv4.dst.value_())))
 
     print_exts(f.exts)
 
@@ -92,12 +102,16 @@ for dev in list_for_each_entry('struct net_device', dev_base_head,
                                'dev_list'):
     name = dev.name.string_().decode()
     addr = dev.value_()
-    if "enp4s0f0" != name:
+    if "enp4s0f0" not in name:
         continue
-#     print("%20s" % name, end='')
-#     print("%20x" % addr)
+    print("%20s" % name, end='')
+    print("%20x" % addr)
+    print('')
 
-    qdisc = dev.ingress_queue.qdisc
+    ingress_queue = dev.ingress_queue
+    if ingress_queue.value_() == 0:
+        continue
+    qdisc = ingress_queue.qdisc
     qdisc_size = prog.type('struct Qdisc').size
 
 #     print("%lx" % qdisc.value_())
