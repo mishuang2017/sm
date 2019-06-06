@@ -3,17 +3,6 @@
 from drgn.helpers.linux import *
 from drgn import Object
 
-miniflow_list = []
-
-for flow in list_for_each_entry('struct mlx5e_tc_flow', prog['ct_list'].address_of_(), 'nft_node'):
-    print("mlx5e_tc_flow: %lx" % flow.value_())
-    for mini in list_for_each_entry('struct mlx5e_miniflow', flow.miniflow_list.address_of_(), 'node'):
-        mlx5e_miniflow_node = Object(prog, 'struct mlx5e_miniflow_node', address=mini.value_())
-        miniflow = mlx5e_miniflow_node.miniflow
-        print("mlx5e_miniflow: %lx" % miniflow)
-        if miniflow not in miniflow_list:
-            miniflow_list.append(miniflow)
-
 def print_nf_conntrack_tuple(tuple):
     print("src: ", end='')
     print(tuple.src.u3.in6.in6_u.u6_addr8)
@@ -55,7 +44,7 @@ def print_exts(e):
                 print("snat ip: ", tcf_conntrack_info.range.min_addr.in6.in6_u.u6_addr8)
         if kind == "pedit":
             tcf_pedit = Object(prog, 'struct tcf_pedit', address=a.value_())
-            print("%lx" % a.value_())
+#             print("%lx" % a.value_())
             n = tcf_pedit.tcfp_nkeys
             print("tcf_pedit.tcfp_nkeys: %d" % n)
             for i in range(n):
@@ -97,39 +86,39 @@ def print_ct_tuples(t, k):
     print("%d: nat: 0x%lx" % (k, t.nat))
 #     print("tuple: ", t.tuple)
 
-for i in miniflow_list:
-    name = i.priv.netdev.name.string_().decode()
-#     print(i.nr_flows)
-#     print("cookie: %lx" % i.cookie)     # pointer of skb
-#     print('{0}'.format(i.tuple))
+dev_base_head = prog['init_net'].dev_base_head.address_of_()
 
-    if name == "enp4s0f0_1" or name == "enp4s0f0":
-#     if name == "enp4s0f0_1":
-        for j in range(8):
-            flow = i.path.flows[j]
-            if flow:
-                print(name, j)
-                attr = flow.esw_attr[0]
-                print("action: %4x, chain: %d" % (attr.action, attr.chain))
-                print('')
+for dev in list_for_each_entry('struct net_device', dev_base_head,
+                               'dev_list'):
+    name = dev.name.string_().decode()
+    addr = dev.value_()
+    if "enp4s0f0" != name:
+        continue
+#     print("%20s" % name, end='')
+#     print("%20x" % addr)
 
-        for j in range(8):
-            flow = i.path.cookies[j]
-            if flow:
-                addr = flow.value_()
-                if (addr & 1):
-                    print("=========== %d %s %s ==========" % (j, name, "nf_conntrack_tuple"))
-                    addr = flow.value_() & ~0x1
-                    nf_conntrack_tuple = Object(prog, 'struct nf_conntrack_tuple', address=addr)
-                    print_nf_conntrack_tuple(nf_conntrack_tuple)
-                else:
-                    print("=========== %d %s %s ==========" % (j, name, "cls_fl_filter"))
-                    cls_fl_filter = Object(prog, 'struct cls_fl_filter', address=addr)
-                    print_cls_fl_filter(cls_fl_filter)
+    qdisc = dev.ingress_queue.qdisc
+    qdisc_size = prog.type('struct Qdisc').size
 
-
-        n = i.nr_ct_tuples
-        print("\nnr_ct_tuples: %x" % n)
-        for k in range(n):
-            print_ct_tuples(i.ct_tuples[k], k)
-        print("+++++++++++++++++++++ end ++++++++++++++++++++\n")
+#     print("%lx" % qdisc.value_())
+    addr = qdisc.value_() + qdisc_size
+    ingress_sched_data = Object(prog, 'struct ingress_sched_data', address=addr)
+#     print(ingress_sched_data)
+    block = ingress_sched_data.block
+#     print(block)
+    chain_list_addr = block.chain_list.address_of_()
+    for chain in list_for_each_entry('struct tcf_chain', chain_list_addr, 'list'):
+        print("chain index: %d, 0x%x" % (chain.index, chain.index))
+        tcf_proto = chain.filter_chain
+        while True:
+#             print(tcf_proto)
+            head = Object(prog, 'struct cls_fl_head', address=tcf_proto.root.value_())
+#             print(head)
+            for node in radix_tree_for_each(head.handle_idr.idr_rt):
+#                 print("%lx" % node[1].value_())
+                f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
+                print_cls_fl_filter(f)
+                print("==========================================\n")
+            tcf_proto = tcf_proto.next
+            if tcf_proto.value_() == 0:
+                break
