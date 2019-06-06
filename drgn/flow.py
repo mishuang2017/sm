@@ -28,7 +28,7 @@ def print_mac(mac):
 def print_match(fte):
     val = fte.val
 #     smac = str(socket.ntohl(hex(val[0])))
-    print("%x: " % fte.index.value_(), end='')
+    print("%8x: " % fte.index.value_(), end='')
     smac_47_16 = socket.ntohl(val[0].value_())
     smac_15_0 = socket.ntohl(val[1].value_() & 0xffff)
     smac_47_16 <<= 16
@@ -105,7 +105,7 @@ def print_match(fte):
         smac_47_16 <<= 16
         smac_15_0 >>= 16
         smac = smac_47_16 | smac_15_0
-        print("\n   s: ", end='')
+        print("\n           s: ", end='')
         print_mac(smac)
 
         dmac_47_16 = socket.ntohl(val[34].value_())
@@ -117,7 +117,7 @@ def print_match(fte):
         print_mac(dmac)
 
         ethertype = socket.ntohl(val[33].value_() & 0xffff0000)
-        print(" ethertype: %x" % ethertype, end='')
+        print(" et: %x" % ethertype, end='')
 
     print(" action %4x: " % fte.action.action.value_())
 
@@ -125,7 +125,7 @@ def print_dest(rule):
     if prog['MLX5_FLOW_DESTINATION_TYPE_COUNTER'] == rule.dest_attr.type:
         return
     if prog['MLX5_FLOW_DESTINATION_TYPE_VPORT'] == rule.dest_attr.type:
-        print("\tdest: vport: %x" % rule.dest_attr.vport.num)
+        print("\t\tdest: vport: %x" % rule.dest_attr.vport.num)
     else:
         print(rule)
 

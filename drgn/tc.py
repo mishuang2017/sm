@@ -58,6 +58,13 @@ def print_exts(e):
             print("output: %s" % tcf_mirred.tcfm_dev.name.string_().decode())
         if kind == "gact":
             print("recirc_id: 0x%x, %d" % (a.goto_chain.index, a.goto_chain.index))
+        if kind == "tunnel_key":
+            tun = Object(prog, 'struct tcf_tunnel_key', address=a.value_())
+            if tun.params.tcft_action == 1:
+                print("TCA_TUNNEL_KEY_ACT_SET")
+                print("tun_id: 0x%x" % tun.params.tcft_enc_metadata.u.tun_info.key.tun_id.value_())
+                print("src ip: %s" % ipv4(socket.ntohl(tun.params.tcft_enc_metadata.u.tun_info.key.u.ipv4.src.value_())))
+                print("dst ip: %s" % ipv4(socket.ntohl(tun.params.tcft_enc_metadata.u.tun_info.key.u.ipv4.dst.value_())))
 
 def ipv4(addr):
     ip=""
@@ -102,7 +109,7 @@ for dev in list_for_each_entry('struct net_device', dev_base_head,
                                'dev_list'):
     name = dev.name.string_().decode()
     addr = dev.value_()
-    if "enp4s0f0" not in name:
+    if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
         continue
     print("%20s" % name, end='')
     print("%20x" % addr)
@@ -119,6 +126,8 @@ for dev in list_for_each_entry('struct net_device', dev_base_head,
     ingress_sched_data = Object(prog, 'struct ingress_sched_data', address=addr)
 #     print(ingress_sched_data)
     block = ingress_sched_data.block
+    if block.value_() == 0:
+        continue
 #     print(block)
     chain_list_addr = block.chain_list.address_of_()
     for chain in list_for_each_entry('struct tcf_chain', chain_list_addr, 'list'):
