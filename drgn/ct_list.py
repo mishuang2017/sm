@@ -54,5 +54,5 @@ for i in miniflow_list:
         n = i.nr_ct_tuples
         print("\nnr_ct_tuples: %x" % n)
         for k in range(n):
-            lib.print_ct_tuples(i.ct_tuples[k], k)
+            lib.print_mlx5e_ct_tuple(i.ct_tuples[k], k)
         print("+++++++++++++++++++++ end ++++++++++++++++++++\n")

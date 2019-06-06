@@ -2,18 +2,33 @@ from drgn.helpers.linux import *
 from drgn import Object
 import socket
 
-def print_nf_conntrack_tuple(tuple):
-    print("src: ", end='')
-    print(tuple.src.u3.in6.in6_u.u6_addr8)
-    print("dst: ", end='')
-    print(tuple.dst.u3.in6.in6_u.u6_addr8)
+def ipv4(addr):
+    ip = ""
+    for i in range(4):
+        v = (addr >> (3 - i) * 8) & 0xff
+        ip += str(v)
+        if i < 3:
+            ip += "."
+    return ip
 
-def print_mac(m):
+def mac(m):
+    s = ""
     for i in range(6):
-        if i == 5:
-            print("%02x" % m[i].value_(), end='')
-        else:
-            print("%02x:" % m[i].value_(), end='')
+        s += ("%02x" % m[i].value_())
+        if i < 5:
+            s += ":"
+    return s
+
+def print_nf_conntrack_tuple(tuple):
+    print("src: %s" % ipv4(socket.ntohl(tuple.src.u3.ip.value_())))
+    print("dst: %s" % ipv4(socket.ntohl(tuple.dst.u3.ip.value_())))
+
+def print_mlx5e_ct_tuple(t, k):
+    print("%d: ipv4: %s" % (k, ipv4(socket.ntohl(t.ipv4.value_()))))
+    print("%d: zone: %d" % (k, t.zone.id))
+    print("%d: nat: 0x%lx" % (k, t.nat))
+    print_nf_conntrack_tuple(t.tuple)
+    print('')
 
 #define TCA_FLOWER_KEY_CT_FLAGS_NEW               0x01
 #define TCA_FLOWER_KEY_CT_FLAGS_ESTABLISHED       0x02
@@ -64,15 +79,6 @@ def print_exts(prog, e):
                 print("src ip: %s" % ipv4(socket.ntohl(tun.params.tcft_enc_metadata.u.tun_info.key.u.ipv4.src.value_())))
                 print("dst ip: %s" % ipv4(socket.ntohl(tun.params.tcft_enc_metadata.u.tun_info.key.u.ipv4.dst.value_())))
 
-def ipv4(addr):
-    ip=""
-    for i in range(4):
-        v = (addr >> (3 - i) * 8) & 0xff
-        ip+=str(v)
-        if i < 3:
-            ip+="."
-    return ip
-
 def print_cls_fl_filter(prog, f):
     k = f.mkey
     print("ct_state: 0x%x" % k.ct_state.value_())
@@ -80,12 +86,8 @@ def print_cls_fl_filter(prog, f):
     print("ct_mark: 0x%x" % k.ct_mark.value_())
     print("ct_labels[0] %x: " % k.ct_labels[0].value_())
     print("protocol: %x" % socket.ntohs(k.basic.n_proto))
-    print("dmac: ", end='')
-    print_mac(k.eth.dst)
-    print('')
-    print("smac: ", end='')
-    print_mac(k.eth.src)
-    print('')
+    print("dmac: %s" % mac(k.eth.dst))
+    print("smac: %s" % mac(k.eth.src))
     if k.ipv4.src:
         print("src ip: ", end='')
         print(ipv4(socket.ntohl(k.ipv4.src.value_())))
@@ -95,8 +97,4 @@ def print_cls_fl_filter(prog, f):
 
     print_exts(prog, f.exts)
 
-def print_ct_tuples(t, k):
-    print("%d: ipv4: 0x%x" % (k, t.ipv4))
-    print("%d: zone: %d" % (k, t.zone.id))
-    print("%d: nat: 0x%lx" % (k, t.nat))
-#     print("tuple: ", t.tuple)
+
