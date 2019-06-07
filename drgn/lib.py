@@ -1,5 +1,6 @@
 from drgn.helpers.linux import *
 from drgn import Object
+from drgn import container_of
 import socket
 
 def ipv4(addr):
@@ -116,3 +117,39 @@ def get_mlx5_pf0(prog):
         if name == "enp4s0f0":
             mlx5e_priv = get_mlx5(prog, dev)
     return mlx5e_priv
+
+def get_mlx5e_rep_priv(prog):
+    mlx5e_priv = get_mlx5_pf0(prog)
+
+    # struct mlx5_esw_offload
+    offloads = mlx5e_priv.mdev.priv.eswitch.offloads
+
+    # struct mlx5_eswitch_rep
+    vport = offloads.vport_reps
+
+    # struct mlx5_eswitch_rep_if
+    rep_if = vport.rep_if
+
+    # struct mlx5e_rep_priv
+    priv = rep_if[prog['REP_ETH']].priv
+    mlx5e_rep_priv = Object(prog, 'struct mlx5e_rep_priv', address=priv.value_())
+    return mlx5e_rep_priv
+
+def hash(rhashtable, type, member):
+    nodes = []
+
+    tbl = rhashtable.tbl
+
+    buckets = tbl.buckets
+    size = tbl.size.value_()
+
+    for i in range(size):
+        rhash_head = buckets[i]
+        while True:
+            if rhash_head.value_() & 1:
+                break;
+            obj = container_of(rhash_head, type, member)
+            nodes.append(obj)
+            rhash_head = rhash_head.next
+
+    return nodes
