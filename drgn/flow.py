@@ -6,17 +6,12 @@ from drgn import reinterpret
 import time
 import socket
 
-dev_base_head = prog['init_net'].dev_base_head.address_of_()
-# print(f'&init_net->dev_base_head is {dev_base_head}')
+import sys
+import os
 
-def ipv4(addr):
-    ip=""
-    for i in range(4):
-        v = (addr >> (3 - i) * 8) & 0xff
-        ip+=str(v)
-        if i < 3:
-            ip+="."
-    return ip
+libpath = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(libpath)
+import lib
 
 def print_mac(mac):
     for i in range(6):
@@ -85,11 +80,11 @@ def print_match(fte):
 
     src_ip = socket.ntohl(val[11].value_())
     if src_ip:
-        print(" src_ip: %12s" % ipv4(src_ip), end='')
+        print(" src_ip: %12s" % lib.ipv4(src_ip), end='')
 
     dst_ip = socket.ntohl(val[15].value_())
     if src_ip:
-        print(" dst_ip: %12s" % ipv4(dst_ip), end='')
+        print(" dst_ip: %12s" % lib.ipv4(dst_ip), end='')
 
     vni = socket.ntohl(val[21].value_() & 0xffffff) >> 8
     if vni:
@@ -129,7 +124,6 @@ def print_dest(rule):
     else:
         print(rule)
 
-
 def flow(flow):
 #     print("flow table address")
 #     print("%lx" % flow.value_())
@@ -151,28 +145,19 @@ def flow(flow):
                 rule = Object(prog, 'struct mlx5_flow_rule', address=dest.value_())
                 print_dest(rule)
 
-for dev in list_for_each_entry('struct net_device', dev_base_head, 'dev_list'):
-    name = dev.name.string_().decode()
-    if name == "enp4s0f0":
-        print(dev.name)
-        size = prog.type('struct net_device').size
-#         print("%lx" % size)
-        mlx5e_priv_addr = dev.value_() + size
-#         print("%lx" % mlx5e_priv_addr)
-        mlx5e_priv = Object(prog, 'struct mlx5e_priv', address=mlx5e_priv_addr)
+mlx5e_priv = lib.get_mlx5_pf0(prog)
+mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
+for i in range(4):
+    for j in range(17):
+        for k in range(2):
+            num_rules = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].num_rules
+            if num_rules:
+                print("")
+                print(i, j, k, num_rules);
+                fdb = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].fdb
+                print("flow table id: %x leve: %x" % (fdb.id.value_(), fdb.level.value_()))
+                flow(fdb)
 
-        mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
-        for i in range(4):
-            for j in range(17):
-                for k in range(2):
-                    num_rules = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].num_rules
-                    if num_rules:
-                        print("")
-                        print(i, j, k, num_rules);
-                        fdb = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].fdb
-                        print("flow table id: %x leve: %x" % (fdb.id.value_(), fdb.level.value_()))
-                        flow(fdb)
-
-#         slow_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb
-#         print("\nflow table id: %x leve: %x" % (slow_fdb.id.value_(), slow_fdb.level.value_()))
-#         flow(slow_fdb)
+# slow_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb
+# print("\nflow table id: %x leve: %x" % (slow_fdb.id.value_(), slow_fdb.level.value_()))
+# flow(slow_fdb)

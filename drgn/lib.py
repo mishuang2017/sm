@@ -74,10 +74,11 @@ def print_exts(prog, e):
         if kind == "tunnel_key":
             tun = Object(prog, 'struct tcf_tunnel_key', address=a.value_())
             if tun.params.tcft_action == 1:
+                ip_tunnel_key = tun.params.tcft_enc_metadata.u.tun_info.key
                 print("TCA_TUNNEL_KEY_ACT_SET")
-                print("tun_id: 0x%x" % tun.params.tcft_enc_metadata.u.tun_info.key.tun_id.value_())
-                print("src ip: %s" % ipv4(socket.ntohl(tun.params.tcft_enc_metadata.u.tun_info.key.u.ipv4.src.value_())))
-                print("dst ip: %s" % ipv4(socket.ntohl(tun.params.tcft_enc_metadata.u.tun_info.key.u.ipv4.dst.value_())))
+                print("tun_id: 0x%x" % ip_tunnel_key.tun_id.value_())
+                print("src ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
+                print("dst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
 
 def print_cls_fl_filter(prog, f):
     k = f.mkey
@@ -97,4 +98,21 @@ def print_cls_fl_filter(prog, f):
 
     print_exts(prog, f.exts)
 
+def get_netdevs(prog):
+    devs = []
+    dev_base_head = prog['init_net'].dev_base_head.address_of_()
+    for dev in list_for_each_entry('struct net_device', dev_base_head, 'dev_list'):
+        devs.append(dev)
+    return devs
 
+def get_mlx5(prog, dev):
+    mlx5e_priv_addr = dev.value_() + prog.type('struct net_device').size
+    mlx5e_priv = Object(prog, 'struct mlx5e_priv', address=mlx5e_priv_addr)
+    return mlx5e_priv
+
+def get_mlx5_pf0(prog):
+    for x, dev in enumerate(get_netdevs(prog)):
+        name = dev.name.string_().decode()
+        if name == "enp4s0f0":
+            mlx5e_priv = get_mlx5(prog, dev)
+    return mlx5e_priv
