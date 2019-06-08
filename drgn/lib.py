@@ -82,7 +82,9 @@ def print_exts(prog, e):
                 print("dst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
 
 def print_cls_fl_filter(prog, f):
+    print("handle: 0x%x" % f.handle)
     k = f.mkey
+    print("ip_flags: 0x%x" % k.control.flags)
     print("ct_state: 0x%x" % k.ct_state.value_())
     print("ct_zone: %d" % k.ct_zone.value_())
     print("ct_mark: 0x%x" % k.ct_mark.value_())
