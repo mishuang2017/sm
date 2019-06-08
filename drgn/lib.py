@@ -84,11 +84,15 @@ def print_exts(prog, e):
 def print_cls_fl_filter(prog, f):
     print("handle: 0x%x" % f.handle)
     k = f.mkey
+    #define FLOW_DIS_IS_FRAGMENT    BIT(0)
+    #define FLOW_DIS_FIRST_FRAG     BIT(1)
+    # 1 means nofirstfrag
+    # 3 means firstfrag
     print("ip_flags: 0x%x" % k.control.flags)
     print("ct_state: 0x%x" % k.ct_state.value_())
     print("ct_zone: %d" % k.ct_zone.value_())
     print("ct_mark: 0x%x" % k.ct_mark.value_())
-    print("ct_labels[0] %x: " % k.ct_labels[0].value_())
+    print("ct_labels[0]: %x" % k.ct_labels[0].value_())
     print("protocol: %x" % socket.ntohs(k.basic.n_proto))
     print("dmac: %s" % mac(k.eth.dst))
     print("smac: %s" % mac(k.eth.src))
@@ -99,7 +103,7 @@ def print_cls_fl_filter(prog, f):
         print("dst ip: ", end='')
         print(ipv4(socket.ntohl(k.ipv4.dst.value_())))
 
-    print_exts(prog, f.exts)
+#     print_exts(prog, f.exts)
 
 def get_netdevs(prog):
     devs = []

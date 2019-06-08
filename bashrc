@@ -507,7 +507,6 @@ alias smm2="cd /images/chrism/mlnx-ofa_kernel-4.0-2"
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
-alias ovs="cd /$images/chrism/openvswitch"
 alias smo="cd /$images/chrism/openvswitch"
 alias smo2="cd /$images/chrism/ovs-ct-2.10"
 alias smt="cd /$images/chrism/ovs-tests"
@@ -1595,7 +1594,6 @@ set +x
 function io
 {
 set -x
-	ovs
 	make -j 32
 	sudo make install
 	restart-ovs
