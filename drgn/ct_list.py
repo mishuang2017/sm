@@ -49,7 +49,7 @@ for i in miniflow_list:
                 else:
                     print("=========== %d %s %s ==========" % (j, name, "cls_fl_filter"))
                     cls_fl_filter = Object(prog, 'struct cls_fl_filter', address=addr)
-                    lib.print_cls_fl_filter(prog, cls_fl_filter)
+                    lib.print_cls_fl_filter(cls_fl_filter)
 
         n = i.nr_ct_tuples
         print("\nnr_ct_tuples: %x" % n)

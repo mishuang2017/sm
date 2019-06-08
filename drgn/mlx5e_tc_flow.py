@@ -10,7 +10,7 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
-mlx5e_rep_priv = lib.get_mlx5e_rep_priv(prog)
+mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
 tc_ht = mlx5e_rep_priv.tc_ht
 # print(tc_ht)
 

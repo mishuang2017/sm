@@ -10,7 +10,7 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
-mlx5e_priv = lib.get_mlx5_pf0(prog)
+mlx5e_priv = lib.get_mlx5_pf0()
 mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
 while True:
     for i in range(4):

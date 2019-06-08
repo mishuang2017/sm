@@ -3,14 +3,15 @@
 from drgn.helpers.linux import *
 from drgn import Object
 import time
+import sys
+import os
 
-dev_base_head = prog['init_net'].dev_base_head.address_of_()
-# print(f'&init_net->dev_base_head is {dev_base_head}')
+libpath = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(libpath)
+import lib
 
-for dev in list_for_each_entry('struct net_device', dev_base_head,
-                               'dev_list'):
+for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
     addr = dev.value_()
     if "enp4s0f" in name:
-        print("%20s" % name, end='')
-        print("%20x" % addr)
+        print("%20s%20x" % (name, addr))

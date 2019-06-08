@@ -9,7 +9,7 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
-for x, dev in enumerate(lib.get_netdevs(prog)):
+for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
         continue
@@ -43,7 +43,7 @@ for x, dev in enumerate(lib.get_netdevs(prog)):
             for node in radix_tree_for_each(head.handle_idr.idr_rt):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
-                lib.print_cls_fl_filter(prog, f)
+                lib.print_cls_fl_filter(f)
                 print("==========================================\n")
             tcf_proto = tcf_proto.next
             if tcf_proto.value_() == 0:

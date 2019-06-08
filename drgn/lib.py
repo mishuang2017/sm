@@ -3,6 +3,9 @@ from drgn import Object
 from drgn import container_of
 import socket
 
+import drgn
+prog = drgn.program_from_kernel()
+
 def ipv4(addr):
     ip = ""
     for i in range(4):
@@ -40,7 +43,7 @@ def print_mlx5e_ct_tuple(t, k):
 #define TCA_FLOWER_KEY_CT_FLAGS_SRC_NAT           0x40
 #define TCA_FLOWER_KEY_CT_FLAGS_DST_NAT           0x80
 
-def print_exts(prog, e):
+def print_exts(e):
     print("\nnr_actions: %d" % e.nr_actions)
     for i in range(e.nr_actions):
         a = e.actions[i]
@@ -81,7 +84,7 @@ def print_exts(prog, e):
                 print("src ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
                 print("dst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
 
-def print_cls_fl_filter(prog, f):
+def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
     k = f.mkey
     #define FLOW_DIS_IS_FRAGMENT    BIT(0)
@@ -103,29 +106,29 @@ def print_cls_fl_filter(prog, f):
         print("dst ip: ", end='')
         print(ipv4(socket.ntohl(k.ipv4.dst.value_())))
 
-#     print_exts(prog, f.exts)
+#     print_exts(f.exts)
 
-def get_netdevs(prog):
+def get_netdevs():
     devs = []
     dev_base_head = prog['init_net'].dev_base_head.address_of_()
     for dev in list_for_each_entry('struct net_device', dev_base_head, 'dev_list'):
         devs.append(dev)
     return devs
 
-def get_mlx5(prog, dev):
+def get_mlx5(dev):
     mlx5e_priv_addr = dev.value_() + prog.type('struct net_device').size
     mlx5e_priv = Object(prog, 'struct mlx5e_priv', address=mlx5e_priv_addr)
     return mlx5e_priv
 
-def get_mlx5_pf0(prog):
-    for x, dev in enumerate(get_netdevs(prog)):
+def get_mlx5_pf0():
+    for x, dev in enumerate(get_netdevs()):
         name = dev.name.string_().decode()
         if name == "enp4s0f0":
-            mlx5e_priv = get_mlx5(prog, dev)
+            mlx5e_priv = get_mlx5(dev)
     return mlx5e_priv
 
-def get_mlx5e_rep_priv(prog):
-    mlx5e_priv = get_mlx5_pf0(prog)
+def get_mlx5e_rep_priv():
+    mlx5e_priv = get_mlx5_pf0()
 
     # struct mlx5_esw_offload
     offloads = mlx5e_priv.mdev.priv.eswitch.offloads
