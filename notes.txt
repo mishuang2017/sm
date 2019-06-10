@@ -3312,6 +3312,10 @@ static const struct dpctl_command all_commands[] = {
 { NULL, NULL, 0, 0, NULL, DP_RO },
 };
 
+===gro===
+
+dev_gro_receive
+
 ===ovs===
 
 #define MAX_DEPTH 64
@@ -6410,6 +6414,36 @@ mlx5e_enable_cq
 
 ===rx===
 
+napi_gro_receive always return GRO_NORMAL, so netif_receive_skb_internal is called
+
+mlx5e_handle_rx_cqe_mpwrq is called
+not
+mlx5e_handle_rx_cqe
+
+        mlx5e_free_rx_mpwqe
+        mlx5e_poll_rx_cq
+        mlx5e_napi_poll
+        net_rx_action
+        __softirqentry_text_start+0xde [kernel]
+        run_ksoftirqd+0x1f [kernel]
+        smpboot_thread_fn+0xfc [kernel]
+        kthread+0x121 [kernel]
+        ret_from_fork+0x35 [kernel]
+
+        mlx5e_page_release
+        mlx5e_handle_rx_cqe_mpwrq
+        mlx5e_poll_rx_cq
+        mlx5e_napi_poll
+        net_rx_action
+        __softirqentry_text_start+0xde [kernel]
+        run_ksoftirqd+0x1f [kernel]
+        smpboot_thread_fn+0xfc [kernel]
+        kthread+0x121 [kernel]
+        ret_from_fork+0x35 [kernel]
+
+mlx5e_handle_rx_cqe_mpwrq
+    mlx5e_skb_from_cqe_mpwrq_linear
+
 echo xor > /sys/class/net/eth*/settings/hfunc 
 
 mlx5_wq_ll_create
@@ -6421,6 +6455,21 @@ mlx5_wq_ll_create
 
 mlx5e_post_rx_mpwqe
         mlx5_wq_ll_push
+
+0       0       swapper/14      mlx5e_post_rx_mpwqes
+        mlx5e_post_rx_mpwqes
+        net_rx_action
+        __softirqentry_text_start+0xde [kernel]
+        irq_exit+0xf2 [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xb0 [kernel]
+        cpuidle_enter+0x17 [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1e1 [kernel]
+        cpu_startup_entry+0x1d [kernel]
+        start_secondary+0x199 [kernel]
+        secondary_startup_64+0xa4 [kernel]
 
 8.9.4.5Shared Receive WQE Format
 
@@ -9548,6 +9597,13 @@ crash> sk_buff.protocol,vlan_proto,vlan_tci,vlan_present ffff9e1fd80e7000
   vlan_present = 0x1
 
 ===ovs_ct===
+
+ovs_ct_execute
+        handle_fragments
+                ip_defrag
+                        ip_frag_queue
+                                ip_frag_reasm
+
 
 add_flow_start
 rule_collection_add

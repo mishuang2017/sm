@@ -7604,8 +7604,13 @@ alias udp14=/labhome/chrism/prg/python/scapy/udp14.py
 
 alias reboot='echo reboot; read; reboot'
 
+# two way traffic
+alias udp-server-2='/labhome/chrism/prg/c/udp-server/udp-server-2'
+alias udp-client-2='/labhome/chrism/prg/c/udp-client/udp-client-2'
+
+# one way traffic
 alias udp-server='/labhome/chrism/prg/c/udp-server/udp-server'
-alias udp-client='/labhome/chrism/prg/c/udp-client/udp-client'
+alias udp-client="/labhome/chrism/prg/c/udp-client/udp-client -c 192.168.1.$rhost_num -i 1 -t 10000"
 
 function udp1
 {
@@ -7928,11 +7933,10 @@ function install-bpftrace
 	make install
 }
 
-function bcc1
+function trace1
 {
 	[[ $# != 1 ]] && return
-	smb
-	./trace.py -K -U "$1 \"%s\", arg1"
+	$BCC_DIR/tools/trace.py "$1 \"%lx\", arg1"
 }
 
 BCC_DIR=/images/chrism/bcc
