@@ -465,6 +465,7 @@ alias win='vncviewer 10.12.201.153:0'
 # alias uperf="$nfs_dir/uperf-1.0.5/src/uperf"
 
 alias chown1="sudo chown -R chrism.mtl $linux_dir"
+alias chown2="sudo chown -R chrism.mtl ."
 alias sb='tmux save-buffer'
 
 alias sm="cd /$images/chrism"
@@ -472,6 +473,7 @@ alias sm3="cd /$images/chrism/iproute2"
 alias sm1="cd $linux_dir"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
+alias sm7="cd /$images/chrism/rh_debug/BUILD/kernel-3.10.0-1055.el7/linux-3.10.0-1055.el7.x86_64"
 
 if [[ "$USER" == "mi" ]]; then
 	kernel=$(uname -r | cut -d. -f 1-6)
@@ -589,7 +591,7 @@ alias tcs-arp-rep="tc filter show dev $rep1 protocol arp parent ffff:"
 
 alias suc='[[ $UID == 0 ]] && su - chrism'
 alias s=suc
-[[ "$USER" == "chrism" ]] && alias s='sudo su -'
+# [[ "$USER" == "chrism" ]] && alias s='sudo su -'
 alias s2='su - mi'
 alias s0='[[ $UID == 0 ]] && su chrism'
 alias e=exit
@@ -737,6 +739,7 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
+alias r8='brb; restart-ovs; sudo ~chrism/bin/test_router8.sh'	# ct + snat with br-int and br-ex
 alias r7='sudo ~chrism/bin/test_router7.sh'	# ct + snat with more recircs
 alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
 alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script for PF
@@ -1055,6 +1058,7 @@ function tc-drop
 # ovs-ofctl add-flow br -O openflow13 "in_port=2,dl_type=0x86dd,nw_proto=58,icmp_type=128,action=set_field:0x64->tun_id,output:5"
 
 alias ofd="ovs-ofctl dump-flows $br"
+alias ofdi="ovs-ofctl dump-flows br-int"
 alias ofd2="ovs-ofctl dump-flows br2" 
 
 alias drop3="ovs-ofctl add-flow $br 'nw_dst=1.1.3.2 action=drop'"
@@ -4136,6 +4140,31 @@ set -x
 set +x
 }
 
+function brb
+{
+set -x
+	int=br-int
+	ex=br-ex
+	del-br
+	ovs-vsctl add-br $int
+	ovs-vsctl add-br $ex
+
+	ifconfig $int up
+	ifconfig $ex 100.64.0.1/24 up
+	ifconfig $link 8.9.10.13/24 up
+	ssh 10.12.205.14 ifconfig $link 8.9.10.11/24 up
+
+	ovs-vsctl add-port $int $rep2
+# 	ovs-vsctl add-port $int $link
+
+	ovs-vsctl                           \
+		-- add-port $int patch-int       \
+		-- set interface patch-int type=patch options:peer=patch-ex  \
+		-- add-port $ex patch-ex       \
+		-- set interface patch-ex type=patch options:peer=patch-int
+set +x
+}
+
 function brx
 {
 set -x
@@ -4465,7 +4494,7 @@ function start-switchdev
 #		(( time ++ ))
 #		(( time > 10 )) && return
 #	done
-	sleep 5
+	sleep 1
 	time bind_all $l
 	sleep 1
 
@@ -6101,7 +6130,7 @@ function watchr
 	watch -d -n 1 "ethtool -S $link | grep \"rx[0-9]*_packets:\""
 }
 
-function natan
+function 1_natan
 {
 	fw_path=/.autodirect/fwgwork/natano/fw2/mirror_and_decap_wa
 	fw_path=/root/mirror_and_decap_wa
@@ -6675,6 +6704,51 @@ function book-noga
 #	/etc/init.d/network restart
 # fi
 
+function clear-nat
+{
+	iptables -t nat -X
+	iptables -t nat -F
+	iptables -t nat -Z
+}
+
+function nat
+{
+# add defaut route in namespace
+# ifconfig $rep2 1.1.1.254/24 up
+# ip r add default via 1.1.1.254
+
+set -x
+	clear-nat
+	iptables -t nat -A POSTROUTING -s 100.64.0.10/32 -j SNAT --to-source 8.9.10.1
+	iptables -t nat -L
+set +x
+}
+
+function nat-masq
+{
+set -x
+	clear-nat
+	iptables -t nat -A POSTROUTING -o $link -j MASQUERADE
+	iptables -t nat -L
+set +x
+}
+
+function nat-vf
+{
+set -x
+	del-br
+	ifconfig $rep2 1.1.1.254/24 up
+	ip netns exec n11 ifconfig $vf2 1.1.1.1/24 up
+	ip netns exec n11 ip r add default via 1.1.1.254
+
+	clear-nat
+
+ 	iptables -t nat -A POSTROUTING -s 1.1.1.1/32 -j SNAT --to-source 8.9.10.13
+	ifconfig $link 8.9.10.13/24 up
+	ssh 10.12.205.14 ifconfig $link 8.9.10.11/24 up
+set +x
+}
+
 function disable-networkmanager
 {
 	systemctl stop NetworkManager
@@ -7241,7 +7315,7 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=test-ovs-qinq-1.sh
+test1=test-eswitch-add-del-flows-during-flows-cleanup.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 

@@ -37,13 +37,13 @@ for x, dev in enumerate(lib.get_netdevs()):
         print("chain index: %d, 0x%x" % (chain.index, chain.index))
         tcf_proto = chain.filter_chain
         while True:
-#             print(tcf_proto)
+            print("tcf_proto %lx" % tcf_proto.value_())
             head = Object(prog, 'struct cls_fl_head', address=tcf_proto.root.value_())
 #             print(head)
             for node in radix_tree_for_each(head.handle_idr.idr_rt):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
-                lib.print_cls_fl_filter(f)
+#                 lib.print_cls_fl_filter(f)
                 print("==========================================\n")
             tcf_proto = tcf_proto.next
             if tcf_proto.value_() == 0:

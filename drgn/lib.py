@@ -106,7 +106,7 @@ def print_cls_fl_filter(f):
         print("dst ip: ", end='')
         print(ipv4(socket.ntohl(k.ipv4.dst.value_())))
 
-#     print_exts(f.exts)
+    print_exts(f.exts)
 
 def get_netdevs():
     devs = []

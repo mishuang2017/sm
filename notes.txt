@@ -9596,6 +9596,41 @@ crash> sk_buff.protocol,vlan_proto,vlan_tci,vlan_present ffff9e1fd80e7000
   vlan_tci = 0x3e8
   vlan_present = 0x1
 
+===nat===
+
+iptables -t nat -A POSTROUTING -o $link -j MASQUERADE
+
+0       0       swapper/12      nf_nat_manip_pkt
+        nf_nat_manip_pkt
+        nf_nat_inet_fn
+        nf_nat_ipv4_fn
+        nf_nat_ipv4_out
+        nf_hook_slow
+        ip_output
+        ip_forward_finish
+        ip_forward
+        ip_rcv_finish
+        ip_rcv
+        __netif_receive_skb_one_core+0x57 [kernel]
+        __netif_receive_skb+0x18 [kernel]
+        netif_receive_skb_internal+0x45 [kernel]
+        napi_gro_receive+0xc5 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq+0x2ff [kernel]
+        mlx5e_poll_rx_cq+0xd5 [kernel]
+        mlx5e_napi_poll+0xb9 [kernel]
+        net_rx_action+0x13c [kernel]
+        __softirqentry_text_start+0xde [kernel]
+        irq_exit+0xf2 [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xb0 [kernel]
+        cpuidle_enter+0x17 [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1e1 [kernel]
+        cpu_startup_entry+0x1d [kernel]
+        start_secondary+0x199 [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
 ===ovs_ct===
 
 ovs_ct_execute
