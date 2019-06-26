@@ -48,6 +48,90 @@ struct nsproxy init_nsproxy
 struct task_struct init_task
     .nsproxy        = &init_nsproxy,
 
+===printk===
+
+printk
+vprintk_default
+vprintk_emit
+vprintk_store
+log_output
+log_store
+
+log_buf
+
+static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);
+static char *log_buf = __log_buf;
+static u32 log_buf_len = __LOG_BUF_LEN;
+
+log_next_seq
+log_next_idx
+
+===frag===
+
+commit 7257b535ab8e5fafd811c5f6788205eefdd44948
+Author: Ben Pfaff <blp@nicira.com>
+Date:   Wed Oct 19 21:33:44 2011 -0700
+
+    Implement new fragment handling policy.
+
+    Until now, OVS has handled IP fragments more awkwardly than necessary.  It
+    has not been possible to match on L4 headers, even in fragments with offset
+    0 where they are actually present.  This means that there was no way to
+    implement ACLs that treat, say, different TCP ports differently, on
+    fragmented traffic; instead, all decisions for fragment forwarding had to
+    be made on the basis of L2 and L3 headers alone.
+
+    This commit improves the situation significantly.  It is still not possible
+    to match on L4 headers in fragments with nonzero offset, because that
+    information is simply not present in such fragments, but this commit adds
+    the ability to match on L4 headers for fragments with zero offset.  This
+    means that it becomes possible to implement ACLs that drop such "first
+    fragments" on the basis of L4 headers.  In practice, that effectively
+    blocks even fragmented traffic on an L4 basis, because the receiving IP
+    stack cannot reassemble a full packet when the first fragment is missing.
+
+    This commit works by adding a new "fragment type" to the kernel flow match
+    and making it available through OpenFlow as a new NXM field named
+    NXM_NX_IP_FRAG.  Because OpenFlow 1.0 explicitly says that the L4 fields
+    are always 0 for IP fragments, it adds a new OpenFlow fragment handling
+    mode that fills in the L4 fields for "first fragments".  It also enhances
+    ovs-ofctl to allow users to configure this new fragment handling mode and
+    to parse the new field.
+
+    Signed-off-by: Ben Pfaff <blp@nicira.com>
+    Bug #7557.
+
+
+
+
+commit 83e866067ea67807e573c64fc6ee69d47f6d5b7c
+Author: Roi Dayan <roid@mellanox.com>
+Date:   Mon Mar 12 14:58:47 2018 +0200
+
+    netdev-tc-offloads: Add support for IP fragmentation
+
+    Add support for frag no, first and later.
+
+    Signed-off-by: Roi Dayan <roid@mellanox.com>
+    Reviewed-by: Shahar Klein <shahark@mellanox.com>
+    Reviewed-by: Paul Blakey <paulb@mellanox.com>
+    Signed-off-by: Simon Horman <simon.horman@netronome.com>
+
+
+
+https://redmine.mellanox.com/issues/1774992
+
+TCA_FLOWER_KEY_FLAGS_IS_FRAGMENT
+FLOW_NW_FRAG_ANY
+
+1 with ovs. which will pass with your fix
+1 with tc only which will keep failing until we fix ct in the kernel probably as i think it should work
+talked with Paul.   frag packet dont have ports
+we need src ip dst ip proto and src/dst ports for CT
+we dont have src/dst ports in fragmented later packets
+This conversation is being saved. You'll see it soon in your Outlook Inbox folder. 
+so offload will never happen for us but should work with tc sw
+
 ===udev===
 
 net_class_attrs
@@ -188,7 +272,7 @@ ts: 10, 4
  0x538da0 : nl_transact          40/0x60 [/usr/sbin/ovs-vswitchd]
  0x53b9e5 : tc_replace_flower          375/0xef0 [/usr/sbin/ovs-vswitchd]
  0x534e2c : netdev_tc_flow_put          d4c/0x1650 [/usr/sbin/ovs-vswitchd]
- 0x527031 : dpif_netlink_operate.part.35          221/0x520 [/usr/sbin/ovs-vswitchd]
+ 0x527031 : dpif_netlink_operate 
  0x476428 : dpif_operate          a8/0x260 [/usr/sbin/ovs-vswitchd]
  0x43d591 : recv_upcalls.isra.24          6f1/0x870 [/usr/sbin/ovs-vswitchd]
  0x43d752 : udpif_upcall_handler          42/0x70 [/usr/sbin/ovs-vswitchd]
@@ -2946,6 +3030,7 @@ parse_tc_fdb_actions
 mlx5e_attach_encap
 mlx5e_create_encap_header_ipv4
 	mlx5e_route_lookup_ipv4
+
 mlx5_encap_alloc
 
 vxlan_netdevice_event
@@ -3317,6 +3402,19 @@ static const struct dpctl_command all_commands[] = {
 dev_gro_receive
 
 ===ovs===
+
+netdev_port_get
+
+log_flow_put_message
+
+format_odp_action
+
+format_odp_recirc_action
+
+2019-06-14T07:37:32.687Z|00004|dpif_netlink(handler152)|DBG|system@ovs-system: put[create] ufid:86aca336-2914-4ef4-9bd3-0b18c7ceaa66 recirc_id(0x2),dp_hash(0/0),skb_priority(0/0),in_port(3),skb_mark(0/0),ct_state(0x21/0),ct_zone(0x7/0),ct_mark(0/0),ct_label(0/0),ct_tuple4(src=192.168.0.2/0.0.0.0,dst=8.9.10.11/0.0.0.0,proto=17/0,tp_src=55574/0,tp_dst=8080/0),eth(src=02:25:d0:13:01:02/00:00:00:00:00:00,dst=24:8a:07:ad:77:99),eth_type(0x0800),ipv4(src=192.168.0.2,dst=8.9.10.11/0.0.0.0,proto=17/0,tos=0/0,ttl=64/0,frag=no),udp(src=55574/0,dst=8080/0), actions:set(ipv4(src=128.0.103.87)),ct(commit,zone=65534,mark=0x6757/0xffffffff,label=0xc0a80002/0xffffffff,nat(src=100.64.0.10)),recirc(0x3)
+
+netdev_tc_flow_put
+
 
 #define MAX_DEPTH 64
 
@@ -8423,6 +8521,14 @@ CONFIG_NET_SWITCHDEV=y
 http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
+
+size_t x = ...;
+ssize_t y = ...;
+printf("%zu\n", x);  // prints as unsigned decimal
+printf("%zx\n", x);  // prints as hex
+printf("%zd\n", y);  // prints as signed decimal
+
+pgrep -xn bash
 
 find -type f -empty -exec rm {} \;
 

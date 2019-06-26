@@ -250,7 +250,7 @@ alias vsconfig-hw='ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"'
 alias vsconfig-sw='ovs-vsctl set Open_vSwitch . other_config:hw-offload="false"'
 alias vsconfig-skip_sw='ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_sw'
 alias vsconfig-skip_hw='ovs-vsctl set Open_vSwitch . other_config:tc-policy=skip_hw'
-alias ovs-log=' tail -f  /var/log/openvswitch/ovs-vswitchd.log'
+alias ovs-log='sudo tail -f  /var/log/openvswitch/ovs-vswitchd.log'
 alias ovs2-log=' tail -f /var/log/openvswitch/ovsdb-server.log'
 
 alias p23="ping 1.1.1.23"
@@ -374,6 +374,7 @@ alias dmesg='dmesg -T'
 
 alias git-log='git log --tags --source'
 alias v4.20='git checkout v4.20; git checkout -b 4.20'
+alias v4.19='git checkout v4.19; git checkout -b 4.19'
 alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
 alias v4.10='git checkout v4.10; git checkout -b 4.10'
@@ -510,7 +511,8 @@ alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
 alias smo="cd /$images/chrism/openvswitch"
-alias smo2="cd /$images/chrism/ovs-ct-2.10"
+alias smo3="cd /$images/chrism/ovs-ct-2.10"
+alias smo2="cd /$images/chrism/ovs-roi"
 alias smt="cd /$images/chrism/ovs-tests"
 alias cfo="cd /$images/chrism/openvswitch; cscope -d"
 alias ipa='ip a'
@@ -739,8 +741,9 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
-alias r8='brb; restart-ovs; sudo ~chrism/bin/test_router8.sh'	# ct + snat with br-int and br-ex
-alias r7='sudo ~chrism/bin/test_router7.sh'	# ct + snat with more recircs
+alias r9='restart-ovs; sudo ~chrism/bin/test_router9.sh; enable-ovs-debug'	# ct + snat with br-int and br-ex with vxlan
+alias r8='restart-ovs; sudo ~chrism/bin/test_router8.sh; enable-ovs-debug'	# ct + snat with br-int and br-ex
+alias r7='restart-ovs; bru; sudo ~chrism/bin/test_router7.sh; enable-ovs-debug'	# ct + snat with more recircs
 alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
 alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script for PF
 alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat, can't offload
@@ -1057,9 +1060,9 @@ function tc-drop
 
 # ovs-ofctl add-flow br -O openflow13 "in_port=2,dl_type=0x86dd,nw_proto=58,icmp_type=128,action=set_field:0x64->tun_id,output:5"
 
-alias ofd="ovs-ofctl dump-flows $br"
-alias ofdi="ovs-ofctl dump-flows br-int"
-alias ofd2="ovs-ofctl dump-flows br2" 
+alias ofd="ovs-ofctl dump-flows $br --color"
+alias ofdi="ovs-ofctl dump-flows br-int --color"
+alias ofd2="ovs-ofctl dump-flows br2 --color" 
 
 alias drop3="ovs-ofctl add-flow $br 'nw_dst=1.1.3.2 action=drop'"
 alias del3="ovs-ofctl del-flows $br 'nw_dst=1.1.3.2'"
@@ -4140,6 +4143,7 @@ set -x
 set +x
 }
 
+# for bytedance
 function brb
 {
 set -x
@@ -4156,6 +4160,36 @@ set -x
 
 	ovs-vsctl add-port $int $rep2
 # 	ovs-vsctl add-port $int $link
+
+	ovs-vsctl                           \
+		-- add-port $int patch-int       \
+		-- set interface patch-int type=patch options:peer=patch-ex  \
+		-- add-port $ex patch-ex       \
+		-- set interface patch-ex type=patch options:peer=patch-int
+set +x
+}
+
+# for bytedance
+function brb2
+{
+set -x
+	int=br-int
+	ex=br-ex
+	del-br
+	ovs-vsctl add-br $int
+	ovs-vsctl add-br $ex
+
+	ifconfig $int up
+	ifconfig $ex $link_ip/24 up
+	ifconfig $link 8.9.10.13/24 up
+	ssh 10.12.205.14 ifconfig $link $link_remote_ip/24 up
+
+	ovs-vsctl add-port $int $rep2
+	ovs-vsctl add-port $int $vx		\
+		-- set interface $vx type=vxlan	\
+		options:remote_ip=$link_remote_ip	\
+		options:key=$vni options:dst_port=$vxlan_port
+	ovs-vsctl add-port $ex $link
 
 	ovs-vsctl                           \
 		-- add-port $int patch-int       \
@@ -7315,11 +7349,11 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=test-eswitch-add-del-flows-during-flows-cleanup.sh
+test1=test-ovs-overlap-rules.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 
-test2=test-ovs-qinq-2.sh
+test2=test-ovs-ct-icmp-frag.sh
 alias test2="./$test2"
 alias vi-test2="vi ~chrism/asap_dev_reg/$test2"
 
@@ -8362,6 +8396,18 @@ alias wget8="wget 8.9.10.11:8000"
 function http-server
 {
 	python -m SimpleHTTPServer
+}
+
+function msglvl
+{
+	ethtool -s $link msglvl 0x004
+}
+
+function kmsg() {
+	local m=$@
+	if [ -w /dev/kmsg ]; then
+		echo -e ":test: $m" >>/dev/kmsg
+	fi
 }
 
 ######## ubuntu #######

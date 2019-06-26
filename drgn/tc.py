@@ -28,12 +28,11 @@ for x, dev in enumerate(lib.get_netdevs()):
         continue
 #     print(block)
 
-    print("%20s" % name, end='')
-    print("%20x" % addr)
-    print('')
+    print("\n%20s %20x\n" % (name, addr))
 
     chain_list_addr = block.chain_list.address_of_()
     for chain in list_for_each_entry('struct tcf_chain', chain_list_addr, 'list'):
+        print("tcf_chain %lx" % chain.value_())
         print("chain index: %d, 0x%x" % (chain.index, chain.index))
         tcf_proto = chain.filter_chain
         while True:
@@ -43,7 +42,7 @@ for x, dev in enumerate(lib.get_netdevs()):
             for node in radix_tree_for_each(head.handle_idr.idr_rt):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
-#                 lib.print_cls_fl_filter(f)
+                lib.print_cls_fl_filter(f)
                 print("==========================================\n")
             tcf_proto = tcf_proto.next
             if tcf_proto.value_() == 0:

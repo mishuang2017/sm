@@ -24,15 +24,19 @@ def mac(m):
     return s
 
 def print_nf_conntrack_tuple(tuple):
-    print("src: %s" % ipv4(socket.ntohl(tuple.src.u3.ip.value_())))
-    print("dst: %s" % ipv4(socket.ntohl(tuple.dst.u3.ip.value_())))
+    print("src ip  : %s" % ipv4(socket.ntohl(tuple.src.u3.ip.value_())))
+    print("src port: %d" % socket.ntohs(tuple.src.u.all.value_()))
+    print("dst ip  : %s" % ipv4(socket.ntohl(tuple.dst.u3.ip.value_())))
+    print("dst port: %d" % socket.ntohs(tuple.dst.u.all.value_()))
 
-def print_mlx5e_ct_tuple(t, k):
-    print("%d: ipv4: %s" % (k, ipv4(socket.ntohl(t.ipv4.value_()))))
-    print("%d: zone: %d" % (k, t.zone.id))
-    print("%d: nat: 0x%lx" % (k, t.nat))
-    print_nf_conntrack_tuple(t.tuple)
-    print('')
+def print_mlx5e_ct_tuple(k, tuple):
+    print("\n=== mlx5e_ct_tuple start ===")
+    print("%d: ipv4: %s" % (k, ipv4(socket.ntohl(tuple.ipv4.value_()))))
+    print("%d: zone: %d" % (k, tuple.zone.id))
+    print("%d: nat: 0x%lx" % (k, tuple.nat))
+    print("%d: mlx5e_tc_flow %lx, refcnt: %d" % (k, tuple.flow, tuple.flow.refcnt.refs.counter.value_()))
+    print_nf_conntrack_tuple(tuple.tuple)
+    print("=== mlx5_ct_tuple end ===\n")
 
 #define TCA_FLOWER_KEY_CT_FLAGS_NEW               0x01
 #define TCA_FLOWER_KEY_CT_FLAGS_ESTABLISHED       0x02
@@ -74,6 +78,8 @@ def print_exts(e):
             tcf_mirred = Object(prog, 'struct tcf_mirred', address=a.value_())
             print("output: %s" % tcf_mirred.tcfm_dev.name.string_().decode())
         if kind == "gact":
+            print("tc_action %lx" % a.value_())
+            print("tcf_chain %lx" % a.goto_chain.value_())
             print("recirc_id: 0x%x, %d" % (a.goto_chain.index, a.goto_chain.index))
         if kind == "tunnel_key":
             tun = Object(prog, 'struct tcf_tunnel_key', address=a.value_())
@@ -91,21 +97,21 @@ def print_cls_fl_filter(f):
     #define FLOW_DIS_FIRST_FRAG     BIT(1)
     # 1 means nofirstfrag
     # 3 means firstfrag
-    print("ip_flags: 0x%x" % k.control.flags)
-    print("ct_state: 0x%x" % k.ct_state.value_())
-    print("ct_zone: %d" % k.ct_zone.value_())
-    print("ct_mark: 0x%x" % k.ct_mark.value_())
-    print("ct_labels[0]: %x" % k.ct_labels[0].value_())
-    print("protocol: %x" % socket.ntohs(k.basic.n_proto))
-    print("dmac: %s" % mac(k.eth.dst))
-    print("smac: %s" % mac(k.eth.src))
-    if k.ipv4.src:
-        print("src ip: ", end='')
-        print(ipv4(socket.ntohl(k.ipv4.src.value_())))
-    if k.ipv4.dst:
-        print("dst ip: ", end='')
-        print(ipv4(socket.ntohl(k.ipv4.dst.value_())))
-
+#     print("ip_flags: 0x%x" % k.control.flags)
+#     print("ct_state: 0x%x" % k.ct_state.value_())
+#     print("ct_zone: %d" % k.ct_zone.value_())
+#     print("ct_mark: 0x%x" % k.ct_mark.value_())
+#     print("ct_labels[0]: %x" % k.ct_labels[0].value_())
+#     print("protocol: %x" % socket.ntohs(k.basic.n_proto))
+#     print("dmac: %s" % mac(k.eth.dst))
+#     print("smac: %s" % mac(k.eth.src))
+#     if k.ipv4.src:
+#         print("src ip: ", end='')
+#         print(ipv4(socket.ntohl(k.ipv4.src.value_())))
+#     if k.ipv4.dst:
+#         print("dst ip: ", end='')
+#         print(ipv4(socket.ntohl(k.ipv4.dst.value_())))
+ 
     print_exts(f.exts)
 
 def get_netdevs():
@@ -162,3 +168,11 @@ def hash(rhashtable, type, member):
             rhash_head = rhash_head.next
 
     return nodes
+
+def print_mlx5_flow_handle(handle):
+    print("\n=== mlx5_flow_handle start ===")
+    num = handle.num_rules.value_()
+    print("num_rules: %d" % (num))
+    for i in range(num):
+        print(handle.rule[i].dest_attr)
+    print("=== mlx5_flow_handle end ===\n")
