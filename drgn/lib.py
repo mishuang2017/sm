@@ -6,6 +6,8 @@ import socket
 import drgn
 prog = drgn.program_from_kernel()
 
+import os
+
 def ipv4(addr):
     ip = ""
     for i in range(4):
@@ -133,14 +135,30 @@ def get_mlx5_pf0():
             mlx5e_priv = get_mlx5(dev)
     return mlx5e_priv
 
+def kernel_4_20_16_plus():
+    b = os.popen('uname -r')
+    text = b.read()
+    b.close()
+
+    if "4.20.16+" in text:
+        return True
+    else:
+        return False
+
 def get_mlx5e_rep_priv():
     mlx5e_priv = get_mlx5_pf0()
 
     # struct mlx5_esw_offload
     offloads = mlx5e_priv.mdev.priv.eswitch.offloads
 
+    total_vports = mlx5e_priv.mdev.priv.eswitch.total_vports.value_()
+
     # struct mlx5_eswitch_rep
-    vport = offloads.vport_reps
+
+    if kernel_4_20_16_plus:
+        vport = offloads.vport_reps[0]
+    else:
+        vport = offloads.vport_reps[total_vports - 1]
 
     # struct mlx5_eswitch_rep_if
     rep_if = vport.rep_if

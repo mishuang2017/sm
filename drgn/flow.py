@@ -121,6 +121,10 @@ def print_dest(rule):
         return
     if prog['MLX5_FLOW_DESTINATION_TYPE_VPORT'] == rule.dest_attr.type:
         print("\t\tdest: vport: %x" % rule.dest_attr.vport.num)
+        return
+    if prog['MLX5_FLOW_DESTINATION_TYPE_TIR'] == rule.dest_attr.type:
+        print("\t\tdest: tir_num: %x" % rule.dest_attr.tir_num)
+        return
     else:
         print(rule)
 
@@ -147,6 +151,7 @@ def flow(flow):
 
 mlx5e_priv = lib.get_mlx5_pf0()
 mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
+
 for i in range(4):
     for j in range(17):
         for k in range(2):
@@ -161,3 +166,7 @@ for i in range(4):
 # slow_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb
 # print("\nflow table id: %x leve: %x" % (slow_fdb.id.value_(), slow_fdb.level.value_()))
 # flow(slow_fdb)
+# 
+# vport_to_tir = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads
+# print("\nflow table id: %x leve: %x" % (vport_to_tir.id.value_(), vport_to_tir.level.value_()))
+# flow(vport_to_tir)

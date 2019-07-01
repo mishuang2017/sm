@@ -396,6 +396,8 @@ alias slog10='git slog -10'
 alias git1='git slog v4.11.. drivers/net/ethernet/mellanox/mlx5/core/'
 alias gita='git log --tags --source --author="chrism@mellanox.com"'
 alias gitvlad='git log --tags --source --author="vladbu@mellanox.com"'
+alias gitroi='git log --tags --source --author="roid@mellanox.com"'
+alias gityossi='git log --tags --source --author="yossiku@mellanox.com"'
 alias gitelib='git log --tags --source --author="elibr@mellanox.com"'
 alias git-linux-origin='git remote set-url origin ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias git-linus='git remote add linus git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git; git fetch --tags linus'
@@ -746,6 +748,7 @@ alias r8='restart-ovs; sudo ~chrism/bin/test_router8.sh; enable-ovs-debug'	# ct 
 alias r7='restart-ovs; bru; sudo ~chrism/bin/test_router7.sh; enable-ovs-debug'	# ct + snat with more recircs
 alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
 alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script for PF
+alias r52='sudo ~chrism/bin/test_router5-2.sh'	# ct + snat with Yossi's script for PF, enhanced
 alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat, can't offload
 alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat, can't offload
 alias r2='sudo ~chrism/bin/test_router2.sh'	# snat, can offload
@@ -4665,7 +4668,8 @@ set -x
 	fi
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
 	if (( host_num == 13)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+# 		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
 	fi
 
 	sudo echo "GRUB_TERMINAL_OUTPUT=\"console\"" >> $file
@@ -6539,6 +6543,7 @@ alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --wi
 alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
 
 alias ofed-configure='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
+alias ofed-configure-miniflow="ofed-configure --with-mlx5-miniflow"
 
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
