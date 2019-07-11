@@ -28,10 +28,13 @@ for x, dev in enumerate(lib.get_netdevs()):
         continue
 #     print(block)
 
-    print("\n%20s %20x\n" % (name, addr))
+    print("\n%20s ingress_sched_data %20x\n" % (name, addr))
 
     chain_list_addr = block.chain_list.address_of_()
     for chain in list_for_each_entry('struct tcf_chain', chain_list_addr, 'list'):
+        if (chain.value_() == 0):
+            print("chain 0, continue")
+            continue
         print("tcf_chain %lx" % chain.value_())
         print("chain index: %d, 0x%x" % (chain.index, chain.index))
         tcf_proto = chain.filter_chain

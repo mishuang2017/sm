@@ -12,11 +12,19 @@ import lib
 
 mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
 
-if lib.kernel_4_20_16_plus():
+if lib.kernel("4.20.16+"):
     tc_ht = mlx5e_rep_priv.uplink_priv.tc_ht
 else:
     tc_ht = mlx5e_rep_priv.tc_ht
 
 for i, flow in enumerate(lib.hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
-    print("%s: mlx5e_tc_flow %lx" % (name, flow.value_()))
+    print("%-10s mlx5e_tc_flow %lx" % (name, flow.value_()))
+
+#     continue
+#     print(flow.miniflow_list)
+    j = 0
+    for mlx5e_miniflow_node in list_for_each_entry('struct mlx5e_miniflow_node', flow.miniflow_list.address_of_(), 'node'):
+#         print(mlx5e_miniflow_node)
+        print("%d: mlx5e_miniflow %lx" % (j, mlx5e_miniflow_node.miniflow.value_()))
+        j = j + 1

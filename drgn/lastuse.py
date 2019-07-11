@@ -39,31 +39,30 @@ for i in miniflow_list:
 #     print("cookie: %lx" % i.cookie)     # pointer of skb
 #     print('{0}'.format(i.tuple))
 
-    if name == "enp4s0f0_1" or name == "enp4s0f0" or name == "enp4s0f0_2":
+#     if name == "enp4s0f0_1" or name == "enp4s0f0" or name == "enp4s0f0_2":
+    if name == "enp4s0f0":
         flow = i.flow
         print("miniflow->flow: mlx5e_tc_flow %lx" % (flow))
         fc = flow.esw_attr[0].counter
-#         print(fc)
+        lib.print_mlx5_fc(fc)
 #         lib.print_mlx5_flow_handle(flow.rule[0])
 #     if name == "enp4s0f0_1":
-
 #         for j in range(8):
 #             flow = i.path.flows[j]
 #             if flow:
 #                 print("%s: path.flows[%d]: %lx" % (name, j, flow.value_()))
 #                 attr = flow.esw_attr[0]
 #                 fc = flow.dummy_counter
+#                 lib.print_mlx5_fc(fc)
 #                 p = fc.lastpackets
 #                 b = fc.lastbytes
-#                 print("mlx5_fc: %lx, packets: %d, bytes: %d" % (fc, p, b))
+#                 print("mlx5_fc: %lx, packets: %lx, bytes: %lx" % (fc, p, b))
 #                 print("action: %4x, chain: %d" % (attr.action, attr.chain))
 #                 print('')
 
         for j in range(8):
             flow = i.path.flows[j]
-            if flow.value_():
-                lastuse = flow.dummy_counter.cache.lastuse
-                print("mlx5e_tc_flow %lx, lastuse: %lx" % (flow.value_(), lastuse / 1000))
+            print("mlx5e_tc_flow %lx" % (flow.value_()))
             continue
             cookie = i.path.cookies[j]
             if cookie:

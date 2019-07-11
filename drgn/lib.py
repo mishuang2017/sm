@@ -56,6 +56,7 @@ def print_exts(e):
         kind = a.ops.kind.string_().decode()
         print('')
         print(kind)
+#         print(a.cpu_bstats_hw)
         if kind == "ct":
 #             print(a)
             tcf_conntrack_info = Object(prog, 'struct tcf_conntrack_info', address=a.value_())
@@ -135,17 +136,26 @@ def get_mlx5_pf0():
             mlx5e_priv = get_mlx5(dev)
     return mlx5e_priv
 
-def kernel_4_20_16_plus():
+def kernel(name):
     b = os.popen('uname -r')
     text = b.read()
     b.close()
 
-    if "4.20.16+" in text:
+#     print("uname -r: %s" % text)
+
+    if name in text:
         return True
     else:
         return False
 
 def get_mlx5e_rep_priv():
+    mlx5e_priv = get_mlx5_pf0()
+    ppriv = mlx5e_priv.ppriv
+    mlx5e_rep_priv = Object(prog, 'struct mlx5e_rep_priv', address=ppriv.value_())
+
+    return mlx5e_rep_priv
+
+def get_mlx5e_rep_priv2():
     mlx5e_priv = get_mlx5_pf0()
 
     # struct mlx5_esw_offload
@@ -153,18 +163,27 @@ def get_mlx5e_rep_priv():
 
     total_vports = mlx5e_priv.mdev.priv.eswitch.total_vports.value_()
 
+#     print("total_vports: %d" % total_vports)
+
     # struct mlx5_eswitch_rep
 
-    if kernel_4_20_16_plus:
-        vport = offloads.vport_reps[0]
+    if kernel("4.20.16+") or kernel("4.20.0-rc1+"):
+        mlx5_eswitch_rep = offloads.vport_reps[0]
     else:
-        vport = offloads.vport_reps[total_vports - 1]
+        mlx5_eswitch_rep = offloads.vport_reps[total_vports - 1]
+
+#     for i in range(total_vports):
+#         print("%lx" % offloads.vport_reps[i].address_of_())
+#     print("%lx" % vport.address_of_())
 
     # struct mlx5_eswitch_rep_if
-    rep_if = vport.rep_if
+    rep_if = mlx5_eswitch_rep.rep_if
 
     # struct mlx5e_rep_priv
     priv = rep_if[prog['REP_ETH']].priv
+
+#     print("priv: %lx" % priv.value_())
+
     mlx5e_rep_priv = Object(prog, 'struct mlx5e_rep_priv', address=priv.value_())
     return mlx5e_rep_priv
 
@@ -194,3 +213,15 @@ def print_mlx5_flow_handle(handle):
     for i in range(num):
         print(handle.rule[i].dest_attr)
     print("=== mlx5_flow_handle end ===\n")
+
+def print_mlx5_fc(fc):
+    p = fc.lastpackets
+    b = fc.lastbytes
+    id = fc.id
+    dummy = fc.dummy
+    nr_dummies = fc.nr_dummies.counter.value_()
+    cachepackets = fc.cache.packets
+    cachebytes = fc.cache.bytes
+    lastuse = fc.cache.lastuse
+    print("mlx5_fc: %lx, id: %4x, dummy: %d, nr_dummy: %d, lastpackets: %-10ld, lastbytes: %-10ld, packets: %-10ld, bytes: %-10ld, lastuse: %-10ld" % (fc, id, dummy, nr_dummies, p, b, cachepackets, cachebytes, lastuse / 1000))
+#     print(fc.cache)

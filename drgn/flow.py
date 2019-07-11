@@ -13,6 +13,28 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
+def flow_table(name, table):
+    print("\n%s\nflow table id: %x leve: %x" % (name, table.id.value_(), table.level.value_()))
+#     print("flow table address")
+#     print("%lx" % table.value_())
+    fs_node = Object(prog, 'struct fs_node', address=table.value_())
+#     print("%lx" % fs_node.address_of_())
+#     print(fs_node)
+    group_addr = fs_node.address_of_()
+#     print("fs_node address")
+#     print("%lx" % group_addr.value_())
+    group_addr = fs_node.children.address_of_()
+#     print(group_addr)
+    for group in list_for_each_entry('struct fs_node', group_addr, 'list'):
+        fte_addr = group.children.address_of_()
+        for fte in list_for_each_entry('struct fs_node', fte_addr, 'list'):
+            fs_fte = Object(prog, 'struct fs_fte', address=fte.value_())
+            print_match(fs_fte)
+            dest_addr = fte.children.address_of_()
+            for dest in list_for_each_entry('struct fs_node', dest_addr, 'list'):
+                rule = Object(prog, 'struct mlx5_flow_rule', address=dest.value_())
+                print_dest(rule)
+
 def print_mac(mac):
     for i in range(6):
         v = (mac >> (5 - i) * 8) & 0xff
@@ -125,29 +147,12 @@ def print_dest(rule):
     if prog['MLX5_FLOW_DESTINATION_TYPE_TIR'] == rule.dest_attr.type:
         print("\t\tdest: tir_num: %x" % rule.dest_attr.tir_num)
         return
+    if prog['MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE'] == rule.dest_attr.type:
+        print("\t\tdest: ft: %lx" % (rule.dest_attr.ft.value_()))
+        flow_table("rule", rule.dest_attr.ft)
+        return
     else:
         print(rule)
-
-def flow(flow):
-#     print("flow table address")
-#     print("%lx" % flow.value_())
-    fs_node = Object(prog, 'struct fs_node', address=flow.value_())
-#     print("%lx" % fs_node.address_of_())
-#     print(fs_node)
-    group_addr = fs_node.address_of_()
-#     print("fs_node address")
-#     print("%lx" % group_addr.value_())
-    group_addr = fs_node.children.address_of_()
-#     print(group_addr)
-    for group in list_for_each_entry('struct fs_node', group_addr, 'list'):
-        fte_addr = group.children.address_of_()
-        for fte in list_for_each_entry('struct fs_node', fte_addr, 'list'):
-            fs_fte = Object(prog, 'struct fs_fte', address=fte.value_())
-            print_match(fs_fte)
-            dest_addr = fte.children.address_of_()
-            for dest in list_for_each_entry('struct fs_node', dest_addr, 'list'):
-                rule = Object(prog, 'struct mlx5_flow_rule', address=dest.value_())
-                print_dest(rule)
 
 mlx5e_priv = lib.get_mlx5_pf0()
 mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
@@ -161,12 +166,9 @@ for i in range(4):
                 print(i, j, k, num_rules);
                 fdb = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].fdb
                 print("flow table id: %x leve: %x" % (fdb.id.value_(), fdb.level.value_()))
-                flow(fdb)
+                flow_table("", fdb)
 
 # slow_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb
-# print("\nflow table id: %x leve: %x" % (slow_fdb.id.value_(), slow_fdb.level.value_()))
-# flow(slow_fdb)
-# 
+# flow_table("mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb", slow_fdb)
 # vport_to_tir = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads
-# print("\nflow table id: %x leve: %x" % (vport_to_tir.id.value_(), vport_to_tir.level.value_()))
-# flow(vport_to_tir)
+# flow_table("mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads", vport_to_tir)

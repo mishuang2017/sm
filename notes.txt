@@ -1534,11 +1534,7 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/net-mlx5/duplicated-rules
-git push origin HEAD:refs/for/mlnx_ofed_4_5/dpdk_fix
-git push origin HEAD:refs/for/mlnx_ofed_4_5/vlan_pop_and_push
-
-git push origin HEAD:refs/for/mlnx_ofed_4_5/fix-get_tc_ht
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/nat-support
 
 ===git===
 
@@ -3403,6 +3399,30 @@ dev_gro_receive
 
 ===ovs===
 
+commit 608ff46aaf0dd4330c2488c260ee42992e17a6fd
+Author: John Hurley <john.hurley@netronome.com>
+Date:   Tue Apr 9 15:36:14 2019 +0100
+
+    ovs-tc: offload datapath rules matching on internal ports
+
+    Rules applied to OvS internal ports are not represented in TC datapaths.
+    However, it is possible to support rules matching on internal ports in TC.
+    The start_xmit ndo of OvS internal ports directs packets back into the OvS
+    kernel datapath where they are rematched with the ingress port now being
+    that of the internal port. Due to this, rules matching on an internal port
+    can be added as TC filters to an egress qdisc for these ports.
+
+    Allow rules applied to internal ports to be offloaded to TC as egress
+    filters. Rules redirecting to an internal port are also offloaded. These
+    are supported by the redirect ingress functionality applied in an earlier
+    patch.
+
+    Signed-off-by: John Hurley <john.hurley@netronome.com>
+    Reviewed-by: Roi Dayan <roid@mellanox.com>
+    Signed-off-by: Simon Horman <simon.horman@netronome.com>
+
+
+
 netdev_port_get
 
 log_flow_put_message
@@ -3773,6 +3793,8 @@ nl_parse_flower_options
 nl_parse_flower_actions
 nl_parse_single_action
 nl_parse_act_mirred
+
+parse_ethertype
 
 ovs-appctl vlog/list
 
@@ -10949,3 +10971,44 @@ Jan 30 14:29:17 dev-r630-03 kernel: do_syscall_64        5a/0x170
 Jan 30 14:29:17 dev-r630-03 kernel: entry_SYSCALL_64_after_hwframe        44/0xa9
 
 mlx5e_refresh_tirs
+
+
+[root@dev-r630-04 ~]# tcs $link
+filter protocol ip pref 1 flower chain 0
+filter protocol ip pref 1 flower chain 0 handle 0x1
+  dst_mac 24:8a:07:88:27:ca
+  src_mac 24:8a:07:88:27:9a
+  eth_type ipv4
+  ip_flags nofrag
+  in_hw in_hw_count 1
+        action order 1: conntrack zone 65534
+        index 4 ref 1 bind 1 installed 0 sec used 0 sec
+        Action statistics:
+        Sent 84 bytes 1 pkt (dropped 0, overlimits 0 requeues 0)
+        backlog 0b 0p requeues 0
+
+        action order 2: gact action goto chain 4
+         random type none pass val 0
+         index 4 ref 1 bind 1 installed 0 sec used 0 sec
+        Action statistics:
+        Sent 84 bytes 1 pkt (dropped 0, overlimits 0 requeues 0)
+        backlog 0b 0p requeues 0
+        cookie a315ff155e4e5b3f6dd3459ce2d12461
+
+filter protocol arp pref 2 flower chain 0
+filter protocol ip pref 1 flower chain 4
+filter protocol ip pref 1 flower chain 4 handle 0x1
+  eth_type ipv4
+  ip_flags nofrag
+  in_hw in_hw_count 1
+        action order 1: gact action drop
+         random type none pass val 0
+         index 6 ref 1 bind 1 installed 9 sec used 0 sec
+        Action statistics:
+        Sent 672 bytes 8 pkt (dropped 8, overlimits 0 requeues 0)
+        backlog 0b 0p requeues 0
+        cookie cae44fd7664aea15a1c0b2b3560d378c
+
+
+
+

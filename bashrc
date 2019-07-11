@@ -7,8 +7,8 @@ numvfs=3
 
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
-[[ "$(hostname -s)" == "gen-h-vrt-015" ]] && host_num=5
-[[ "$(hostname -s)" == "gen-h-vrt-016" ]] && host_num=6
+[[ "$(hostname -s)" == "dev-l-vrt-202" ]] && host_num=2
+[[ "$(hostname -s)" == "dev-l-vrt-203" ]] && host_num=3
 [[ "$(hostname -s)" == "dev-chrism-vm1" ]] && host_num=15
 [[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
@@ -44,21 +44,13 @@ elif (( host_num == 14 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-elif (( host_num == 5 )); then
-	link=enp129s0f0
-	link2=enp129s0f1
+elif (( host_num == 2 )); then
+	numvfs=2
+	link=enp6s0f0
 
-	vf1=enp129s0f2
-	vf2=enp129s0f3
-	vf3=enp129s0f4
-
-elif (( host_num == 6 )); then
-	link=enp129s0f0
-	link2=enp129s0f1
-
-	vf1=enp129s0f2
-	vf2=enp129s0f3
-	vf3=enp129s0f4
+elif (( host_num == 3 )); then
+	numvfs=2
+	link=enp6s0f0
 
 elif (( host_num == 15 )); then
 	link=ens9
@@ -284,7 +276,7 @@ alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
 alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
 
 
-alias jd-ovs="~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
+alias jd-ovs="del-br; br; ~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
 alias jd-vxlan="~chrism/bin/ct_lots_rule_vxlan.sh $rep2 $vx"
 alias jd-vxlan2="~chrism/bin/ct_lots_rule_vxlan2.sh $rep2 $vx"
 alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
@@ -344,6 +336,7 @@ alias restart-all='stop-all; start-all'
 
 alias dud='du -h -d 1'
 
+alias clone-git='git clone git@github.com:git/git.git'
 alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
@@ -356,6 +349,7 @@ alias clone-crash='git clone git@github.com:mishuang2017/crash.git'
 alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
+alias clone-ovs-mishuang='git clone git@github.com:mishuang2017/ovs.git'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
@@ -397,6 +391,7 @@ alias git1='git slog v4.11.. drivers/net/ethernet/mellanox/mlx5/core/'
 alias gita='git log --tags --source --author="chrism@mellanox.com"'
 alias gitvlad='git log --tags --source --author="vladbu@mellanox.com"'
 alias gitroi='git log --tags --source --author="roid@mellanox.com"'
+alias gitpaul='git log --tags --source --author="paulb@mellanox.com"'
 alias gityossi='git log --tags --source --author="yossiku@mellanox.com"'
 alias gitelib='git log --tags --source --author="elibr@mellanox.com"'
 alias git-linux-origin='git remote set-url origin ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
@@ -743,8 +738,18 @@ alias np5="ip netns exec n1 netperf -H 1.1.1.13 -t TCP_STREAM -l $n_time -- m $m
 
 alias sshcopy='ssh-copy-id -i ~/.ssh/id_rsa.pub'
 
-alias r9='restart-ovs; sudo ~chrism/bin/test_router9.sh; enable-ovs-debug'	# ct + snat with br-int and br-ex with vxlan
-alias r8='restart-ovs; sudo ~chrism/bin/test_router8.sh; enable-ovs-debug'	# ct + snat with br-int and br-ex
+# ct + snat with br-int and br-ex and pf is in br-ex without vxlan
+# use arp responder to get arp reply
+# connection will be aborted
+alias r9a='restart-ovs; sudo ~chrism/bin/test_router9-ar.sh; enable-ovs-debug'
+
+# ct + snat with br-int and br-ex and pf is in br-ex without vxlan
+# configure ip address on br-ex
+alias r9='restart-ovs; sudo ~chrism/bin/test_router9-orig.sh; enable-ovs-debug'
+
+alias r9t='restart-ovs; sudo ~chrism/bin/test_router9-test.sh; enable-ovs-debug'
+
+alias r8='restart-ovs; sudo ~chrism/bin/test_router8.sh; enable-ovs-debug'	# ct + snat with br-int and br-ex and pf is not in br-ex, using iptable with vxlan
 alias r7='restart-ovs; bru; sudo ~chrism/bin/test_router7.sh; enable-ovs-debug'	# ct + snat with more recircs
 alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
 alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script for PF
@@ -1932,6 +1937,7 @@ alias m=make-all
 alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install -j 32'
+alias mi2='make -j 32; sudo make install -j 32; force-restart'
 alias m32='make -j 32'
 
 function mi2
@@ -4118,6 +4124,8 @@ set -x
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
+
+	ifconfig $br 8.9.10.1/24 up
 set +x
 }
 
@@ -4276,6 +4284,7 @@ set +x
 # rep=$(eval echo '$'rep"$i")
 function del-br
 {
+	start-ovs
 	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
 	sleep 1
 	return
@@ -4455,6 +4464,13 @@ function set-mac
 	done
 }
 
+alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
+alias n1c='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
+alias n1p='n1 ping 8.9.10.11'
+alias n1i='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
+alias n1iperf3='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
+alias n1c2='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 1.1.1.2 -t 6000'
+
 alias exe='ip netns exec'
 alias n0='exe n0'
 alias n1='exe n1'
@@ -4608,6 +4624,7 @@ function start-switchdev-all
 	done
 	ip1
 	ip2
+	ifconfig $rep2 1.1.3.3/16 up
 #	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
 	
 #	(( host_num == 13 )) && jd-vxlan2
@@ -5354,10 +5371,12 @@ function burn5
 {
 set -x
 	pci=0000:04:00.0
-	version=last_revision
 	version=fw-4119-rel-16_25_1000
 	version=fw-4119-rel-16_99_6804
 	version=fw-4119-rel-16_25_0328
+	version=fw-4119-rel-16_25_4244
+	version=last_revision
+	version=fw-4119-rel-16_26_0160
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -5709,6 +5728,24 @@ set -x
 	ip link add name $vx type vxlan id $vni dev $link  remote $link_remote_ip dstport $vxlan_port
 #	ifconfig $vx $link_ip_vxlan/24 up
 	ip addr add $link_ip_vxlan/16 brd + dev $vx
+	ip addr add $link_ipv6_vxlan/64 dev $vx
+	ip link set dev $vx up
+	ip link set $vx address $vxlan_mac
+
+#	ip link set vxlan0 up
+#	ip addr add 1.1.1.2/16 dev vxlan0
+#	ip addr add fc00:0:0:0::2/64 dev vxlan0
+set +x
+}
+
+function peer10
+{
+set -x
+	ifconfig $link 8.9.10.11/24 up
+	ip link del $vx > /dev/null 2>&1
+	ip link add name $vx type vxlan id $vni dev $link  remote 8.9.10.1 dstport $vxlan_port
+#	ifconfig $vx $link_ip_vxlan/24 up
+	ip addr add 192.168.0.200/16 brd + dev $vx
 	ip addr add $link_ipv6_vxlan/64 dev $vx
 	ip link set dev $vx up
 	ip link set $vx address $vxlan_mac
@@ -6585,6 +6622,14 @@ function tcs
 	$TC -s filter show dev $1 root
 }
 
+function tcs0
+{
+	[[ $# != 1 ]] && return
+	TC=/images/chrism/iproute2/tc/tc
+	TC=tc
+	$TC -s filter show dev $1 chain 0 root
+}
+
 alias vlan-test="while true; do  tc-vlan; rep2; tcs $link; sleep 5; tcv; rep2; tcs $link;  sleep 5; done"
 alias vlan-iperf=" iperf3 -c 1.1.1.1 -t 10000 -B 1.1.1.22 -P 1 --cport 6000 -i 0"
 alias iperf10=" iperf3 -c 1.1.1.2 -t 10000 -B 1.1.1.22 -P 10 --cport 6000 -i 0"
@@ -6874,6 +6919,8 @@ set +x
 
 # https://fedoraproject.org/wiki/Building_a_custom_kernel
 # dnf download --source kernel
+
+alias make-rpm='make -s -j32 rpm-pkg RPM_BUILD_NCPUS=32'
 
 pkgrelease_file=/tmp/pkgrelease
 function git-archive
@@ -7354,7 +7401,7 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=test-ovs-overlap-rules.sh
+test1=test-ovs-ct-scapy-udp-jd-nat-reconfig-flows.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 
@@ -8049,11 +8096,11 @@ function install-bpftrace
 function trace1
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace.py "$1 \"%lx\", arg1"
+	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg1"
 }
 
 BCC_DIR=/images/chrism/bcc
-alias trace="$BCC_DIR/tools/trace.py"
+alias trace="$BCC_DIR/tools/trace.py -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
 alias funccount="$BCC_DIR/tools/funccount.py"
 
@@ -8073,7 +8120,7 @@ function traceo
 	[[ $# < 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py 'ovs-vswitchd:$1 "%lx", arg1'
+$BCC_DIR/tools/trace.py -t 'ovs-vswitchd:$1 "%lx", arg1'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file
@@ -8413,6 +8460,76 @@ function kmsg() {
 	if [ -w /dev/kmsg ]; then
 		echo -e ":test: $m" >>/dev/kmsg
 	fi
+}
+
+function _flowtable
+{
+	i=0
+	while :; do
+		echo "======== $i ======="
+		sudo /labhome/chrism/sm/drgn/_flowtable.py
+		sleep 1
+		i=$((i+1))
+	done
+}
+
+function flow
+{
+	i=0
+	while :; do
+		echo "======== $i ======="
+		sudo /labhome/chrism/sm/drgn/flow.py
+		sleep 1
+		i=$((i+1))
+	done
+}
+
+function ct_list
+{
+	i=0
+	while :; do
+		echo "======== $i ======="
+		sudo /labhome/chrism/sm/drgn/ct_list.py
+		sleep 1
+		i=$((i+1))
+	done
+}
+
+function mlx5e_tc_flow
+{
+	i=0
+	while :; do
+		echo "======== $i ======="
+		sudo /labhome/chrism/sm/drgn/mlx5e_tc_flow.py
+		sleep 1
+		i=$((i+1))
+	done
+}
+
+function dr1
+{
+	cd /labhome/chrism/sm/drgn
+set -x
+	sudo ./_flowtable.py
+	sudo ./mlx5e_tc_flow.py
+	sudo ./ct_list.py  | grep mlx5e_tc
+set +x
+}
+
+function while-dp
+{
+	while :; do
+		echo "============================"
+		dpd
+		sleep 2
+	done
+}
+
+# UDP 5353
+function disable-avahi-daemon.service
+{
+	sudo systemctl stop avahi-daemon.service
+	sudo systemctl disable avahi-daemon.service
 }
 
 ######## ubuntu #######
