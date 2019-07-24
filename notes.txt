@@ -205,6 +205,61 @@ USEC_INITIALIZED=77440
 
 udevadm info -a --path=/sys/class/net/enp4s0f0
 
+[root@dev-r630-03 devices]# udevadm info /sys/class/net/enp4s0f1
+P: /devices/pci0000:00/0000:00:02.0/0000:04:00.1/net/enp4s0f1
+E: DEVPATH=/devices/pci0000:00/0000:00:02.0/0000:04:00.1/net/enp4s0f1
+E: ID_BUS=pci
+E: ID_MM_CANDIDATE=1
+E: ID_MODEL_FROM_DATABASE=MT28800 Family [ConnectX-5 Ex]
+E: ID_MODEL_ID=0x1019
+E: ID_NET_DRIVER=mlx5_core
+E: ID_NET_LINK_FILE=/lib/systemd/network/99-default.link
+E: ID_NET_NAME=enp4s0f1
+E: ID_NET_NAME_MAC=enx248a0788279b
+E: ID_NET_NAME_PATH=enp4s0f1
+E: ID_OUI_FROM_DATABASE=Mellanox Technologies, Inc.
+E: ID_PATH=pci-0000:04:00.1
+E: ID_PATH_TAG=pci-0000_04_00_1
+E: ID_PCI_CLASS_FROM_DATABASE=Network controller
+E: ID_PCI_SUBCLASS_FROM_DATABASE=Ethernet controller
+E: ID_VENDOR_FROM_DATABASE=Mellanox Technologies
+E: ID_VENDOR_ID=0x15b3
+E: IFINDEX=43
+E: INTERFACE=enp4s0f1
+E: SUBSYSTEM=net
+E: SYSTEMD_ALIAS=/sys/subsystem/net/devices/enp4s0f1 /sys/subsystem/net/devices/enp4s0f1
+E: TAGS=:systemd:
+E: USEC_INITIALIZED=4239194592
+
+[root@dev-r630-03 devices]# udevadm info /sys/class/net/enp4s0f
+/sys/class/net/enp4s0f0np0    /sys/class/net/enp4s0f0np0_0  /sys/class/net/enp4s0f0np0_1  /sys/class/net/enp4s0f0np0_2  /sys/class/net/enp4s0f1
+[root@dev-r630-03 devices]# udevadm info /sys/class/net/enp4s0f0np0
+P: /devices/pci0000:00/0000:00:02.0/0000:04:00.0/net/enp4s0f0np0
+E: DEVPATH=/devices/pci0000:00/0000:00:02.0/0000:04:00.0/net/enp4s0f0np0
+E: ID_BUS=pci
+E: ID_MM_CANDIDATE=1
+E: ID_MODEL_FROM_DATABASE=MT28800 Family [ConnectX-5 Ex]
+E: ID_MODEL_ID=0x1019
+E: ID_NET_DRIVER=mlx5e_rep
+E: ID_NET_LINK_FILE=/lib/systemd/network/99-default.link
+E: ID_NET_NAME=enp4s0f0np0
+E: ID_NET_NAME_MAC=enx248a0788279a
+E: ID_NET_NAME_PATH=enp4s0f0np0
+E: ID_OUI_FROM_DATABASE=Mellanox Technologies, Inc.
+E: ID_PATH=pci-0000:04:00.0
+E: ID_PATH_TAG=pci-0000_04_00_0
+E: ID_PCI_CLASS_FROM_DATABASE=Network controller
+E: ID_PCI_SUBCLASS_FROM_DATABASE=Ethernet controller
+E: ID_VENDOR_FROM_DATABASE=Mellanox Technologies
+E: ID_VENDOR_ID=0x15b3
+E: IFINDEX=74
+E: INTERFACE=enp4s0f0np0
+E: NAME=enp4s0f0np0
+E: SUBSYSTEM=net
+E: SYSTEMD_ALIAS=/sys/subsystem/net/devices/enp4s0f0np0 /sys/subsystem/net/devices/enp4s0f0np0
+E: TAGS=:systemd:
+E: USEC_INITIALIZED=5852898643
+
 ===block===
 
 fl_change
@@ -1534,9 +1589,21 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/nat-support
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/jd-bugfix-cherry-pick
 
 ===git===
+
+echo "# bin" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.com:mishuang2017/bin.git
+git push -u origin master
+
+git remote add origin git@github.com:mishuang2017/bin.git
+git push -u origin master
+
+git log --oneline | grep -m1 "Don't add decap"
 
 # How to remove local untracked files from the current Git branch
 git clean -n
@@ -7685,6 +7752,8 @@ netdev_priv
 register_netdev
 
 ===ofed===
+
+./mlnxofedinstall  --add-kernel-support --skip-distro-check
 
 http://www.mellanox.com/related-docs/prod_software/Mellanox_OFED_Linux_User_Manual_v4_5.pdf
 

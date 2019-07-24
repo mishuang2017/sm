@@ -102,7 +102,16 @@ ovs-ofctl add-flow $BR_INT "table=0, in_port=$PATCH_INT, dl_type=0x0806, nw_dst=
 
 # request
 ovs-ofctl add-flow $BR_INT "table=0,priority=100,in_port=$REP,arp actions=NORMAL"
-ovs-ofctl add-flow $BR_INT "table=0,priority=100,in_port=$REP,ip,nw_dst=192.168.0.200 actions=NORMAL"
+
+ovs-ofctl add-flow $BR_INT "table=0,priority=100,in_port=$REP,ip,nw_dst=192.168.0.200 actions=output:vxlan0"
+# ovs-ofctl add-flow $BR_INT "table=0,priority=100,in_port=$REP,ip,nw_dst=192.168.0.200 actions=ct(commit,table=5,)"
+# ovs-ofctl add-flow $BR_INT "table=5,priority=100,in_port=$REP,ip,nw_dst=192.168.0.200 actions=output:vxlan0"
+
+# ovs-ofctl add-flow $BR_INT "table=0,priority=100,in_port=$REP,ip,nw_dst=192.168.0.200 actions=ct(commit,table=5,zone=0)"
+# ovs-ofctl add-flow $BR_INT "table=5,priority=100,in_port=$REP,ip,nw_dst=192.168.0.200,ct_state=-new+est-rel-inv+trk actions=mod_nw_ttl=20,output:vxlan0"
+# ovs-ofctl add-flow $BR_INT "table=5,priority=100,in_port=$REP,ip,nw_dst=192.168.0.200,ct_state=+new-est-rel-inv+trk actions=mod_nw_ttl=20,output:vxlan0"
+
+
 ovs-ofctl add-flow $BR_INT "table=0,priority=100,in_port=$REP actions=load:0x6757->NXM_NX_REG6[],load:0x7->OXM_OF_METADATA[],load:0->OXM_OF_IN_PORT[],resubmit(,5)"
 ovs-ofctl add-flow $BR_INT "table=5,priority=200,ip,reg6=0x6757,dl_src=$MAC_VF,nw_src=$VM_IP actions=resubmit(,10)"
 ovs-ofctl add-flow $BR_INT "table=10,priority=100,ip,reg6=0x6757 actions=ct(table=15,zone=OXM_OF_METADATA[0..15])"

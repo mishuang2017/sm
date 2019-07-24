@@ -47,9 +47,13 @@ elif (( host_num == 14 )); then
 elif (( host_num == 2 )); then
 	numvfs=2
 	link=enp6s0f0
+	rhost_num=3
+	link_remote_ip=192.168.1.$rhost_num
 
 elif (( host_num == 3 )); then
 	numvfs=2
+	rhost_num=2
+	link_remote_ip=192.168.1.$rhost_num
 	link=enp6s0f0
 
 elif (( host_num == 15 )); then
@@ -199,7 +203,8 @@ cx5=0
 # modprobe mlx5_core > /dev/null 2>&1
 function get_pci
 {
-	if [[ -e /sys/class/net/$link/device && -f /usr/sbin/lspci ]]; then
+# 	if [[ -e /sys/class/net/$link/device && -f /usr/sbin/lspci ]]; then
+	if [[ -e /sys/class/net/$link/device ]]; then
 		pci=$(basename $(readlink /sys/class/net/$link/device))
 		pci_id=$(echo $pci | cut -b 6-)
 		lspci -d 15b3: -nn | grep $pci_id | grep 1019 > /dev/null && cx5=1
@@ -277,10 +282,13 @@ alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
 
 
 alias jd-ovs="del-br; br; ~chrism/bin/ct_lots_rule.sh $rep2 $rep3"
-alias jd-vxlan="~chrism/bin/ct_lots_rule_vxlan.sh $rep2 $vx"
+
+alias jd-vxlan="del-br; brx; ~chrism/bin/ct_lots_rule_vxlan.sh $rep2 $vx"
+alias jd-vxlan-ttl="del-br; brx; ~chrism/bin/ct_lots_rule_vxlan-ttl.sh $rep2 $vx"
+
 alias jd-vxlan2="~chrism/bin/ct_lots_rule_vxlan2.sh $rep2 $vx"
 alias jd-ovs2="~chrism/bin/ct_lots_rule2.sh $rep2 $rep3 $rep4"
-alias jd-ovs-ttl="~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
+alias jd-ovs-ttl="del-br; br; ~chrism/bin/ct_lots_rule_ttl.sh $rep2 $rep3"
 alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
 
 alias pc="picocom -b $base_baud /dev/ttyS1"
@@ -340,7 +348,9 @@ alias clone-git='git clone git@github.com:git/git.git'
 alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
+alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
+alias clone-iproute2-ct='git clone https://github.com/roidayan/iproute2 --branch=ct-one-table'
 alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
@@ -350,6 +360,7 @@ alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-ovs-mishuang='git clone git@github.com:mishuang2017/ovs.git'
+alias clone-ovs-ct='git clone https://github.com/roidayan/ovs --branch=ct-one-table-2.10'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
@@ -375,6 +386,7 @@ alias v4.10='git checkout v4.10; git checkout -b 4.10'
 alias v4.8='git checkout v4.8; git checkout -b 4.8'
 alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
 alias v4.4='git checkout v4.4; git checkout -b 4.4'
+alias v6000='git checkout rel-12_25_6000; git checkout -b 12_25_6000'
 alias ab='rej; git am --abort'
 alias gr='git add -u; git am --resolved'
 alias gar='git add -A; git am --resolved'
@@ -535,8 +547,15 @@ alias mr='modprobe -r'
 alias vs='sudo ovs-vsctl'
 alias of='sudo ovs-ofctl'
 alias dp='sudo ovs-dpctl'
-alias dpd='sudo ovs-dpctl dump-flows --name'
+alias dpd='sudo ~chrism/bin/ovs-df.sh'
+alias dpd1='sudo ovs-dpctl dump-flows --name | grep "in_port(enp4s0f0)"'
+alias dpd2='sudo ovs-dpctl dump-flows --name | grep "in_port(enp4s0f0_1)"'
 alias app='sudo ovs-appctl'
+alias fdbs='sudo ovs-appctl fdb/show'
+alias fdbi='sudo ovs-appctl fdb/show br-int'
+alias fdbe='sudo ovs-appctl fdb/show br-ex'
+alias fdb='of show br-int | grep addr; fdbi; of show br-ex | grep addr; fdbe'
+alias fdb-br='of show br | grep addr; sudo ovs-appctl fdb/show br'
 alias app1='sudo ovs-appctl dpctl/dump-flows'
 alias appn='sudo ovs-appctl dpctl/dump-flows --names'
 
@@ -747,6 +766,8 @@ alias r9a='restart-ovs; sudo ~chrism/bin/test_router9-ar.sh; enable-ovs-debug'
 # configure ip address on br-ex
 alias r9='restart-ovs; sudo ~chrism/bin/test_router9-orig.sh; enable-ovs-debug'
 
+alias r92='restart-ovs; sudo ~chrism/bin/test_router9-test2.sh; enable-ovs-debug'
+alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'
 alias r9t='restart-ovs; sudo ~chrism/bin/test_router9-test.sh; enable-ovs-debug'
 
 alias r8='restart-ovs; sudo ~chrism/bin/test_router8.sh; enable-ovs-debug'	# ct + snat with br-int and br-ex and pf is not in br-ex, using iptable with vxlan
@@ -761,6 +782,7 @@ alias r1='sudo ~chrism/bin/test_router.sh'	# veth arp responder
 
 corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
+alias vi-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir; vi corrupt.c"
 alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
 
 [[ $UID == 0 ]] && echo 2 > /proc/sys/fs/suid_dumpable
@@ -895,7 +917,10 @@ function ln-profile
 	ln -s ~chrism/.screenrc
 	ln -s ~chrism/.tmux.conf
 	ln -s ~chrism/.crash
+}
 
+function create-images
+{
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
 }
@@ -1050,6 +1075,12 @@ function drop_tc
 		action drop
 }
 
+function ovs-drop
+{
+# 	ovs-ofctl add-flow br-int "table=0,in_port=$rep2,actions=drop"
+	ovs-ofctl add-flow br-ex "table=0,in_port=$link,actions=drop"
+}
+
 function tc-drop
 {
 	TC=/$images/chrism/iproute2/tc/tc
@@ -1070,7 +1101,13 @@ function tc-drop
 
 alias ofd="ovs-ofctl dump-flows $br --color"
 alias ofdi="ovs-ofctl dump-flows br-int --color"
+alias ofde="ovs-ofctl dump-flows br-ex --color"
 alias ofd2="ovs-ofctl dump-flows br2 --color" 
+
+function ofi
+{
+	ovs-ofctl dump-flows br-int table=$1 --color
+}
 
 alias drop3="ovs-ofctl add-flow $br 'nw_dst=1.1.3.2 action=drop'"
 alias del3="ovs-ofctl del-flows $br 'nw_dst=1.1.3.2'"
@@ -1483,7 +1520,9 @@ alias bo=mybuild2
 mybuild2 ()
 {
 set -x;
-	sudo ovs-vsctl del-br $br
+	sudo ovs-vsctl del-br br
+	sudo ovs-vsctl del-br br-int
+	sudo ovs-vsctl del-br br-ex
 	module=openvswitch
 	driver_dir=net/openvswitch
 	cd $linux_dir;
@@ -1936,8 +1975,8 @@ function make-all
 alias m=make-all
 alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
-alias mi='make -j 32; sudo make install -j 32'
-alias mi2='make -j 32; sudo make install -j 32; force-restart'
+alias mi='make -j 32; sudo make install_kernel -j 32'
+alias mi2='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe'
 alias m32='make -j 32'
 
 function mi2
@@ -4126,6 +4165,7 @@ set -x
 	done
 
 	ifconfig $br 8.9.10.1/24 up
+	ifconfig $br:0 192.168.0.1/24 up
 set +x
 }
 
@@ -4165,12 +4205,12 @@ set -x
 	ovs-vsctl add-br $ex
 
 	ifconfig $int up
-	ifconfig $ex 100.64.0.1/24 up
+	ifconfig $ex 8.9.10.1/24 up
 	ifconfig $link 8.9.10.13/24 up
-	ssh 10.12.205.14 ifconfig $link 8.9.10.11/24 up
+	ssh 10.12.205.$rhost_num ifconfig $link 8.9.10.11/24 up
 
 	ovs-vsctl add-port $int $rep2
-# 	ovs-vsctl add-port $int $link
+	ovs-vsctl add-port $ex $link
 
 	ovs-vsctl                           \
 		-- add-port $int patch-int       \
@@ -4215,12 +4255,42 @@ function brx
 set -x
 	del-br
 	vs add-br $br
-	for (( i = 1; i <= 1; i++)); do
+	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 	vxlan1
 set +x
+}
+
+function brx-ct
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan1
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+set +x
+}
+
+function counter-tc-ct
+{
+set -x
+	cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct
+set +
 }
 
 function create-br-vxlan-vlan
@@ -4464,12 +4534,35 @@ function set-mac
 	done
 }
 
-alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
-alias n1c='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
 alias n1p='n1 ping 8.9.10.11'
-alias n1i='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
+alias n1p1='n1 ping 8.9.10.1'
+alias n1p10='n1 ping 8.9.10.10'
+alias n1p8='n1 ping 192.168.0.200'
+
+alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
+alias n1c500='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -l 500'
+alias n1c50='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -l 50'
+alias n1c8='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 192.168.0.200 -t 600'
+alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600; echo $?'
+alias n1i='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
+alias n1i8='time ip netns exec n11 iperf3 -c 192.168.0.200 -t 600 -M 1200'
+alias n1u='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200 -u'
 alias n1iperf3='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
 alias n1c2='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 1.1.1.2 -t 6000'
+alias n1u='n1 /labhome/chrism/prg/c/udp-client/udp-client-2 -c 8.9.10.11 -t 10000'
+
+function n1-iperf
+{
+	i=0
+	while :;do
+		echo "============== $i ============="
+		n1 iperf -c 8.9.10.11 -P 8 -i 1
+		if (( i == 100 )); then
+			break;
+		fi
+		i=$((i+1))
+	done
+}
 
 alias exe='ip netns exec'
 alias n0='exe n0'
@@ -4679,6 +4772,8 @@ set -x
 	sudo sed -i '/GRUB_TERMINAL_OUTPUT/d' $file
 	sudo sed -i '/GRUB_SERIAL_COMMAND/d' $file
 #	sudo echo "GRUB_DEFAULT=\"CentOS Linux ($kernel) 7 (Core)\"" >> $file
+
+	# net.ifnames=0 to set name to eth0
 
 	if (( host_num == 14)); then
 		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
@@ -5365,6 +5460,8 @@ function syndrome
 	grep -i $2 $file
 }
 
+alias syn='syndrome 16.25.6000'
+
 # mlxfwup
 
 function burn5
@@ -5374,9 +5471,9 @@ set -x
 	version=fw-4119-rel-16_25_1000
 	version=fw-4119-rel-16_99_6804
 	version=fw-4119-rel-16_25_0328
-	version=fw-4119-rel-16_25_4244
 	version=last_revision
 	version=fw-4119-rel-16_26_0160
+	version=fw-4119-rel-16_25_6000
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
@@ -5741,6 +5838,9 @@ set +x
 function peer10
 {
 set -x
+	del-br
+	ip l d vxlan0
+
 	ifconfig $link 8.9.10.11/24 up
 	ip link del $vx > /dev/null 2>&1
 	ip link add name $vx type vxlan id $vni dev $link  remote 8.9.10.1 dstport $vxlan_port
@@ -6895,6 +6995,32 @@ set -x
 	ovs-ofctl add-flow $br "table=1,in_port=2,ip,ct_state=+trk+est,action=3"
 	ovs-ofctl add-flow $br "table=1,in_port=3,ip,ct_state=+trk+new,action=drop"
 	ovs-ofctl add-flow $br "table=1,in_port=3,ip,ct_state=+trk+est,action=2"
+set +x
+}
+
+function ct3
+{
+set -x
+	restart-ovs
+	ovs-ofctl add-flow $br table=0,priority=1,action=drop
+	ovs-ofctl add-flow $br table=0,priority=10,arp,action=normal
+	ovs-ofctl add-flow $br "table=0,priority=100,ip,ct_state=-trk,action=ct(table=1),$br"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,ct_state=+trk+new,action=ct(commit),$rep3"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,ct_state=+trk+est,action=$rep3"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep3,ip,ct_state=+trk+new,action=drop"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep3,ip,ct_state=+trk+est,action=$rep2"
+set +x
+}
+
+function ct-mark-icmp
+{
+set -x
+	restart-ovs
+	ovs-ofctl add-flow $br table=0,priority=1,action=drop
+	ovs-ofctl add-flow $br table=0,arp,action=normal
+	ovs-ofctl add-flow $br "table=0,in_port=$rep2,icmp,action=ct(commit,exec(set_field:1->ct_mark)),$rep3"
+	ovs-ofctl add-flow $br "table=0,in_port=$rep3,ct_state=-trk,icmp,action=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep3,ct_state=+trk,ct_mark=1,icmp,action=$rep2"
 set +x
 }
 
@@ -8099,6 +8225,12 @@ function trace1
 	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg1"
 }
 
+function trace2
+{
+	[[ $# != 1 ]] && return
+	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg2"
+}
+
 BCC_DIR=/images/chrism/bcc
 alias trace="$BCC_DIR/tools/trace.py -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
@@ -8465,44 +8597,64 @@ function kmsg() {
 function _flowtable
 {
 	i=0
+	n=0
+	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/_flowtable.py
-		sleep 1
+		sleep 2
 		i=$((i+1))
+		if (( n == i )); then
+			break;
+		fi
 	done
 }
 
 function flow
 {
 	i=0
+	n=0
+	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/flow.py
-		sleep 1
+		sleep 2
 		i=$((i+1))
+		if (( n == i )); then
+			break;
+		fi
 	done
 }
 
 function ct_list
 {
 	i=0
+	n=0
+	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/ct_list.py
-		sleep 1
+		sleep 2
 		i=$((i+1))
+		if (( n == i )); then
+			break;
+		fi
 	done
 }
 
 function mlx5e_tc_flow
 {
 	i=0
+	n=0
+	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/mlx5e_tc_flow.py
-		sleep 1
+		sleep 2
 		i=$((i+1))
+		if (( n == i )); then
+			break;
+		fi
 	done
 }
 
@@ -8520,17 +8672,24 @@ function while-dp
 {
 	while :; do
 		echo "============================"
-		dpd
+		dpd | grep drop
 		sleep 2
 	done
 }
 
 # UDP 5353
+# sssd.service
 function disable-avahi-daemon.service
 {
 	sudo systemctl stop avahi-daemon.service
 	sudo systemctl disable avahi-daemon.service
+
+	sudo systemctl stop sssd.service
+	sudo systemctl disable sssd.service
 }
+
+alias udps="UDPServer.py --ipAddress=1.1.1.1 --port=4000 --clients 1.1.3.1 --successRate=100.0 --max_delay=10 --size=100 --packets=100"
+alias udpc="UDPClient.py --serverAddr 1.1.1.1 --port=4000 --size=100 --packets=100 --sleep=0.1"
 
 ######## ubuntu #######
 
@@ -8634,6 +8793,8 @@ function install-dbgsym
 
 function start-ovs
 {
+	sudo systemctl start openvswitch-switch.service
+	exit
 	smo
 # 	mkdir -p /etc/openvswitch
 # 	ovsdb-tool create /etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
@@ -8647,7 +8808,7 @@ set +x
 
 function restart-ovs
 {
-	sudo systemctl restart ovs-vswitchd.service
+	sudo systemctl restart openvswitch-switch.service
 }
 
 function stop-ovs

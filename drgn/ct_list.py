@@ -47,17 +47,18 @@ for i in miniflow_list:
 #         lib.print_mlx5_flow_handle(flow.rule[0])
 #     if name == "enp4s0f0_1":
 
-#         for j in range(8):
-#             flow = i.path.flows[j]
-#             if flow:
-#                 print("%s: path.flows[%d]: %lx" % (name, j, flow.value_()))
-#                 attr = flow.esw_attr[0]
-#                 fc = flow.dummy_counter
-#                 p = fc.lastpackets
-#                 b = fc.lastbytes
-#                 print("mlx5_fc: %lx, packets: %d, bytes: %d" % (fc, p, b))
-#                 print("action: %4x, chain: %d" % (attr.action, attr.chain))
-#                 print('')
+        for j in range(8):
+            flow = i.path.flows[j]
+            if flow:
+                print("%s: path.flows[%d]: %lx" % (name, j, flow.value_()))
+                continue
+                attr = flow.esw_attr[0]
+                fc = flow.dummy_counter
+                p = fc.lastpackets
+                b = fc.lastbytes
+                print("mlx5_fc: %lx, packets: %d, bytes: %d" % (fc, p, b))
+                print("action: %4x, chain: %d" % (attr.action, attr.chain))
+                print('')
 
         for j in range(8):
             flow = i.path.flows[j]

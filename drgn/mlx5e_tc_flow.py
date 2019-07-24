@@ -19,7 +19,7 @@ else:
 
 for i, flow in enumerate(lib.hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
-    print("%-10s mlx5e_tc_flow %lx" % (name, flow.value_()))
+    print("%-10s mlx5e_tc_flow %lx, cookie: %lx" % (name, flow.value_(), flow.cookie.value_()))
 
 #     continue
 #     print(flow.miniflow_list)
