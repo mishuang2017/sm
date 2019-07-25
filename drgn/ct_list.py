@@ -80,8 +80,8 @@ for i in miniflow_list:
                     cls_fl_filter = Object(prog, 'struct cls_fl_filter', address=addr)
                     lib.print_cls_fl_filter(cls_fl_filter)
 
-#         n = i.nr_ct_tuples
-#         print("\nnr_ct_tuples: %x" % n)
-#         for k in range(n):
-#             lib.print_mlx5e_ct_tuple(k, i.ct_tuples[k])
-#         print("+++++++++++++++++++++ end ++++++++++++++++++++\n")
+        n = i.nr_ct_tuples
+        print("\nnr_ct_tuples: %x" % n)
+        for k in range(n):
+            lib.print_mlx5e_ct_tuple(k, i.ct_tuples[k])
+        print("+++++++++++++++++++++ end ++++++++++++++++++++\n")

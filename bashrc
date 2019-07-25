@@ -768,6 +768,7 @@ alias r9='restart-ovs; sudo ~chrism/bin/test_router9-orig.sh; enable-ovs-debug'
 
 alias r92='restart-ovs; sudo ~chrism/bin/test_router9-test2.sh; enable-ovs-debug'
 alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'
+alias rx2='restart-ovs; sudo ~chrism/bin/test_router-vxlan2.sh; enable-ovs-debug'
 alias r9t='restart-ovs; sudo ~chrism/bin/test_router9-test.sh; enable-ovs-debug'
 
 alias r8='restart-ovs; sudo ~chrism/bin/test_router8.sh; enable-ovs-debug'	# ct + snat with br-int and br-ex and pf is not in br-ex, using iptable with vxlan
@@ -4263,6 +4264,31 @@ set -x
 set +x
 }
 
+function brx-ct-mangle
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan1
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+
+	set-mangle
+set +x
+}
+
 function brx-ct
 {
 set -x
@@ -4283,6 +4309,34 @@ set -x
 	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+
+	clear-mangle
+set +x
+}
+
+function brx-ct-tos
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan \
+		options:remote_ip=$link_remote_ip  options:key=$vni options:dst_port=$vxlan_port options:tos=inherit
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+
+	clear-mangle
 set +x
 }
 
@@ -6887,6 +6941,23 @@ function book-noga
 #	systemctl disable NetworkManager
 #	/etc/init.d/network restart
 # fi
+
+function set-mangle
+{
+set -x
+	iptables -F -t mangle
+	iptables -t mangle -A OUTPUT -j DSCP --set-dscp 0x08
+	iptables -L -t mangle
+set +x
+}
+
+function clear-mangle
+{
+set -x
+	iptables -F -t mangle
+	iptables -L -t mangle
+set +x
+}
 
 function clear-nat
 {

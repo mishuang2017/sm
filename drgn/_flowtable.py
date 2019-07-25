@@ -14,7 +14,7 @@ import lib
 # table = prog.variable('_flowtable', "/images/chrism/linux/drivers/net/ethernet/mellanox/mlx5/core/miniflow_aging.c")
 # table = prog.variable('_flowtable')
 # table = prog.variable('first_device')
-table_addr = 0xffff9ed9f9262000
+table_addr = 0xffff92a5d1c97300
 table = Object(prog, 'struct flow_offload_table', address=table_addr)
 # print(table)
 
