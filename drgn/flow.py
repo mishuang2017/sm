@@ -74,6 +74,10 @@ def print_match(fte):
     if ip_protocol:
         print(" ip: %-2d" % ip_protocol, end='')
 
+    tos = (val[4].value_() & 0xff00) >> 8
+    if tos:
+        print(" tos: %-2x(dscp: %x)" % (tos, tos >> 2), end='')
+
     tcp_flags = (val[4].value_() & 0xff000000) >> 24
     if tcp_flags:
         print(" tflags: %2x" % tcp_flags, end='')

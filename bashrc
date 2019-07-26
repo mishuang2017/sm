@@ -4314,7 +4314,7 @@ set -x
 set +x
 }
 
-function brx-ct-tos
+function brx-ct-tos-inherit
 {
 set -x
 	del-br
@@ -4325,6 +4325,32 @@ set -x
 	done
 	ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan \
 		options:remote_ip=$link_remote_ip  options:key=$vni options:dst_port=$vxlan_port options:tos=inherit
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+
+	clear-mangle
+set +x
+}
+
+function brx-ct-tos-set
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan \
+		options:remote_ip=$link_remote_ip  options:key=$vni options:dst_port=$vxlan_port options:tos=0x20
 
 	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
 
