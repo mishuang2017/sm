@@ -4366,6 +4366,8 @@ set -x
 set +x
 }
 
+alias bt='del-br; r; brx-ct'
+
 function counter-tc-ct
 {
 set -x
