@@ -86,8 +86,6 @@ def print_match(fte):
     if ip_version:
         print(" ipv: %-2x" % ip_version, end='')
 
-#     print("\n  ", end='')
-
     tcp_sport = socket.ntohs(val[5].value_() & 0xffff)
     if tcp_sport:
         print(" sport: %5d" % tcp_sport, end='')
@@ -139,6 +137,46 @@ def print_match(fte):
 
         ethertype = socket.ntohl(val[33].value_() & 0xffff0000)
         print(" et: %x" % ethertype, end='')
+
+        ip_protocol = val[36].value_() & 0xff
+        if ip_protocol:
+            print(" ip: %-2d" % ip_protocol, end='')
+
+        tos = (val[4].value_() & 0xff00) >> 8
+        if tos:
+            print(" tos: %-2x(dscp: %x)" % (tos, tos >> 2), end='')
+
+        tcp_flags = (val[36].value_() & 0xff000000) >> 24
+        if tcp_flags:
+            print(" tflags: %2x" % tcp_flags, end='')
+
+        ip_version = (val[36].value_() & 0xff0000) >> 17
+        if ip_version:
+            print(" ipv: %-2x" % ip_version, end='')
+
+        tcp_sport = socket.ntohs(val[37].value_() & 0xffff)
+        if tcp_sport:
+            print(" sport: %5d" % tcp_sport, end='')
+
+        tcp_dport = socket.ntohs(val[37].value_() >> 16 & 0xffff)
+        if tcp_dport:
+            print(" dport: %6d" % tcp_dport, end='')
+
+        udp_sport = socket.ntohs(val[39].value_() & 0xffff)
+        if udp_sport:
+            print(" sport: %6d" % udp_sport, end='')
+
+        udp_dport = socket.ntohs(val[39].value_() >> 16 & 0xffff)
+        if udp_dport:
+            print(" dport: %6d" % udp_dport, end='')
+
+        src_ip = socket.ntohl(val[43].value_())
+        if src_ip:
+            print(" src_ip: %12s" % lib.ipv4(src_ip), end='')
+
+        dst_ip = socket.ntohl(val[47].value_())
+        if src_ip:
+            print(" dst_ip: %12s" % lib.ipv4(dst_ip), end='')
 
     print(" action %4x: " % fte.action.action.value_())
 
