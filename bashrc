@@ -8796,6 +8796,11 @@ alias udpc="UDPClient.py --serverAddr 1.1.1.1 --port=4000 --size=100 --packets=1
 
 alias vig='sudo vim /boot/grub/grub.cfg'
 
+[[ "$(hostname -s)" == "xiaomi" ]] && host_num=200
+if (( host_num == 200 )); then
+	link=wlp2s0
+fi
+
 function root-login
 {
 	local file=/etc/ssh/sshd_config
