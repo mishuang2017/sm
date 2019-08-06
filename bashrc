@@ -8760,6 +8760,8 @@ function kmsg() {
 	fi
 }
 
+drgn_dir=/labhome/chrism/sm/drgn
+
 function _flowtable
 {
 	i=0
@@ -8767,7 +8769,7 @@ function _flowtable
 	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
-		sudo /labhome/chrism/sm/drgn/_flowtable.py
+		sudo $drgn_dir/_flowtable.py
 		i=$((i+1))
 		if (( n == i )); then
 			break;
@@ -8783,7 +8785,7 @@ function num_rules
 	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
-		sudo /labhome/chrism/sm/drgn/num_rules.py
+		sudo $drgn_dir/num_rules.py
 		i=$((i+1))
 		if (( n == i )); then
 			break;
@@ -8799,7 +8801,7 @@ function flow
 	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
-		sudo /labhome/chrism/sm/drgn/flow.py
+		sudo $drgn_dir/flow.py
 		i=$((i+1))
 		if (( n == i )); then
 			break;
@@ -8815,7 +8817,7 @@ function ct_list
 	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
-		sudo /labhome/chrism/sm/drgn/ct_list.py
+		sudo $drgn_dir/ct_list.py
 		i=$((i+1))
 		if (( n == i )); then
 			break;
@@ -8831,7 +8833,7 @@ function mlx5e_tc_flow
 	[[ $# == 1 ]] && n=$1
 	while :; do
 		echo "======== $i ======="
-		sudo /labhome/chrism/sm/drgn/mlx5e_tc_flow.py
+		sudo $drgn_dir/mlx5e_tc_flow.py
 		i=$((i+1))
 		if (( n == i )); then
 			break;
@@ -8842,7 +8844,7 @@ function mlx5e_tc_flow
 
 function dr1
 {
-	cd /labhome/chrism/sm/drgn
+	cd $drgn_dir
 set -x
 	sudo ./_flowtable.py
 	sudo ./mlx5e_tc_flow.py
