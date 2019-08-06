@@ -8780,18 +8780,7 @@ function _flowtable
 
 function num_rules
 {
-	i=0
-	n=0
-	[[ $# == 1 ]] && n=$1
-	while :; do
-		echo "======== $i ======="
-		sudo $drgn_dir/num_rules.py
-		i=$((i+1))
-		if (( n == i )); then
-			break;
-		fi
-		sleep 2
-	done
+	sudo $drgn_dir/num_rules.py
 }
 
 function flow
