@@ -548,6 +548,7 @@ alias vs='sudo ovs-vsctl'
 alias of='sudo ovs-ofctl'
 alias dp='sudo ovs-dpctl'
 alias dpd='sudo ~chrism/bin/ovs-df.sh'
+alias dpd0='sudo ovs-dpctl dump-flows --name'
 alias dpd1='sudo ovs-dpctl dump-flows --name | grep "in_port(enp4s0f0)"'
 alias dpd2='sudo ovs-dpctl dump-flows --name | grep "in_port(enp4s0f0_1)"'
 alias app='sudo ovs-appctl'
@@ -768,6 +769,8 @@ alias r9='restart-ovs; sudo ~chrism/bin/test_router9-orig.sh; enable-ovs-debug'
 
 alias r92='restart-ovs; sudo ~chrism/bin/test_router9-test2.sh; enable-ovs-debug'
 alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'
+alias baidu='restart-ovs; sudo ~chrism/bin/test_router-baidu.sh; enable-ovs-debug'	# vm2 underlay
+alias dnat='restart-ovs; sudo ~chrism/bin/test_router-dnat.sh; enable-ovs-debug'	# dnat
 alias rx2='restart-ovs; sudo ~chrism/bin/test_router-vxlan2.sh; enable-ovs-debug'
 alias r9t='restart-ovs; sudo ~chrism/bin/test_router9-test.sh; enable-ovs-debug'
 
@@ -775,6 +778,7 @@ alias r8='restart-ovs; sudo ~chrism/bin/test_router8.sh; enable-ovs-debug'	# ct 
 alias r7='restart-ovs; bru; sudo ~chrism/bin/test_router7.sh; enable-ovs-debug'	# ct + snat with more recircs
 alias r6='sudo ~chrism/bin/test_router6.sh'	# ct + snat with Yossi's script for VF
 alias r5='sudo ~chrism/bin/test_router5.sh'	# ct + snat with Yossi's script for PF
+alias dnat2='sudo ~chrism/bin/dnat.sh'		# dnat only
 alias r52='sudo ~chrism/bin/test_router5-2.sh'	# ct + snat with Yossi's script for PF, enhanced
 alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat, can't offload
 alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat, can't offload
@@ -4159,8 +4163,8 @@ set -x
 	del-br
 	vs add-br $br
 	vs add-port $br $link -- set Interface $link ofport_request=5
-# 	for (( i = 0; i < numvfs; i++)); do
-	for (( i = 1; i < 2; i++)); do
+	#for (( i = 1; i < 2; i++)); do
+	for (( i = 0; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
@@ -4314,6 +4318,31 @@ set -x
 set +x
 }
 
+function brex-ct
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan1
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+
+	clear-mangle
+set +x
+}
+
 function brx-ct-tos-inherit
 {
 set -x
@@ -4405,6 +4434,18 @@ set -x
 		vs add-port $br2 $rep $tag
 	done
 #	  vs add-port $br2 $link2
+set +x
+}
+
+function create-brx2
+{
+set -x
+	veth
+	local rep
+	vs del-br $br2
+	vs add-br $br2
+	vxlan1-2
+	vs add-port $br2 veth0
 set +x
 }
 
@@ -4626,24 +4667,31 @@ alias n1c500='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_l
 alias n1c50='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -l 50'
 alias n1c8='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 192.168.0.200 -t 600'
 alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600; echo $?'
-alias n1i='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
-alias n1i8='time ip netns exec n11 iperf3 -c 192.168.0.200 -t 600 -M 1200'
-alias n1u='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200 -u'
+alias n1i='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600'
+alias n1i8='time ip netns exec n11 iperf3 -c 192.168.0.200 -t 600'
+alias n1u='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -u'
 alias n1iperf3='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
 alias n1c2='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 1.1.1.2 -t 6000'
 alias n1u='n1 /labhome/chrism/prg/c/udp-client/udp-client-2 -c 8.9.10.11 -t 10000'
 
 function n1-iperf
 {
+set -x
 	i=0
 	while :;do
 		echo "============== $i ============="
-		n1 iperf -c 8.9.10.11 -P 8 -i 1
+		n1 iperf -c 1.1.1.1 -P 8 -i 1
+		if (( i % 2 == 1 )); then
+			sleep 40
+		else
+			sleep 5
+		fi
 		if (( i == 100 )); then
 			break;
 		fi
 		i=$((i+1))
 	done
+set +x
 }
 
 alias exe='ip netns exec'
@@ -4733,6 +4781,7 @@ function start-switchdev
 	hw_tc_all $port
 
 	time set_netns_all $port
+	ethtool -L $link combined 16
 
 #	iptables -F
 #	iptables -Z
@@ -4840,6 +4889,8 @@ function stop-vm
 #	echo 0 > /sys/class/net/$link/device/sriov_numvfs
 }
 
+# BOOT_IMAGE=/vmlinuz-4.19.36+ root=/dev/mapper/fedora-root ro biosdevname=0 pci=realloc crashkernel=256M intel_iommu=on iommu=pt isolcpus=2,4,6,8,10,12,14 intel_idle.max_cstate=0 nohz_full=2,4,6,8,10,12,14 rcu_nocbs=2,4,6,8,10,12,14 intel_pstate=disable audit=0 nosoftlockup rcu_nocb_poll nopti
+
 function grub
 {
 set -x
@@ -4858,11 +4909,11 @@ set -x
 	# net.ifnames=0 to set name to eth0
 
 	if (( host_num == 14)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
 	fi
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
 	if (( host_num == 13)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
 # 		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
 	fi
 
@@ -5445,11 +5496,25 @@ function skip_sw
 
 function none1
 {
+	vsconfig2
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=30000
+	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 
 #	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=5000
 #	ovs-vsctl set Open_vSwitch . other_config:min_revalidate_pps=1
+	restart-ovs
+	vsconfig
+}
+
+alias idle0='ovs-vsctl set Open_vSwitch . other_config:max-idle=0'
+alias idle10='ovs-vsctl set Open_vSwitch . other_config:max-idle=10000'
+
+function none0
+{
+	vsconfig2
+	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
+	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
+	ovs-vsctl set Open_vSwitch . other_config:max-idle=0
 	restart-ovs
 	vsconfig
 }
@@ -5479,6 +5544,7 @@ function ovs-thread
 
 function none
 {
+	vsconfig2
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
 	restart-ovs
@@ -5551,10 +5617,10 @@ function burn5
 set -x
 	pci=0000:04:00.0
 	version=fw-4119-rel-16_25_1000
-	version=fw-4119-rel-16_99_6804
 	version=fw-4119-rel-16_25_0328
 	version=last_revision
 	version=fw-4119-rel-16_26_0160
+	version=fw-4119-rel-16_99_6110
 	version=fw-4119-rel-16_25_6000
 
 	mkdir -p /mswg/
@@ -7682,14 +7748,15 @@ set -x
 	ip link del veth0
 	ip link add veth0 type veth peer name veth1
 	ip link set dev veth0 up
-	ip addr add 1.1.1.33/24 brd + dev veth0
+	ip addr add 1.1.1.100/24 brd + dev veth0
 	ip netns del $n 2>/dev/null
 	ip netns add $n
 	ip link set dev veth1 netns $n
-	ip netns exec $n ip addr add 1.1.1.34/24 brd + dev veth1
+	ip netns exec $n ip addr add 1.1.1.$host_num/24 brd + dev veth1
 	ip netns exec $n ip link set dev veth1 up
 set +x
 }
+
 function veth1
 {
 	ovs-vsctl add-port $br veth0
@@ -8701,11 +8768,11 @@ function _flowtable
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/_flowtable.py
-		sleep 2
 		i=$((i+1))
 		if (( n == i )); then
 			break;
 		fi
+		sleep 2
 	done
 }
 
@@ -8717,11 +8784,11 @@ function num_rules
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/num_rules.py
-		sleep 2
 		i=$((i+1))
 		if (( n == i )); then
 			break;
 		fi
+		sleep 2
 	done
 }
 
@@ -8733,11 +8800,11 @@ function flow
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/flow.py
-		sleep 2
 		i=$((i+1))
 		if (( n == i )); then
 			break;
 		fi
+		sleep 2
 	done
 }
 
@@ -8749,11 +8816,11 @@ function ct_list
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/ct_list.py
-		sleep 2
 		i=$((i+1))
 		if (( n == i )); then
 			break;
 		fi
+		sleep 2
 	done
 }
 
@@ -8765,11 +8832,11 @@ function mlx5e_tc_flow
 	while :; do
 		echo "======== $i ======="
 		sudo /labhome/chrism/sm/drgn/mlx5e_tc_flow.py
-		sleep 2
 		i=$((i+1))
 		if (( n == i )); then
 			break;
 		fi
+		sleep 2
 	done
 }
 
@@ -8805,6 +8872,32 @@ function disable-avahi-daemon.service
 
 alias udps="UDPServer.py --ipAddress=1.1.1.1 --port=4000 --clients 1.1.3.1 --successRate=100.0 --max_delay=10 --size=100 --packets=100"
 alias udpc="UDPClient.py --serverAddr 1.1.1.1 --port=4000 --size=100 --packets=100 --sleep=0.1"
+
+function combined
+{
+set -x
+	ethtool -l $link
+	ethtool -L $link combined 16
+	ethtool -l $link
+set +x
+}
+
+function perf-rx
+{
+	mlnx_perf -t 3 -i $link | grep -iE "rx_|---"
+}
+
+function perf-tx
+{
+	mlnx_perf -t 3 -i $link | grep -iE "tx_|---"
+}
+
+function taskset1
+{
+	for i in {0..7}; do
+		taskset -c $i iperf -c 1.1.1.122 -i 1 -t 1000 &
+	done
+}
 
 ######## ubuntu #######
 

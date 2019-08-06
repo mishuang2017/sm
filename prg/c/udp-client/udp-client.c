@@ -66,12 +66,12 @@ int main(int argc, char *argv[])
 		if (verbose)
 			printf("Hello message sent %d.\n", i + 1); 
 			
-/* 		n = recvfrom(sockfd, (char *)buffer, MAXLINE,  */
-/* 					MSG_WAITALL, (struct sockaddr *) &servaddr,  */
-/* 					&len);  */
-/* 		buffer[n] = '\0';  */
-/* 		if (verbose) */
-/* 			printf("Server : %s\n", buffer);  */
+		n = recvfrom(sockfd, (char *)buffer, MAXLINE, 
+					MSG_WAITALL, (struct sockaddr *) &servaddr, 
+					&len); 
+		buffer[n] = '\0'; 
+		if (verbose)
+			printf("Server : %s\n", buffer); 
 		sleep(interval);
 	}
 

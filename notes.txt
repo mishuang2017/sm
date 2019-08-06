@@ -469,6 +469,8 @@ rd
 
 ===tmux===
 
+ctl + H/L to resize the page
+
 https://github.com/drmad/tmux-git
 
 tmux show-buffer
@@ -1241,8 +1243,14 @@ hairpin
 
 ===python===
 
+python2 -m pip install jsonschema
+
 sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 sudo yum -y install python36u
+
+===win===
+
+dxdiag
 
 ===serial===
 
@@ -1589,7 +1597,7 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/jd-bugfix-cherry-pick
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/use-after-free-issue
 
 ===git===
 
