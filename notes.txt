@@ -1379,6 +1379,18 @@ usbserinfo:1.0 driver:2.0
 
 ===dpdk===
 
+rdma-core-devel-43mlnx1-1.44100.x86_64
+
+[root@sw-mtx-003 dpdk]# git remote -v
+origin  https://github.com/DPDK/dpdk.git (fetch)
+origin  https://github.com/DPDK/dpdk.git (push)
+[root@sw-mtx-003 dpdk]# git branch
+  master
+  v18.02
+  v18.02-rc4
+* v18.08-rc3
+
+
 echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 
 show port stats all
@@ -1598,6 +1610,7 @@ git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
 git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/use-after-free-issue
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/dealloc-encap-id-issue
 
 ===git===
 
@@ -2828,6 +2841,11 @@ mlx5e_napi_poll
 	mlx5e_cq_arm
 
 ===tcpdump===
+
+tcpdump -i $link src 192.168.1.14 and port 4000 and greater 100 -v -nn
+
+FIN
+tcpdump -i $rep2 "tcp[tcpflags] & (tcp-fin) != 0" -nn
 
 tcpdump -i eth1 ether src 6c:41:6a:ac:11:42 -c 10
 
@@ -5086,6 +5104,33 @@ mlx5e_rep_neigh_entry_lookup
 mlx5e_rep_neigh_update		# neigh_update_work
 mlx5e_rep_update_flows
 neigh_timer_handler
+
+9.866882 0       0       swapper/15      mlx5e_rep_netevent_event
+        mlx5e_rep_netevent_event+0x1 [kernel]
+        atomic_notifier_call_chain+0x1a [kernel]
+        call_netevent_notifiers+0x1b [kernel]
+        neigh_update+0x476 [kernel]
+        arp_process+0x38b [kernel]
+        arp_rcv+0x12b [kernel]
+        __netif_receive_skb_one_core+0x57 [kernel]
+        __netif_receive_skb+0x18 [kernel]
+        netif_receive_skb_internal+0x45 [kernel]
+        napi_gro_receive+0xc5 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq+0xd3 [kernel]
+        mlx5e_poll_rx_cq+0xe2 [kernel]
+        mlx5e_napi_poll+0xfc [kernel]
+        net_rx_action+0x159 [kernel]
+        __do_softirq+0xe4 [kernel]
+        irq_exit+0xf8 [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xa8 [kernel]
+        cpuidle_enter+0x17 [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1f8 [kernel]
+        cpu_startup_entry+0x73 [kernel]
+        start_secondary+0x1ab [kernel]
+        secondary_startup_64+0xa4 [kernel]
 
 mlx5e_route_lookup_ipv4
 
@@ -10336,7 +10381,38 @@ To reproduce the bug, run:
     tc filter add dev dtest chain 1  parent ffff: flower
     ip link del dtest
 
+===skb===
+
+skb_mac_header
+ip_hdr
+tcp_hdr
+
 ===ct===
+
+44.13436 23258   23258   sshd            tcp_in_window
+        tcp_in_window+0x1 [kernel]
+        nf_conntrack_in+0x1c2 [kernel]
+        ipv4_conntrack_local+0x48 [kernel]
+        nf_hook_slow+0x48 [kernel]
+        __ip_local_out+0xf3 [kernel]
+        ip_local_out+0x1c [kernel]
+        __ip_queue_xmit+0x160 [kernel]
+        ip_queue_xmit+0x10 [kernel]
+        __tcp_transmit_skb+0x5a8 [kernel]
+        tcp_write_xmit+0x248 [kernel]
+        __tcp_push_pending_frames+0x35 [kernel]
+        tcp_push+0xdb [kernel]
+        tcp_sendmsg_locked+0x413 [kernel]
+        tcp_sendmsg+0x2c [kernel]
+        inet_sendmsg+0x2e [kernel]
+        sock_sendmsg+0x3e [kernel]
+        sock_write_iter+0x8c [kernel]
+        __vfs_write+0x10c [kernel]
+        vfs_write+0xb1 [kernel]
+        ksys_write+0x55 [kernel]
+        __x64_sys_write+0x1a [kernel]
+        do_syscall_64+0x60 [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
 
 ct_list
 
@@ -10865,6 +10941,19 @@ change dest ip address to 192.168.0.2 and change tcp sport to 0x870a
 ffff91f7e68a9a50:  010a090800001510 b2a0000010000810   ................
 ffff91f7e68a9a60:  14d0250200000410 0201000010000510   .....%..........
 ffff91f7e68a9a70:  ad078a2400000110 9977000010000210   ....$.........w.
+
+===iperf3===
+
+get_parameters
+
+@@ -1783,6 +1783,7 @@ get_parameters(struct iperf_test *test)
+            test->server_affinity = j_p->valueint;
+        if ((j_p = cJSON_GetObjectItem(j, "time")) != NULL)
+            test->duration = j_p->valueint;
++            printf("%s: %d\n", __func__, test->duration);
+        if ((j_p = cJSON_GetObjectItem(j, "num")) != NULL)
+            test->settings->bytes = j_p->valueint;
+        if ((j_p = cJSON_GetObjectItem(j, "blockcount")) != NULL)
 
 ===uplink rep===
 

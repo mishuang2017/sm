@@ -2,6 +2,7 @@
 
 from drgn.helpers.linux import *
 from drgn import container_of
+from drgn import Object
 
 import sys
 import os
@@ -23,6 +24,8 @@ for i in range(256):
         obj = container_of(node, "struct mlx5e_encap_entry", "encap_hlist")
 #         print(obj)
         print("mlx5e_encap_entry %lx" % obj.value_())
+        mlx5e_encap_entry = Object(prog, 'struct mlx5e_encap_entry', address=obj.value_())
+        print("encap_id %lx" % mlx5e_encap_entry.encap_id.value_())
         node = node.next
 
 mlx5e_rep_priv = lib.get_mlx5e_rep_priv()

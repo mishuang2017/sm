@@ -23,6 +23,8 @@ if (( host_num == 13 )); then
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
 	link_remote_ipv6=1::$rhost_num
+	link_mac=24:8a:07:88:27:9a
+	link_mac2=24:8a:07:88:27:9b
 	remote_mac=24:8a:07:88:27:ca
 
 	vf1=enp4s0f2
@@ -38,6 +40,8 @@ elif (( host_num == 14 )); then
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
 	link_remote_ipv6=1::$rhost_num
+	link_mac=24:8a:07:88:27:ca
+	link_mac2=24:8a:07:88:27:cb
 	remote_mac=24:8a:07:88:27:9a
 
 	vf1=enp4s0f2
@@ -696,6 +700,8 @@ alias cd-swg='cd /swgwork/chrism'
 
 alias nc-server='nc -l -p 80 < /dev/zero'
 alias nc-client='nc localhost 80 > /dev/null'
+alias nc-client='nc 1.1.1.1 80 > /dev/null'
+alias nc-client="nc 192.168.1.$rhost_num 80 > /dev/null"
 
 # password is windows password
 alias mount-setup='mkdir -p /mnt/setup; mount  -o username=chrism //10.200.0.25/Setup /mnt/setup'
@@ -705,11 +711,13 @@ alias qlog='less /var/log/libvirt/qemu/vm1.log'
 # alias vd='virsh dumpxml vm1'
 alias simx='/opt/simx/bin/manage_vm_simx_support.py -n vm2'
 
-alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=127"
-alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=16"
+alias vfs100="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=100"
+alias vfs63="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=63"
+alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=4"
 alias vfq="mlxconfig -d $pci q"
 alias vfq2="mlxconfig -d $pci2 q"
-alias vfsm="mlxconfig -d $linik_bdf set NUM_VF_MSIX=6"
+alias vfsm="mlxconfig -d $linik_bdf set NUM_VF_MSIX=16"
+alias vfsm="mlxconfig -d $pci set NUM_VF_MSIX=30"
 
 alias tune1="ethtool -C $link adaptive-rx off rx-usecs 64 rx-frames 128 tx-usecs 64 tx-frames 32"
 alias tune2="ethtool -C $link adaptive-rx on"
@@ -771,6 +779,7 @@ alias r92='restart-ovs; sudo ~chrism/bin/test_router9-test2.sh; enable-ovs-debug
 alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'
 alias baidu='restart-ovs; sudo ~chrism/bin/test_router-baidu.sh; enable-ovs-debug'	# vm2 underlay
 alias dnat='restart-ovs; sudo ~chrism/bin/test_router-dnat.sh; enable-ovs-debug'	# dnat
+alias dnat-ct='restart-ovs; sudo ~chrism/bin/test_router-dnat-ct.sh; enable-ovs-debug'	# dnat
 alias rx2='restart-ovs; sudo ~chrism/bin/test_router-vxlan2.sh; enable-ovs-debug'
 alias r9t='restart-ovs; sudo ~chrism/bin/test_router9-test.sh; enable-ovs-debug'
 
@@ -4268,6 +4277,58 @@ set -x
 set +x
 }
 
+function brx-ct
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan1
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
+
+	clear-mangle
+set +x
+}
+
+function brx-fin
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan1
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,priority=20,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,priority=10,tcp,ct_state=+trk+est actions=normal" 
+	ovs-ofctl add-flow $br "table=1,priority=30,tcp,tcp_flags(1/1), actions=normal" 
+
+	clear-mangle
+set +x
+}
+
 function brx-ct-mangle
 {
 set -x
@@ -4290,31 +4351,6 @@ set -x
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
 
 	set-mangle
-set +x
-}
-
-function brx-ct
-{
-set -x
-	del-br
-	vs add-br $br
-	for (( i = 0; i < numvfs; i++)); do
-		local rep=$(get_rep $i)
-		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
-	done
-	vxlan1
-
-	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
-
-	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
-	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
-	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
-
-	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
-	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
-	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
-
-	clear-mangle
 set +x
 }
 
@@ -6092,7 +6128,17 @@ function pktgen2
 {
 	sm1
 	cd ./samples/pktgen
-	./pktgen_sample02_multiqueue2.sh -i $link -s 1 -m 02:25:d0:e2:14:01 -d 1.1.1.2 -t 1 -n 0
+	export UDP_SRC_MIN=10000
+	export UDP_SRC_MAX=15000
+
+	export UDP_DST_MIN=10000
+	export UDP_DST_MAX=10050
+	if [[ "$(hostname -s)" == "dev-r630-04" ]]; then
+		./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.1 -t 4 -n 0
+	fi
+	if [[ "$(hostname -s)" == "dev-r630-03" ]]; then
+		./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:14:01:02 -d 1.1.3.1 -t 4 -n 0
+	fi
 }
 
 function used
@@ -6900,9 +6946,25 @@ set +x
 function q
 {
 set -x
+	tc qdisc show dev $link
 	tc qdisc show dev $rep2
 	tc qdisc show dev $vx_rep
 set +x
+}
+
+function tc-qos
+{
+set -x
+	tc qdisc del dev $link root handle 1
+	tc qdisc add dev $link root handle 1: cbq avpkt 1000 bandwidth 1Gbit
+	tc class add dev $link parent 1: classid 1:1 cbq rate 10000Mbit allot 1500 bounded
+	tc filter add dev $link parent 1: protocol ip   u32 match ip  protocol 6 0xff match ip dport 5001 0xffff flowid 1:1
+set +x
+}
+
+function tc-unqos
+{
+	tc qdisc del dev $link root handle 1
 }
 
 # ping -I ens6 11.196.22.1 -c 100 -s 100 -i 0.05
@@ -6994,6 +7056,48 @@ set -x
 	mount -t hugetlbfs -o pagesize=1G none /mnt/huge_1G/
 	echo 16 > /sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages
 set +x
+}
+
+function vm1-dpdk
+{
+set -x
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	cd /root/dpdk-stable-17.11.4/
+	./x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap
+set +x
+}
+
+function vm3-dpdk
+{
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	cd /root/dpdk-stable-17.11.4/
+	./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4	-m=4096  -w 0000:00:09.0 -- -i --rxq=4 --txq=4	--nb-cores=4 -i
+}
+
+function 13-dpdk
+{
+set -x
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+	cd /root/dpdk
+	./x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:04:00.3,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap
+set +x
+}
+
+function 14-dpdk
+{
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+	cd /root/dpdk
+	 ./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4    -m=4096  -w 0000:04:00.3 -- -i --rxq=4 --txq=4  --nb-cores=4 -i
+}
+
+function clone-dpdk
+{
+	git clone https://github.com/DPDK/dpdk.git
+	cd dpdk
+	git checkout v18.08-rc3
+	git checkout -b v18.08-rc3+
 }
 
 # ssh chrism@ dev-chrism-vm4
@@ -7453,15 +7557,20 @@ alias sendm='/labhome/chrism/prg/python/scapy/m.py'
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j 32 DESTDIR=install'
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j 32 DESTDIR=/usr'
 
+# ./mlnxofedinstall  --upstream-libs --dpdk
+
+# edit config/common_base  to enable mlx5
+# CONFIG_RTE_LIBRTE_MLX5_PMD=y 
+
 function make-dpdk
 {
-	cd $DPDK_DIR
+# 	cd $DPDK_DIR
 #	make config T=x86_64-native-linuxapp-gcc
 #	make -j32 T=x86_64-native-linuxapp-gcc
 
 	export RTE_SDK=`pwd`
 	export RTE_TARGET=x86_64-native-linuxapp-gcc
-	make install T=x86_64-native-linuxapp-gcc -j8
+	make install T=x86_64-native-linuxapp-gcc -j16
 }
 
 # alias pmd1="$DPDK_DIR/build/app/testpmd -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
@@ -7471,7 +7580,8 @@ function make-dpdk
 # alias pmd200k="$DPDK_DIR/build/app/testpmd200k -l 0-8 -n 4 --socket-mem=1024,1024 -w 04:00.0 -w 04:00.2 -- -i"
 
 alias viflowgen="cd $DPDK_DIR; vim app/test-pmd/flowgen.c"
-alias vimacswap="cd $DPDK_DIR; vim app/test-pmd/macswap.c"
+alias viflowgen2="vim app/test-pmd/flowgen.c"
+alias vimacswap="vim app/test-pmd/macswap.c"
 alias vicommon_base="cd $DPDK_DIR; vim config/common_base"
 
 function ln-ofed
@@ -8145,10 +8255,23 @@ set -x
 set +x
 }
 
+# nf_ct_tcp_be_liberal
 function jd-proc
 {
 	echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+	cat /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
 	echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+}
+
+function no-liberal
+{
+	echo 0 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+	cat /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+}
+
+function cat-liberal
+{
+	cat /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
 }
 
 function jd-hugepage
@@ -8241,6 +8364,14 @@ set +x
 
 alias f1="sudo flint -d $pci q"
 alias cat1="cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct"
+
+function counters_tc_ct
+{
+	while :; do
+		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
+		sleep 1
+	done
+}
 
 alias dis="ethtool -S $link | grep dis"
 
@@ -8395,6 +8526,12 @@ function trace2
 {
 	[[ $# != 1 ]] && return
 	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg2"
+}
+
+function trace3
+{
+	[[ $# != 1 ]] && return
+	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg3"
 }
 
 BCC_DIR=/images/chrism/bcc
@@ -8783,6 +8920,11 @@ function num_rules
 	sudo $drgn_dir/num_rules.py
 }
 
+function encap
+{
+	sudo $drgn_dir/encap.py
+}
+
 function flow
 {
 	i=0
@@ -8888,6 +9030,57 @@ function taskset1
 	for i in {0..7}; do
 		taskset -c $i iperf -c 1.1.1.122 -i 1 -t 1000 &
 	done
+}
+
+function fin
+{
+	local l=$link
+	[[ $# == 1 ]] && l=$1
+	tcpdump -i $l "tcp[tcpflags] & (tcp-fin) != 0" -nn
+}
+
+alias fin2="fin $rep2"
+
+alias proc-iperf="cd /proc/$(pidof iperf)/fd"
+
+function ipna
+{
+set -x
+	if (( host_num == 13 )); then
+		ip n d 192.168.1.14 dev enp4s0f0
+		ip n a 192.168.1.14 lladdr 24:8a:07:88:27:ca dev $link
+	fi
+	if (( host_num == 14 )); then
+		ip n d 192.168.1.13 dev enp4s0f0
+		ip n a 192.168.1.13 lladdr 24:8a:07:88:27:9a dev $link
+	fi
+set +x
+}
+
+function ipnd
+{
+set -x
+	if (( host_num == 13 )); then
+		ip n d 192.168.1.14 dev enp4s0f0
+	fi
+	if (( host_num == 14 )); then
+		ip n d 192.168.1.13 dev enp4s0f0
+	fi
+set +x
+}
+
+function rx-tx-on
+{
+set -x
+	ethtool -K $link rx on tx on
+set +x
+}
+
+function rx-tx-off
+{
+set -x
+	ethtool -K $link rx off tx off
+set +x
 }
 
 ######## ubuntu #######
