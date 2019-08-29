@@ -13,9 +13,10 @@ numvfs=3
 [[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
+[[ "$(hostname -s)" == "r-vrt-24-1" ]] && host_num=24
 
 if (( host_num == 13 )); then
-	export DISPLAY=MTBC-CHRISM:0.0
+# 	export DISPLAY=MTBC-CHRISM:0.0
 
 	link=enp4s0f0
 	link2=enp4s0f1
@@ -32,7 +33,7 @@ if (( host_num == 13 )); then
 	vf3=enp4s0f4
 
 elif (( host_num == 14 )); then
-	export DISPLAY=MTBC-CHRISM:0.0
+# 	export DISPLAY=MTBC-CHRISM:0.0
 
 	link=enp4s0f0
 	link2=enp4s0f1
@@ -59,6 +60,10 @@ elif (( host_num == 3 )); then
 	rhost_num=2
 	link_remote_ip=192.168.1.$rhost_num
 	link=enp6s0f0
+
+elif (( host_num == 24 )); then
+	numvfs=3
+	link=ens2f0
 
 elif (( host_num == 15 )); then
 	link=ens9
@@ -303,6 +308,8 @@ alias rq='echo g > /proc/sysrq-trigger'
 alias sw='vsconfig-sw; restart-ovs'
 alias hw='vsconfig-hw; restart-ovs'
 
+# bluefield
+# mlxdump -d 81:00.0 fsdump --type=FT --no_zero
 alias fsdump5="mlxdump -d $pci fsdump --type FT --gvmi=0 --no_zero=1"
 alias fsdump52="mlxdump -d $pci2 fsdump --type FT --gvmi=1 --no_zero=1"
 
@@ -712,6 +719,7 @@ alias qlog='less /var/log/libvirt/qemu/vm1.log'
 alias simx='/opt/simx/bin/manage_vm_simx_support.py -n vm2'
 
 alias vfs100="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=100"
+alias vfs120="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=120"
 alias vfs63="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=63"
 alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=4"
 alias vfq="mlxconfig -d $pci q"
@@ -798,6 +806,8 @@ corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
 alias vi-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir; vi corrupt.c"
 alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
+alias corrupt2000="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt2000"
+alias corrupt2="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt2"
 
 [[ $UID == 0 ]] && echo 2 > /proc/sys/fs/suid_dumpable
 
@@ -4178,8 +4188,8 @@ set -x
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 
-	ifconfig $br 8.9.10.1/24 up
-	ifconfig $br:0 192.168.0.1/24 up
+# 	ifconfig $br 8.9.10.1/24 up
+# 	ifconfig $br:0 192.168.0.1/24 up
 set +x
 }
 
@@ -4945,11 +4955,11 @@ set -x
 	# net.ifnames=0 to set name to eth0
 
 	if (( host_num == 14)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
 	fi
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
 	if (( host_num == 13)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
 # 		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
 	fi
 
@@ -7063,7 +7073,7 @@ function vm1-dpdk
 set -x
 	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 	cd /root/dpdk-stable-17.11.4/
-	./x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap
+	./x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:00:09.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=3 -i set fwd macswap --forward-mode=macswap -i -a --rss-udp
 set +x
 }
 
@@ -7071,7 +7081,7 @@ function vm3-dpdk
 {
 	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 	cd /root/dpdk-stable-17.11.4/
-	./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4	-m=4096  -w 0000:00:09.0 -- -i --rxq=4 --txq=4	--nb-cores=4 -i
+	./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4	-m=4096  -w 0000:00:09.0 -- -i --rxq=4 --txq=4	--nb-cores=4 -i --forward-mode=flowgen -i -a --rss-udp
 }
 
 function 13-dpdk
@@ -7089,7 +7099,15 @@ function 14-dpdk
 	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 	echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
 	cd /root/dpdk
-	 ./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4    -m=4096  -w 0000:04:00.3 -- -i --rxq=4 --txq=4  --nb-cores=4 -i
+	 ./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4    -m=4096  -w 0000:04:00.3 -- -i --rxq=4 --txq=4  --nb-cores=4 -i --forward-mode=flowgen -i -a --rss-udp
+}
+
+function 14-dpdk-pf
+{
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+	cd /root/dpdk
+	 ./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4    -m=4096  -w 0000:04:00.0 -- -i --rxq=4 --txq=4  --nb-cores=4 -i --forward-mode=flowgen -i -a --rss-udp
 }
 
 function clone-dpdk
@@ -7867,6 +7885,34 @@ set -x
 set +x
 }
 
+function veth-vm1
+{
+set -x
+	local n=n11
+	ip link del veth0
+	ip link add veth0 type veth peer name veth1
+	ip link set dev veth0 up
+	brctl addif br0 veth0
+	ip link set dev veth1 netns $n
+	ip netns exec $n ip addr add 10.12.205.15/24 brd + dev veth1
+	ip netns exec $n ip route add default via 10.12.205.1 dev veth1
+	ip netns exec $n ip link set dev veth1 up
+	ip netns exec $n /usr/sbin/sshd -o PidFile=/run/sshd-oob.pid
+# 	ip netns exec $n hostname dev-chrism-vm1
+	ip netns exec $n sysctl -w kernel.sched_rt_runtime_us=-1
+set +x
+}
+
+function veth-vm1-2
+{
+	ip route add default via 10.12.205.1 dev veth1
+	/usr/sbin/sshd -o PidFile=/run/sshd-oob.pid
+	sysctl -w kernel.sched_rt_runtime_us=-1
+}
+
+alias n11-sshd='ip netns exec n11 /usr/sbin/sshd -o PidFile=/run/sshd-oob.pid'
+alias n11-rt='ip netns exec n11 sysctl -w kernel.sched_rt_runtime_us=-1'
+
 function veth1
 {
 	ovs-vsctl add-port $br veth0
@@ -8151,6 +8197,28 @@ function br-ct
 	ovs-ofctl add-flow $br in_port=$rep2,dl_type=0x0806,actions=output:$rep3
 	ovs-ofctl add-flow $br in_port=$rep3,dl_type=0x0806,actions=output:$rep2
 
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	ovs-ofctl dump-flows $br
+}
+
+function br-pf-ct
+{
+	del-br
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $link
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	proto=udp
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	proto=tcp
 	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
 	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
 	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
@@ -9082,6 +9150,25 @@ set -x
 	ethtool -K $link rx off tx off
 set +x
 }
+
+function msi
+{
+	a=$((1144-127))
+	a=$((1536-127))
+	b=$((a/240))
+	echo $b
+}
+
+alias cd-trex='cd /images/chrism/DPIX'
+alias vit1='vi AsapPerfTester/TestParams/AsapPerfTestParams.py'
+alias vit2='vi dpdk_conf/frame_size_-_64.dpdk.conf'
+function run-trex
+{
+	cd-trex
+	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/AsapPerfTestParams.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
+}
+
+# ip a | grep 10.12.205.15 && hostname dev-chrism-vm1
 
 ######## ubuntu #######
 
