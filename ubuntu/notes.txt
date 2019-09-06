@@ -59,3 +59,12 @@ nameserver 10.12.68.101
 # install ovs for debian
 apt-cache show openvswitch-switch
 apt-get install openvswitch-switch
+
+# fix lsb issue
+[root@dev-r630-03 Python-3.6.0]# lsb_release -a
+Traceback (most recent call last):
+  File "/usr/bin/lsb_release", line 25, in <module>
+    import lsb_release
+ModuleNotFoundError: No module named 'lsb_release'
+
+ln -s /usr/share/pyshared/lsb_release.py /usr/lib/python3.6/site-packages/lsb_release.py
