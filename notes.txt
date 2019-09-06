@@ -134,6 +134,8 @@ so offload will never happen for us but should work with tc sw
 
 ===udev===
 
+udevadm test /sys/class/net/eth0
+
 net_class_attrs
 
 17473   17473   ip              device_rename
@@ -1609,8 +1611,7 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/use-after-free-issue
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/dealloc-encap-id-issue
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/bugfixes
 
 ===git===
 
@@ -11043,6 +11044,10 @@ trace -s /lib64/libc.so.6,/bin/ping 'p:c:inet_pton' -U
 ping -c1 google.com
 
 trace 'tc:tc_filter_modify "%d", arg1'
+
+===wq===
+
+list -H workqueues -s workqueue_struct.name -l workqueue_struct.list
 
 ===ubuntu===
 

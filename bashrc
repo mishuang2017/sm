@@ -32,6 +32,11 @@ if (( host_num == 13 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
+	if [[ "$USER" == "root" ]]; then
+		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
+		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+	fi
+
 elif (( host_num == 14 )); then
 # 	export DISPLAY=MTBC-CHRISM:0.0
 
@@ -48,6 +53,11 @@ elif (( host_num == 14 )); then
 	vf1=enp4s0f2
 	vf2=enp4s0f3
 	vf3=enp4s0f4
+
+	if [[ "$USER" == "root" ]]; then
+		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
+		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+	fi
 
 elif (( host_num == 2 )); then
 	numvfs=2
@@ -448,8 +458,8 @@ alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 
 alias watch-netstat='watch -d -n 1 netstat -s'
 alias w1='watch -d -n 1'
-alias w2="watch -d -n 1 cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct"
 alias w2='watch -d -n 1 cat /proc/buddyinfo'
+alias w2="watch -d -n 1 cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct"
 alias w3='watch -d -n 1 ovs-appctl upcall/show'
 alias w4='watch -d -n 1 sar -n DEV 1'
 # sar -n TCP 1
@@ -4892,9 +4902,11 @@ function start-switchdev-all
 	for i in $(seq $ports); do
 		start-switchdev $i
 	done
+
+	ifconfig $vf1 mtu 1450
+	ifconfig $vf1 1.1.$host_num.3/16 up
 	ip1
 	ip2
-	ifconfig $rep2 1.1.3.3/16 up
 #	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
 	
 #	(( host_num == 13 )) && jd-vxlan2
@@ -4955,11 +4967,11 @@ set -x
 	# net.ifnames=0 to set name to eth0
 
 	if (( host_num == 14)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt net.ifnames=1 biosdevname=0 pci=realloc crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
 	fi
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
 	if (( host_num == 13)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt biosdevname=0 pci=realloc crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt net.ifnames=1 biosdevname=0 pci=realloc crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
 # 		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
 	fi
 
@@ -7575,7 +7587,8 @@ alias sendm='/labhome/chrism/prg/python/scapy/m.py'
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j 32 DESTDIR=install'
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j 32 DESTDIR=/usr'
 
-# ./mlnxofedinstall  --upstream-libs --dpdk
+# ./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update
+alias ofed-dpdk='./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update --force --with-mft --with-mstflint'
 
 # edit config/common_base  to enable mlx5
 # CONFIG_RTE_LIBRTE_MLX5_PMD=y 
@@ -7894,7 +7907,7 @@ set -x
 	ip link set dev veth0 up
 	brctl addif br0 veth0
 	ip link set dev veth1 netns $n
-	ip netns exec $n ip addr add 10.12.205.15/24 brd + dev veth1
+	ip netns exec $n ip addr add 10.12.205.16/24 brd + dev veth1
 	ip netns exec $n ip route add default via 10.12.205.1 dev veth1
 	ip netns exec $n ip link set dev veth1 up
 	ip netns exec $n /usr/sbin/sshd -o PidFile=/run/sshd-oob.pid
@@ -8431,8 +8444,9 @@ set +x
 }
 
 alias f1="sudo flint -d $pci q"
-alias cat1="cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct"
 
+alias cd-miniflow-cache='cd /sys/kernel/slab/mlx5_miniflow_cache'
+alias cd-wq='cd /sys/devices/virtual/workqueue'
 function counters_tc_ct
 {
 	while :; do
@@ -8440,6 +8454,7 @@ function counters_tc_ct
 		sleep 1
 	done
 }
+alias co=counters_tc_ct
 
 alias dis="ethtool -S $link | grep dis"
 
@@ -8607,12 +8622,23 @@ alias trace="$BCC_DIR/tools/trace.py -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
 alias funccount="$BCC_DIR/tools/funccount.py"
 
-function tracer
+function tracerx
 {
 	[[ $# != 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
 $BCC_DIR/tools/trace.py 'r::$1 "%lx", retval'
+EOF
+	echo $file
+	bash $file
+}
+
+function tracer
+{
+	[[ $# != 1 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace.py 'r::$1 "%d", retval'
 EOF
 	echo $file
 	bash $file
@@ -9162,13 +9188,28 @@ function msi
 alias cd-trex='cd /images/chrism/DPIX'
 alias vit1='vi AsapPerfTester/TestParams/AsapPerfTestParams.py'
 alias vit2='vi dpdk_conf/frame_size_-_64.dpdk.conf'
-function run-trex
+function trex
 {
 	cd-trex
 	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/AsapPerfTestParams.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 }
 
 # ip a | grep 10.12.205.15 && hostname dev-chrism-vm1
+
+function trex-arp
+{
+set -x
+	if (( host_num == 13 )); then
+		arp -d 192.168.1.14
+		arp -s 192.168.1.14 24:8a:07:88:27:ca
+	fi
+
+	if (( host_num == 14 )); then
+		arp -d 192.168.1.13
+		arp -s 192.168.1.13 24:8a:07:88:27:9a
+	fi
+set +x
+}
 
 ######## ubuntu #######
 
