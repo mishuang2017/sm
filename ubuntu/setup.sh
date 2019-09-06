@@ -35,3 +35,6 @@ apt install linux-crashdump
 apt install -y python3-setuptools
 apt install -y python3-dev
 apt install -y liblzma-dev
+
+# install libvirt for debian
+sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils libguestfs-tools genisoimage virtinst libosinfo-bin
