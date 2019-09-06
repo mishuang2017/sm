@@ -9194,6 +9194,12 @@ function trex
 	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/AsapPerfTestParams.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 }
 
+function trex2
+{
+	cd-trex
+	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/IpVarianceVxlan.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
+}
+
 # ip a | grep 10.12.205.15 && hostname dev-chrism-vm1
 
 function trex-arp
@@ -9208,6 +9214,19 @@ set -x
 		arp -d 192.168.1.13
 		arp -s 192.168.1.13 24:8a:07:88:27:9a
 	fi
+set +x
+}
+
+function test-panic
+{
+set -x
+	while :; do
+		ovs-vsctl del-port $rep2 $br
+		ovs-vsctl del-port $link $br
+		ovs-vsctl add-port $rep2 $br
+		ovs-vsctl add-port $link $br
+		sleep 5
+	done
 set +x
 }
 
@@ -9288,6 +9307,7 @@ function ln-crash
 	ln -s ${dir}dump* vmcore.$n
 }
 
+# uncomment the following for built-in kernel
 # VMLINUX=/usr/lib/debug/boot/vmlinux-$(uname -r)
 alias crash1="$CRASH -i /root/.crash $VMLINUX"
 
