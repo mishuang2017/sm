@@ -134,6 +134,9 @@ so offload will never happen for us but should work with tc sw
 
 ===udev===
 
+mlx5e_rep_get_phys_port_name
+phys_switch_id_show
+
 udevadm test /sys/class/net/eth0
 
 net_class_attrs
@@ -174,8 +177,6 @@ ts: 14, 9
 http://linux.dell.com/files/biosdevname/
 http://linux.dell.com/files/whitepapers/consistent_network_device_naming_in_linux.pdf
 
-mlx5e_rep_get_phys_port_name
-phys_switch_id_show
 
 # udevadm info --query=property --name /dev/sda
 DEVLINKS=/dev/disk/by-id/scsi-36847beb0f962180020e608c514fe9c96 /dev/disk/by-id/wwn-0x6847beb0f962180020e608c514fe9c96 /dev/disk/by-path/pci-0000:03:00.0-scsi-0:2:0:0
@@ -1611,7 +1612,7 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/bugfixes
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/use-after-free
 
 ===git===
 

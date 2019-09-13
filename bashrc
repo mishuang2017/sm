@@ -16,7 +16,7 @@ numvfs=3
 [[ "$(hostname -s)" == "r-vrt-24-1" ]] && host_num=24
 
 if (( host_num == 13 )); then
-# 	export DISPLAY=MTBC-CHRISM:0.0
+	export DISPLAY=MTBC-CHRISM:0.0
 
 	link=enp4s0f0
 	link2=enp4s0f1
@@ -38,7 +38,9 @@ if (( host_num == 13 )); then
 	fi
 
 elif (( host_num == 14 )); then
-# 	export DISPLAY=MTBC-CHRISM:0.0
+	export DISPLAY=MTBC-CHRISM-N:0.0
+	export DISPLAY=MTBC-CHRISM:0.0
+	export DISPLAY=10.12.68.111:0.0
 
 	link=enp4s0f0
 	link2=enp4s0f1
@@ -505,6 +507,9 @@ alias sm1="cd $linux_dir"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
 alias sm7="cd /$images/chrism/rh_debug/BUILD/kernel-3.10.0-1055.el7/linux-3.10.0-1055.el7.x86_64"
+
+alias softirq="/$images/chrism/bcc/tools/softirqs.py 1"
+alias hardirq="/$images/chrism/bcc/tools/hardirqs.py 5"
 
 if [[ "$USER" == "mi" ]]; then
 	kernel=$(uname -r | cut -d. -f 1-6)
@@ -4320,6 +4325,7 @@ set -x
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
 
 	clear-mangle
+	trex-arp
 set +x
 }
 
@@ -4837,7 +4843,8 @@ function start-switchdev
 	hw_tc_all $port
 
 	time set_netns_all $port
-	ethtool -L $link combined 16
+	combined 3
+	affinity-set
 
 #	iptables -F
 #	iptables -Z
@@ -4897,6 +4904,7 @@ function start-switchdev-all
 {
 #	enable-multipath
 #	ifconfig $link2 up
+	stop1
 
 	start-ovs
 	for i in $(seq $ports); do
@@ -4907,6 +4915,9 @@ function start-switchdev-all
 	ifconfig $vf1 1.1.$host_num.3/16 up
 	ip1
 	ip2
+
+	start1
+	brx-ct
 #	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
 	
 #	(( host_num == 13 )) && jd-vxlan2
@@ -4971,7 +4982,7 @@ set -x
 	fi
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
 	if (( host_num == 13)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt net.ifnames=1 biosdevname=0 pci=realloc crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt net.ifnames=1 biosdevname=0 pci=realloc isolcpus=8,10,12,14 intel_idle.max_cstate=0 nohz_full=8,10,12,14 intel_pstate=disable crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
 # 		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
 	fi
 
@@ -6530,6 +6541,7 @@ function 1_natan
 	mlxburn -d $mstdev -fw ${galil_fw_path}fw-ConnectX5.mlx -conf_dir ${galil_fw_path} -force
 }
 
+# unbind vf first
 function q1
 {
 set -x
@@ -6538,6 +6550,8 @@ set -x
 	echo 15b3 101a >/sys/bus/pci/drivers/vfio-pci/new_id
 	ls /dev/vfio
 
+	pkill -9 qemu
+	sleep 1
 	qemu-system-x86_64 --enable-kvm \
 		-S			\
 		-cpu qemu64		\
@@ -6550,6 +6564,7 @@ set -x
 		-device vfio-pci,host=04:00.4,id=hostdev0,bus=pci.0,addr=0x9	\
 		-vga std	\
 		-vnc :1		\
+		-serial "/dev/ttyS0" \
 		-daemonize
 
 set +x
@@ -8456,6 +8471,15 @@ function counters_tc_ct
 }
 alias co=counters_tc_ct
 
+function counters_tc_ct10
+{
+	while :; do
+		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
+		sleep 10
+	done | tee co.txt
+}
+alias co10=counters_tc_ct10
+
 alias dis="ethtool -S $link | grep dis"
 
 function autoprobe-show
@@ -9102,9 +9126,13 @@ alias udpc="UDPClient.py --serverAddr 1.1.1.1 --port=4000 --size=100 --packets=1
 
 function combined
 {
+	n=4
+	if [[ $# == 1 ]]; then
+		n=$1
+	fi
 set -x
 	ethtool -l $link
-	ethtool -L $link combined 16
+	ethtool -L $link combined $n
 	ethtool -l $link
 set +x
 }
@@ -9194,11 +9222,78 @@ function trex
 	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/AsapPerfTestParams.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 }
 
-function trex2
+function trex-vxlan
 {
 	cd-trex
 	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/IpVarianceVxlan.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 }
+
+function trex-vxlan2
+{
+	cd-trex
+	i=0
+	while : ; do
+		./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/IpVarianceVxlan.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
+		(( i++ == 100 )) && break
+		echo "=============== $i ==============="
+		sleep 150
+	done
+}
+
+function trex-pf
+{
+	cd-trex
+	i=0
+	while : ; do
+		./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/AsapPerfTestParams.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
+		(( i++ == 200 )) && break
+		echo "=============== $i ==============="
+		sleep 40
+	done
+}
+
+function affinity
+{
+	irq=$(grep $link /proc/interrupts | awk '{print $1}' | sed 's/://')
+	echo $irq
+	for i in $irq; do
+		echo $i
+		cat /proc/irq/$i/smp_affinity
+		echo
+	done
+}
+
+# 9,11,13,15
+function affinity-set
+{
+	irq=$(grep $link /proc/interrupts | awk '{print $1}' | sed 's/://')
+	echo $irq
+	n=1
+	for i in $irq; do
+		echo $i
+		cat /proc/irq/$i/smp_affinity
+		x=$(irq $n)
+		echo $x > /proc/irq/$i/smp_affinity
+		cat /proc/irq/$i/smp_affinity
+		n=$((n+2))
+		echo
+	done
+}
+
+function irq
+{
+	[[ $# != 1 ]] && return
+	n=1
+	for i in {1..16}; do
+		if [[ $1 == $i ]]; then
+			printf "%x\n" $n
+			return
+		fi
+		n=$((n*2))
+	done
+}
+
+alias numa="cat /sys/class/net/$link/device/numa_node"
 
 # ip a | grep 10.12.205.15 && hostname dev-chrism-vm1
 
@@ -9229,6 +9324,10 @@ set -x
 	done
 set +x
 }
+
+alias vm='v drivers/net/ethernet/mellanox/mlx5/core/miniflow.c:1010'
+
+alias top-ovs=" top -p $(pgrep ovs-)"
 
 ######## ubuntu #######
 
