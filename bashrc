@@ -8646,6 +8646,9 @@ alias trace="$BCC_DIR/tools/trace.py -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
 alias funccount="$BCC_DIR/tools/funccount.py"
 
+alias fc1='funccount miniflow_merge_work -i 1'
+alias fc2='funccount mlx5e_del_miniflow_list -i 1'
+
 function tracerx
 {
 	[[ $# != 1 ]] && return
@@ -9236,7 +9239,7 @@ function trex-vxlan2
 		./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/IpVarianceVxlan.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 		(( i++ == 100 )) && break
 		echo "=============== $i ==============="
-		sleep 150
+		sleep 50
 	done
 }
 
@@ -9268,7 +9271,7 @@ function affinity-set
 {
 	irq=$(grep $link /proc/interrupts | awk '{print $1}' | sed 's/://')
 	echo $irq
-	n=1
+	n=3
 	for i in $irq; do
 		echo $i
 		cat /proc/irq/$i/smp_affinity
