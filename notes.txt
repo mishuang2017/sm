@@ -11050,6 +11050,8 @@ trace 'tc:tc_filter_modify "%d", arg1'
 
 list -H workqueues -s workqueue_struct.name -l workqueue_struct.list
 
+tree -t radix  worker_pool_idr -s worker_pool.cpu
+
 ===ubuntu===
 
 # crash needs it
