@@ -11,20 +11,25 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
+# there are 16 CPUs, each CPU has 2 pools.
+# So the unbound pool start with 32
 def print_worker_pool(pool):
-#     print("worker_pool.id: %d" % pool.id.value_())
-#     print("worker_pool.cpu: %d" % pool.cpu.value_())
+    print("worker_pool %lx" % pool.value_())
     workers = pool.workers.address_of_()
     for worker in list_for_each_entry('struct worker', workers, 'node'):
         desc = worker.desc.string_().decode()
-        if desc == "miniflow" or pool.id.value_() == 32:
-            print("worker.id: %d, task.cpu: %d, current_func: %x" % (worker.id.value_(), worker.task.cpu.value_(), worker.current_func.value_()))
+#         if desc == "miniflow" or pool.id.value_() == 32:
+        if desc == "miniflow":
+            print("")
+            print("worker %lx" % worker.value_())
+            print("pool cpu: %d, pool id: %d" % (pool.cpu.value_(), pool.id.value_()))
+            print("desc: %s" % desc)
+            print("worker.cpu: %d, task.id: %d, current_func: %x" % (worker.task.cpu.value_(), worker.id.value_(), worker.current_func.value_()))
 
-idr = prog['worker_pool_idr'].address_of_()
-
-for i in radix_tree_for_each(idr.idr_rt):
-    pool = Object(prog, 'struct worker_pool', address=i[1])
-    print_worker_pool(pool)
+# idr = prog['worker_pool_idr'].address_of_()
+# for i in radix_tree_for_each(idr.idr_rt):
+#     pool = Object(prog, 'struct worker_pool', address=i[1])
+#     print_worker_pool(pool)
 
 # sys.exit(0)
 
@@ -43,8 +48,8 @@ for pwq in list_for_each_entry('struct pool_workqueue', pwqs, 'pwqs_node'):
     if nr_active != 0:
         print("pool_workqueue %lx" % pwq)
         print(pwq.nr_in_flight.value_())
-        print("worker_pool.nr_active: %d" % pwq.nr_active.value_())
-        print("worker_pool.max_active: %d" % pwq.max_active.value_())
+        print("pool_workqueue.nr_active: %d" % pwq.nr_active.value_())
+        print("pool_workqueue.max_active: %d" % pwq.max_active.value_())
 #         print(pwq.pool)
         print_worker_pool(pwq.pool)
 
