@@ -11,27 +11,30 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
+idr = 0
+
 # there are 16 CPUs, each CPU has 2 pools.
 # So the unbound pool start with 32
 def print_worker_pool(pool):
-    print("worker_pool %lx" % pool.value_())
+#     print("worker_pool %lx" % pool.value_())
     workers = pool.workers.address_of_()
     for worker in list_for_each_entry('struct worker', workers, 'node'):
         desc = worker.desc.string_().decode()
-#         if desc == "miniflow" or pool.id.value_() == 32:
-        if desc == "miniflow":
+        if desc == "miniflow" or pool.id.value_() == 32:
+#         if desc == "miniflow":
             print("")
             print("worker %lx" % worker.value_())
             print("pool cpu: %d, pool id: %d" % (pool.cpu.value_(), pool.id.value_()))
             print("desc: %s" % desc)
-            print("worker.cpu: %d, task.id: %d, current_func: %x" % (worker.task.cpu.value_(), worker.id.value_(), worker.current_func.value_()))
+            print("worker.task.cpu: %d, worker.id: %d, current_func: %x" % (worker.task.cpu.value_(), worker.id.value_(), worker.current_func.value_()))
 
-# idr = prog['worker_pool_idr'].address_of_()
-# for i in radix_tree_for_each(idr.idr_rt):
-#     pool = Object(prog, 'struct worker_pool', address=i[1])
-#     print_worker_pool(pool)
+if idr:
+    idr = prog['worker_pool_idr'].address_of_()
+    for i in radix_tree_for_each(idr.idr_rt):
+        pool = Object(prog, 'struct worker_pool', address=i[1])
+        print_worker_pool(pool)
 
-# sys.exit(0)
+    sys.exit(0)
 
 wqs =  prog['workqueues'].address_of_()
 for wq in list_for_each_entry('struct workqueue_struct', wqs, 'list'):

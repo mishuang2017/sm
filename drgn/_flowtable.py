@@ -11,10 +11,10 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
-# table = prog.variable('_flowtable', "/images/chrism/linux/drivers/net/ethernet/mellanox/mlx5/core/miniflow_aging.c")
-# table = prog.variable('_flowtable')
-# table = prog.variable('first_device')
-table_addr = 0xffff92a5c40af800
+table_addr = lib.ksa("_flowtable")
+if table_addr == 0:
+    sys.exit(1)
+
 table = Object(prog, 'struct flow_offload_table', address=table_addr)
 # print(table)
 

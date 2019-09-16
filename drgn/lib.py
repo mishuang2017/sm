@@ -3,10 +3,24 @@ from drgn import Object
 from drgn import container_of
 import socket
 
+import subprocess
 import drgn
 prog = drgn.program_from_kernel()
 
 import os
+
+# kernel symbal name
+def ksa(name):
+    (status, output) = subprocess.getstatusoutput("grep " + name + " /proc/kallsyms | awk '{print $1}'")
+#     print("%d, %s" % (status, output))
+
+    t = int(output, 16)
+    p = Object(prog, 'void *', address=t)
+
+    if status:
+        return 0
+
+    return p.value_()
 
 def ipv4(addr):
     ip = ""

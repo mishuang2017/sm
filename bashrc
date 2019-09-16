@@ -485,8 +485,6 @@ alias 14c='ssh root@10.12.206.26'
 
 alias switch='ssh admin@10.12.67.39'
 
-alias r=restart
-
 alias slave='lnst-slave'
 alias classic='rpyc_classic.py'	# used to update mac address
 alias lv='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/03-vlan_in_host.xml'
@@ -4782,6 +4780,39 @@ alias start-bind='start-switchdev bind'
 alias restart='off; start'
 # alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
 alias mystart=start-switchdev-all
+alias r=restart
+
+function start-bd
+{
+	stop1
+
+	start-ovs
+	for i in $(seq $ports); do
+		start-switchdev $i
+	done
+
+	ifconfig $vf1 mtu 1450
+	ip1
+	ip2
+}
+
+function start-trex
+{
+	start-ovs
+	for i in $(seq $ports); do
+		start-switchdev $i
+	done
+	ifconfig $link 1.1.3.1/16 up
+}
+
+function start-switchdev-all
+{
+	start-ovs
+	for i in $(seq $ports); do
+		start-switchdev $i
+	done
+}
+
 function start-switchdev
 {
 	local port=$1
@@ -4898,45 +4929,6 @@ function echo_legacy2
 	local sysfs_dir=/sys/class/net/$link2/compat/devlink
 	echo legacy >  $sysfs_dir/mode
 	echo $?
-}
-
-function start-switchdev-all
-{
-#	enable-multipath
-#	ifconfig $link2 up
-	stop1
-
-	start-ovs
-	for i in $(seq $ports); do
-		start-switchdev $i
-	done
-
-	ifconfig $vf1 mtu 1450
-	ifconfig $vf1 1.1.$host_num.3/16 up
-	ip1
-	ip2
-
-	start1
-	brx-ct
-#	ethtool -K $link hw-tc-offload on > /dev/null 2>&1
-	
-#	(( host_num == 13 )) && jd-vxlan2
-#	(( host_num == 14 )) && jd-vxlan
-#	jd-vxlan
-#	jd-ovs
-
-#	create-br-all
-
-#	ifconfig $(get_vf $host_num 1 1) up
-#	ifconfig $rep1 up
-
-#	if (( ports == 2 )); then
-#		ifconfig $(get_vf $host_num 2 1) up
-#		ifconfig $rep1_2 up
-#	fi
-
-#	brx
-#	add-reps
 }
 
 function stop-vm
