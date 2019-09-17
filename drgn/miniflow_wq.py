@@ -7,7 +7,7 @@ from drgn import Object
 import sys
 import os
 
-libpath = os.path.dirname(os.path.realpath(__file__))
+libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
@@ -20,17 +20,19 @@ def print_worker_pool(pool):
     workers = pool.workers.address_of_()
     for worker in list_for_each_entry('struct worker', workers, 'node'):
         desc = worker.desc.string_().decode()
-        if desc == "miniflow" or pool.id.value_() == 32:
+        if desc == "miniflow" or pool.id.value_() >= 32:
 #         if desc == "miniflow":
-            print("")
-            print("worker %lx" % worker.value_())
-            print("pool cpu: %d, pool id: %d" % (pool.cpu.value_(), pool.id.value_()))
-            print("desc: %s" % desc)
             func = worker.current_func.value_()
             if func:
                 func = lib.address_to_name(hex(func))
+            else:
+                continue
+            print("worker %lx" % worker.value_())
+            print("pool cpu: %d, pool id: %d" % (pool.cpu.value_(), pool.id.value_()))
+            print("desc: %s" % desc)
             print("worker.task.cpu: %d, worker.id: %d, current_func: %s" % \
                 (worker.task.cpu.value_(), worker.id.value_(), func))
+            print("")
 
 if idr:
     idr = prog['worker_pool_idr'].address_of_()

@@ -460,7 +460,7 @@ alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 
 alias watch-netstat='watch -d -n 1 netstat -s'
 alias w1='watch -d -n 1'
-alias w2='watch -d -n 1 cat /proc/buddyinfo'
+alias wb='watch -d -n 1 cat /proc/buddyinfo'
 alias w2="watch -d -n 1 cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct"
 alias w3='watch -d -n 1 ovs-appctl upcall/show'
 alias w4='watch -d -n 1 sar -n DEV 1'
@@ -4639,7 +4639,8 @@ function up_all_reps
 	echo "start up_all_reps"
 	for (( i = 0; i < numvfs; i++)); do
 		rep=${l}_$i
-		ifconfig $rep up
+		echo $rep
+		time ifconfig $rep up
 		echo "up $rep"
 		if (( ecmp == 1 )); then
 			ovs-vsctl add-port br-vxlan $rep
@@ -8641,6 +8642,7 @@ BCC_DIR=/images/chrism/bcc
 alias trace="$BCC_DIR/tools/trace.py -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
 alias funccount="$BCC_DIR/tools/funccount.py"
+alias fl="$BCC_DIR/tools/funclatency.py"
 
 alias fc1='funccount miniflow_merge_work -i 1'
 alias fc2='funccount mlx5e_del_miniflow_list -i 1'
