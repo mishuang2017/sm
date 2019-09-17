@@ -11,7 +11,7 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
-idr = 0
+idr = 1
 
 # there are 16 CPUs, each CPU has 2 pools.
 # So the unbound pool start with 32
@@ -26,7 +26,11 @@ def print_worker_pool(pool):
             print("worker %lx" % worker.value_())
             print("pool cpu: %d, pool id: %d" % (pool.cpu.value_(), pool.id.value_()))
             print("desc: %s" % desc)
-            print("worker.task.cpu: %d, worker.id: %d, current_func: %x" % (worker.task.cpu.value_(), worker.id.value_(), worker.current_func.value_()))
+            func = worker.current_func.value_()
+            if func:
+                func = lib.address_to_name(hex(func))
+            print("worker.task.cpu: %d, worker.id: %d, current_func: %s" % \
+                (worker.task.cpu.value_(), worker.id.value_(), func))
 
 if idr:
     idr = prog['worker_pool_idr'].address_of_()

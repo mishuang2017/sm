@@ -4794,6 +4794,10 @@ function start-bd
 	ifconfig $vf1 mtu 1450
 	ip1
 	ip2
+
+	brx-ct
+	trex-arp
+	start1
 }
 
 function start-trex
@@ -9031,6 +9035,11 @@ function _flowtable
 function num_rules
 {
 	sudo $drgn_dir/num_rules.py
+}
+
+function miniflow_wq
+{
+	sudo $drgn_dir/miniflow_wq.py
 }
 
 function encap

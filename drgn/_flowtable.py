@@ -11,7 +11,7 @@ libpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(libpath)
 import lib
 
-table_addr = lib.ksa("_flowtable")
+table_addr = lib.name_to_address("_flowtable")
 if table_addr == 0:
     sys.exit(1)
 
@@ -56,7 +56,7 @@ for i, flow in enumerate(hash1(table.rhashtable)):
     if flow_offload_entry not in entries:
         entries.append(flow_offload_entry)
 
-print(len(entries))
+print("entries: %d" % len(entries))
 
 for i in entries:
     flow_offload_entry = Object(prog, 'struct flow_offload_entry', address=i)
