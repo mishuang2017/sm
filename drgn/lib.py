@@ -5,7 +5,8 @@ import socket
 
 import subprocess
 import drgn
-prog = drgn.program_from_kernel()
+# prog = drgn.program_from_kernel()
+prog = drgn.program_from_core_dump("/var/crash/vmcore.1")
 
 import os
 

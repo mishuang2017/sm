@@ -6,7 +6,7 @@ import sys
 import os
 import time
 
-libpath = os.path.dirname(os.path.realpath(__file__))
+libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
