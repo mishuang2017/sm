@@ -1612,7 +1612,7 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/use-after-free
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/tir
 
 ===git===
 
