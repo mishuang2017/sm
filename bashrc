@@ -4809,7 +4809,6 @@ function start-trex
 	ifconfig $link 1.1.3.1/16 up
 }
 
-alias ip-trex="ifconfig $link 1.1.3.1/16 up"
 function start-switchdev-all
 {
 	start-ovs
