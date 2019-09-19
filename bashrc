@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=120
 
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
@@ -4639,8 +4639,7 @@ function up_all_reps
 	echo "start up_all_reps"
 	for (( i = 0; i < numvfs; i++)); do
 		rep=${l}_$i
-		echo $rep
-		time ifconfig $rep up
+		ifconfig $rep up
 		echo "up $rep"
 		if (( ecmp == 1 )); then
 			ovs-vsctl add-port br-vxlan $rep
@@ -9335,6 +9334,15 @@ set +x
 alias vm='v drivers/net/ethernet/mellanox/mlx5/core/miniflow.c:1010'
 
 alias top-ovs=" top -p $(pgrep ovs-)"
+
+function bd1
+{
+	while :; do
+		ip link set dev $rep2 up || echo "up error"
+		ip link set dev $rep2 down || echo "down error"
+		echo done
+	done
+}
 
 ######## ubuntu #######
 
