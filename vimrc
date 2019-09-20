@@ -41,7 +41,7 @@ map <C-J> :previous<CR>
 map <C-K> :next<CR>
 
 map <C-N> :bprevious<CR>
-map <C-M> :bnext<CR>
+" map <C-M> :bnext<CR>
 
 map <F1> :call VComment()<CR>
 map <F2> :set number!<CR>

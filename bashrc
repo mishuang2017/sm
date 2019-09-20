@@ -7643,12 +7643,11 @@ alias genm='$pg_linux/samples/pktgen/pktgen_sample04_many_flows.sh'
 alias gen2='gen -i $vf2 -m 02:25:d0:13:01:03 -d 1.1.1.23'
 alias gen1='gen -i $vf1 -m 02:25:d0:13:01:03 -d 1.1.1.23'
 
+# alias g1='genm -i $vf2 -m 24:8a:07:88:27:ca -d 192.168.1.14'
+# alias g2='genm -i $vf2 -m 24:8a:07:88:27:9a -d 192.168.1.13'
 
-alias g1='genm -i $vf2 -m 24:8a:07:88:27:ca -d 192.168.1.14'
-alias g2='genm -i $vf2 -m 24:8a:07:88:27:9a -d 192.168.1.13'
-
-alias g3='genm -i $vf2 -m 02:25:d0:13:01:03 -d 1.1.1.23'
-alias g4='genm -i $vf2 -m 02:25:d0:14:01:03 -d 1.1.1.123'
+# alias g3='genm -i $vf2 -m 02:25:d0:13:01:03 -d 1.1.1.23'
+# alias g4='genm -i $vf2 -m 02:25:d0:14:01:03 -d 1.1.1.123'
 
 function pgset1
 {
@@ -9069,6 +9068,7 @@ function ct_list
 	i=0
 	n=0
 	[[ $# == 1 ]] && n=$1
+	cd $drgn_dir
 	while :; do
 		echo "======== $i ======="
 		sudo $drgn_dir/ct_list.py
