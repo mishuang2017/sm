@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=120
+numvfs=3
 
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
@@ -4323,7 +4323,6 @@ set -x
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
 
 	clear-mangle
-	trex-arp
 set +x
 }
 
@@ -4796,7 +4795,7 @@ function start-bd
 	ip2
 
 	brx-ct
-	trex-arp
+# 	trex-arp
 	start1
 }
 
@@ -9014,13 +9013,14 @@ function kmsg() {
 	fi
 }
 
-drgn_dir=/labhome/chrism/sm/drgn
+drgn_dir=/labhome/chrism/sm/drgn/kernel
 
 function _flowtable
 {
 	i=0
 	n=0
 	[[ $# == 1 ]] && n=$1
+	cd $drgn_dir
 	while :; do
 		echo "======== $i ======="
 		sudo $drgn_dir/_flowtable.py
@@ -9034,16 +9034,19 @@ function _flowtable
 
 function num_rules
 {
+	cd $drgn_dir
 	sudo $drgn_dir/num_rules.py
 }
 
 function miniflow_wq
 {
+	cd $drgn_dir
 	sudo $drgn_dir/miniflow_wq.py
 }
 
 function encap
 {
+	cd $drgn_dir
 	sudo $drgn_dir/encap.py
 }
 
@@ -9052,6 +9055,7 @@ function flow
 	i=0
 	n=0
 	[[ $# == 1 ]] && n=$1
+	cd $drgn_dir
 	while :; do
 		echo "======== $i ======="
 		sudo $drgn_dir/flow.py
@@ -9085,6 +9089,7 @@ function mlx5e_tc_flow
 	i=0
 	n=0
 	[[ $# == 1 ]] && n=$1
+	cd $drgn_dir
 	while :; do
 		echo "======== $i ======="
 		sudo $drgn_dir/mlx5e_tc_flow.py

@@ -80,7 +80,7 @@ def print_hmap(hmap, struct_name):
         buckets = buckets + 8
 
 # print_hmap("ufid_tc", "ufid_tc_data")
-# print_hmap("port_to_netdev", "port_to_netdev_data")
+print_hmap("port_to_netdev", "port_to_netdev_data")
 
-all_commands = prog["all_commands"]
-print(all_commands)
+# all_commands = prog["all_commands"]
+# print(all_commands)
