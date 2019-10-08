@@ -647,20 +647,20 @@ alias netstat1='netstat -ntlp'
 alias f7="ssh root@l-csi-0937h.mtl.labs.mlnx"
 alias f8="ssh root@l-csi-0938h.mtl.labs.mlnx"
 
-alias 13='ssh root@10.12.205.13'
-alias 14='ssh root@10.12.205.14'
+alias 13='ssh root@10.112.205.13'
+alias 14='ssh root@10.112.205.14'
 
-alias 15='ssh root@10.12.205.15'
+alias 15='ssh root@10.112.205.15'
 alias vm1=15
-alias 16='ssh root@10.12.205.16'
+alias 16='ssh root@10.112.205.16'
 alias vm2=16
-alias 17='ssh root@10.12.205.17'
+alias 17='ssh root@10.112.205.17'
 alias vm3=17
-alias 18='ssh root@10.12.205.18'
+alias 18='ssh root@10.112.205.18'
 alias vm4=18
-alias 9='ssh root@10.12.205.9'
+alias 9='ssh root@10.112.205.9'
 alias vm5=9
-alias 8='ssh root@10.12.205.8'
+alias 8='ssh root@10.112.205.8'
 alias vm6=8
 
 alias b3='lspci -d 15b3: -nn'
@@ -4320,7 +4320,8 @@ set -x
 	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
-	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
+
+# 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
 
 	clear-mangle
 set +x
@@ -4795,7 +4796,7 @@ function start-bd
 	ip2
 
 	brx-ct
-# 	trex-arp
+	trex-arp
 	start1
 }
 
@@ -5539,7 +5540,13 @@ function gdb1
 
 alias g='gdb1 ovs-vswitchd'
 
-# ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=5
+function n-revalidator-threads
+{
+	n=4
+	[[ $# == 1 ]] && n=$1
+	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=$n
+}
+
 function skip_hw
 {
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
@@ -6156,16 +6163,38 @@ function pktgen2
 {
 	sm1
 	cd ./samples/pktgen
+
+	n=10
+	[[ $# == 1 ]] && n=$1
+
 	export UDP_SRC_MIN=10000
 	export UDP_SRC_MAX=15000
-
 	export UDP_DST_MIN=10000
-	export UDP_DST_MAX=10050
+	export UDP_DST_MAX=$((10000+n))
+	i=0
+
 	if [[ "$(hostname -s)" == "dev-r630-04" ]]; then
-		./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.1 -t 4 -n 0
+# 		while :; do
+			./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.220 -t 8 -n 0	# vm1
+# 			sleep 15
+# 			i=$((i+1))
+# 			echo "================= $i ===================="
+# 		done
+# 		./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.1 -t 4 -n 0
 	fi
 	if [[ "$(hostname -s)" == "dev-r630-03" ]]; then
 		./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:14:01:02 -d 1.1.3.1 -t 4 -n 0
+	fi
+}
+
+function base
+{
+	if [[ $# == 0 ]]; then
+		cat /proc/sys/net/ipv4/neigh/enp4s0f0/base_reachable_time_ms
+	else
+		cat /proc/sys/net/ipv4/neigh/enp4s0f0/base_reachable_time_ms
+		echo $1 > /proc/sys/net/ipv4/neigh/enp4s0f0/base_reachable_time_ms
+		cat /proc/sys/net/ipv4/neigh/enp4s0f0/base_reachable_time_ms
 	fi
 }
 
@@ -6965,7 +6994,7 @@ alias iperf2=" iperf3 -c 1.1.1.2 -t 10000 -B 1.1.1.22 -P 2 --cport 6000 -i 0"
 
 # alias iperf1=" iperf3 -c 1.1.1.23 -t 10000 -B 1.1.1.22 -P 2 --cport 6000 -i 0"
 
-alias ovs-enable-debug="ovs-appctl vlog/set tc:file:DBG netdev_tc_offloads:file:DBG"
+# alias ovs-enable-debug="ovs-appctl vlog/set tc:file:DBG netdev_tc_offloads:file:DBG"
 function enable-ovs-debug
 {
 set -x
@@ -7129,7 +7158,27 @@ function 14-dpdk-pf
 	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 	echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
 	cd /root/dpdk
-	 ./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4    -m=4096  -w 0000:04:00.0 -- -i --rxq=4 --txq=4  --nb-cores=4 -i --forward-mode=flowgen -i -a --rss-udp
+	 ./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4    -m=4096  -w 0000:04:00.0 -- -i --rxq=4 --txq=4  --nb-cores=3 -i --forward-mode=flowgen -i -a --rss-udp
+}
+
+function 14-dpdk-icmpecho
+{
+set -x
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+	cd /root/dpdk
+	./x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:04:00.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=1 -i set fwd icmpecho
+set +x
+}
+
+function 14-dpdk-macswap
+{
+set -x
+	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+	echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+	cd /root/dpdk
+	./x86_64-native-linuxapp-gcc/app/testpmd -c 0xf -n 4 -w 0000:04:00.0,txq_inline=896 --socket-mem=2048,0 -- --rxq=4 --txq=4 --nb-cores=1 -i set fwd macswap
+set +x
 }
 
 function clone-dpdk
@@ -7543,6 +7592,25 @@ function addflow-port
 	for(( src = 2000; src < 52000; src++)); do
 		for(( dst = 1000; dst < 1020; dst++)); do
 			echo "table=0,priority=10,udp,nw_dst=1.1.1.23,tp_dst=$dst,tp_src=$src,in_port=enp4s0f0_1,action=output:enp4s0f0_2"
+		done
+	done >> $file
+
+	br=br
+	set -x
+	ovs-ofctl add-flows $br -O openflow13 $file
+	ovs-ofctl dump-flows $br | wc -l
+	set +x
+}
+
+function addflow-port2
+{
+	local file=/tmp/of.txt
+	rm -f $file
+
+	restart-ovs
+	for(( src = 10000; src < 15000; src++)); do
+		for(( dst = 10000; dst < 10050; dst++)); do
+			echo "table=0,priority=10,udp,nw_dst=1.1.1.220,tp_dst=$dst,tp_src=$src,in_port=$link,action=output:$rep2"
 		done
 	done >> $file
 
@@ -8638,11 +8706,17 @@ function trace3
 BCC_DIR=/images/chrism/bcc
 alias trace="$BCC_DIR/tools/trace.py -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop.py"
-alias funccount="$BCC_DIR/tools/funccount.py"
+alias funccount="$BCC_DIR/tools/funccount.py -i 1"
 alias fl="$BCC_DIR/tools/funclatency.py"
 
 alias fc1='funccount miniflow_merge_work -i 1'
 alias fc2='funccount mlx5e_del_miniflow_list -i 1'
+
+function fco
+{
+	[[ $# != 1 ]] && return
+	$BCC_DIR/tools/funccount.py /usr/sbin/ovs-vswitchd:$1 -i 1
+}
 
 function tracerx
 {
@@ -8680,6 +8754,23 @@ EOF
 	echo $file
 	bash $file
 }
+
+function tracecmd
+{
+	[[ $# < 2 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace.py -t '$1:$2 "%lx", arg1'
+EOF
+	if [[ $# == 2 ]]; then
+		sed -i 's/$/& -U/g' $file
+	fi
+	cat $file
+	echo $file
+	bash $file
+}
+
+alias trace-of="tracecmd ovs-ofctl"
 
 function traceo2
 {
@@ -9224,8 +9315,9 @@ function msi
 }
 
 alias cd-trex='cd /images/chrism/DPIX'
-alias vit1='vi AsapPerfTester/TestParams/AsapPerfTestParams.py'
-alias vit2='vi dpdk_conf/frame_size_-_64.dpdk.conf'
+alias vit1='vi /images/chrism/DPIX/AsapPerfTester/TestParams/AsapPerfTestParams.py'
+alias vitx='vi /images/chrism/DPIX/AsapPerfTester/TestParams/IpVarianceVxlan.py'
+alias vit2='vi /images/chrism/DPIX/dpdk_conf/frame_size_-_64.dpdk.conf'
 function trex
 {
 	cd-trex
@@ -9347,6 +9439,16 @@ function bd1
 		echo done
 	done
 }
+
+function bd2
+{
+	while :; do
+		ip link set dev $vf1 up || echo "up error"
+		ip link set dev $vf1 down || echo "down error"
+		echo done
+	done
+}
+
 
 ######## ubuntu #######
 

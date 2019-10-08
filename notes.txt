@@ -1623,7 +1623,7 @@ git commit -m "first commit"
 git remote add origin git@github.com:mishuang2017/bin.git
 git push -u origin master
 
-git remote add origin git@github.com:mishuang2017/bin.git
+git remote add origin git@github.com:mishuang2017/binit
 git push -u origin master
 
 git log --oneline | grep -m1 "Don't add decap"
@@ -2855,6 +2855,8 @@ https://mellanox.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=86a978fb-f69d-4be
 
 ===tcpdump===
 
+portrange 22-23
+
 tcpdump -i $link src 192.168.1.14 and port 4000 and greater 100 -v -nn
 
 FIN
@@ -3500,6 +3502,9 @@ static const struct dpctl_command all_commands[] = {
 };
 
 ===ovs===
+
+open_vconn__
+ovs_rundir
 
 commit 608ff46aaf0dd4330c2488c260ee42992e17a6fd
 Author: John Hurley <john.hurley@netronome.com>
@@ -5541,10 +5546,10 @@ fl_dump         dumps all keys
 0xffffffff8163a6f3 : tc_dump_tfilter                    193/0x2b0 [kernel]
 0xffffffff8163f9a2 : netlink_dump                    122/0x290 [kernel]
 0xffffffff8164096f : __netlink_dump_start                    15f/0x190 [kernel]
-0xffffffff8161fbfe : rtnetlink_rcv_msg                    1ae/0x220 [kernel]
+0xffffffff8161fbfe : rtnetlink_rcv_msg                    1ae/0x220 [kernel]		# move to here
 0xffffffff81642987 : netlink_rcv_skb                    e7/0x120 [kernel]
 
-0xffffffff8161a338 : rtnetlink_rcv                    28/0x30 [kernel]			# rtnl_lock/rtnl_unlock
+0xffffffff8161a338 : rtnetlink_rcv                    28/0x30 [kernel]			# removed rtnl_lock/rtnl_unlock
 
 static void rtnetlink_rcv(struct sk_buff *skb)
 {
