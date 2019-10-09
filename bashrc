@@ -9450,6 +9450,11 @@ function bd2
 }
 
 
+function siblings
+{
+	cat /sys/devices/system/cpu/cpu0/topology/thread_siblings_list
+}
+
 ######## ubuntu #######
 
 [[ -f /usr/bin/lsb_release ]] || return
