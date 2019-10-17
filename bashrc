@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=50
 
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
@@ -544,8 +544,8 @@ alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
 alias smo="cd /$images/chrism/openvswitch"
-alias smo3="cd /$images/chrism/ovs-ct-2.10"
 alias smo2="cd /$images/chrism/ovs-roi"
+alias smo2="cd /$images/chrism/tmp/ovs"
 alias smt="cd /$images/chrism/ovs-tests"
 alias cfo="cd /$images/chrism/openvswitch; cscope -d"
 alias ipa='ip a'
@@ -9455,6 +9455,26 @@ function siblings
 	cat /sys/devices/system/cpu/cpu0/topology/thread_siblings_list
 }
 
+alias iperf-dnat='iperf -c 8.9.10.10 -p 9999 -i 1 -t 10000'
+
+function restart-ovs-1
+{
+    n=0
+
+    while :; do
+        echo $n
+        restart-ovs
+	ovs-ofctl add-flow br "table=0,in_port=$link,actions=2,21,22,23,24,25,26,22,23,24,30,31,32,33,34,35,36,32,33,34,40,41,42,43,44,45,46,42,43,44,45,46,47,48,49,50"
+	ovs-ofctl add-flow br "table=0,in_port=$rep2,actions=21,22,23,24,25,26,22,23,24,30,31,32,33,34,35,36,32,33,34,40,41,42,43,44,45,46,42,43,44,45,46,47,48,49,50"
+        sudo ovs-appctl vlog/set netlink_socket:file:DBG;
+        sudo ovs-appctl vlog/set tc:file:DBG
+        sudo ovs-appctl vlog/set dpif_netlink:file:DBG
+        sudo ovs-appctl vlog/set netdev_tc_offloads:file:DBG
+        n=$((n+1))
+        sleep 60
+    done
+}
+
 ######## ubuntu #######
 
 [[ -f /usr/bin/lsb_release ]] || return
@@ -9585,4 +9605,10 @@ function stop-ovs
 {
 	sudo systemctl stop ovs-vswitchd.service
 	sudo systemctl stop ovsdb-server.service
+}
+
+function ovs-dpkg
+{
+	export CFLAGS='-g -O0'
+	DEB_BUILD_OPTIONS="parallel=40 nocheck" dpkg-buildpackage -b -us -uc
 }

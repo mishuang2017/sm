@@ -1614,7 +1614,14 @@ git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
 git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/use-after-free
 
+git push origin HEAD:refs/for/master/max-action-16
+
 ===git===
+
+git remote update # update all branches
+
+git checkout -b branch_name remote_name/branch_name
+
 
 echo "# bin" >> README.md
 git init
@@ -2854,6 +2861,8 @@ https://wikinox.mellanox.com/display/SW/AsapPerfTester
 https://mellanox.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=86a978fb-f69d-4bed-89f7-aa7e0141d095
 
 ===tcpdump===
+
+ether proto 0x88cc
 
 portrange 22-23
 
@@ -7984,6 +7993,14 @@ register_netdev
 
 ===ofed===
 
+  532  cp -rf /usr/src/ofa_kernel-4.6/ .
+  533  cd ofa_kernel-4.6/
+  534  /etc/infiniband/info
+  535  ./configure  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-mdev-mod --with-e_ipoib-mod -j
+  536  vim drivers/net/ethernet/mellanox/mlx5/core/en_tc.c
+  537  make -j $(nproc) > /dev/null
+  538  history
+
  yes | /tmp/OFED-internal-4.6-3.1.9.0.7/install.pl --post-install-mlnx-ofa_kernel-devel /auto/net_linux_verification/tools/fix_ofa_kernel_src.sh --with-memtrack --prefix /usr/ --force --all --without-srp --without-isert --without-iser --without-isert-dkms --without-knem --without-knem-mlnx --without-srptools --without-librxe --without-librxe-1 --without-knem-dkms --without-fca --without-openmpi --without-sharp --without-libdapl2 --without-dapl2-utils --without-libdapl-dev --without-dapl --without-dapl-devel --without-dapl-devel-static --without-dapl-utils --without-dapl-debuginfo --without-mxm --without-hcoll --without-mpi-selector --without-bupc --without-ucx --without-mvapich2 --without-libibprof --without-mpitests --without-mpitests_mvapich2__2_0 --without-mpitests_openmpi__1_8_4 --without-libdisni --without-iser-dkms --without-mlnx-nvme --without-mlnx-nvme-dkms --without-srp-dkms --without-libdisni1 --without-openvswitch --with-perftest
 
 ./mlnxofedinstall  --add-kernel-support --skip-distro-check
@@ -9120,6 +9137,9 @@ May 23 02:19:19 localhost.localdomain systemd[1]: Started Crash recovery kernel 
 ===crash===
 
 mod -s mlx5_core /lib/modules/3.10.0-957.el7.x86_64/extra/mlnx-ofa_kernel/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.ko
+objdump  -D /lib/modules/4.19.36+/kernel/net/sched/cls_flower.ko > 1.txt
+addr2line -e /lib/modules/4.19.36+/kernel/net/sched/cls_flower.ko -a 0x1f
+
 
 CONFIG_RELOCATABLE=y
 CONFIG_RANDOMIZE_BASE=y

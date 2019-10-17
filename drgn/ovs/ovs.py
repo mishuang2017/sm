@@ -80,20 +80,30 @@ def print_hmap(hmap, struct_name):
         buckets = buckets + 8
 
 # print_hmap("ufid_tc", "ufid_tc_data")
-# print_hmap("port_to_netdev", "port_to_netdev_data")
+print_hmap("port_to_netdev", "port_to_netdev_data")
 
 # all_commands = prog["all_commands"]
 # print(all_commands)
 
 all_dpif_backers = prog['all_dpif_backers']
+print("all_dpif_backers")
+print(all_dpif_backers)
 one = all_dpif_backers.map.one
 shash = Object(prog, 'struct shash_node', address=one.value_())
+print("all_dpif_backers.map.one/shash")
 print(shash)
-backer = Object(prog, 'struct dpif_backer', address=shash.data.value_())
-# print(backer.udpif)
+backer = Object(prog, 'struct dpif_backer', address=shash.data)
+print("%x" % backer.address_of_())
 
+# print("backer")
+# print(backer)
+print("backer.udpif")
+print(backer.udpif)
+
+print("udpif")
 udpif = backer.udpif
-print("udpif: %x" % udpif)
+
+# sys.exit(0)
 
 n = udpif.n_revalidators
 rev = udpif.revalidators
@@ -101,20 +111,22 @@ rev = udpif.revalidators
 print("n: %d" % n)
 print("revalidators: %x" % rev)
 
-dump = udpif.dump
-print(dump)
-dpif_netlink_flow_dump = Object(prog, 'struct dpif_netlink_flow_dump', address=dump.value_())
-print(dpif_netlink_flow_dump)
 
-for i in range(n):
-    print(rev[i])
+# dump = udpif.dump
+# print(dump)
+# dpif_netlink_flow_dump = Object(prog, 'struct dpif_netlink_flow_dump', address=dump.value_())
+# print(dpif_netlink_flow_dump)
+
+# for i in range(n):
+#     print(rev[i])
+
 
 # ukeys = udpif.ukeys
 # for i in range(512):
 #     print("%d: %d" % (i, ukeys[i].cmap.impl.p.n.value_()))
 
 def address_to_name(address):
-    print("address: %s" % address)
+#     print("address: %s" % address)
     (status, output) = subprocess.getstatusoutput("nm /usr/sbin/ovs-vswitchd | grep " + address.strip("0x") + " | awk '{print $3}'")
 #     print("%d, %s" % (status, output))
 
@@ -127,3 +139,6 @@ dpif = udpif.dpif
 print(dpif)
 print(address_to_name(hex(dpif.dpif_class.get_stats.value_())))
 print(address_to_name(hex(dpif.dpif_class.flow_dump_thread_create.value_())))
+print(address_to_name(hex(dpif.dpif_class.port_add.value_())))
+
+
