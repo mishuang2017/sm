@@ -19,11 +19,11 @@ p = Object(prog, 'void *', address=t)
 t = p.value_()
 
 for i in range(1024):
-    p = Object(prog, 'void *', address=t)
-    if p:
-        print("vport: %lx" % p)
-        vport = Object(prog, 'struct vport', address=p.value_() - 0x20)
+    p = Object(prog, 'struct hlist_head', address=t)
+    for vport in hlist_for_each_entry('struct vport', p, 'hash_node'):
+        print("address: %lx" % t)
         name = vport.dev.name.string_().decode()
         print(name)
-#         print(vport)
-    t = t + 8
+        print(vport)
+        print("")
+    t = t + prog.type('struct hlist_head').size
