@@ -14,11 +14,11 @@ def name_to_address(name):
     (status, output) = subprocess.getstatusoutput("grep -w " + name + " /proc/kallsyms | awk '{print $1}'")
     print("%d, %s" % (status, output))
 
-    t = int(output, 16)
-    p = Object(prog, 'void *', address=t)
-
     if status:
         return 0
+
+    t = int(output, 16)
+    p = Object(prog, 'void *', address=t)
 
     return p.value_()
 

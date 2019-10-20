@@ -9082,8 +9082,8 @@ function br-veth
 	ifconfig host1_rep 0 up
 
 	ovs-vsctl add-br $br
-	ovs-vsctl add-port $br host1_rep tag=$vid -- set Interface host1_rep ofport_request=2
-	ovs-vsctl add-port $br $link -- set Interface $link ofport_request=5
+	ovs-vsctl add-port $br host1_rep -- set Interface host1_rep ofport_request=2
+# 	ovs-vsctl add-port $br $link -- set Interface $link ofport_request=5
 }
 
 alias wget8="wget 8.9.10.11:8000"
