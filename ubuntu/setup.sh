@@ -38,3 +38,10 @@ apt install -y liblzma-dev
 
 # install libvirt for debian
 sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils libguestfs-tools genisoimage virtinst libosinfo-bin
+
+# vpn
+# libopenconnect5:amd64
+# openconnect
+# vpnc-scripts
+# network-manager-openconnect: /usr/lib/NetworkManager/nm-openconnect-service
+# network-manager-openconnect-gnome: /usr/lib/NetworkManager/nm-openconnect-auth-dialog
