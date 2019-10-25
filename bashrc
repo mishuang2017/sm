@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=50
+numvfs=3
 
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
@@ -4403,6 +4403,9 @@ set -x
 set +x
 }
 
+#
+# we can offload the following rules, 2019/10/21
+#
 function brx-ct-tos-inherit
 {
 set -x
@@ -4424,6 +4427,35 @@ set -x
 	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+
+	clear-mangle
+set +x
+}
+
+alias tos=brx-ct-tos-inherit
+alias tos2=brx-ct-tos-inherit2
+
+function brx-ct-tos-inherit2
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	ovs-vsctl add-port $br $vx -- set interface $vx type=vxlan \
+		options:remote_ip=$link_remote_ip  options:key=$vni options:dst_port=$vxlan_port options:tos=inherit
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=dec_ttl,normal" 
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=dec_ttl,normal" 
 
 	clear-mangle
 set +x
@@ -6184,6 +6216,34 @@ function pktgen2
 	fi
 	if [[ "$(hostname -s)" == "dev-r630-03" ]]; then
 		./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:14:01:02 -d 1.1.3.1 -t 4 -n 0
+	fi
+}
+
+function pktgen-pf
+{
+	sm1
+	cd ./samples/pktgen
+
+	n=10
+	[[ $# == 1 ]] && n=$1
+
+	export UDP_SRC_MIN=10000
+	export UDP_SRC_MAX=15000
+	export UDP_DST_MIN=10000
+	export UDP_DST_MAX=$((10000+n))
+	i=0
+
+	if [[ "$(hostname -s)" == "dev-r630-04" ]]; then
+# 		while :; do
+			./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.220 -t 8 -n 0	# vm1
+# 			sleep 15
+# 			i=$((i+1))
+# 			echo "================= $i ===================="
+# 		done
+# 		./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.1 -t 4 -n 0
+	fi
+	if [[ "$(hostname -s)" == "dev-r630-03" ]]; then
+		./pktgen_sample02_multiqueue.sh -i $link -s 1 -m 24:8a:07:88:27:ca -d 192.168.1.14 -t 4 -n 0
 	fi
 }
 

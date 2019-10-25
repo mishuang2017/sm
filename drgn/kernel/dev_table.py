@@ -14,16 +14,10 @@ if status:
     sys.exit(1)
 
 t = int(output, 16)
-p = Object(prog, 'void *', address=t)
-
-t = p.value_()
+p = Object(prog, 'struct hlist_head *', address=t)
 
 for i in range(1024):
-    p = Object(prog, 'struct hlist_head', address=t)
     for vport in hlist_for_each_entry('struct vport', p, 'hash_node'):
-        print("address: %lx" % t)
         name = vport.dev.name.string_().decode()
         print(name)
-        print(vport)
-        print("")
-    t = t + prog.type('struct hlist_head').size
+    p = p + 1
