@@ -1,0 +1,1 @@
+python /opt/neohost/sdk/get_device_performance_counters.py --mode=shell --dev-uid=0000:af:00.0 --get-analysis
