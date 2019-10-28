@@ -544,8 +544,7 @@ alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
 alias smo="cd /$images/chrism/openvswitch"
-alias smo2="cd /$images/chrism/ovs-roi"
-alias smo2="cd /$images/chrism/tmp/ovs"
+alias smo2="cd /$images/chrism/ovs"
 alias smt="cd /$images/chrism/ovs-tests"
 alias cfo="cd /$images/chrism/openvswitch; cscope -d"
 alias ipa='ip a'
@@ -9534,6 +9533,30 @@ function restart-ovs-1
         sleep 60
     done
 }
+
+function ethtool-tx
+{
+	while :; do
+		tx=$(ethtool -S $link | grep -w tx_packets | cut -d":" -f 2)
+		delta=$((tx-tx_old))
+		echo $delta
+		tx_old=$tx
+		sleep 1
+	done
+}
+
+function ethtool-rx
+{
+	while :; do
+		tx=$(ethtool -S eth0 | grep -w rx_packets | cut -d":" -f 2)
+		delta=$((tx-tx_old))
+		echo $delta
+		tx_old=$tx
+		sleep 1
+	done
+}
+
+
 
 ######## ubuntu #######
 
