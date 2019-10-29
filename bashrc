@@ -5,6 +5,11 @@ fi
 
 numvfs=3
 
+# alias virc='vi /images/chrism/sm/bashrc'
+# alias rc='. /images/chrism/sm/bashrc'
+alias virc='vi ~/.bashrc'
+alias rc='. ~/.bashrc'
+
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
 [[ "$(hostname -s)" == "dev-l-vrt-202" ]] && host_num=2
@@ -675,11 +680,9 @@ alias df='df -h'
 alias vi='vim'
 alias vd='vimdiff'
 alias vipr='vi ~/.profile'
-alias virc='vi ~/.bashrc'
 alias virca='vi ~/.bashrc*'
 alias visc='vi ~/.screenrc'
 alias vv='vi ~/.vimrc'
-alias rc='. ~/.bashrc'
 alias vis='vi ~/.ssh/known_hosts'
 alias vin='vi ~/sm/notes.txt'
 alias vij='vi ~/Documents/jd.txt'
@@ -5721,9 +5724,9 @@ set -x
 	version=fw-4119-rel-16_25_1000
 	version=fw-4119-rel-16_25_0328
 	version=last_revision
-	version=fw-4119-rel-16_26_0160
 	version=fw-4119-rel-16_99_6110
 	version=fw-4119-rel-16_25_6000
+	version=fw-4119-rel-16_26_1200
 
 	mkdir -p /mswg/
 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
