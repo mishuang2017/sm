@@ -1554,6 +1554,12 @@ ts: 5
 
 ===fw===
 
+Use mlxfwmanager to find the psid:
+
+  Part Number:      MCX512A-ACA_Ax
+
+/.autodirect/mswg/release/BUILDS/fw-4119/fw-4119-rel-16_26_1200-build-001/etc/bin/fw-ConnectX5-rel-16_26_1200-MCX512A-ACA_Ax-UEFI-14.19.14-FlexBoot-3.5.803.bin
+
 mlxburn -fw /swgwork/maozn/fw_for_SNIC_fast_linkup_testing_based_on_14_23_1020_19112018.mlx  -c ast_linkup_fw_Tencent_SNIC_20181101_take3.ini -wrimage fw-ConnectX-4Lx-rel-14_23_1020_Inspur_CX4lx_2P_25G_BP_Ax-UEFI-14.16.17-FlexBoot-3.5.504_2018_11_20.bin
 
 [root@dev-r630-03 bin]# cat /sys/class/infiniband/mlx5_0//fw_pages
@@ -1594,8 +1600,7 @@ sudo mlxfwreset -d 02:00.0 reset
 flint -d 02:00.0 -i /tmp/2.bin b
 /.autodirect/fwgwork/rabiel/workdir/shomron/golan_fw
 
-ssh root@10.212.214.1
-ssh root@10.212.215.1
+mlxburn -d d8:00.0 -i 1.bin	# no burn
 
 /mswg/release/BUILDS/fw-4119/fw-4119-rel-16_21_0338-build-001/etc/syndrome_list.log
 
