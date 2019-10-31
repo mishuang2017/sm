@@ -7008,16 +7008,22 @@ function fetch
 	if [[ $# == 1 ]]; then
 		repo=origin
 		local branch=$1
+		local new_branch=$1
 	elif [[ $# == 2 ]]; then
 		local repo=$1
 		local branch=$2
+		local new_branch=$2
+	elif [[ $# == 3 ]]; then
+		local repo=$1
+		local branch=$2
+		local new_branch=$3
 	else
 		return
 	fi
 
 	git fetch $repo $branch
 	git checkout FETCH_HEAD
-	git checkout -b $branch
+	git checkout -b $new_branch
 }
 
 alias git-lx='git apply  ~/sm/kgdb/lx-symbole.patch'

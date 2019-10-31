@@ -11,8 +11,15 @@ libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
-table_addr = lib.name_to_address("_flowtable")
-if table_addr == 0:
+try:
+    table_addr = prog['_flowtable']
+except LookupError as x:
+    print("no _flowtable")
+    sys.exit(1)
+
+# table_addr = lib.name_to_address("_flowtable")
+if table_addr.value_() == 0:
+    print("_flowtable is not initialized")
     sys.exit(1)
 
 table = Object(prog, 'struct flow_offload_table', address=table_addr)
