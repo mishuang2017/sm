@@ -11,7 +11,9 @@ import lib
 
 for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
-    if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
+#     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
+#         continue
+    if "enp4s0f0_1" != name:
         continue
     ingress_queue = dev.ingress_queue
     if ingress_queue.value_() == 0:
@@ -45,6 +47,7 @@ for x, dev in enumerate(lib.get_netdevs()):
             for node in radix_tree_for_each(head.handle_idr.idr_rt):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
+                print("cls_fl_filter %lx" % f.address_of_())
                 lib.print_cls_fl_filter(f)
                 print("==========================================\n")
             tcf_proto = tcf_proto.next

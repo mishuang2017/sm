@@ -544,6 +544,8 @@ alias sm9="cd /$images/chrism/linux-4.9"
 alias smy="cd /images/chrism/yossi"
 alias sm14="cd /images/chrism/linux-4.14.78"
 alias smm="cd /images/chrism/mlnx-ofa_kernel-4.0"
+alias smm7="cd /images/chrism/ofed-4.7/mlnx-ofa_kernel-4.0"
+alias smm6="cd /images/chrism/ofed-4.6/mlnx-ofa_kernel-4.0"
 alias smm2="cd /images/chrism/mlnx-ofa_kernel-4.0-2"
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
 alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actions//tests.json"
@@ -4760,7 +4762,7 @@ alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linu
 alias n1c500='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -l 500'
 alias n1c50='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -l 50'
 alias n1c8='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 192.168.0.200 -t 600'
-alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600; echo $?'
+alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 1'
 alias n1i='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600'
 alias n1i8='time ip netns exec n11 iperf3 -c 192.168.0.200 -t 600'
 alias n1u='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -u'
@@ -8348,6 +8350,7 @@ function br-ct
 	local proto=udp
 	local proto=tcp
 
+	del-br
 	ovs-vsctl add-br $br
 	ovs-vsctl add-port $br $rep2
 	ovs-vsctl add-port $br $rep3
