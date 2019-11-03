@@ -647,7 +647,7 @@ alias e=exit
 alias 160='ssh root@10.200.0.160'
 alias ka=killall
 alias vnc2='ssh chrism@10.7.2.14'
-alias vnc='ssh chrism@10.12.68.111'
+alias vnc='ssh chrism@10.112.68.111'
 alias netstat1='netstat -ntlp'
 
 alias f7="ssh root@l-csi-0937h.mtl.labs.mlnx"
