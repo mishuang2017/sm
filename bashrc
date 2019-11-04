@@ -802,7 +802,7 @@ alias r9='restart-ovs; sudo ~chrism/bin/test_router9-orig.sh; enable-ovs-debug'
 
 alias r92='restart-ovs; sudo ~chrism/bin/test_router9-test2.sh; enable-ovs-debug'
 alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'
-alias baidu='restart-ovs; sudo ~chrism/bin/test_router-baidu.sh; enable-ovs-debug'	# vm2 underlay
+alias baidu='del-br; sudo ~chrism/bin/test_router-baidu.sh; enable-ovs-debug'	# vm2 underlay
 alias dnat='restart-ovs; sudo ~chrism/bin/test_router-dnat.sh; enable-ovs-debug'	# dnat
 alias dnat-ct='restart-ovs; sudo ~chrism/bin/test_router-dnat-ct.sh; enable-ovs-debug'	# dnat
 alias rx2='restart-ovs; sudo ~chrism/bin/test_router-vxlan2.sh; enable-ovs-debug'
@@ -4758,11 +4758,11 @@ alias n1p1='n1 ping 8.9.10.1'
 alias n1p10='n1 ping 8.9.10.10'
 alias n1p8='n1 ping 192.168.0.200'
 
-alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
 alias n1c500='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -l 500'
 alias n1c50='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -l 50'
 alias n1c8='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 192.168.0.200 -t 600'
-alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 1'
+alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
+alias n1c1='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 1'
 alias n1i='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600'
 alias n1i8='time ip netns exec n11 iperf3 -c 192.168.0.200 -t 600'
 alias n1u='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -u'
@@ -5175,15 +5175,16 @@ function tm
 	$cmd has -t $session
 
 	if [ $? != 0 ]; then
-		$cmd new -d -n linux -s $session
-		$cmd neww -n build
-		$cmd neww -n list
-		$cmd neww -n patch
+		$cmd new -d -n cmd -s $session
+		$cmd neww -n trace
+		$cmd neww -n bash
+		$cmd neww -n bash
 		$cmd neww -n 4.19
 		$cmd neww -n live
-		$cmd neww -n stm
-		$cmd neww -n bash
+		$cmd neww -n 4.6
+		$cmd neww -n 4.7
 		$cmd neww -n bash	# 8
+		$cmd neww -n bash	# 9
 	fi
 
 	$cmd att -t $session
