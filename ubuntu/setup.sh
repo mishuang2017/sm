@@ -19,7 +19,7 @@ sudo apt-get -y install libdw-dev
 sudo apt-get -y install texinfo
 
 # For perf
-sudo apt-get -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev libbabeltrace-ctf-dev libiberty-dev libperl-dev
+sudo apt-get -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev libbabeltrace-ctf-dev libiberty-dev libperl-dev libreadline-dev 
 # sudo apt install openjdk-8-jdk
 
 apt install linux-crashdump
@@ -39,6 +39,7 @@ apt install -y liblzma-dev
 # install libvirt for debian
 sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils libguestfs-tools genisoimage virtinst libosinfo-bin
 # sudo apt install libvirt-daemon*
+
 
 # vpn
 # libopenconnect5:amd64
