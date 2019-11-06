@@ -13,7 +13,7 @@ sys.path.append(libpath)
 import lib
 
 try:
-    buf = prog['mlx5_buf']
+    buf = prog['__mlx5e_log_buf']
 except LookupError as x:
     print("no mlx5_buf")
     sys.exit(1)
