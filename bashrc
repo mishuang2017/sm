@@ -2017,7 +2017,7 @@ alias m=make-all
 alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install_kernel -j 32'
-alias mi2='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe'
+alias mi2='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/'
 alias m32='make -j 32'
 
 function mi2
@@ -4300,6 +4300,21 @@ set -x
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
+	vxlan1
+set +x
+}
+
+function brx2
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	ovs-ofctl add-flow $br "table=0,ip,udp,in_port=$rep2,nw_src=1.1.1.1,nw_dst=1.1.1.200/255.255.0.0 actions=output:4"
+	ovs-ofctl add-flow $br "table=0,ip,tcp,in_port=$rep2,nw_src=1.1.1.1,nw_dst=1.1.1.200/255.255.0.0 actions=output:4"
 	vxlan1
 set +x
 }
@@ -9524,7 +9539,10 @@ function bd2
 
 function siblings
 {
-	cat /sys/devices/system/cpu/cpu0/topology/thread_siblings_list
+	for ((i = 0; i < $(nproc); i++)); do
+		echo -n "$i: "
+		cat /sys/devices/system/cpu/cpu$i/topology/thread_siblings_list
+	done
 }
 
 alias iperf-dnat='iperf -c 8.9.10.10 -p 9999 -i 1 -t 10000'

@@ -31,6 +31,9 @@ apt install linux-crashdump
 #	vm.min_free_kbytes=65536
 # sysctl vm.min_free_kbytes
 
+# For crash, no termcap
+apt install -y libncurses5-dev
+
 # For drgn
 apt install -y python3-setuptools
 apt install -y python3-dev
