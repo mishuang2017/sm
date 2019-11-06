@@ -35,6 +35,8 @@ apt install linux-crashdump
 apt install -y libncurses5-dev
 
 # For drgn
+# must install libreadline-dev before install python 3.6
+# https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
 apt install -y python3-setuptools
 apt install -y python3-dev
 apt install -y liblzma-dev
