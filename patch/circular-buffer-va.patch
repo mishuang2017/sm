@@ -12,7 +12,7 @@ index b54766b81..6119c0951 100644
  	mlx5e_sq_fetch_wqe(sq, &wqe, &pi);
  
 diff --git a/drivers/net/ethernet/mellanox/mlx5/core/main.c b/drivers/net/ethernet/mellanox/mlx5/core/main.c
-index 661bd89d3..b8ae38136 100644
+index 661bd89d3..ad3548b08 100644
 --- a/drivers/net/ethernet/mellanox/mlx5/core/main.c
 +++ b/drivers/net/ethernet/mellanox/mlx5/core/main.c
 @@ -53,6 +53,7 @@
@@ -55,7 +55,7 @@ index 661bd89d3..b8ae38136 100644
 +	snprintf(buf, 1024, "%d: %s\n", mlx5e_log_next_seq++, va_buf);
 +	len = strlen(buf);
 +
-+	if (len + mlx5e_log_next_idx > mlx5e_log_buf_len) {
++	if (len + mlx5e_log_next_idx >= mlx5e_log_buf_len) {
 +		memset(mlx5e_log_buf, 0, mlx5e_log_buf_len - mlx5e_log_next_idx - 1);
 +		mlx5e_log_next_idx = 0;
 +		mlx5e_log_buf = __mlx5e_log_buf;
