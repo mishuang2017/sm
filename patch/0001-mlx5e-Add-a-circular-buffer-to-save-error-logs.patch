@@ -1,0 +1,91 @@
+From b8ec5a9895420692dd94f024f64f16f3acf95918 Mon Sep 17 00:00:00 2001
+From: Chris Mi <chrism@mellanox.com>
+Date: Mon, 24 Jun 2019 11:11:22 +0800
+Subject: [PATCH] mlx5e: Add a circular buffer to save error logs
+
+Signed-off-by: Chris Mi <chrism@mellanox.com>
+---
+ drivers/net/ethernet/mellanox/mlx5/core/main.c     | 40 ++++++++++++++++++++++
+ .../net/ethernet/mellanox/mlx5/core/mlx5_core.h    |  1 +
+ 2 files changed, 41 insertions(+)
+
+diff --git a/drivers/net/ethernet/mellanox/mlx5/core/main.c b/drivers/net/ethernet/mellanox/mlx5/core/main.c
+index 337cf25..1ed2b68 100644
+--- a/drivers/net/ethernet/mellanox/mlx5/core/main.c
++++ b/drivers/net/ethernet/mellanox/mlx5/core/main.c
+@@ -826,6 +826,43 @@ static void mlx5_cleanup_once(struct mlx5_core_dev *dev)
+ 	mlx5_eq_table_cleanup(dev);
+ }
+ 
++struct mutex mlx5e_buf_lock;
++
++#define MLX5E_LOG_BUF_LEN   (16*PAGE_SIZE)
++
++char __mlx5e_log_buf[MLX5E_LOG_BUF_LEN] __aligned(4);
++char *mlx5e_log_buf = __mlx5e_log_buf;
++u32 mlx5e_log_buf_len = MLX5E_LOG_BUF_LEN;
++
++u16 mlx5e_log_next_seq = 0;
++u32 mlx5e_log_next_idx = 0;
++
++void mlx5e_log(char *log)
++{
++	char buf[1024] = {0};
++	size_t len;
++
++	if (!log)
++		return;
++
++	snprintf(buf, 1024, "%d: %s\n", mlx5e_log_next_seq++, log);
++	len = strlen(buf);
++	if (len > 1024)
++		return;
++
++	if (len + mlx5e_log_next_idx > mlx5e_log_buf_len) {
++		memset(mlx5e_log_buf, 0, mlx5e_log_buf_len - mlx5e_log_next_idx - 1);
++		mlx5e_log_next_idx = 0;
++		mlx5e_log_buf = __mlx5e_log_buf;
++	}
++
++	mutex_lock(&mlx5e_buf_lock);
++	memcpy(mlx5e_log_buf, buf, len);
++	mlx5e_log_buf += len;
++	mlx5e_log_next_idx += len;
++	mutex_unlock(&mlx5e_buf_lock);
++}
++
+ char *jd_version = "1.5.4";	/* branch jd-1-mlx5 */
+ 
+ static int mlx5_load_one(struct mlx5_core_dev *dev, struct mlx5_priv *priv,
+@@ -1011,6 +1048,8 @@ static int mlx5_load_one(struct mlx5_core_dev *dev, struct mlx5_priv *priv,
+ out:
+ 	mutex_unlock(&dev->intf_state_mutex);
+ 
++	mutex_init(&mlx5e_buf_lock);
++
+ 	return 0;
+ 
+ err_reg_dev:
+@@ -1106,6 +1145,7 @@ static int mlx5_unload_one(struct mlx5_core_dev *dev, struct mlx5_priv *priv,
+ 	mlx5_core_disable_hca(dev, 0);
+ 	mlx5_cmd_cleanup(dev);
+ 
++	mutex_destroy(&mlx5e_buf_lock);
+ out:
+ 	mutex_unlock(&dev->intf_state_mutex);
+ 	return err;
+diff --git a/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h b/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h
+index d9728d8..a0a0167 100644
+--- a/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h
++++ b/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h
+@@ -184,6 +184,7 @@ int mlx5_firmware_flash(struct mlx5_core_dev *dev, const struct firmware *fw);
+ 
+ int mlx5e_init(void);
+ void mlx5e_cleanup(void);
++void mlx5e_log(char *log);
+ 
+ static inline int mlx5_lag_is_lacp_owner(struct mlx5_core_dev *dev)
+ {
+-- 
+1.8.3.1
+
