@@ -120,6 +120,18 @@ function Endif()
 	s/$/\r#endif/
 endfunc
 
+function OVS()
+	set softtabstop=4
+	set shiftwidth=4
+	set expandtab
+endfunc
+
+function Linux()
+	set softtabstop=8
+	set shiftwidth=8
+	set noexpandtab
+endfunc
+
 " colorscheme darkZ
 " colorscheme dark-ruby
 " colorscheme c

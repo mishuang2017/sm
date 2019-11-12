@@ -377,6 +377,7 @@ alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
 alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
+alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_7_3'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
 alias clone-iproute2-ct='git clone https://github.com/roidayan/iproute2 --branch=ct-one-table'
 alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
@@ -496,7 +497,7 @@ alias lv='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/03-vlan_in_host.x
 alias lh='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/header_rewrite.xml'
 alias iso='cd /mnt/d/software/iso'
 
-alias win='vncviewer 10.12.201.153:0'
+alias win='vncviewer 10.112.201.135:0'
 
 # alias uperf="$nfs_dir/uperf-1.0.5/src/uperf"
 
@@ -509,7 +510,7 @@ alias sm3="cd /$images/chrism/iproute2"
 alias sm1="cd $linux_dir"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
-alias sm7="cd /$images/chrism/rh_debug/BUILD/kernel-3.10.0-1055.el7/linux-3.10.0-1055.el7.x86_64"
+alias smk="cd ~chrism/sm/drgn/kernel"
 
 alias softirq="/$images/chrism/bcc/tools/softirqs.py 1"
 alias hardirq="/$images/chrism/bcc/tools/hardirqs.py 5"
@@ -570,6 +571,8 @@ alias smi2='cd /etc/libvirt/qemu'
 alias smn='cd /etc/sysconfig/network-scripts/'
 alias mr='modprobe -r'
 
+alias bfdb='bridge fdb'
+alias bfdb1='bridge fdb | grep 25'
 alias vs='sudo ovs-vsctl'
 alias of='sudo ovs-ofctl'
 alias dp='sudo ovs-dpctl'
@@ -800,7 +803,7 @@ alias r92='restart-ovs; sudo ~chrism/bin/test_router9-test2.sh; enable-ovs-debug
 alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'
 alias baidu='del-br; sudo ~chrism/bin/test_router-baidu.sh; enable-ovs-debug'	# vm2 underlay
 alias dnat='restart-ovs; sudo ~chrism/bin/test_router-dnat.sh; enable-ovs-debug'	# dnat
-alias dnat-ct='restart-ovs; sudo ~chrism/bin/test_router-dnat-ct.sh; enable-ovs-debug'	# dnat
+alias dnat-ct='del-br; sudo ~chrism/bin/test_router-dnat-ct.sh; enable-ovs-debug'	# dnat
 alias rx2='restart-ovs; sudo ~chrism/bin/test_router-vxlan2.sh; enable-ovs-debug'
 alias r9t='restart-ovs; sudo ~chrism/bin/test_router9-test.sh; enable-ovs-debug'
 
@@ -814,6 +817,13 @@ alias r4='sudo ~chrism/bin/test_router4.sh'	# ct + snat, can't offload
 alias r3='sudo ~chrism/bin/test_router3.sh'	# ct + snat, can't offload
 alias r2='sudo ~chrism/bin/test_router2.sh'	# snat, can offload
 alias r1='sudo ~chrism/bin/test_router.sh'	# veth arp responder
+
+# single port and one IP address
+
+# vm1 ip and vf1 ip and remote ip are in same subnet
+alias bd1='sudo ~chrism/bin/single-port.sh; enable-ovs-debug'
+
+alias bd2='sudo ~chrism/bin/single-port2.sh; enable-ovs-debug'	# dnat
 
 corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
@@ -2157,8 +2167,8 @@ set -x
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
 	TC=/images/chrism/tc-scripts/tc
-	TC=tc
 	TC=/images/chrism/iproute2/tc/tc
+	TC=tc
 
 	$TC qdisc del dev $rep2 ingress
 	$TC qdisc del dev $link ingress
@@ -2174,17 +2184,19 @@ set -x
 
 	src_mac=02:25:d0:$host_num:01:02
 	dst_mac=$remote_mac
-#	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
-#	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
-#	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $link
-	$TC filter add dev $rep2 prio 1 protocol ip  chain 100 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
-	$TC filter add dev $rep2 prio 2 protocol arp chain 100 parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
-	$TC filter add dev $rep2 prio 2 protocol arp chain 100 parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $link
-	src_mac=$remote_mac
-	dst_mac=02:25:d0:$host_num:01:02
-	$TC filter add dev $link prio 1 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
-	$TC filter add dev $link prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
-	$TC filter add dev $link prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep2 prio 3 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
+	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
+	$TC filter add dev $rep2 prio 1 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $link
+
+# 	$TC filter add dev $rep2 prio 3 protocol ip  chain 100 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
+# 	$TC filter add dev $rep2 prio 2 protocol arp chain 100 parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
+# 	$TC filter add dev $rep2 prio 1 protocol arp chain 100 parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $link
+
+# 	src_mac=$remote_mac
+# 	dst_mac=02:25:d0:$host_num:01:02
+# 	$TC filter add dev $link prio 3 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+# 	$TC filter add dev $link prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+# 	$TC filter add dev $link prio 1 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
 set +x
 }
 
@@ -4507,8 +4519,9 @@ alias bt='del-br; r; brx-ct'
 function counter-tc-ct
 {
 set -x
-	cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct
-set +
+# 	cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct
+	cat /sys/class/net/enp4s0f0/device/counters_tc_ct
+set +x
 }
 
 function create-br-vxlan-vlan
@@ -7871,20 +7884,6 @@ function checkout1
 	git reset --hard $1
 }
 
-alias pull1='git pull origin jd-kernel-unlocked-driver'
-function checkout2
-{
-	[[ $# != 1 ]] && return
-	git branch
-	git checkout jd-kernel-unlocked-driver
-	git branch -D 1
-	git branch 1
-	git checkout 1
-	git reset --hard $1
-	git am ~/backport/0001-disable-trace.patch
-	git am ~/backport/delay/0001-mlx5_flow_stats_work.patch
-}
-
 function vr
 {
 	[[ $# != 1 ]] && return
@@ -8610,7 +8609,8 @@ alias cd-wq='cd /sys/devices/virtual/workqueue'
 function counters_tc_ct
 {
 	while :; do
-		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
+# 		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
+		cat /sys/class/net/$link/device/counters_tc_ct | grep in_hw
 		sleep 1
 	done
 }
@@ -8619,7 +8619,8 @@ alias co=counters_tc_ct
 function counters_tc_ct10
 {
 	while :; do
-		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
+# 		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
+		cat /sys/class/net/$link/device/counters_tc_ct | grep in_hw
 		sleep 10
 	done | tee co.txt
 }
@@ -9421,7 +9422,7 @@ function trex-vxlan2
 		./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/IpVarianceVxlan.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 		(( i++ == 100 )) && break
 		echo "=============== $i ==============="
-		sleep 40
+		sleep 60
 	done
 }
 
@@ -9514,25 +9515,6 @@ alias vm='v drivers/net/ethernet/mellanox/mlx5/core/miniflow.c:1010'
 
 alias top-ovs=" top -p $(pgrep ovs-)"
 
-function bd1
-{
-	while :; do
-		ip link set dev $rep2 up || echo "up error"
-		ip link set dev $rep2 down || echo "down error"
-		echo done
-	done
-}
-
-function bd2
-{
-	while :; do
-		ip link set dev $vf1 up || echo "up error"
-		ip link set dev $vf1 down || echo "down error"
-		echo done
-	done
-}
-
-
 function siblings
 {
 	for ((i = 0; i < $(nproc); i++)); do
@@ -9583,7 +9565,13 @@ function ethtool-rx
 	done
 }
 
-
+function clear-br-ct
+{
+set -x
+	ip link set dev br_tc down
+	brctl  delbr br_tc
+set +x
+}
 
 ######## ubuntu #######
 

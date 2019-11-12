@@ -182,7 +182,7 @@ def print_match(fte):
 
 def print_dest(rule):
     if prog['MLX5_FLOW_DESTINATION_TYPE_COUNTER'] == rule.dest_attr.type:
-        print("\t\tdest: counter_id: %d, name: %s" % (rule.dest_attr.counter_id, rule.node.name.string_().decode()))
+#         print("\t\tdest: counter_id: %d, name: %s" % (rule.dest_attr.counter_id, rule.node.name.string_().decode()))
         return
     if prog['MLX5_FLOW_DESTINATION_TYPE_VPORT'] == rule.dest_attr.type:
         print("\t\tdest: vport: %x" % rule.dest_attr.vport.num)

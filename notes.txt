@@ -1617,9 +1617,13 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/stats-update
+git push origin HEAD:refs/for/mlnx_ofed_4_7_3/bd-nat
 
 git push origin HEAD:refs/for/master/stats-update
+
+git push origin HEAD:refs/for/mlnx_ofed_4_7/bd-fixes
+
+If commit was abandoned, don't reuse the change-id. Otherwise, will fail to push
 
 ===git===
 
@@ -11200,192 +11204,35 @@ Date:   Tue Feb 13 15:48:30 2018 +0200
 mlx5e_netdev_ops_vf_rep
 mlx5e_netdev_ops_uplink_rep
 
+===br===
 
+12.01276 0       0       swapper/2       br_fdb_update
+        br_fdb_update+0x1 [kernel]
+        br_nf_hook_thresh+0x50 [kernel]
+        br_nf_pre_routing_finish_ipv6+0x14c [kernel]
+        br_nf_pre_routing_ipv6+0xf7 [kernel]
+        br_nf_pre_routing+0x395 [kernel]
+        nf_hook_slow+0x48 [kernel]
+        br_handle_frame+0x213 [kernel]
+        __netif_receive_skb_core+0x2db [kernel]
+        __netif_receive_skb_one_core+0x3b [kernel]
+        __netif_receive_skb+0x18 [kernel]
+        netif_receive_skb_internal+0x6b [kernel]
+        napi_gro_receive+0xeb [kernel]
+        mlx5e_handle_rx_cqe_mpwrq+0xd3 [kernel]
+        mlx5e_poll_rx_cq+0x90 [kernel]
+        mlx5e_napi_poll+0xfe [kernel]
+        net_rx_action+0x14f [kernel]
+        __do_softirq+0xf9 [kernel]
+        irq_exit+0xf8 [kernel]
+        do_IRQ+0x8a [kernel]
+        ret_from_intr+0x0 [kernel]
+        mwait_idle+0x7f [kernel]
+        arch_cpu_idle+0x15 [kernel]
+        default_idle_call+0x23 [kernel]
+        do_idle+0x1bf [kernel]
+        cpu_startup_entry+0x73 [kernel]
+        start_secondary+0x1ab [kernel]
+        secondary_startup_64+0xa4 [kernel]
 
-[83628.400311]  <IRQ>
-[83628.402069]  notifier_call_chain        4c/0x70
-[83628.403832]  atomic_notifier_call_chain        1a/0x20
-[83628.405597]  forward_event        2f/0xb0 [mlx5_core]
-[83628.407287]  notifier_call_chain        4c/0x70
-[83628.408954]  atomic_notifier_call_chain        1a/0x20
-[83628.410631]  mlx5_eq_async_int        51/0x150 [mlx5_core]
-[83628.412290]  ? __note_gp_changes        c9/0x150
-[83628.413945]  __handle_irq_event_percpu        44/0x190
-[83628.415605]  handle_irq_event_percpu        32/0x80
-[83628.417264]  handle_irq_event        3b/0x60
-[83628.418893]  handle_edge_irq        7c/0x190
-[83628.420520]  handle_irq        b3/0x120
-[83628.422144]  do_IRQ        4e/0xe0
-[83628.423761]  common_interrupt        f/0xf
-
-
- 0xffffffffc043c170 : mlx5e_update_carrier        0/0x60 [mlx5_core]
- 0xffffffffc04403c2 : mlx5e_open_locked        72/0x90 [mlx5_core]
- 0xffffffffc0440408 : mlx5e_open        28/0xc0 [mlx5_core]
- 0xffffffff826bdc3a : __dev_open        da/0x170 [kernel]
- 0xffffffff826be0a1 : __dev_change_flags        1b1/0x200 [kernel]
- 0xffffffff826be119 : dev_change_flags        29/0x60 [kernel]
- 0xffffffff826cf207 : do_setlink        307/0xeb0 [kernel]
- 0xffffffff826d500a : __rtnl_newlink        53a/0x930 [kernel]
- 0xffffffff826d544c : rtnl_newlink        4c/0x70 [kernel]
- 0xffffffff826d053c : rtnetlink_rcv_msg        27c/0x2f0 [kernel]
- 0xffffffff8270b4a4 : netlink_rcv_skb        54/0x130 [kernel]
- 0xffffffff826ce885 : rtnetlink_rcv        15/0x20 [kernel]
- 0xffffffff8270acda : netlink_unicast        20a/0x2c0 [kernel]
- 0xffffffff8270b061 : netlink_sendmsg        2d1/0x3d0 [kernel]
- 0xffffffff82695459 : sock_sendmsg        39/0x50 [kernel]
- 0xffffffff826975d0 : ___sys_sendmsg        2a0/0x2f0 [kernel]
- 0xffffffff82698aa3 : __sys_sendmsg        63/0xa0 [kernel]
- 0xffffffff82698aff : __x64_sys_sendmsg        1f/0x30 [kernel]
- 0xffffffff8200261a : do_syscall_64        5a/0x170 [kernel]
- 0xffffffff82a0008c : entry_SYSCALL_64_after_hwframe        44/0xa9 [kernel]
-parms: priv=0xffff973e8f9808c0
-execname: ip
-ts: 56, 2
- 0x7f1158479387 : sendmsg        17/0xb0 [/usr/lib64/libc-2.26.so]
- 0x456e9b : __rtnl_talk_iov        db/0x3f0 [/usr/sbin/ip]
- 0x457c38 : rtnl_talk        28/0x30 [/usr/sbin/ip]
- 0x4219f2 : iplink_modify        192/0x220 [/usr/sbin/ip]
- 0x421c4a : do_iplink        ea/0xe30 [/usr/sbin/ip]
- 0x40a4b4 : do_cmd        44/0x80 [/usr/sbin/ip]
- 0x409faf : main        2df/0x680 [/usr/sbin/ip]
- 0x7f11583a3f2a : __libc_start_main        ea/0x1c0 [/usr/lib64/libc-2.26.so]
- 0x40a37a : _start        2a/0x30 [/usr/sbin/ip]
-
-
-mlx5e_update_carrier
-
- netif_carrier_on
-
-__LINK_STATE_NOCARRIER
-
-
-Jan 30 13:47:36 dev-r630-03 kernel: RIP: 0010: async_event         9/0x50 [mlx5_core]
-Jan 30 13:47:36 dev-r630-03 kernel: Code: f1 48 8b bb 48 8e 01 00 e8 34 bd da f1 5b 41 5c 5d c3 0f 1f 44 00 00 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 44 00 00 55 48 89 e5 <0f> 0b 31 c0 48 83 fe 09 74 02 5d c3 0f b6 52 03 80 fa 01 74 05 80
-Jan 30 13:47:36 dev-r630-03 kernel: RSP: 0018:ffffa0d85fbc3dd8 EFLAGS: 00010082
-Jan 30 13:47:36 dev-r630-03 kernel: RAX: ffffffffc094b3f0 RBX: 00000000fffffffe RCX: 0000000000000009
-Jan 30 13:47:36 dev-r630-03 kernel: RDX: ffffa0d050180000 RSI: 0000000000000009 RDI: ffffa0d01563bd58
-Jan 30 13:47:36 dev-r630-03 kernel: RBP: ffffa0d85fbc3dd8 R08: 0000000000000200 R09: 0000000000000000
-Jan 30 13:47:36 dev-r630-03 kernel: R10: 0000000000000000 R11: 0000000000000000 R12: 0000000000000000
-Jan 30 13:47:36 dev-r630-03 kernel: R13: 0000000000000009 R14: ffffa0d050180000 R15: 0000000000000000
-Jan 30 13:47:36 dev-r630-03 kernel: FS:  0000000000000000(0000) GS:ffffa0d85fbc0000(0000) knlGS:0000000000000000
-Jan 30 13:47:36 dev-r630-03 kernel: CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-Jan 30 13:47:36 dev-r630-03 kernel: CR2: 00007f70de5819b0 CR3: 000000095420e003 CR4: 00000000003606e0
-Jan 30 13:47:36 dev-r630-03 kernel: DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-Jan 30 13:47:36 dev-r630-03 kernel: DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-Jan 30 13:47:36 dev-r630-03 kernel: Call Trace:
-Jan 30 13:47:36 dev-r630-03 kernel: <IRQ>
-Jan 30 13:47:36 dev-r630-03 kernel: notifier_call_chain        4c/0x70
-Jan 30 13:47:36 dev-r630-03 kernel: atomic_notifier_call_chain        1a/0x20
-Jan 30 13:47:36 dev-r630-03 kernel: forward_event        2f/0xb0 [mlx5_core]
-Jan 30 13:47:36 dev-r630-03 kernel: notifier_call_chain        4c/0x70
-Jan 30 13:47:36 dev-r630-03 kernel: atomic_notifier_call_chain        1a/0x20
-Jan 30 13:47:36 dev-r630-03 kernel: mlx5_eq_async_int        51/0x150 [mlx5_core]
-Jan 30 13:47:36 dev-r630-03 kernel: ? __note_gp_changes        c9/0x150
-Jan 30 13:47:36 dev-r630-03 kernel: __handle_irq_event_percpu        44/0x190
-Jan 30 13:47:36 dev-r630-03 kernel: handle_irq_event_percpu        32/0x80
-Jan 30 13:47:36 dev-r630-03 kernel: handle_irq_event        3b/0x60
-Jan 30 13:47:36 dev-r630-03 kernel: handle_edge_irq        7c/0x190
-Jan 30 13:47:36 dev-r630-03 kernel: handle_irq        b3/0x120
-Jan 30 13:47:36 dev-r630-03 kernel: do_IRQ        4e/0xe0
-Jan 30 13:47:36 dev-r630-03 kernel: common_interrupt        f/0xf
-
-async_event
-	mlx5e_update_carrier_work
-		mlx5e_update_carrier
-
-[root@dev-r630-03 log]# dmesg -T
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.0: firmware version: 16.99.6118
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.0: 126.016 Gb/s available PCIe bandwidth, limited by 8 GT/s x16 link at 0000:00:02.0 (capable of 252.048 Gb/s with 16 GT/s x16 link)
-[Wed Jan 30 15:07:34 2019] (0000:04:00.0): E-Switch: Total vports 128, per vport: max uc(1024) max mc(16384)
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.0: Port module event: module 0, Cable plugged
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.1: firmware version: 16.99.6118
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.1: 126.016 Gb/s available PCIe bandwidth, limited by 8 GT/s x16 link at 0000:00:02.0 (capable of 252.048 Gb/s with 16 GT/s x16 link)
-[Wed Jan 30 15:07:34 2019] (0000:04:00.1): E-Switch: Total vports 128, per vport: max uc(1024) max mc(16384)
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.1: Port module event: module 1, Cable plugged
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.0: MLX5E: StrdRq(1) RqSz(8) StrdSz(2048) RxCqeCmprss(0)
-[Wed Jan 30 15:07:34 2019] mlx5e_add: ffffa0d054680000, eth0
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.1: MLX5E: StrdRq(1) RqSz(8) StrdSz(2048) RxCqeCmprss(0)
-[Wed Jan 30 15:07:34 2019] mlx5_core 0000:04:00.0 enp4s0f0: renamed from eth0
-[Wed Jan 30 15:07:34 2019] IPv6: ADDRCONF(NETDEV_UP): enp4s0f0: link is not ready
-[Wed Jan 30 15:07:35 2019] mlx5e_update_carrier: ffffa0d054680000, enp4s0f0
-[Wed Jan 30 15:07:35 2019] mlx5_core 0000:04:00.0 enp4s0f0: Link down
-[Wed Jan 30 15:07:35 2019] IPv6: ADDRCONF(NETDEV_UP): enp4s0f0: link is not ready
-[Wed Jan 30 15:07:35 2019] mlx5e_add: ffffa0d01c940000, eth0
-[Wed Jan 30 15:07:35 2019] mlx5_core 0000:04:00.1 enp4s0f1: renamed from eth0
-[Wed Jan 30 15:07:35 2019] IPv6: ADDRCONF(NETDEV_UP): enp4s0f1: link is not ready
-[Wed Jan 30 15:07:35 2019] mlx5e_update_carrier: ffffa0d01c940000, enp4s0f1
-[Wed Jan 30 15:07:35 2019] mlx5_core 0000:04:00.1 enp4s0f1: Link down
-[Wed Jan 30 15:07:35 2019] IPv6: ADDRCONF(NETDEV_UP): enp4s0f1: link is not ready
-[Wed Jan 30 15:07:39 2019] async_event: enp4s0f0: ffffa0d054680000, 4
-[Wed Jan 30 15:07:39 2019] mlx5e_update_carrier: ffffa0d054680000, enp4s0f0
-[Wed Jan 30 15:07:39 2019] mlx5_core 0000:04:00.0 enp4s0f0: Link up
-[Wed Jan 30 15:07:39 2019] IPv6: ADDRCONF(NETDEV_CHANGE): enp4s0f0: link becomes ready
-[Wed Jan 30 15:07:39 2019] async_event: enp4s0f1: ffffa0d01c940000, 4
-[Wed Jan 30 15:07:39 2019] mlx5e_update_carrier: ffffa0d01c940000, enp4s0f1
-[Wed Jan 30 15:07:39 2019] mlx5_core 0000:04:00.1 enp4s0f1: Link up
-[Wed Jan 30 15:07:39 2019] IPv6: ADDRCONF(NETDEV_CHANGE): enp4s0f1: link becomes ready
-
-
-Jan 30 14:29:17 dev-r630-03 kernel: Call Trace:
-Jan 30 14:29:17 dev-r630-03 kernel: mlx5_add_device        5f/0xf0 [mlx5_core]
-Jan 30 14:29:17 dev-r630-03 kernel: mlx5_add_dev_by_protocol        4b/0x50 [mlx5_core]
-Jan 30 14:29:17 dev-r630-03 kernel: mlx5_reload_interface        34/0x50 [mlx5_core]
-Jan 30 14:29:17 dev-r630-03 kernel: mlx5_eswitch_disable_sriov        2ba/0x3f0 [mlx5_core]
-Jan 30 14:29:17 dev-r630-03 kernel: mlx5_device_disable_sriov        e4/0x120 [mlx5_core]
-Jan 30 14:29:17 dev-r630-03 kernel: mlx5_core_sriov_configure        eb/0x220 [mlx5_core]
-Jan 30 14:29:17 dev-r630-03 kernel: sriov_numvfs_store        a1/0x190
-Jan 30 14:29:17 dev-r630-03 kernel: dev_attr_store        1b/0x30
-Jan 30 14:29:17 dev-r630-03 kernel: sysfs_kf_write        3c/0x50
-Jan 30 14:29:17 dev-r630-03 kernel: kernfs_fop_write        125/0x1a0
-Jan 30 14:29:17 dev-r630-03 kernel: __vfs_write        3a/0x190
-Jan 30 14:29:17 dev-r630-03 kernel: ? security_file_permission        31/0xf0
-Jan 30 14:29:17 dev-r630-03 kernel: ? _cond_resched        19/0x40
-Jan 30 14:29:17 dev-r630-03 kernel: vfs_write        b1/0x1a0
-Jan 30 14:29:17 dev-r630-03 kernel: ksys_write        55/0xc0
-Jan 30 14:29:17 dev-r630-03 kernel: __x64_sys_write        1a/0x20
-Jan 30 14:29:17 dev-r630-03 kernel: do_syscall_64        5a/0x170
-Jan 30 14:29:17 dev-r630-03 kernel: entry_SYSCALL_64_after_hwframe        44/0xa9
-
-mlx5e_refresh_tirs
-
-
-[root@dev-r630-04 ~]# tcs $link
-filter protocol ip pref 1 flower chain 0
-filter protocol ip pref 1 flower chain 0 handle 0x1
-  dst_mac 24:8a:07:88:27:ca
-  src_mac 24:8a:07:88:27:9a
-  eth_type ipv4
-  ip_flags nofrag
-  in_hw in_hw_count 1
-        action order 1: conntrack zone 65534
-        index 4 ref 1 bind 1 installed 0 sec used 0 sec
-        Action statistics:
-        Sent 84 bytes 1 pkt (dropped 0, overlimits 0 requeues 0)
-        backlog 0b 0p requeues 0
-
-        action order 2: gact action goto chain 4
-         random type none pass val 0
-         index 4 ref 1 bind 1 installed 0 sec used 0 sec
-        Action statistics:
-        Sent 84 bytes 1 pkt (dropped 0, overlimits 0 requeues 0)
-        backlog 0b 0p requeues 0
-        cookie a315ff155e4e5b3f6dd3459ce2d12461
-
-filter protocol arp pref 2 flower chain 0
-filter protocol ip pref 1 flower chain 4
-filter protocol ip pref 1 flower chain 4 handle 0x1
-  eth_type ipv4
-  ip_flags nofrag
-  in_hw in_hw_count 1
-        action order 1: gact action drop
-         random type none pass val 0
-         index 6 ref 1 bind 1 installed 9 sec used 0 sec
-        Action statistics:
-        Sent 672 bytes 8 pkt (dropped 8, overlimits 0 requeues 0)
-        backlog 0b 0p requeues 0
-        cookie cae44fd7664aea15a1c0b2b3560d378c
-
-
-
-
+===end===
