@@ -55,3 +55,6 @@ sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils lib
 # reboot
 
 # apt install -y *pinyin*
+
+# No LSB modules are available.
+sudo apt-get install lsb-core
