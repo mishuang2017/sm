@@ -24,7 +24,7 @@ def name_to_address(name):
 
 def address_to_name(address):
 #     print("address: %s" % address)
-    (status, output) = subprocess.getstatusoutput("grep " + address.strip("0x") + " /proc/kallsyms | awk '{print $3}'")
+    (status, output) = subprocess.getstatusoutput("grep " + address.replace("0x", "") + " /proc/kallsyms | awk '{print $3}'")
 #     print("%d, %s" % (status, output))
 
     if status:

@@ -14,7 +14,7 @@ for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
 #     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
 #         continue
-    if "veth_ovs" != name:
+    if "enp4s0f0" != name:
         continue
     ingress_queue = dev.ingress_queue
     if ingress_queue.value_() == 0:
@@ -30,15 +30,15 @@ for x, dev in enumerate(lib.get_netdevs()):
     if block.value_() == 0:
         continue
 
-    print(block)
+#     print(block)
     for cb in list_for_each_entry('struct tcf_block_cb', block.cb_list.address_of_(), 'list'):
-        print(cb)
+#         print(cb)
         func = cb.cb.value_()
         func = lib.address_to_name(hex(func))
-        print(func)
+        print("tcf_block_cb cb: %s" % func)
         priv = cb.cb_priv
         priv = Object(prog, 'struct mlx5e_priv', address=priv.value_())
-        print(priv.netdev.name.string_().decode())
+        print("tcf_block_cb cb_priv name: %s" % priv.netdev.name.string_().decode())
 
     print("\n%20s ingress_sched_data %20x\n" % (name, addr))
 
