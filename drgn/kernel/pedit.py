@@ -16,7 +16,11 @@ mlx5e_priv = lib.get_mlx5_pf0()
 # struct mlx5_esw_offload
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
 
-mod_hdr_tbl = offloads.mod_hdr.hlist
+# ofed 4.6
+mod_hdr_tbl = offloads.mod_hdr_tbl
+
+# ofed 4.7
+# mod_hdr_tbl = offloads.mod_hdr.hlist
 
 for i in range(256):
     node = mod_hdr_tbl[i].first

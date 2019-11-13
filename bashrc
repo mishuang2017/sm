@@ -507,6 +507,7 @@ alias sb='tmux save-buffer'
 
 alias sm="cd /$images/chrism"
 alias sm3="cd /$images/chrism/iproute2"
+alias sm4="cd /$images/chrism/iproute2-upstream"
 alias sm1="cd $linux_dir"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
@@ -519,24 +520,6 @@ if [[ "$USER" == "mi" ]]; then
 	kernel=$(uname -r | cut -d. -f 1-6)
 	arch=$(uname -m)
 fi
-
-function sm7
-{
-	local dir
-
-	dir=/$images/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64
-	if test -d $dir; then
-		cd $dir
-	fi
-	dir=/$images/mi/rpmbuild/BUILD/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.centos.x86_64
-	if test -d $dir; then
-		cd $dir
-	fi
-}
-alias sm4="cd /$images/mi/rpmbuild/BUILD/kernel-3.10.0-693.21.1.el7/linux-3.10.0-693.21.1.el7.x86_64"
-alias cf4='sm4; cscope -d'
-alias sm5="cd /$images/mi/rpmbuild/BUILD/kernel-3.10.0-862.11.6.el7/linux-3.10.0-862.11.6.el7.x86_64"
-alias cf5='sm5; cscope -d'
 
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
@@ -9212,6 +9195,12 @@ function num_rules
 {
 	cd $drgn_dir
 	sudo $drgn_dir/num_rules.py
+}
+
+function tc.py
+{
+	cd $drgn_dir
+	sudo $drgn_dir/tc.py
 }
 
 function miniflow_wq
