@@ -4771,7 +4771,7 @@ alias n1c50='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_li
 alias n1c8='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 192.168.0.200 -t 600'
 alias n1c='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 600'
 alias n1c1='time ip netns exec n11 /labhome/chrism/prg/c/corrupt/corrupt_lat_linux/corrupt -c 8.9.10.11 -t 1'
-alias n1i='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600'
+alias n1i='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 60000'
 alias n1i8='time ip netns exec n11 iperf3 -c 192.168.0.200 -t 600'
 alias n1u='n1 ping 8.9.10.11 -c 5; time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -u'
 alias n1iperf3='time ip netns exec n11 iperf3 -c 8.9.10.11 -t 600 -M 1200'
@@ -9201,6 +9201,12 @@ function tc.py
 {
 	cd $drgn_dir
 	sudo $drgn_dir/tc.py
+}
+
+function pedit
+{
+	cd $drgn_dir
+	sudo $drgn_dir/pedit.py
 }
 
 function miniflow_wq
