@@ -10092,6 +10092,9 @@ iptables -t nat -A POSTROUTING -o $link -j MASQUERADE
 
 ===ovs_ct===
 
+openvswitch: NAT support.
+https://lwn.net/Articles/671459/
+
 ovs_ct_execute
         handle_fragments
                 ip_defrag

@@ -1,5 +1,41 @@
 #!/usr/local/bin/drgn -k
 
+# SNAT
+# [root@dev-r630-03 kernel]# pedit
+# reply
+# mlx5e_mod_hdr_entry ffffa0bcbd53b600, mod_hdr_id 2e6
+#         action_type: 1, field: 16, name: OUT_DIPV4      , offset: 0     128.0.103.87
+#         action_type: 1, field:  9, name: OUT_TCP_DPORT  , offset: 0     afe8, 45032
+#         action_type: 1, field:  4, name: OUT_DMAC_47_16 , offset: 0     225d013
+#         action_type: 1, field:  5, name: OUT_DMAC_15_0  , offset: 0     102
+#         action_type: 1, field:  1, name: OUT_SMAC_47_16 , offset: 0     248a07ad
+#         action_type: 1, field:  2, name: OUT_SMAC_15_0  , offset: 0     7799
+#         action_type: 1, field: 16, name: OUT_DIPV4      , offset: 0     192.168.0.2
+# request
+# mlx5e_mod_hdr_entry ffffa0bcb154e300, mod_hdr_id 2e5
+#         action_type: 1, field: 15, name: OUT_SIPV4      , offset: 0     128.0.103.87
+#         action_type: 1, field: 15, name: OUT_SIPV4      , offset: 0     8.9.10.10
+#         action_type: 1, field:  8, name: OUT_TCP_SPORT  , offset: 0     ea65, 60005
+#         action_type: 1, field:  4, name: OUT_DMAC_47_16 , offset: 0     248a0788
+#         action_type: 1, field:  5, name: OUT_DMAC_15_0  , offset: 0     27ca
+#         action_type: 1, field:  1, name: OUT_SMAC_47_16 , offset: 0     248a07ad
+#         action_type: 1, field:  2, name: OUT_SMAC_15_0  , offset: 0     7799
+
+# DNAT
+# [root@dev-r630-03 kernel]# pedit
+# reply
+# mlx5e_mod_hdr_entry ffffa0bbc01f69c0, mod_hdr_id 2e3
+#         action_type: 1, field:  4, name: OUT_DMAC_47_16 , offset: 0     248a0788
+#         action_type: 1, field:  5, name: OUT_DMAC_15_0  , offset: 0     27ca
+#         action_type: 1, field: 15, name: OUT_SIPV4      , offset: 0     8.9.10.10
+#         action_type: 1, field:  8, name: OUT_TCP_SPORT  , offset: 0     270f, 9999
+# request
+# mlx5e_mod_hdr_entry ffffa0bc1199cb40, mod_hdr_id 2e2
+#         action_type: 1, field:  4, name: OUT_DMAC_47_16 , offset: 0     225d013
+#         action_type: 1, field:  5, name: OUT_DMAC_15_0  , offset: 0     102
+#         action_type: 1, field: 16, name: OUT_DIPV4      , offset: 0     192.168.0.2
+#         action_type: 1, field:  9, name: OUT_TCP_DPORT  , offset: 0     1389, 5001
+
 from drgn.helpers.linux import *
 from drgn import container_of
 from drgn import Object
@@ -11,17 +47,6 @@ import os
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
-
-mlx5e_priv = lib.get_mlx5_pf0()
-
-# struct mlx5_esw_offload
-offloads = mlx5e_priv.mdev.priv.eswitch.offloads
-
-# ofed 4.6
-mod_hdr_tbl = offloads.mod_hdr_tbl
-
-# ofed 4.7
-# mod_hdr_tbl = offloads.mod_hdr.hlist
 
 field_name = {
     0x1: "OUT_SMAC_47_16",
@@ -86,29 +111,46 @@ field_name = {
     0x5C: "IN_TCP_ACK_NUM"
 }
 
+mlx5e_priv = lib.get_mlx5_pf0()
+
+# struct mlx5_esw_offload
+offloads = mlx5e_priv.mdev.priv.eswitch.offloads
+
+# ofed 4.6
+# mod_hdr_tbl = offloads.mod_hdr_tbl
+
+# ofed 4.7
+# mod_hdr_tbl = offloads.mod_hdr.hlist
+
+try:
+    prog.type('struct mod_hdr_tbl')
+    mod_hdr_tbl = offloads.mod_hdr.hlist
+except LookupError as x:
+    mod_hdr_tbl = offloads.mod_hdr_tbl
+
 def parse_pedit(l, h):
-    print("%lx" % l)
-    print("%lx" % h)
+#     print("%lx" % l)
+#     print("%lx" % h)
     action_type = (l & 0xf0000000) >> 28
     field = (l & 0xfff0000) >> 16
     offset = (l & 0x1f00) >> 8
-    print("action_type: %x, field: %2x, name: %-15s, offset: %d" % \
-        (action_type, field, field_name.get(field), offset))
+    print("\taction_type: %x, field: %2x, name: %-15s, offset: %d" % \
+        (action_type, field, field_name.get(field), offset), end="")
     if field == 0x15 or field == 0x16:
-        print("%s" % lib.ipv4(h))
-    if field == 0x8 or field == 0x9:
-        print("%x, %d" % (h, h))
-    print("")
+        print("\t%s" % lib.ipv4(h))
+    elif field == 0x8 or field == 0x9:
+        print("\t%x, %d" % (h, h))
+    else:
+        print("\t%x" % (h))
 
 for i in range(256):
     node = mod_hdr_tbl[i].first
     while node.value_():
         obj = container_of(node, "struct mlx5e_mod_hdr_entry", "mod_hdr_hlist")
-        print("mlx5e_mod_hdr_entry %lx" % obj.value_())
         mlx5e_mod_hdr_entry = Object(prog, 'struct mlx5e_mod_hdr_entry', address=obj.value_())
-        print("mod_hdr_id %lx" % mlx5e_mod_hdr_entry.mod_hdr_id.value_())
+        print("mlx5e_mod_hdr_entry %lx, mod_hdr_id %lx" % (obj.value_(), mlx5e_mod_hdr_entry.mod_hdr_id.value_()))
 
-        print(mlx5e_mod_hdr_entry.key)
+#         print(mlx5e_mod_hdr_entry.key)
         actions = mlx5e_mod_hdr_entry.key.actions
         num_actions = mlx5e_mod_hdr_entry.key.num_actions
 #         print(actions)
@@ -121,4 +163,3 @@ for i in range(256):
             actions = actions + 8
 
         node = node.next
-        print("")
