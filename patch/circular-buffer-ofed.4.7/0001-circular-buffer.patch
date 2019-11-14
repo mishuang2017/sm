@@ -1,21 +1,19 @@
-diff --git a/drivers/net/ethernet/mellanox/mlx5/core/en_tx.c b/drivers/net/ethernet/mellanox/mlx5/core/en_tx.c
-index b54766b81..6119c0951 100644
---- a/drivers/net/ethernet/mellanox/mlx5/core/en_tx.c
-+++ b/drivers/net/ethernet/mellanox/mlx5/core/en_tx.c
-@@ -594,6 +594,8 @@ netdev_tx_t mlx5e_xmit(struct sk_buff *skb, struct net_device *dev)
- 	struct mlx5e_txqsq *sq;
- 	u16 pi;
- 
-+	mlx5e_log("%s: %lx", __func__, (long)skb);
-+
- 	sq = priv->txq2sq[skb_get_queue_mapping(skb)];
- 	mlx5e_sq_fetch_wqe(sq, &wqe, &pi);
- 
+From c9f8c31bec2466e42e8115fcdfc85211df19e9c4 Mon Sep 17 00:00:00 2001
+From: Chris Mi <chrism@mellanox.com>
+Date: Thu, 14 Nov 2019 13:48:09 +0800
+Subject: [PATCH] circular buffer
+
+Change-Id: Icc2500216c5d231f3271820464128673ff8f23ae
+---
+ drivers/net/ethernet/mellanox/mlx5/core/main.c     | 45 ++++++++++++++++++++++
+ .../net/ethernet/mellanox/mlx5/core/mlx5_core.h    |  1 +
+ 2 files changed, 46 insertions(+)
+
 diff --git a/drivers/net/ethernet/mellanox/mlx5/core/main.c b/drivers/net/ethernet/mellanox/mlx5/core/main.c
-index 661bd89d3..ad3548b08 100644
+index d7519a70b..08fdeaa3d 100644
 --- a/drivers/net/ethernet/mellanox/mlx5/core/main.c
 +++ b/drivers/net/ethernet/mellanox/mlx5/core/main.c
-@@ -53,6 +53,7 @@
+@@ -52,6 +52,7 @@
  #include <linux/mlx5/mlx5_ifc.h>
  #include <linux/mlx5/vport.h>
  #include <linux/pm.h>
@@ -23,7 +21,7 @@ index 661bd89d3..ad3548b08 100644
  #ifdef CONFIG_RFS_ACCEL
  #include <linux/cpu_rmap.h>
  #endif
-@@ -2891,6 +2892,47 @@ static void mlx5_remove_core_dir(void)
+@@ -2480,6 +2481,47 @@ static void mlx5_remove_core_dir(void)
  	}
  }
  
@@ -40,19 +38,19 @@ index 661bd89d3..ad3548b08 100644
 +
 +void mlx5e_log(char *fmt, ...)
 +{
-+	char va_buf[1024] = {0};
-+	char buf[1024] = {0};
++	char va_buf[512] = {0};
++	char buf[512] = {0};
 +	va_list argptr;
 +	size_t len;
 +	int cnt;
 +
 +	va_start(argptr, fmt);
-+	cnt = vsnprintf(va_buf, 1024, fmt, argptr);
++	cnt = vsnprintf(va_buf, 512, fmt, argptr);
 +	va_end(argptr);
-+	if (cnt > 1000)
++	if (cnt > 500)
 +		return;
 +
-+	snprintf(buf, 1024, "%d: %s\n", mlx5e_log_next_seq++, va_buf);
++	snprintf(buf, 512, "%d: %ld: %s\n", mlx5e_log_next_seq++, jiffies, va_buf);
 +	len = strlen(buf);
 +
 +	if (len + mlx5e_log_next_idx >= mlx5e_log_buf_len) {
@@ -71,16 +69,16 @@ index 661bd89d3..ad3548b08 100644
  static int __init init(void)
  {
  	int err;
-@@ -2918,6 +2960,8 @@ static int __init init(void)
- 		goto err_core_dir;
- 	}
+@@ -2507,6 +2549,8 @@ static int __init init(void)
+ 	mlx5e_init();
+ #endif
  
 +	mutex_init(&mlx5e_buf_lock);
 +
  	return 0;
  
  err_core_dir:
-@@ -2938,6 +2982,7 @@ static void __exit cleanup(void)
+@@ -2527,6 +2571,7 @@ static void __exit cleanup(void)
  
  	mlx5_remove_core_dir();
  	mlx5_unregister_debugfs();
@@ -89,14 +87,17 @@ index 661bd89d3..ad3548b08 100644
  
  module_init(init);
 diff --git a/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h b/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h
-index b35ab46d4..3a5f359b4 100644
+index 0ad69bdfc..3abecf354 100644
 --- a/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h
 +++ b/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.h
-@@ -349,6 +349,7 @@ int mlx5_icmd_access_register(struct mlx5_core_dev *dev,
+@@ -380,6 +380,7 @@ int mlx5_icmd_access_register(struct mlx5_core_dev *dev,
  
  void mlx5e_init(void);
  void mlx5e_cleanup(void);
 +void mlx5e_log(char *fmt, ...);
  
  int mlx5_modify_other_hca_cap_roce(struct mlx5_core_dev *mdev,
- 				   int function_id, bool value);
+ 				   u16 function_id, bool value);
+-- 
+2.14.4
+
