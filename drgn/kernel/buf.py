@@ -18,5 +18,19 @@ except LookupError as x:
     print("no mlx5_buf")
     sys.exit(1)
 
-for i in str(buf.string_()).split('\\n'):
-    print(i.strip("'"))
+result = {}
+
+# print(buf.string_().decode("utf-8"))
+for line in buf.string_().decode("utf-8").split('\n'):
+#     print(line)
+    index = line.split(':')[0]
+    if len(index) != 0:
+        index = int(index)
+#         print(index)
+        result[index] = line
+
+L=list(result.items()) 
+L.sort()
+
+for i in L:
+    print(i[1])
