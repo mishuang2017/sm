@@ -12,9 +12,15 @@ import lib
 
 mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
 
-if lib.kernel("4.20.16+"):
+# if lib.kernel("4.20.16+"):
+#     tc_ht = mlx5e_rep_priv.uplink_priv.tc_ht
+# else:
+#     tc_ht = mlx5e_rep_priv.tc_ht
+
+try:
+    prog.type('struct mlx5_rep_uplink_priv')
     tc_ht = mlx5e_rep_priv.uplink_priv.tc_ht
-else:
+except LookupError as x:
     tc_ht = mlx5e_rep_priv.tc_ht
 
 for i, flow in enumerate(lib.hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
