@@ -1,6 +1,6 @@
 sudo apt-get -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 	git make build-essential flex bison libssl-dev libelf-dev		\
-	ethtool tree linux-tools-generic sysstat
+	ethtool tree bc sysstat
 
 # For bionic bcc
 sudo apt-get -y install bison build-essential cmake flex git libedit-dev	\

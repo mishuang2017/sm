@@ -1617,11 +1617,10 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_4_7_3/bd-nat
+git push origin HEAD:refs/for/mlnx_ofed_4_7_3/nat-offload-issue
 
 git push origin HEAD:refs/for/master/stats-update
 
-git push origin HEAD:refs/for/mlnx_ofed_4_7/bd-fixes
 
 If commit was abandoned, don't reuse the change-id. Otherwise, will fail to push
 
