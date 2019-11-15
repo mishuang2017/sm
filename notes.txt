@@ -11237,4 +11237,60 @@ mlx5e_netdev_ops_uplink_rep
         start_secondary+0x1ab [kernel]
         secondary_startup_64+0xa4 [kernel]
 
+===ip_veth===
+
+Breakpoint 1, veth_parse_opt (lu=0x4a2aa0 <veth_link_util>, argc=3, argv=0x7fffffffe398, n=0x7fffffffdd90) at link_veth.c:34
+34              char *type = NULL;
+(gdb) bt
+#0  veth_parse_opt (lu=0x4a2aa0 <veth_link_util>, argc=3, argv=0x7fffffffe398, n=0x7fffffffdd90) at link_veth.c:34
+#1  0x00000000004294ea in iplink_modify (cmd=16, flags=1536, argc=3, argv=0x7fffffffe398) at iplink.c:1064
+#2  0x000000000042ada8 in do_iplink (argc=7, argv=0x7fffffffe378) at iplink.c:1637
+#3  0x0000000000408b7b in do_cmd (argv0=0x7fffffffe64e "link", argc=8, argv=0x7fffffffe370) at ip.c:113
+#4  0x00000000004094ed in main (argc=9, argv=0x7fffffffe368) at ip.c:317
+(gdb) file ip
+Reading symbols from ip...
+(gdb) p *argv
+$3 = 0x7fffffffe667 "peer"
+(gdb) p *argv+1
+$4 = 0x7fffffffe668 "eer"
+(gdb) p *(argv+1)
+$5 = 0x7fffffffe66c "name"
+(gdb) p *(argv+2)
+$6 = 0x7fffffffe671 "host1_rep"
+(gdb) p *n
+$8 = {
+  nlmsg_len = 60,
+  nlmsg_type = 16,	# RTM_NEWLINK     = 16,
+  nlmsg_flags = 1537,
+  nlmsg_seq = 0,
+  nlmsg_pid = 0
+}
+(gdb) p/x *n
+$9 = {
+  nlmsg_len = 0x3c,
+  nlmsg_type = 0x10,
+  nlmsg_flags = 0x601,
+  nlmsg_seq = 0x0,
+  nlmsg_pid = 0x0
+}
+
+===veth===
+
+[root@dev-r630-03 ~]# trace veth_newlink -K
+TIME     PID     TID     COMM            FUNC
+5.391614 11556   11556   ip              veth_newlink
+        veth_newlink
+	rtnl_newlink	ops->newlink
+        rtnetlink_rcv_msg	doit
+        netlink_rcv_skb+0x54 [kernel]
+        rtnetlink_rcv+0x15 [kernel]
+        netlink_unicast+0x19c [kernel]
+        netlink_sendmsg+0x2d1 [kernel]
+        sock_sendmsg+0x3e [kernel]
+        ___sys_sendmsg+0x283 [kernel]
+        __sys_sendmsg+0x63 [kernel]
+        __x64_sys_sendmsg+0x1f [kernel]
+        do_syscall_64+0x60 [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
 ===end===

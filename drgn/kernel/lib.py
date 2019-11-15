@@ -156,15 +156,29 @@ def get_veth(veth_name):
             veth_addr = dev.value_() + prog.type('struct net_device').size
             veth = Object(prog, 'struct veth_priv', address=veth_addr)
             veths.append(veth)
-            veths.append(dev)
 
             dev_peer = veth.peer
             veth_addr = dev_peer.value_() + prog.type('struct net_device').size
             veth = Object(prog, 'struct veth_priv', address=veth_addr)
             veths.append(veth)
-            veths.append(dev)
 
     return veths
+
+def get_veth_netdev(veth_name):
+    devs = []
+    for x, dev in enumerate(get_netdevs()):
+        name = dev.name.string_().decode()
+        if name == veth_name:
+            veth_addr = dev.value_() + prog.type('struct net_device').size
+            veth = Object(prog, 'struct veth_priv', address=veth_addr)
+            devs.append(dev)
+
+            dev_peer = veth.peer
+            veth_addr = dev_peer.value_() + prog.type('struct net_device').size
+            veth = Object(prog, 'struct veth_priv', address=veth_addr)
+            devs.append(dev)
+
+    return devs
 
 def get_mlx5(dev):
     mlx5e_priv_addr = dev.value_() + prog.type('struct net_device').size
