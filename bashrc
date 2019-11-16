@@ -9569,6 +9569,66 @@ set -x
 set +x
 }
 
+function tc-nat
+{
+set -x
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	del-br 2> /dev/null
+	tc2 2> /dev/null
+	tc-setup $rep2 2> /dev/null
+	tc-setup $link 2> /dev/null
+
+	tc filter add dev $rep2 ingress prio 1 chain 0 proto ip flower $offload ct_state -trk action ct pipe action goto chain 1
+	tc filter add dev $rep2 ingress prio 1 chain 1 proto ip flower $offload ct_state +trk+new \
+		action ct commit pipe action mirred egress redirect dev $link
+	tc filter add dev $rep2 ingress prio 1 chain 1 proto ip flower $offload ct_state +trk+est \
+		action ct pipe action mirred egress redirect dev $link
+
+	tc filter add dev $link ingress prio 1 chain 0 proto ip flower $offload ct_state -trk action ct pipe action goto chain 1
+	tc filter add dev $link ingress prio 1 chain 1 proto ip flower $offload ct_state +trk+est \
+		action ct pipe action mirred egress redirect dev $rep2
+set +x
+}
+
+function tc-nat2
+{
+set -x
+	tc2
+	tc-setup $rep2
+	tc-setup $link
+
+	tc filter add dev $rep2 ingress \
+		prio 1 chain 0 proto ip \
+		flower ip_proto tcp ct_state -trk \
+		action ct zone 2 pipe \
+		action goto chain 2
+	tc filter add dev $rep2 ingress \
+		prio 1 chain 2 proto ip \
+		flower ct_state +trk+new \
+		action ct zone 2 commit mark 0xbb nat src addr 8.9.10.10 pipe \
+		action mirred egress redirect dev $link
+	tc filter add dev $rep2 ingress \
+		prio 1 chain 2 proto ip \
+		flower ct_zone 2 ct_mark 0xbb ct_state +trk+est \
+		action ct nat pipe \
+		action mirred egress redirect dev $link
+
+	tc filter add dev $link ingress \
+		prio 1 chain 0 proto ip \
+		flower ip_proto tcp ct_state -trk \
+		action ct zone 2 pipe \
+		action goto chain 1
+	tc filter add dev $link ingress \
+		prio 1 chain 1 proto ip \
+		flower ct_zone 2 ct_mark 0xbb ct_state +trk+est \
+		action ct nat pipe \
+		action mirred egress redirect dev $rep2
+set +x
+}
+
 ######## ubuntu #######
 
 [[ -f /usr/bin/lsb_release ]] || return
