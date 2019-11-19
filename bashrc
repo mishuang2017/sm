@@ -18,7 +18,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
-[[ "$(hostname -s)" == "r-vrt-24-1" ]] && host_num=24
+[[ "$(hostname -s)" == "nps-server-30" ]] && host_num=20
+[[ "$(hostname -s)" == "nps-server-31" ]] && host_num=40
 
 if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
@@ -78,9 +79,15 @@ elif (( host_num == 3 )); then
 	link_remote_ip=192.168.1.$rhost_num
 	link=enp6s0f0
 
-elif (( host_num == 24 )); then
-	numvfs=3
-	link=ens2f0
+elif (( host_num == 20 )); then
+	numvfs=2
+	link=enp59s0f0
+	link2=enp59s0f1
+elif (( host_num == 40 )); then
+	numvfs=2
+	link=enp59s0f0
+	link2=enp59s0f1
+
 
 elif (( host_num == 15 )); then
 	link=ens9
@@ -260,7 +267,7 @@ alias vx='vxlan2; vxlan1'
 
 alias ipmirror="ifconfig $link 0; ip addr add dev $link $link_ip_vlan/16; ip link set $link up"
 
-alias vsconfig="ovs-vsctl get Open_vSwitch . other_config"
+alias vsconfig="sudo ovs-vsctl get Open_vSwitch . other_config"
 function vsconfig3
 {
 set -x
@@ -378,6 +385,7 @@ alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/et
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
 alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
 alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_7_3'
+alias clone-ofed-4.6='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
 alias clone-iproute2-ct='git clone https://github.com/roidayan/iproute2 --branch=ct-one-table'
 alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
@@ -385,6 +393,7 @@ alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kern
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
 alias clone-crash-upstream='git clone git@github.com:crash-utility/crash.git'
 alias clone-crash='git clone https://github.com/mishuang2017/crash.git'
+alias clone-sm='git clone https://github.com/mishuang2017/sm'
 alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
@@ -408,6 +417,7 @@ alias dmesg='dmesg -T'
 
 alias git-log='git log --tags --source'
 alias v4.20='git checkout v4.20; git checkout -b 4.20'
+alias v5.2='git checkout v5.2; git checkout -b 5.2'
 alias v4.19='git checkout v4.19; git checkout -b 4.19'
 alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
@@ -506,9 +516,8 @@ alias chown2="sudo chown -R chrism.mtl ."
 alias sb='tmux save-buffer'
 
 alias sm="cd /$images/chrism"
-alias sm3="cd /$images/chrism/iproute2"
-alias sm4="cd /$images/chrism/iproute2-upstream"
-alias sm1="cd $linux_dir"
+alias smip="cd /$images/chrism/iproute2"
+alias smipu="cd /$images/chrism/iproute2-upstream"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
 alias smk="cd ~chrism/sm/drgn/kernel"
@@ -804,10 +813,13 @@ alias r1='sudo ~chrism/bin/test_router.sh'	# veth arp responder
 
 # single port and one IP address
 
-# vm1 ip and vf1 ip and remote ip are in same subnet
+# vm1 ip and vf1 ip and remote ip are in same subnet, create a linux bridge
 alias bd1='sudo ~chrism/bin/single-port.sh; enable-ovs-debug'
 
 alias bd2='sudo ~chrism/bin/single-port2.sh; enable-ovs-debug'	# dnat
+
+# don't create linux bridge, use tc
+alias bd3='sudo ~chrism/bin/single-port3.sh; enable-ovs-debug'
 
 corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
@@ -9628,6 +9640,8 @@ set -x
 		action mirred egress redirect dev $rep2
 set +x
 }
+
+alias show-bond='cat /proc/net/bonding/bond0'
 
 ######## ubuntu #######
 

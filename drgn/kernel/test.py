@@ -9,6 +9,5 @@ libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
-rep = lib.get_mlx5e_rep_priv()
-print(rep.rep.esw.mode)
-#         .rep = (struct mlx5_eswitch_rep *)0xffff9694bdde5a78,
+priv = lib.get_mlx5_pf0()
+print(priv.stats.pport)
