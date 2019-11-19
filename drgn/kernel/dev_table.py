@@ -20,4 +20,6 @@ for i in range(1024):
     for vport in hlist_for_each_entry('struct vport', p, 'hash_node'):
         name = vport.dev.name.string_().decode()
         print(name)
+        if name == "enp4s0f0":
+            print(vport)
     p = p + 1

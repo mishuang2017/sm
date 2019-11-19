@@ -9,5 +9,5 @@ libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
-priv = lib.get_mlx5_pf0()
+priv = lib.get_pf0_netdev()
 print(priv.stats.pport)

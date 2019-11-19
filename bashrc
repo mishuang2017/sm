@@ -38,10 +38,10 @@ if (( host_num == 13 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-	if [[ "$USER" == "root" ]]; then
-		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
-		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
-	fi
+# 	if [[ "$USER" == "root" ]]; then
+# 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
+# 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+# 	fi
 
 elif (( host_num == 14 )); then
 	export DISPLAY=MTBC-CHRISM-N:0.0
@@ -416,6 +416,7 @@ alias gg='git grep -n'
 alias dmesg='dmesg -T'
 
 alias git-log='git log --tags --source'
+alias v4.14='git checkout v4.14; git checkout -b 4.14'
 alias v4.20='git checkout v4.20; git checkout -b 4.20'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
 alias v4.19='git checkout v4.19; git checkout -b 4.19'
@@ -730,6 +731,7 @@ alias vfs100="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=100"
 alias vfs120="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=120"
 alias vfs63="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=63"
 alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=4"
+alias vfs2="mlxconfig -d $pci2 set SRIOV_EN=1 NUM_OF_VFS=4"
 alias vfq="mlxconfig -d $pci q"
 alias vfq2="mlxconfig -d $pci2 q"
 alias vfsm="mlxconfig -d $linik_bdf set NUM_VF_MSIX=16"
@@ -1033,7 +1035,8 @@ function bind_all
 	done
 	echo "end bind_all"
 }
-alias bi='bind_all $link'
+alias bi="bind_all $link"
+alias bi2="bind_all $link2"
 
 function unbind_all
 {
@@ -1048,6 +1051,7 @@ function unbind_all
 	echo "end unbind_all"
 }
 alias un="unbind_all $link"
+alias un2="unbind_all $link2"
 
 function off_all
 {
@@ -1094,6 +1098,21 @@ set -x
 set +x
 }
 alias dev=set-switchdev
+
+function dev2
+{
+set -x
+	devlink dev eswitch show pci/$pci2
+	if [[ $# == 0 ]]; then
+		devlink dev eswitch set pci/$pci2 mode switchdev
+	fi
+	if [[ $# == 1 && "$1" == "off" ]]; then
+		devlink dev eswitch set pci/$pci2 mode legacy
+	fi
+	devlink dev eswitch show pci/$pci
+set +x
+}
+
 
 function inline-mode
 {
@@ -1563,6 +1582,7 @@ alias bo=mybuild2
 mybuild2 ()
 {
 set -x;
+	start-ovs
 	sudo ovs-vsctl del-br br
 	sudo ovs-vsctl del-br br-int
 	sudo ovs-vsctl del-br br-ex
@@ -4211,6 +4231,18 @@ set -x
 
 # 	ifconfig $br 8.9.10.1/24 up
 # 	ifconfig $br:0 192.168.0.1/24 up
+set +x
+}
+
+function bru2
+{
+set -x
+	del-br
+	vs add-br $br -- set bridge br  other-config:hwaddr=\"24:8a:07:88:27:13\"
+	ifconfig $link 8.9.10.2/24 up
+	vs add-port $br $link -- set Interface $link ofport_request=5
+	ip addr add dev $br 8.9.10.1/24;
+	ip link set dev $br up
 set +x
 }
 
@@ -8392,6 +8424,91 @@ function br-pf-ct
 	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
 
 	ovs-ofctl dump-flows $br
+}
+
+# [chrism@vnc14 ~]$ cat  /.autodirect/mgwork/maord/scripts/set_bond.sh
+#!/usr/bin/env bash
+# 
+# device=$1
+# device2=$2
+# num_vfs=$3
+# 
+# 
+# ifenslave -d bond0 $device $device1
+# rmmod bonding
+# 
+# $(dirname "$0")/set_switchdev.sh $device $num_vfs
+# sleep 10
+# $(dirname "$0")/set_switchdev.sh $device2 $num_vfs
+# sleep 10
+# modprobe bonding mode=4 miimon=100
+# ifconfig bond0 up
+# ifconfig $device down
+# ifconfig $device2 down
+# ip link set $device master bond0
+# ip link set $device2 master bond0
+# ifconfig $device up
+# ifconfig $device2 up
+
+function create-bond
+{
+set -x
+	off
+	on-sriov
+	sleep 1
+	on-sriov2
+	sleep 1
+	un
+	sleep 1
+	un2
+	sleep 1
+	dev
+	sleep 1
+	dev2
+	sleep 1
+	set-mac
+	set-mac 2
+
+	ifenslave -d bond0 $link $link2
+	sleep 1
+	rmmod bonding
+	sleep 1
+	modprobe bonding mode=4 miimon=100
+	sleep 1
+	ifconfig bond0 up
+	sleep 1
+	ifconfig $link down
+	sleep 1
+	ifconfig $link2 down
+	sleep 1
+	ip link set $link master bond0
+	sleep 1
+	ip link set $link2 master bond0
+	sleep 1
+	ifconfig $link up
+	sleep 1
+	ifconfig $link2 up
+	sleep 1
+	ethtool -K $link hw-tc-offload on
+	ethtool -K $link2 hw-tc-offload on
+
+	bi
+	sleep 1
+	bi2
+	sleep 1
+set +x
+}
+
+function br-bond
+{
+set -x
+	del-br
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br bond0
+	ovs-vsctl add-port $br $rep1
+	ifconfig $vf1 1.1.1.1/24 up
+	ifconfig $rep1 up
+set +x
 }
 
 alias cd-scapy='cd /labhome/chrism/prg/python/scapy'

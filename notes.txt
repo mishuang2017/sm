@@ -9762,6 +9762,27 @@ interface ethernet 1/2 no shutdown
 show interfaces ethernet status
 
 ===bonding===
+===bond===
+
+[Tue Nov 19 17:05:41 2019] Ethernet Channel Bonding Driver: v3.7.1 (April 27, 2011)
+[Tue Nov 19 17:05:41 2019] MII link monitoring set to 100 ms
+[Tue Nov 19 17:05:42 2019] IPv6: ADDRCONF(NETDEV_UP): bond0: link is not ready
+[Tue Nov 19 17:05:45 2019] mlx5_core 0000:04:00.0 enp4s0f0: Link down
+[Tue Nov 19 17:05:46 2019] bond0: Enslaving enp4s0f0 as a backup interface with a down link
+[Tue Nov 19 17:05:47 2019] mlx5_core 0000:04:00.1 enp4s0f1: Link down
+[Tue Nov 19 17:05:47 2019] bond0: Enslaving enp4s0f1 as a backup interface with a down link
+[Tue Nov 19 17:05:47 2019] mlx5_core 0000:04:00.0: lag map port 1:2 port 2:2 shared_fdb(1)
+[Tue Nov 19 17:05:47 2019] mlx5_core 0000:04:00.0: Operation mode is single FDB
+[Tue Nov 19 17:05:49 2019] mlx5_core 0000:04:00.0 enp4s0f0: Link up
+[Tue Nov 19 17:05:49 2019] bond0: link status definitely up for interface enp4s0f0, 100000 Mbps full duplex
+[Tue Nov 19 17:05:49 2019] bond0: Warning: No 802.3ad response from the link partner for any adapters in the bond
+[Tue Nov 19 17:05:49 2019] bond0: first active interface up!
+[Tue Nov 19 17:05:49 2019] mlx5_core 0000:04:00.0: modify lag map port 1:1 port 2:1
+[Tue Nov 19 17:05:49 2019] IPv6: ADDRCONF(NETDEV_CHANGE): bond0: link becomes ready
+[Tue Nov 19 17:05:50 2019] mlx5_core 0000:04:00.2: enabling device (0000 -> 0002)
+[Tue Nov 19 17:05:50 2019] mlx5_core 0000:04:00.2: firmware version: 16.26.1200
+
+
 
  0xffffffffa0225fe0 : mlx5e_xmit              0/0x80 [mlx5_core]
  0xffffffff81628b8b : dev_hard_start_xmit              9b/0x230 [kernel]

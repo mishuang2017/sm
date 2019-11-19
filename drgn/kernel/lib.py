@@ -185,13 +185,18 @@ def get_mlx5(dev):
     mlx5e_priv = Object(prog, 'struct mlx5e_priv', address=mlx5e_priv_addr)
     return mlx5e_priv
 
-
 def get_mlx5_pf0():
     for x, dev in enumerate(get_netdevs()):
         name = dev.name.string_().decode()
         if name == "enp4s0f0":
             mlx5e_priv = get_mlx5(dev)
     return mlx5e_priv
+
+def get_pf0_netdev():
+    for x, dev in enumerate(get_netdevs()):
+        name = dev.name.string_().decode()
+        if name == "enp4s0f0":
+            return dev
 
 def kernel(name):
     b = os.popen('uname -r')
