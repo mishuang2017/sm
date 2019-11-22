@@ -9852,16 +9852,16 @@ function ln-crash
 # VMLINUX=/usr/lib/debug/boot/vmlinux-$(uname -r)
 alias crash1="sudo $CRASH -i /root/.crash $VMLINUX"
 
-alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
-alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
-alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 $VMLINUX"
-alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 $VMLINUX"
-alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 $VMLINUX"
-alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 $VMLINUX"
-alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $VMLINUX"
-alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
-alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
-alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
+alias c0="sudo $CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
+alias c1="sudo $CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
+alias c2="sudo $CRASH -i /root/.crash $crash_dir/vmcore.2 $VMLINUX"
+alias c3="sudo $CRASH -i /root/.crash $crash_dir/vmcore.3 $VMLINUX"
+alias c4="sudo $CRASH -i /root/.crash $crash_dir/vmcore.4 $VMLINUX"
+alias c5="sudo $CRASH -i /root/.crash $crash_dir/vmcore.5 $VMLINUX"
+alias c6="sudo $CRASH -i /root/.crash $crash_dir/vmcore.6 $VMLINUX"
+alias c7="sudo $CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
+alias c8="sudo $CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
+alias c9="sudo $CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
 
 alias ls='ls --color=auto'
 
