@@ -421,6 +421,7 @@ alias v4.20='git checkout v4.20; git checkout -b 4.20'
 alias v4.19='git checkout v4.19; git checkout -b 4.19'
 alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
+alias v5.3='git checkout v5.3; git checkout -b 5.3'
 alias v4.10='git checkout v4.10; git checkout -b 4.10'
 alias v4.8='git checkout v4.8; git checkout -b 4.8'
 alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
@@ -9849,7 +9850,7 @@ function ln-crash
 
 # uncomment the following for built-in kernel
 # VMLINUX=/usr/lib/debug/boot/vmlinux-$(uname -r)
-alias crash1="$CRASH -i /root/.crash $VMLINUX"
+alias crash1="sudo $CRASH -i /root/.crash $VMLINUX"
 
 alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
 alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
