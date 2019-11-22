@@ -22,7 +22,7 @@ sudo apt-get -y install texinfo
 sudo apt-get -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev libbabeltrace-ctf-dev libiberty-dev libperl-dev libreadline-dev 
 # sudo apt install openjdk-8-jdk
 
-apt install linux-crashdump
+# apt install linux-crashdump
 # dpkg-reconfigure kdump-tools
 # /usr/sbin/kdump-config
 # /etc/default/grub.d/kdump-tools.cfg
@@ -32,14 +32,14 @@ apt install linux-crashdump
 # sysctl vm.min_free_kbytes
 
 # For crash, no termcap
-apt install -y libncurses5-dev
+sudo apt install -y libncurses5-dev
 
 # For drgn
 # must install libreadline-dev before install python 3.6
 # https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
-apt install -y python3-setuptools
-apt install -y python3-dev
-apt install -y liblzma-dev
+sudo apt install -y python3-setuptools
+sudo apt install -y python3-dev
+sudo apt install -y liblzma-dev
 
 # install libvirt for debian
 sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils libguestfs-tools genisoimage virtinst libosinfo-bin
