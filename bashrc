@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=2
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -570,6 +570,7 @@ alias vs='sudo ovs-vsctl'
 alias of='sudo ovs-ofctl'
 alias dp='sudo ovs-dpctl'
 alias dpd='sudo ~chrism/bin/ovs-df.sh'
+alias dpd-bond='dpd -m | grep -v arp | grep -v "bond0$" | grep offloaded | grep bond0'
 alias dpd0='sudo ovs-dpctl dump-flows --name'
 alias dpd1='sudo ovs-dpctl dump-flows --name | grep "in_port(enp4s0f0)"'
 alias dpd2='sudo ovs-dpctl dump-flows --name | grep "in_port(enp4s0f0_1)"'
@@ -1057,7 +1058,7 @@ function off_all
 {
 	local l
 #	for l in $link; do
-	for l in $link $link2 eth0; do
+	for l in $link $link2; do
 		[[ ! -d /sys/class/net/$l ]] && continue
 		n=$(cat /sys/class/net/$l/device/sriov_numvfs)
 		echo "$l has $n vfs"
@@ -1698,6 +1699,7 @@ function install-python3
 }
 
 # need to install /auto/mtbcswgwork/chrism/libcap-ng-0.7.8 first
+# pip3 install six
 function install-ovs
 {
 set -x
@@ -5674,7 +5676,7 @@ function none0
 	vsconfig2
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=0
+	ovs-vsctl set Open_vSwitch . other_config:max-idle=6000000
 	restart-ovs
 	vsconfig
 }
@@ -8452,7 +8454,6 @@ function br-pf-ct
 
 function create-bond
 {
-set -x
 	off
 	on-sriov
 	sleep 1
@@ -8469,45 +8470,43 @@ set -x
 	set-mac
 	set-mac 2
 
-	ifenslave -d bond0 $link $link2
+set -x
+	ifenslave -d bond0 $link $link2 2> /dev/null
 	sleep 1
 	rmmod bonding
 	sleep 1
 	modprobe bonding mode=4 miimon=100
 	sleep 1
 	ifconfig bond0 up
-	sleep 1
 	ifconfig $link down
-	sleep 1
 	ifconfig $link2 down
-	sleep 1
 	ip link set $link master bond0
 	sleep 1
 	ip link set $link2 master bond0
 	sleep 1
 	ifconfig $link up
-	sleep 1
 	ifconfig $link2 up
-	sleep 1
 	ethtool -K $link hw-tc-offload on
 	ethtool -K $link2 hw-tc-offload on
+set +x
 
 	bi
 	sleep 1
 	bi2
 	sleep 1
-set +x
 }
 
 function br-bond
 {
 set -x
+	restart-ovs
 	del-br
 	ovs-vsctl add-br $br
 	ovs-vsctl add-port $br bond0
 	ovs-vsctl add-port $br $rep1
-	ifconfig $vf1 1.1.1.1/24 up
+	ifconfig $vf1 192.168.1.$host_num/24 up
 	ifconfig $rep1 up
+# 	ovs-ofctl add-flow $br "in_port=bond0,dl_dst=2:25:d0:13:01:01 action=$rep1"
 set +x
 }
 
@@ -8882,29 +8881,41 @@ function install-bpftrace
 	make install
 }
 
+BCC_DIR=/images/chrism/bcc
+BCC_DIR=/usr/share/bcc
+alias trace="$BCC_DIR/tools/trace -t"
+alias execsnoop="$BCC_DIR/tools/execsnoop"
+alias funccount="$BCC_DIR/tools/funccount -i 1"
+alias fl="$BCC_DIR/tools/funclatency"
+
 function trace1
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg1"
+	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg1"
 }
 
 function trace2
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg2"
+	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg2"
+}
+
+function tracer2
+{
+	[[ $# != 1 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace -t 'r::$1 "ret: %d", retval' "$1 \"ifindex: %lx\", arg2"
+EOF
+	echo $file
+	bash $file
 }
 
 function trace3
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace.py -t "$1 \"%lx\", arg3"
+	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg3"
 }
-
-BCC_DIR=/images/chrism/bcc
-alias trace="$BCC_DIR/tools/trace.py -t"
-alias execsnoop="$BCC_DIR/tools/execsnoop.py"
-alias funccount="$BCC_DIR/tools/funccount.py -i 1"
-alias fl="$BCC_DIR/tools/funclatency.py"
 
 alias fc1='funccount miniflow_merge_work -i 1'
 alias fc2='funccount mlx5e_del_miniflow_list -i 1'
@@ -8912,7 +8923,7 @@ alias fc2='funccount mlx5e_del_miniflow_list -i 1'
 function fco
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/funccount.py /usr/sbin/ovs-vswitchd:$1 -i 1
+	$BCC_DIR/tools/funccount /usr/sbin/ovs-vswitchd:$1 -i 1
 }
 
 function tracerx
@@ -8920,7 +8931,7 @@ function tracerx
 	[[ $# != 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py 'r::$1 "%lx", retval'
+$BCC_DIR/tools/trace 'r::$1 "%lx", retval'
 EOF
 	echo $file
 	bash $file
@@ -8931,7 +8942,7 @@ function tracer
 	[[ $# != 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py 'r::$1 "%d", retval'
+$BCC_DIR/tools/trace 'r::$1 "%d", retval'
 EOF
 	echo $file
 	bash $file
@@ -8942,7 +8953,7 @@ function traceo
 	[[ $# < 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py -t 'ovs-vswitchd:$1 "%lx", arg1'
+$BCC_DIR/tools/trace -t 'ovs-vswitchd:$1 "%d", arg1'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file
@@ -8957,7 +8968,7 @@ function tracecmd
 	[[ $# < 2 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py -t '$1:$2 "%lx", arg1'
+$BCC_DIR/tools/trace -t '$1:$2 "%lx", arg1'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file
@@ -8974,7 +8985,7 @@ function traceo2
 	[[ $# < 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py 'ovs-vswitchd:$1 "%lx", arg2'
+$BCC_DIR/tools/trace 'ovs-vswitchd:$1 "%lx", arg2'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file
@@ -8989,7 +9000,7 @@ function traceo3
 	[[ $# < 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py 'ovs-vswitchd:$1 "%llx", arg3'
+$BCC_DIR/tools/trace 'ovs-vswitchd:$1 "%llx", arg3'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file
@@ -9004,7 +9015,7 @@ function traceor
 	[[ $# < 1 ]] && return
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
-$BCC_DIR/tools/trace.py 'r:ovs-vswitchd:$1 "%lx", retval'
+$BCC_DIR/tools/trace 'r:ovs-vswitchd:$1 "%lx", retval'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file
@@ -9869,7 +9880,7 @@ function install-dbgsym
 function start-ovs
 {
 	sudo systemctl start openvswitch-switch.service
-	exit
+	return
 	smo
 # 	mkdir -p /etc/openvswitch
 # 	ovsdb-tool create /etc/openvswitch/conf.db vswitchd/vswitch.ovsschema

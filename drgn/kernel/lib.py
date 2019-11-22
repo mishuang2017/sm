@@ -192,6 +192,14 @@ def get_mlx5_pf0():
             mlx5e_priv = get_mlx5(dev)
     return mlx5e_priv
 
+def get_mlx5_pf1():
+    for x, dev in enumerate(get_netdevs()):
+        name = dev.name.string_().decode()
+        if name == "enp4s0f1":
+            mlx5e_priv = get_mlx5(dev)
+    return mlx5e_priv
+
+
 def get_pf0_netdev():
     for x, dev in enumerate(get_netdevs()):
         name = dev.name.string_().decode()

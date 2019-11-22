@@ -211,6 +211,22 @@ for i in range(4):
                 print("flow table id: %x leve: %x" % (fdb.id.value_(), fdb.level.value_()))
                 flow_table("", fdb)
 
+print("--------------------------------")
+
+mlx5e_priv = lib.get_mlx5_pf1()
+mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
+
+for i in range(4):
+    for j in range(17):
+        for k in range(2):
+            num_rules = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].num_rules
+            if num_rules:
+                print("")
+                print(i, j, k, num_rules);
+                fdb = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].fdb
+                print("flow table id: %x leve: %x" % (fdb.id.value_(), fdb.level.value_()))
+                flow_table("", fdb)
+
 # slow_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb
 # flow_table("mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb", slow_fdb)
 # vport_to_tir = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads

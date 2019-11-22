@@ -1617,6 +1617,8 @@ git push origin HEAD:refs/for/asap2-direct-3.3-next/port-mirroring
 git push origin HEAD:refs/for/backport-mlnx_ofed_4_2_asap/backport-idr
 git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 
+git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue-for-bond
+
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue
 
 git push origin HEAD:refs/for/master/stats-update
@@ -9764,6 +9766,11 @@ show interfaces ethernet status
 ===bonding===
 ===bond===
 
+mlx5e_nic_enable
+	mlx5_lag_add
+
+mlx5_queue_bond_work
+
 [Tue Nov 19 17:05:41 2019] Ethernet Channel Bonding Driver: v3.7.1 (April 27, 2011)
 [Tue Nov 19 17:05:41 2019] MII link monitoring set to 100 ms
 [Tue Nov 19 17:05:42 2019] IPv6: ADDRCONF(NETDEV_UP): bond0: link is not ready
@@ -10986,6 +10993,10 @@ http://debuginfo.centos.org/7/x86_64/kernel-debuginfo-3.10.0-862.el7.x86_64.rpm
 https://mirrors.aliyun.com/centos/7.5.1804/updates/x86_64/Packages/
 
 https://ask.fedoraproject.org/en/question/51444/how-to-install-specific-kernel-version/
+
+centos 7.6:
+http://debuginfo.centos.org/7/x86_64/kernel-debuginfo-common-x86_64-3.10.0-957.el7.x86_64.rpm
+http://debuginfo.centos.org/7/x86_64/kernel-debuginfo-3.10.0-957.el7.x86_64.rpm
 
 ===lwn===
 
