@@ -13,5 +13,5 @@ import lib
 for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
     addr = dev.value_()
-    if "enp4s0f" in name:
+    if "enp" in name:
         print("%20s%20x" % (name, addr))

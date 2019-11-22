@@ -9845,7 +9845,8 @@ function ln-crash
 	cd $crash_dir
 	local dir=$(ls -td $(date +%Y)*/ | head -1)
 	local n=$(ls vmcore* | wc -l)
-	ln -s ${dir}dump* vmcore.$n
+# 	ln -s ${dir}dump* vmcore.$n
+	ln -s ${dir}vmcore* vmcore.$n
 }
 
 # uncomment the following for built-in kernel
@@ -9899,7 +9900,7 @@ function restart-ovs
 
 function stop-ovs
 {
-	sudo systemctl stop ovs-vswitchd.service
+	sudo systemctl stop openvswitch-switch.service
 	sudo systemctl stop ovsdb-server.service
 }
 
@@ -9908,3 +9909,5 @@ function ovs-dpkg
 	export CFLAGS='-g -O0'
 	DEB_BUILD_OPTIONS="parallel=40 nocheck" dpkg-buildpackage -b -us -uc
 }
+
+e=enp0s31f6

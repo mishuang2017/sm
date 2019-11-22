@@ -19,7 +19,11 @@ p = Object(prog, 'struct hlist_head *', address=t)
 for i in range(1024):
     for vport in hlist_for_each_entry('struct vport', p, 'hash_node'):
         name = vport.dev.name.string_().decode()
-        print(name)
-        if name == "enp4s0f0":
-            print(vport)
+        upcall_portids = vport.upcall_portids
+        ids = upcall_portids.ids
+        id = ids[0]
+        print("name: %10s,  n_ids: %d, id: %x" % (name, upcall_portids.n_ids, id))
+        print("vport %lx" % vport)
+        print("vport_portids %lx" % upcall_portids)
+        print("")
     p = p + 1
