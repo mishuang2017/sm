@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=2
+numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -418,7 +418,6 @@ alias dmesg='dmesg -T'
 alias git-log='git log --tags --source'
 alias v4.14='git checkout v4.14; git checkout -b 4.14'
 alias v4.20='git checkout v4.20; git checkout -b 4.20'
-alias v5.2='git checkout v5.2; git checkout -b 5.2'
 alias v4.19='git checkout v4.19; git checkout -b 4.19'
 alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
