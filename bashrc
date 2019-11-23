@@ -464,7 +464,7 @@ alias t="tcpdump -enn -i $link"
 alias t1="tcpdump -enn -v -i $link"
 alias t2="tcpdump -enn -vv -i $link"
 alias t4="tcpdump -enn -vvvv -i $link"
-alias ti='tcpdump -enn -i'
+alias ti='sudo tcpdump -enn -i'
 alias tvf="ip netns exec n0 tcpdump -enn -i $vf1"
 alias tvf2="ip netns exec n1 tcpdump -en -i $vf2"
 alias trep="tcpdump -en -i $rep1"
@@ -1162,10 +1162,10 @@ function tc-drop
 
 # ovs-ofctl add-flow br -O openflow13 "in_port=2,dl_type=0x86dd,nw_proto=58,icmp_type=128,action=set_field:0x64->tun_id,output:5"
 
-alias ofd="ovs-ofctl dump-flows $br --color"
-alias ofdi="ovs-ofctl dump-flows br-int --color"
-alias ofde="ovs-ofctl dump-flows br-ex --color"
-alias ofd2="ovs-ofctl dump-flows br2 --color" 
+alias ofd="sudo ovs-ofctl dump-flows $br --color"
+alias ofdi="sudo ovs-ofctl dump-flows br-int --color"
+alias ofde="sudo ovs-ofctl dump-flows br-ex --color"
+alias ofd2="sudo ovs-ofctl dump-flows br2 --color" 
 
 function ofi
 {
@@ -8883,7 +8883,7 @@ function install-bpftrace
 
 BCC_DIR=/images/chrism/bcc
 BCC_DIR=/usr/share/bcc
-alias trace="$BCC_DIR/tools/trace -t"
+alias trace="sudo $BCC_DIR/tools/trace -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop"
 alias funccount="$BCC_DIR/tools/funccount -i 1"
 alias fl="$BCC_DIR/tools/funclatency"
@@ -8891,13 +8891,13 @@ alias fl="$BCC_DIR/tools/funclatency"
 function trace1
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg1"
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg1"
 }
 
 function trace2
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg2"
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg2"
 }
 
 function tracer2
@@ -8908,13 +8908,13 @@ cat << EOF > $file
 $BCC_DIR/tools/trace -t 'r::$1 "ret: %d", retval' "$1 \"ifindex: %lx\", arg2"
 EOF
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function trace3
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg3"
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg3"
 }
 
 alias fc1='funccount miniflow_merge_work -i 1'
@@ -8923,7 +8923,7 @@ alias fc2='funccount mlx5e_del_miniflow_list -i 1'
 function fco
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/funccount /usr/sbin/ovs-vswitchd:$1 -i 1
+	sudo $BCC_DIR/tools/funccount /usr/sbin/ovs-vswitchd:$1 -i 1
 }
 
 function tracerx
@@ -8934,7 +8934,7 @@ cat << EOF > $file
 $BCC_DIR/tools/trace 'r::$1 "%lx", retval'
 EOF
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function tracer
@@ -8945,7 +8945,7 @@ cat << EOF > $file
 $BCC_DIR/tools/trace 'r::$1 "%d", retval'
 EOF
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function traceo
@@ -8960,7 +8960,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function tracecmd
@@ -8975,7 +8975,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 alias trace-of="tracecmd ovs-ofctl"
@@ -8992,7 +8992,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function traceo3
@@ -9007,7 +9007,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function traceor
@@ -9022,7 +9022,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function bcc-mlx5e_xmit

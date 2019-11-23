@@ -3,9 +3,14 @@
 from drgn.helpers.linux import *
 from drgn import Object
 import subprocess
+import socket
 import time
 import sys
 import os
+
+libpath = os.path.dirname(os.path.realpath("__file__"))
+sys.path.append(libpath)
+import lib
 
 (status, output) = subprocess.getstatusoutput("grep -w dev_table /proc/kallsyms | grep openvswitch | awk '{print $1}'")
 print("%d, %s" % (status, output))
@@ -27,3 +32,36 @@ for i in range(1024):
         print("vport_portids %lx" % upcall_portids)
         print("")
     p = p + 1
+
+table = vport.dp.table
+ufid_count = table.count.value_()
+ufid_ti = table.ufid_ti
+print("ufid_count: %d" % ufid_count)
+print(ufid_ti)
+
+n_buckets = ufid_ti.n_buckets.value_()
+node_ver = ufid_ti.node_ver.value_()
+print("n_buckets: %d, node_ver: %d" % (n_buckets, node_ver))
+
+def print_mac(mac):
+    a = ("%02x:%02x:%02x:%02x:%02x:%02x") % (mac[0], mac[1], mac[2], mac[3], mac[4], mac[5])
+    return a
+
+def print_eth(eth):
+    print("eth: ", end='')
+    type = eth.type
+    print("type: %x, src: %s, dst: %s" % (socket.ntohs(type), print_mac(eth.src), print_mac(eth.dst)))
+
+def print_flow_key(key):
+#     MAC_PROTO_ETHERNET = 1
+#     mac_proto = key.mac_proto
+#     print(mac_proto)
+    print_eth(key.eth)
+    proto = key.ip.proto.value_()
+#     print("proto: %d, src: %s" % (proto, lib.ipv4(key.ipv4.addr.src)))
+    tp_dst = key.tp.dst
+    print("tp_dst: %d" % socket.ntohs(tp_dst))
+
+for i in range(n_buckets):
+    for flow in hlist_for_each_entry('struct sw_flow', ufid_ti.buckets[i].address_of_(), 'ufid_table'):
+        print_flow_key(flow.key)
