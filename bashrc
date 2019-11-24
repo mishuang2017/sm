@@ -493,7 +493,7 @@ alias m1="mlxlink -d $pci"
 
 alias modv='modprobe --dump-modversions'
 alias 154='ssh mishuang@10.12.66.154'
-alias ctl=systemctl
+alias ctl='sudo systemctl'
 # alias dmesg='dmesg -T'
 alias dmesg1='dmesg -HwT'
 
@@ -4628,11 +4628,11 @@ set +x
 function del-br
 {
 	start-ovs
-	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
+	sudo ovs-vsctl list-br | sudo xargs -r -l ovs-vsctl del-br
 	sleep 1
 	return
-	ip l d $vx_rep
-	ip l d dummy0 > /dev/null 2>&1
+	sudo ip l d $vx_rep
+	sudo ip l d dummy0 > /dev/null 2>&1
 }
 
 function vlan-ns
@@ -9911,3 +9911,11 @@ function ovs-dpkg
 }
 
 e=enp0s31f6
+
+function br-hp
+{
+	del-br
+	sudo ovs-vsctl add-br $br
+	sudo ovs-vsctl add-port $br $e
+	sudo ifconfig $br 1.1.1.1/24 up
+}
