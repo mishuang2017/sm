@@ -22,7 +22,11 @@ def name_to_address(name):
 
     return p.value_()
 
+# hex returns type str
 def address_to_name(address):
+#     print(type(address))
+    if address == "0x0":
+        return "0x0"
 #     print("address: %s" % address)
     (status, output) = subprocess.getstatusoutput("grep " + address.replace("0x", "") + " /proc/kallsyms | awk '{print $3}'")
 #     print("%d, %s" % (status, output))

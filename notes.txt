@@ -11311,6 +11311,11 @@ $9 = {
 
 bnxt_tc_add_flow
 
+===fib===
+
+cat /proc/net/fib_trie
+fib_trie_seq_start
+
 ===veth===
 
 [root@dev-r630-03 ~]# trace veth_newlink -K

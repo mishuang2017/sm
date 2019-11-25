@@ -421,6 +421,7 @@ alias v4.20='git checkout v4.20; git checkout -b 4.20'
 alias v4.19='git checkout v4.19; git checkout -b 4.19'
 alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
+alias v5.3='git checkout v5.3; git checkout -b 5.3'
 alias v4.10='git checkout v4.10; git checkout -b 4.10'
 alias v4.8='git checkout v4.8; git checkout -b 4.8'
 alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
@@ -463,7 +464,7 @@ alias t="tcpdump -enn -i $link"
 alias t1="tcpdump -enn -v -i $link"
 alias t2="tcpdump -enn -vv -i $link"
 alias t4="tcpdump -enn -vvvv -i $link"
-alias ti='tcpdump -enn -i'
+alias ti='sudo tcpdump -enn -i'
 alias tvf="ip netns exec n0 tcpdump -enn -i $vf1"
 alias tvf2="ip netns exec n1 tcpdump -en -i $vf2"
 alias trep="tcpdump -en -i $rep1"
@@ -492,7 +493,7 @@ alias m1="mlxlink -d $pci"
 
 alias modv='modprobe --dump-modversions'
 alias 154='ssh mishuang@10.12.66.154'
-alias ctl=systemctl
+alias ctl='sudo systemctl'
 # alias dmesg='dmesg -T'
 alias dmesg1='dmesg -HwT'
 
@@ -1161,10 +1162,10 @@ function tc-drop
 
 # ovs-ofctl add-flow br -O openflow13 "in_port=2,dl_type=0x86dd,nw_proto=58,icmp_type=128,action=set_field:0x64->tun_id,output:5"
 
-alias ofd="ovs-ofctl dump-flows $br --color"
-alias ofdi="ovs-ofctl dump-flows br-int --color"
-alias ofde="ovs-ofctl dump-flows br-ex --color"
-alias ofd2="ovs-ofctl dump-flows br2 --color" 
+alias ofd="sudo ovs-ofctl dump-flows $br --color"
+alias ofdi="sudo ovs-ofctl dump-flows br-int --color"
+alias ofde="sudo ovs-ofctl dump-flows br-ex --color"
+alias ofd2="sudo ovs-ofctl dump-flows br2 --color" 
 
 function ofi
 {
@@ -4629,11 +4630,11 @@ set +x
 function del-br
 {
 	start-ovs
-	ovs-vsctl list-br | xargs -r -l ovs-vsctl del-br
+	sudo ovs-vsctl list-br | sudo xargs -r -l ovs-vsctl del-br
 	sleep 1
 	return
-	ip l d $vx_rep
-	ip l d dummy0 > /dev/null 2>&1
+	sudo ip l d $vx_rep
+	sudo ip l d dummy0 > /dev/null 2>&1
 }
 
 function vlan-ns
@@ -8884,7 +8885,7 @@ function install-bpftrace
 
 BCC_DIR=/images/chrism/bcc
 BCC_DIR=/usr/share/bcc
-alias trace="$BCC_DIR/tools/trace -t"
+alias trace="sudo $BCC_DIR/tools/trace -t"
 alias execsnoop="$BCC_DIR/tools/execsnoop"
 alias funccount="$BCC_DIR/tools/funccount -i 1"
 alias fl="$BCC_DIR/tools/funclatency"
@@ -8892,13 +8893,13 @@ alias fl="$BCC_DIR/tools/funclatency"
 function trace1
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg1"
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg1"
 }
 
 function trace2
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg2"
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg2"
 }
 
 function tracer2
@@ -8909,13 +8910,13 @@ cat << EOF > $file
 $BCC_DIR/tools/trace -t 'r::$1 "ret: %d", retval' "$1 \"ifindex: %lx\", arg2"
 EOF
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function trace3
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/trace -t "$1 \"%lx\", arg3"
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg3"
 }
 
 alias fc1='funccount miniflow_merge_work -i 1'
@@ -8924,7 +8925,7 @@ alias fc2='funccount mlx5e_del_miniflow_list -i 1'
 function fco
 {
 	[[ $# != 1 ]] && return
-	$BCC_DIR/tools/funccount /usr/sbin/ovs-vswitchd:$1 -i 1
+	sudo $BCC_DIR/tools/funccount /usr/sbin/ovs-vswitchd:$1 -i 1
 }
 
 function tracerx
@@ -8935,7 +8936,7 @@ cat << EOF > $file
 $BCC_DIR/tools/trace 'r::$1 "%lx", retval'
 EOF
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function tracer
@@ -8946,7 +8947,7 @@ cat << EOF > $file
 $BCC_DIR/tools/trace 'r::$1 "%d", retval'
 EOF
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function traceo
@@ -8961,7 +8962,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function tracecmd
@@ -8976,7 +8977,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 alias trace-of="tracecmd ovs-ofctl"
@@ -8993,7 +8994,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function traceo3
@@ -9008,7 +9009,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function traceor
@@ -9023,7 +9024,7 @@ EOF
 	fi
 	cat $file
 	echo $file
-	bash $file
+	sudo bash $file
 }
 
 function bcc-mlx5e_xmit
@@ -9846,23 +9847,24 @@ function ln-crash
 	cd $crash_dir
 	local dir=$(ls -td $(date +%Y)*/ | head -1)
 	local n=$(ls vmcore* | wc -l)
-	ln -s ${dir}dump* vmcore.$n
+# 	ln -s ${dir}dump* vmcore.$n
+	ln -s ${dir}vmcore* vmcore.$n
 }
 
 # uncomment the following for built-in kernel
 # VMLINUX=/usr/lib/debug/boot/vmlinux-$(uname -r)
-alias crash1="$CRASH -i /root/.crash $VMLINUX"
+alias crash1="sudo $CRASH -i /root/.crash $VMLINUX"
 
-alias c0="$CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
-alias c1="$CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
-alias c2="$CRASH -i /root/.crash $crash_dir/vmcore.2 $VMLINUX"
-alias c3="$CRASH -i /root/.crash $crash_dir/vmcore.3 $VMLINUX"
-alias c4="$CRASH -i /root/.crash $crash_dir/vmcore.4 $VMLINUX"
-alias c5="$CRASH -i /root/.crash $crash_dir/vmcore.5 $VMLINUX"
-alias c6="$CRASH -i /root/.crash $crash_dir/vmcore.6 $VMLINUX"
-alias c7="$CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
-alias c8="$CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
-alias c9="$CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
+alias c0="sudo $CRASH -i /root/.crash $crash_dir/vmcore.0 $VMLINUX"
+alias c1="sudo $CRASH -i /root/.crash $crash_dir/vmcore.1 $VMLINUX"
+alias c2="sudo $CRASH -i /root/.crash $crash_dir/vmcore.2 $VMLINUX"
+alias c3="sudo $CRASH -i /root/.crash $crash_dir/vmcore.3 $VMLINUX"
+alias c4="sudo $CRASH -i /root/.crash $crash_dir/vmcore.4 $VMLINUX"
+alias c5="sudo $CRASH -i /root/.crash $crash_dir/vmcore.5 $VMLINUX"
+alias c6="sudo $CRASH -i /root/.crash $crash_dir/vmcore.6 $VMLINUX"
+alias c7="sudo $CRASH -i /root/.crash $crash_dir/vmcore.7 $VMLINUX"
+alias c8="sudo $CRASH -i /root/.crash $crash_dir/vmcore.8 $VMLINUX"
+alias c9="sudo $CRASH -i /root/.crash $crash_dir/vmcore.9 $VMLINUX"
 
 alias ls='ls --color=auto'
 
@@ -9900,7 +9902,7 @@ function restart-ovs
 
 function stop-ovs
 {
-	sudo systemctl stop ovs-vswitchd.service
+	sudo systemctl stop openvswitch-switch.service
 	sudo systemctl stop ovsdb-server.service
 }
 
@@ -9908,4 +9910,14 @@ function ovs-dpkg
 {
 	export CFLAGS='-g -O0'
 	DEB_BUILD_OPTIONS="parallel=40 nocheck" dpkg-buildpackage -b -us -uc
+}
+
+e=enp0s31f6
+
+function br-hp
+{
+	del-br
+	sudo ovs-vsctl add-br $br
+	sudo ovs-vsctl add-port $br $e
+	sudo ifconfig $br 1.1.1.1/24 up
 }
