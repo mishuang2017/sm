@@ -1620,6 +1620,7 @@ git push origin HEAD:refs/for/mlnx_ofed_4_2_asap/icmp6-frag-issue
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue-for-bond
 
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue
+git push origin HEAD:refs/for/mlnx_ofed_4_7_3/ipv6_stub
 
 git push origin HEAD:refs/for/master/stats-update
 

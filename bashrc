@@ -2134,7 +2134,8 @@ function tc2
 		ip link show $l > /dev/null 2>&1 || continue
 		tc qdisc show dev $l ingress | grep ffff > /dev/null 2>&1
 		if (( $? == 0 )); then
-			sudo /bin/time -f %e tc qdisc del dev $l ingress
+# 			sudo /bin/time -f %e tc qdisc del dev $l ingress
+			sudo tc qdisc del dev $l ingress
 			echo $l
 		fi
 	done
@@ -2143,7 +2144,8 @@ function tc2
 		ip link show $l > /dev/null 2>&1 || continue
 		tc qdisc show dev $l ingress | grep ffff > /dev/null 2>&1
 		if (( $? == 0 )); then
-			sudo /bin/time -f %e tc qdisc del dev $l ingress
+# 			sudo /bin/time -f %e tc qdisc del dev $l ingress
+			sudo tc qdisc del dev $l ingress
 			echo $l
 		fi
 	done
