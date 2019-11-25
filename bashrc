@@ -2041,7 +2041,7 @@ alias m=make-all
 alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
 alias mi='make -j 32; sudo make install_kernel -j 32'
-alias mi2='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/'
+alias mi2='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
 alias m32='make -j 32'
 
 function mi2
@@ -4233,7 +4233,8 @@ set -x
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 
-# 	ifconfig $br 8.9.10.1/24 up
+	ifconfig $br $link_ip/24 up
+	ifconfig $link 192.168.1.1/24 up
 # 	ifconfig $br:0 192.168.0.1/24 up
 set +x
 }

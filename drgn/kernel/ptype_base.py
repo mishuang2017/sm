@@ -16,7 +16,7 @@ def print_packet_type(pt):
     func = pt.func.value_()
     list_func = pt.list_func.value_()
     id_match = pt.id_match.value_()
-    print("type: %x, func: %s, list_func: %s, id_match: %s" % \
+    print("type: %4x, func: %10s, list_func: %15s, id_match: %s" % \
         (socket.ntohs(type),                    \
         lib.address_to_name(hex(func)),        \
         lib.address_to_name(hex(list_func)),        \
