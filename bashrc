@@ -582,6 +582,7 @@ alias fdb='of show br-int | grep addr; fdbi; of show br-ex | grep addr; fdbe'
 alias fdb-br='of show br | grep addr; sudo ovs-appctl fdb/show br'
 alias app1='sudo ovs-appctl dpctl/dump-flows'
 alias appn='sudo ovs-appctl dpctl/dump-flows --names'
+alias app-ct='sudo ovs-appctl app dpctl/dump-conntrack'
 
 alias p1="ping $link_remote_ip"
 alias p=p1
