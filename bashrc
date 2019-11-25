@@ -4234,7 +4234,7 @@ set -x
 	done
 
 	ifconfig $br $link_ip/24 up
-	ifconfig $link 192.168.1.1/24 up
+# 	ifconfig $link 192.168.1.1/24 up
 # 	ifconfig $br:0 192.168.0.1/24 up
 set +x
 }
@@ -4248,6 +4248,19 @@ set -x
 	vs add-port $br $link -- set Interface $link ofport_request=5
 	ip addr add dev $br 8.9.10.1/24;
 	ip link set dev $br up
+set +x
+}
+
+function bru3
+{
+set -x
+	del-br
+	vs add-br $br
+	ifconfig $link 0
+	vs add-port $br $link -- set Interface $link ofport_request=5
+	ip addr add dev $br $link_ip/24;
+	ip link set dev $br up
+	ifconfig $link 192.168.1.13/24 up
 set +x
 }
 
