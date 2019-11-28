@@ -729,8 +729,8 @@ alias qlog='less /var/log/libvirt/qemu/vm1.log'
 # alias vd='virsh dumpxml vm1'
 alias simx='/opt/simx/bin/manage_vm_simx_support.py -n vm2'
 
-alias vfs100="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=100"
-alias vfs120="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=120"
+alias vfs99="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=99"
+alias vfs127="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=127"
 alias vfs63="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=63"
 alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=4"
 alias vfs2="mlxconfig -d $pci2 set SRIOV_EN=1 NUM_OF_VFS=4"
@@ -1054,6 +1054,13 @@ function unbind_all
 }
 alias un="unbind_all $link"
 alias un2="unbind_all $link2"
+
+function off_test
+{
+	for i in 1 2 3 4; do
+		echo 0 > /sys/class/net/$link/device/sriov_numvfs &
+	done
+}
 
 function off_all
 {
@@ -2039,10 +2046,9 @@ function make-all
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
-alias m-reboot='make-all; reboot1'
 alias mm='sudo make modules_install -j32; sudo make install'
-alias mi='make -j 32; sudo make install_kernel -j 32'
-alias mi2='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
+alias  mi='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
+alias mi2='make -j 32; sudo make install_kernel -j 32'
 alias m32='make -j 32'
 
 function mi2
@@ -5035,6 +5041,14 @@ function echo_legacy
 	echo $?
 }
 
+function echo_nic_netdev
+{
+	local sysfs_dir=/sys/class/net/$link/compat/devlink
+	echo nic_netdev >  $sysfs_dir/uplink_rep_mode
+	echo $?
+}
+
+
 function echo_legacy2
 {
 	local sysfs_dir=/sys/class/net/$link2/compat/devlink
@@ -7010,7 +7024,7 @@ function ofed-unload
 function force-stop
 {
 set -x
-	ofed-unload
+# 	ofed-unload
 	sudo /etc/init.d/openibd force-stop
 set +x
 }
@@ -7018,7 +7032,7 @@ set +x
 function force-start
 {
 set -x
-	ofed-unload
+# 	ofed-unload
 	sudo /etc/init.d/openibd force-start
 # 	sudo systemctl restart systemd-udevd.service
 set +x
@@ -7027,7 +7041,7 @@ set +x
 function force-restart
 {
 set -x
-	ofed-unload
+# 	ofed-unload
 	sudo /etc/init.d/openibd force-stop
 	sudo /etc/init.d/openibd force-start
 # 	sudo systemctl restart systemd-udevd.service
@@ -8038,7 +8052,7 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=test-ovs-ct-scapy-udp-jd-nat-reconfig-flows.sh
+test1=test-eswitch-127-reps.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 
