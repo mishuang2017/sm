@@ -75,3 +75,7 @@ apt-get install kdump-tools crash kexec-tools makedumpfile `uname -r`-dbg
 vi /etc/sudoers
 %admin ALL=(ALL)  NOPASSWD:  ALL
 %sudo    ALL=(ALL:ALL)    NOPASSWD:   ALL
+
+sudo vim /etc/systemd/logind.conf
+HandleLidSwitch=suspend
+service systemd-logind restart
