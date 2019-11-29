@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=2
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -549,7 +549,6 @@ alias ipl='ip l'
 alias ipal='ip a l'
 alias smd='cd /usr/src/debug/kernel-3.10.0-327.el7/linux-3.10.0-327.el7.x86_64'
 alias rmswp='find . -name *.swp -exec rm {} \;'
-alias rmswp1='find . -name *.swp -exec rm {} \;'
 alias cd-drgn='cd /usr/local/lib64/python3.6/site-packages/drgn-0.0.1-py3.6-linux-x86_64.egg/drgn/helpers/linux/'
 alias smdr="cd /$images/chrism/drgn/"
 
@@ -5048,12 +5047,38 @@ function echo_nic_netdev
 	echo $?
 }
 
+function echo_nic_netdev2
+{
+	local sysfs_dir=/sys/class/net/$link2/compat/devlink
+	echo nic_netdev >  $sysfs_dir/uplink_rep_mode
+	echo $?
+}
 
 function echo_legacy2
 {
 	local sysfs_dir=/sys/class/net/$link2/compat/devlink
 	echo legacy >  $sysfs_dir/mode
 	echo $?
+}
+
+function test-nic-netdev
+{
+	off
+
+	on-sriov
+	un
+	echo_nic_netdev
+	dev
+	bi
+
+# 	on-sriov2
+# 	un2
+# 	echo_nic_netdev2
+# 	dev2
+# 	bi2
+
+	reprobe
+# 	force-restart
 }
 
 function stop-vm
@@ -8483,8 +8508,18 @@ function br-pf-ct
 # ifconfig $device up
 # ifconfig $device2 up
 
-function create-bond
+function bond-delete
 {
+	ifenslave -d bond0 $link $link2 2> /dev/null
+	sleep 1
+	rmmod bonding
+	sleep 1
+	off
+}
+
+function bond-create
+{
+	nic=$1
 	off
 	on-sriov
 	sleep 1
@@ -8494,6 +8529,13 @@ function create-bond
 	sleep 1
 	un2
 	sleep 1
+
+	if [[ "$nic" == "nic" ]]; then
+		echo "enable nic_netdev"
+		echo_nic_netdev
+		echo_nic_netdev2
+	fi
+
 	dev
 	sleep 1
 	dev2

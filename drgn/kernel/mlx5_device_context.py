@@ -45,7 +45,7 @@ ctx_list = mlx5_priv.ctx_list
 for ctx in list_for_each_entry('struct mlx5_device_context', ctx_list.address_of_(), 'list'):
     intf = ctx.intf
     print("intf %20s, state: %x, contex: %lx" % (lib.address_to_name(hex(intf)), ctx.state, ctx.context))
-#     print(ctx)
+    print(ctx)
 
 print('')
 
