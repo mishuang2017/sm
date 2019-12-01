@@ -32,6 +32,8 @@ def print_fib(fib):
 
     kv = trie.kv
     print(kv)
+    print("key_vector %lx" % kv.address_of_())
+    print("key_vector %lx" % kv[0].tnode[0].value_())
     print(type(kv))
 
     for i in range(32):
@@ -52,3 +54,13 @@ ipv4 = prog['init_net'].ipv4
 hash = ipv4.fib_table_hash[0]
 for fib in hlist_for_each_entry('struct fib_table', hash.address_of_(), 'tb_hlist'):
     print_fib(fib)
+
+
+# kv = Object(prog, 'struct key_vector', address=0xffff8bc2f72f32f0)
+kv = Object(prog, 'struct key_vector', address=0xffff8bc2f72f3350)
+print(kv)
+leaf = kv.leaf
+
+for alias in hlist_for_each_entry('struct fib_alias', leaf.address_of_(), 'fa_list'):
+    print(alias)
+    print(alias.fa_info)
