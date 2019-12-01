@@ -16,4 +16,4 @@ size = prog['fib_info_hash_size']
 
 for i in range(size):
 	for fib in hlist_for_each_entry('struct fib_info', fib_info_hash[i].address_of_(), 'fib_hash'):
-	    print(fib)
+	    print(fib.nh)
