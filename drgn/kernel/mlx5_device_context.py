@@ -49,14 +49,14 @@ for ctx in list_for_each_entry('struct mlx5_device_context', ctx_list.address_of
 
 print('')
 
-intf_list = prog['intf_list']
-for intf in list_for_each_entry('struct mlx5_interface', intf_list.address_of_(), 'list'):
-    add = intf.add
-    remove = intf.remove
-    attach = intf.attach
-    detach = intf.detach
-    print("add   : %s" % (lib.address_to_name(hex(add))))
-    print("remove: %s" % (lib.address_to_name(hex(remove))))
-    print("attach: %s" % (lib.address_to_name(hex(attach))))
-    print("detach: %s" % (lib.address_to_name(hex(detach))))
+# intf_list = prog['intf_list']
+# for intf in list_for_each_entry('struct mlx5_interface', intf_list.address_of_(), 'list'):
+#     add = intf.add
+#     remove = intf.remove
+#     attach = intf.attach
+#     detach = intf.detach
+#     print("add   : %s" % (lib.address_to_name(hex(add))))
+#     print("remove: %s" % (lib.address_to_name(hex(remove))))
+#     print("attach: %s" % (lib.address_to_name(hex(attach))))
+#     print("detach: %s" % (lib.address_to_name(hex(detach))))
 #     print(intf)

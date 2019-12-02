@@ -205,11 +205,10 @@ for i in range(4):
         for k in range(2):
             num_rules = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].num_rules
             if num_rules:
-                print("")
-                print(i, j, k, num_rules);
                 fdb = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].fdb
-                print("flow table id: %x leve: %x" % (fdb.id.value_(), fdb.level.value_()))
+                print("chain: %d, prio: %d, level: %d, num_rules: %d" % (i, j, k, num_rules.value_()));
                 flow_table("", fdb)
+                print("")
 
 print("--------------------------------")
 
@@ -221,10 +220,8 @@ for i in range(4):
         for k in range(2):
             num_rules = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].num_rules
             if num_rules:
-                print("")
-                print(i, j, k, num_rules);
                 fdb = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].fdb
-                print("flow table id: %x leve: %x" % (fdb.id.value_(), fdb.level.value_()))
+                print("chain: %d, prio: %d, level: %d, num_rules: %d" % (i, j, k, num_rules.value_()));
                 flow_table("", fdb)
 
 # slow_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb
