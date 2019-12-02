@@ -1,7 +1,7 @@
-From f73db9bf7a1f95329358807a5f1f3e7daa611c72 Mon Sep 17 00:00:00 2001
+From 30fe12da697a99dc9e6009c8fdf84914a845bcb1 Mon Sep 17 00:00:00 2001
 From: Chris Mi <chrism@mellanox.com>
 Date: Mon, 25 Nov 2019 16:31:33 +0800
-Subject: [PATCH 2/2] netdev_frame_hook return failure when upcall failed
+Subject: [PATCH 2/3] netdev_frame_hook return failure when upcall failed
 
 Change-Id: Ie759d289155f1849bb18ae7cfa21f3e5b2ec70c8
 ---
@@ -12,10 +12,10 @@ Change-Id: Ie759d289155f1849bb18ae7cfa21f3e5b2ec70c8
  4 files changed, 26 insertions(+), 13 deletions(-)
 
 diff --git a/net/openvswitch/datapath.c b/net/openvswitch/datapath.c
-index 0f5ce77460d4..1bdbcf09ffa9 100644
+index d01410e52097..657fb661280a 100644
 --- a/net/openvswitch/datapath.c
 +++ b/net/openvswitch/datapath.c
-@@ -226,7 +226,7 @@ void ovs_dp_detach_port(struct vport *p)
+@@ -213,7 +213,7 @@ void ovs_dp_detach_port(struct vport *p)
  }
  
  /* Must be called with rcu_read_lock. */
@@ -24,7 +24,7 @@ index 0f5ce77460d4..1bdbcf09ffa9 100644
  {
  	const struct vport *p = OVS_CB(skb)->input_vport;
  	struct datapath *dp = p->dp;
-@@ -235,6 +235,7 @@ void ovs_dp_process_packet(struct sk_buff *skb, struct sw_flow_key *key)
+@@ -222,6 +222,7 @@ void ovs_dp_process_packet(struct sk_buff *skb, struct sw_flow_key *key)
  	struct dp_stats_percpu *stats;
  	u64 *stats_counter;
  	u32 n_mask_hit;
@@ -32,7 +32,7 @@ index 0f5ce77460d4..1bdbcf09ffa9 100644
  
  	stats = this_cpu_ptr(dp->stats_percpu);
  
-@@ -249,10 +250,14 @@ void ovs_dp_process_packet(struct sk_buff *skb, struct sw_flow_key *key)
+@@ -236,10 +237,14 @@ void ovs_dp_process_packet(struct sk_buff *skb, struct sw_flow_key *key)
  		upcall.portid = ovs_vport_find_upcall_portid(p, skb);
  		upcall.mru = OVS_CB(skb)->mru;
  		error = ovs_dp_upcall(dp, skb, key, &upcall, 0);
@@ -50,7 +50,7 @@ index 0f5ce77460d4..1bdbcf09ffa9 100644
  		stats_counter = &stats->n_missed;
  		goto out;
  	}
-@@ -269,6 +274,8 @@ void ovs_dp_process_packet(struct sk_buff *skb, struct sw_flow_key *key)
+@@ -256,6 +261,8 @@ void ovs_dp_process_packet(struct sk_buff *skb, struct sw_flow_key *key)
  	(*stats_counter)++;
  	stats->n_mask_hit += n_mask_hit;
  	u64_stats_update_end(&stats->syncp);
@@ -60,10 +60,10 @@ index 0f5ce77460d4..1bdbcf09ffa9 100644
  
  int ovs_dp_upcall(struct datapath *dp, struct sk_buff *skb,
 diff --git a/net/openvswitch/datapath.h b/net/openvswitch/datapath.h
-index 2c5589efb63b..c5f7be8f749f 100644
+index 751d34accdf9..52dca88bbbf6 100644
 --- a/net/openvswitch/datapath.h
 +++ b/net/openvswitch/datapath.h
-@@ -232,7 +232,7 @@ static inline struct datapath *get_dp(struct net *net, int dp_ifindex)
+@@ -218,7 +218,7 @@ static inline struct datapath *get_dp(struct net *net, int dp_ifindex)
  extern struct notifier_block ovs_dp_device_notifier;
  extern struct genl_family dp_vport_genl_family;
  
@@ -73,10 +73,10 @@ index 2c5589efb63b..c5f7be8f749f 100644
  int ovs_dp_upcall(struct datapath *, struct sk_buff *,
  		  const struct sw_flow_key *, const struct dp_upcall_info *,
 diff --git a/net/openvswitch/vport-netdev.c b/net/openvswitch/vport-netdev.c
-index 2e5e7a41d8ef..a178de6a7d94 100644
+index 57d6436e6f6a..d2fd37972587 100644
 --- a/net/openvswitch/vport-netdev.c
 +++ b/net/openvswitch/vport-netdev.c
-@@ -39,9 +39,10 @@
+@@ -26,9 +26,10 @@
  static struct vport_ops ovs_netdev_vport_ops;
  
  /* Must be called with rcu_read_lock. */
@@ -88,7 +88,7 @@ index 2e5e7a41d8ef..a178de6a7d94 100644
  
  	vport = ovs_netdev_get_vport(skb->dev);
  	if (unlikely(!vport))
-@@ -55,28 +56,34 @@ static void netdev_port_receive(struct sk_buff *skb)
+@@ -42,28 +43,34 @@ static void netdev_port_receive(struct sk_buff *skb)
  	 */
  	skb = skb_share_check(skb, GFP_ATOMIC);
  	if (unlikely(!skb))
@@ -129,10 +129,10 @@ index 2e5e7a41d8ef..a178de6a7d94 100644
  
  static struct net_device *get_dpdev(const struct datapath *dp)
 diff --git a/net/openvswitch/vport.c b/net/openvswitch/vport.c
-index 72c40a5e5261..89e14b20b6df 100644
+index 3fc38d16c456..d12f59b38c34 100644
 --- a/net/openvswitch/vport.c
 +++ b/net/openvswitch/vport.c
-@@ -466,8 +466,7 @@ int ovs_vport_receive(struct vport *vport, struct sk_buff *skb,
+@@ -445,8 +445,7 @@ int ovs_vport_receive(struct vport *vport, struct sk_buff *skb,
  		kfree_skb(skb);
  		return error;
  	}
@@ -143,5 +143,5 @@ index 72c40a5e5261..89e14b20b6df 100644
  
  static int packet_length(const struct sk_buff *skb,
 -- 
-2.14.4
+2.20.1
 
