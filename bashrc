@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=2
+numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -5054,6 +5054,22 @@ function echo_nic_netdev2
 	echo $?
 }
 
+function echo_new_netdev
+{
+	local sysfs_dir=/sys/class/net/$link/compat/devlink
+	echo new_netdev >  $sysfs_dir/uplink_rep_mode
+	echo $?
+}
+
+function echo_new_netdev2
+{
+	local sysfs_dir=/sys/class/net/$link2/compat/devlink
+	echo new_netdev >  $sysfs_dir/uplink_rep_mode
+	echo $?
+}
+
+
+
 function echo_legacy2
 {
 	local sysfs_dir=/sys/class/net/$link2/compat/devlink
@@ -5077,7 +5093,7 @@ function test-nic-netdev
 # 	dev2
 # 	bi2
 
-	reprobe
+# 	reprobe
 # 	force-restart
 }
 
