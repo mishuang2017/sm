@@ -10008,3 +10008,4 @@ function br-hp
 	sudo ovs-vsctl add-port $br $e
 	sudo ifconfig $br 1.1.1.1/24 up
 }
+alias br1=br-hp
