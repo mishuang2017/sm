@@ -1459,6 +1459,7 @@ alias mlx5="cd $linux_dir/drivers/net/ethernet/mellanox/mlx5/core"
 alias mlx2="cd $linux_dir/include/linux/mlx5"
 alias mlx5="cd drivers/net/ethernet/mellanox/mlx5/core"
 alias mlx2="cd include/linux/mlx5"
+alias e1000e="cd drivers/net/ethernet/intel/e1000e"
 
 function buildm
 {
