@@ -5081,10 +5081,12 @@ function test-nic-netdev
 {
 	off
 
+	ip link show dev $link
 	on-sriov
 	un
 	echo_nic_netdev
 	dev
+	ip link show dev $link
 	bi
 
 # 	on-sriov2
@@ -5094,8 +5096,31 @@ function test-nic-netdev
 # 	bi2
 
 # 	reprobe
-# 	force-restart
+	force-restart
 }
+
+function test-new-netdev
+{
+	off
+
+	ip link show dev $link
+	on-sriov
+	un
+	echo_new_netdev
+	dev
+	ip link show dev $link
+	bi
+
+# 	on-sriov2
+# 	un2
+# 	echo_nic_netdev2
+# 	dev2
+# 	bi2
+
+# 	reprobe
+	force-restart
+}
+
 
 function stop-vm
 {
@@ -5923,6 +5948,24 @@ function ga
 	git apply --reject $file
 }
 alias cdv='cd ~/vlad'
+
+# git reset HEAD~ file.c
+# git show --stat
+# git reset
+# amend
+# checkout
+function git-ofed-reset
+{
+	[[ $# != 1 ]] && return
+	local file=$1
+	local file2
+	echo $file | egrep "^a\/||^b\/" > /dev/null || return
+	file2=$(echo $file | sed "s/^..//")
+	git show --stat
+	git rest HEAD~ $file2
+	amend
+	git show --stat
+}
 
 function git-am
 {
