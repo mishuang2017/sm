@@ -5724,7 +5724,7 @@ function gdb1
 	GDB=gdb
 	local bin=$1
 #	gdb -batch $(which $bin) $(pgrep $bin) -x ~chrism/g.txt
-	$GDB $(which $bin) $(pgrep $bin)
+	sudo $GDB $(which $bin) $(pgrep $bin)
 }
 
 alias g='gdb1 ovs-vswitchd'
@@ -9102,6 +9102,21 @@ function tracecmd
 	local file=/tmp/bcc_$$.sh
 cat << EOF > $file
 $BCC_DIR/tools/trace -t '$1:$2 "%lx", arg1'
+EOF
+	if [[ $# == 2 ]]; then
+		sed -i 's/$/& -U/g' $file
+	fi
+	cat $file
+	echo $file
+	sudo bash $file
+}
+
+function tracecmd2
+{
+	[[ $# < 2 ]] && return
+	local file=/tmp/bcc_$$.sh
+cat << EOF > $file
+$BCC_DIR/tools/trace -t '$1:$2 "%lx", arg2'
 EOF
 	if [[ $# == 2 ]]; then
 		sed -i 's/$/& -U/g' $file
