@@ -39,22 +39,6 @@ sudo apt-get install linux-source
 # install 4.18 kernel on 18.04.2
 sudo apt install linux-generic-hwe-18.04
 
-# configure network and nis for debian
-root@dev-r630-03:~# cat /etc/systemd/network/static-eno1.network
-[Match]
-Name=eno1
-[Network]
-Address=10.12.205.13/24
-Gateway=10.12.205.1
-DNS=10.12.68.102
-DNS=10.12.68.101
-
-systemctl enable systemd-networkd
-systemctl start systemd-networkd
-
-[root@dev-r630-03 ~]# cat /etc/resolv.conf
-nameserver 10.12.68.102
-nameserver 10.12.68.101
 
 # install ovs for debian
 apt-cache show openvswitch-switch

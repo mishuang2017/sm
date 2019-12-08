@@ -34,3 +34,12 @@ for i in range(SOCK_MAX):
             a.protocol.value_(),
             lib.address_to_name(hex(a.prot)),
             lib.address_to_name(hex(a.ops))))
+
+SOCK_STREAM = prog['SOCK_STREAM']
+SOCK_DGRAM = prog['SOCK_DGRAM']
+SOCK_RAW = prog['SOCK_RAW']
+
+print("")
+print("SOCK_STREAM: %d" % SOCK_STREAM.value_())
+print("SOCK_DGRAM: %d" % SOCK_DGRAM.value_())
+print("SOCK_RAW: %d" % SOCK_RAW.value_())

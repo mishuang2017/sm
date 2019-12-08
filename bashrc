@@ -10068,3 +10068,4 @@ function br-hp
 	sudo ifconfig $br 1.1.1.1/24 up
 }
 alias br1=br-hp
+alias pi='ssh pi@192.168.31.200'

@@ -1,0 +1,33 @@
+1. systemd
+
+root@dev-r630-03:~# cat /etc/systemd/network/static-eno1.network
+[Match]
+Name=eno1
+[Network]
+Address=10.12.205.13/24
+Gateway=10.12.205.1
+DNS=10.12.68.102
+DNS=10.12.68.101
+
+systemctl enable systemd-networkd
+systemctl start systemd-networkd
+
+2. netplan
+
+3. interfaces
+
+pi@raspberrypi:/etc/network $ cat interfaces
+# interfaces(5) file used by ifup(8) and ifdown(8)
+
+# Please note that this file is written to be used with dhcpcd
+# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'
+
+# Include files from /etc/network/interfaces.d:
+source-directory /etc/network/interfaces.d
+
+auto eth0
+iface eth0 inet static
+address 1.1.1.2
+netmask 255.255.255.0
+
+sudo systemctl restart networking
