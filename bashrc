@@ -934,7 +934,7 @@ alias cu='time cscope -R -b -k'
 function greps
 {
 	[[ $# != 1 ]] && return
-	sm1
+	sml
 #	grep include -Rn -e "struct $1 {" | sed 's/:/\t/'
 	grep include -Rn -e "struct $1 {"
 }
