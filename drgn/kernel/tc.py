@@ -14,7 +14,7 @@ for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
 #     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
 #         continue
-    if "enp4s0f0" != name:
+    if "vxlan_sys_4789" != name:
         continue
     ingress_queue = dev.ingress_queue
     if ingress_queue.value_() == 0:
@@ -49,6 +49,8 @@ for x, dev in enumerate(lib.get_netdevs()):
             continue
         print("tcf_chain %lx" % chain.value_())
         print("chain index: %d, 0x%x" % (chain.index, chain.index))
+        print("chain refcnt: %d" % (chain.refcnt))
+        print("chain action_refcnt: %d" % (chain.action_refcnt))
         tcf_proto = chain.filter_chain
         while True:
             print("==========================================\n")
@@ -56,7 +58,7 @@ for x, dev in enumerate(lib.get_netdevs()):
                 (tcf_proto.value_(), socket.ntohs(tcf_proto.protocol.value_()),   \
                 tcf_proto.prio.value_() >> 16))
             head = Object(prog, 'struct cls_fl_head', address=tcf_proto.root.value_())
-#             print(head)
+            print("list -H %lx" % head.masks.address_of_())
             for node in radix_tree_for_each(head.handle_idr.idr_rt):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
