@@ -34,6 +34,7 @@ for i in range(1024):
     p = p + 1
 
 table = vport.dp.table
+print(table)
 ufid_count = table.count.value_()
 ufid_ti = table.ufid_ti
 print("ufid_count: %d" % ufid_count)
@@ -62,6 +63,7 @@ def print_flow_key(key):
     tp_dst = key.tp.dst
     print("tp_dst: %d" % socket.ntohs(tp_dst))
 
-for i in range(n_buckets):
-    for flow in hlist_for_each_entry('struct sw_flow', ufid_ti.buckets[i].address_of_(), 'ufid_table'):
-        print_flow_key(flow.key)
+if lib.kernel("4.19.36+") == False:
+    for i in range(n_buckets):
+        for flow in hlist_for_each_entry('struct sw_flow', ufid_ti.buckets[i].address_of_(), 'ufid_table'):
+            print_flow_key(flow.key)

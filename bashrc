@@ -522,6 +522,8 @@ alias smipu="cd /$images/chrism/iproute2-upstream"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
 alias smk="cd ~chrism/sm/drgn/kernel"
+alias smdo="cd ~chrism/sm/drgn/ovs"
+alias d-ovs="sudo ~chrism/sm/drgn/ovs/ovs.py"
 
 alias softirq="/$images/chrism/bcc/tools/softirqs.py 1"
 alias hardirq="/$images/chrism/bcc/tools/hardirqs.py 5"
@@ -4265,9 +4267,9 @@ set -x
 	vs add-br $br
 	ifconfig $link 0
 	vs add-port $br $link -- set Interface $link ofport_request=5
-	ip addr add dev $br $link_ip/24;
+	ip addr add dev $br 1.1.1.1/24;
 	ip link set dev $br up
-	ifconfig $link 192.168.1.13/24 up
+	ifconfig $link 1.1.1.1/24 up
 set +x
 }
 
@@ -9479,6 +9481,12 @@ function _flowtable
 	done
 }
 
+function dev_table
+{
+	cd $drgn_dir
+	sudo $drgn_dir/dev_table.py
+}
+
 function num_rules
 {
 	cd $drgn_dir
@@ -9781,6 +9789,23 @@ set -x
 	fi
 set +x
 }
+
+function arp2
+{
+set -x
+	if (( host_num == 13 )); then
+		arp -d 1.1.1.2
+		arp -s 1.1.1.2 24:8a:07:88:27:ca
+	fi
+
+	if (( host_num == 14 )); then
+		arp -d 1.1.1.1
+		arp -s 1.1.1.1 24:8a:07:88:27:9a
+	fi
+set +x
+}
+
+
 
 function test-panic
 {
