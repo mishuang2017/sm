@@ -4267,9 +4267,9 @@ set -x
 	vs add-br $br
 	ifconfig $link 0
 	vs add-port $br $link -- set Interface $link ofport_request=5
-	ip addr add dev $br 1.1.1.1/24;
+	ip addr add dev $br $link_ip/24;
 	ip link set dev $br up
-	ifconfig $link 1.1.1.1/24 up
+	ifconfig $link $link_ip/24 up
 set +x
 }
 
