@@ -4242,9 +4242,9 @@ set -x
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 
+	ifconfig $link 0
 	ifconfig $br $link_ip/24 up
-# 	ifconfig $link 192.168.1.1/24 up
-# 	ifconfig $br:0 192.168.0.1/24 up
+# 	ifconfig $link 192.168.1.13/24 up
 set +x
 }
 

@@ -3829,6 +3829,7 @@ dpif_netlink_operate__
     dpif_netlink_init_flow_put
 
 dpif_netlink_recv__
+	epoll_wait
 
 try_send_to_netdev
 parse_flow_put

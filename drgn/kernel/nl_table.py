@@ -34,10 +34,25 @@ def print_sock(nsock):
 #     print(head)
     for entry in list_for_each_entry('struct wait_queue_entry', head.address_of_(), 'entry'):
         print("\twait_queue_entry %lx" % entry.value_())
+        print("\twait_queue_entry.flags %d" % entry.flags.value_())
         eppoll_entry = container_of(entry, "struct eppoll_entry", 'wait')
-        print(eppoll_entry)
+        print("\teppoll_entry %lx" % eppoll_entry)
+        epitem = eppoll_entry.base
+        print("\tepitem %lx" % epitem)
+        event = epitem.event
+        ffd = epitem.ffd
+        print("\tepoll_filefd %lx" % ffd.address_of_().value_())
+        if entry.flags.value_():
+            print("\tfd: %d" %ffd.fd.value_())
+            print("\tfile: %lx" %ffd.file)
+
+            # 10000019
+            # EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLWAKEUP
+            print("\tevents: %x" % event.events)
+            print("\tdata: %x" % event.data)
         func = entry.func
         print("\t%s" % lib.address_to_name(hex(func)))
+        print("")
     print("\tsk_data_ready: %s" % lib.address_to_name(hex(sock.sk_data_ready)))
     print("")
 
