@@ -10100,4 +10100,5 @@ function br-hp
 }
 alias br1=br-hp
 alias pi200='ssh pi@192.168.31.200'
+alias pi100='ssh pi@192.168.31.100'
 alias pi='ssh pi@1.1.1.2'
