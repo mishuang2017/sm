@@ -524,6 +524,7 @@ alias smb="cd /$images/chrism/bcc/examples/tracing"
 alias smk="cd ~chrism/sm/drgn/kernel"
 alias smdo="cd ~chrism/sm/drgn/ovs"
 alias d-ovs="sudo ~chrism/sm/drgn/ovs/ovs.py"
+alias err="sudo ~chrism/sm/drgn/ovs/errors.py"
 
 alias softirq="/$images/chrism/bcc/tools/softirqs.py 1"
 alias hardirq="/$images/chrism/bcc/tools/hardirqs.py 5"
@@ -640,7 +641,6 @@ alias s2='su - mi'
 alias s0='[[ $UID == 0 ]] && su chrism'
 alias e=exit
 alias 160='ssh root@10.200.0.160'
-alias ka=killall
 alias vnc2='ssh chrism@10.7.2.14'
 alias vnc='ssh chrism@10.112.68.111'
 alias netstat1='netstat -ntlp'
@@ -4270,6 +4270,7 @@ set -x
 	ip addr add dev $br $link_ip/24;
 	ip link set dev $br up
 	ifconfig $link $link_ip/24 up
+	ovs-ofctl add-flow $br "table=0,ip,icmp,in_port=$link,nw_src=192.168.1.14,nw_dst=192.168.1.13 actions=normal"
 set +x
 }
 
@@ -8071,8 +8072,6 @@ function vt
 	echo $name
 }
 
-alias err='make -j 32 > /tmp/err.txt 2>&1; vi /tmp/err.txt'
-
 function test_basic_L3
 {
 set -x
@@ -9943,6 +9942,13 @@ set +x
 }
 
 alias show-bond='cat /proc/net/bonding/bond0'
+
+function ka
+{
+	[[ $# != 1 ]] && return
+	addr=$(echo $1 | sed 's/0x//')
+	grep $addr /proc/kallsyms
+}
 
 ######## ubuntu #######
 

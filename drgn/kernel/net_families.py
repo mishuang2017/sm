@@ -1,5 +1,24 @@
 #!/usr/local/bin/drgn -k
 
+# family:  1, create:          unix_create
+# family:  2, create:          inet_create
+# family: 10, create:         inet6_create
+# family: 16, create:       netlink_create
+# family: 17, create:        packet_create
+# family: 38, create:           alg_create
+# 
+# type: 1, protocol:   6, prot:        tcp_prot, ops:      inet_stream_ops
+# type: 1, protocol: 132, prot:       sctp_prot, ops:   inet_seqpacket_ops
+# type: 2, protocol:  17, prot:        udp_prot, ops:       inet_dgram_ops
+# type: 2, protocol: 136, prot:    udplite_prot, ops:       inet_dgram_ops
+# type: 2, protocol:   1, prot:       ping_prot, ops:     inet_sockraw_ops
+# type: 3, protocol:   0, prot:        raw_prot, ops:     inet_sockraw_ops
+# type: 5, protocol: 132, prot:       sctp_prot, ops:   inet_seqpacket_ops
+# 
+# SOCK_STREAM: 1
+# SOCK_DGRAM: 2
+# SOCK_RAW: 3
+
 from drgn.helpers.linux import *
 from drgn import Object
 import time

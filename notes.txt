@@ -1621,6 +1621,7 @@ git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue-for-bond
 
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/nic_netdev_cleanup_fix
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/index_bugs_bd
 
 git push origin HEAD:refs/for/master/stats-update
 
@@ -4413,6 +4414,28 @@ list = {
 next = 0xffffffffa0a91038,
 prev = 0xffffffffa0a6b218 <ovs_internal_vport_ops+56>
 }
+
+
+[root@dev-r630-03 ~]# trace netdev_create -K
+TIME     PID     TID     COMM            FUNC
+7.842253 16771   16771   ovs-vswitchd    netdev_create
+        netdev_create+0x1 [kernel]
+        new_vport+0x12 [kernel]
+        ovs_vport_cmd_new+0x1c0 [kernel]
+        genl_family_rcv_msg+0x1fe [kernel]
+        genl_rcv_msg+0x4c [kernel]
+        netlink_rcv_skb+0x54 [kernel]
+        genl_rcv+0x28 [kernel]
+        netlink_unicast+0x19c [kernel]
+        netlink_sendmsg+0x2d1 [kernel]
+        sock_sendmsg+0x3e [kernel]
+        ___sys_sendmsg+0x283 [kernel]
+        __sys_sendmsg+0x63 [kernel]
+        __x64_sys_sendmsg+0x1f [kernel]
+        do_syscall_64+0x60 [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
+
 }
 ffffffffa0a91038
 struct vport_ops {

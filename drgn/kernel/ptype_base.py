@@ -1,5 +1,11 @@
 #!/usr/local/bin/drgn -k
 
+# type:  800, func:     ip_rcv, list_func:     ip_list_rcv, id_match: 0x0
+# type:   11, func:    llc_rcv, list_func:             0x0, id_match: 0x0
+# type:    4, func:    llc_rcv, list_func:             0x0, id_match: 0x0
+# type:  806, func:    arp_rcv, list_func:             0x0, id_match: 0x0
+# type: 86dd, func:   ipv6_rcv, list_func:   ipv6_list_rcv, id_match: 0x0
+
 from drgn.helpers.linux import *
 from drgn import Object
 import time
