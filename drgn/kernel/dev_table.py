@@ -31,6 +31,7 @@ for i in range(1024):
         id = ids[0]
         print("name: %10s,  n_ids: %d, id: %x" % (name, upcall_portids.n_ids, id))
         print("vport %lx" % vport)
+        print("datapath %lx" % vport.dp)
         print("vport_portids %lx" % upcall_portids)
         print("vport_no %d" % port_no)
         print("")
