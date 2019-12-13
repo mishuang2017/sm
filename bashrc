@@ -9461,7 +9461,7 @@ function kmsg() {
 	fi
 }
 
-drgn_dir=/labhome/chrism/sm/drgn/kernel
+drgn_dir=~/sm/drgn/kernel
 
 function _flowtable
 {
@@ -9947,7 +9947,7 @@ function ka
 {
 	[[ $# != 1 ]] && return
 	addr=$(echo $1 | sed 's/0x//')
-	grep $addr /proc/kallsyms
+	sudo grep $addr /proc/kallsyms
 }
 
 ######## ubuntu #######
