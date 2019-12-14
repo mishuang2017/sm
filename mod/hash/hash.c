@@ -1,4 +1,5 @@
 #include <linux/init.h>
+#include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/rhashtable.h>
 
@@ -16,34 +17,40 @@ static const struct rhashtable_params tc_ht_params = {
 	.automatic_shrinking = true,
 };
 
+struct rhashtable tc_ht;
+struct mlx5e_tc_flow *flow1;
+struct mlx5e_tc_flow *flow2;
+
 static int hash_init(void)
 {
-	struct rhashtable tc_ht;
-	struct mlx5e_tc_flow flow1;
-	struct mlx5e_tc_flow flow2;
 	struct mlx5e_tc_flow *flow;
 	struct mlx5e_tc_flow flow_p;
+
+	flow1 = kmalloc(sizeof(*flow1), GFP_KERNEL);
+	flow2 = kmalloc(sizeof(*flow2), GFP_KERNEL);
 
 	pr_info("hash enter\n");
 	rhashtable_init(&tc_ht, &tc_ht_params);
 
-	flow1.cookie = 1;
-	rhashtable_insert_fast(&tc_ht, &flow1.node, tc_ht_params);
-	pr_info("%px\n", &flow1);
+	flow1->cookie = 1;
+	rhashtable_insert_fast(&tc_ht, &flow1->node, tc_ht_params);
+	pr_info("%px\n", flow1);
 
-	flow2.cookie = 2;
-	rhashtable_insert_fast(&tc_ht, &flow2.node, tc_ht_params);
-	pr_info("%px\n", &flow2);
+	flow2->cookie = 1;
+	rhashtable_insert_fast(&tc_ht, &flow2->node, tc_ht_params);
+	pr_info("%px\n", flow2);
 
-	flow_p.cookie = 1;
-	flow = rhashtable_lookup_fast(&tc_ht, &flow_p.cookie, tc_ht_params);
-	pr_info("%px\n", flow);
+/* 	flow_p.cookie = 1; */
+/* 	flow = rhashtable_lookup_fast(&tc_ht, &flow_p.cookie, tc_ht_params); */
+/* 	pr_info("%px\n", flow); */
 
 	return 0;
 }
 
 static void hash_exit(void)
 {
+	kfree(flow1);
+	kfree(flow2);
 	pr_info("hash exit\n");
 }
 
