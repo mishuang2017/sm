@@ -56,6 +56,6 @@ def print_sock(nsock):
     print("\tsk_data_ready: %s" % lib.address_to_name(hex(sock.sk_data_ready)))
     print("")
 
-for i, nsock in enumerate(lib.hash(hash, 'struct netlink_sock', 'node')):
+for i, nsock in enumerate(lib.hash2(hash, 'struct netlink_sock', 'node')):
     print("netlink_sock %lx" % nsock.value_())
     print_sock(nsock)

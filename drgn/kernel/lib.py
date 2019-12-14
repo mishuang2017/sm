@@ -1,6 +1,7 @@
 from drgn.helpers.linux import *
-from drgn import Object
 from drgn import container_of
+from drgn import Object
+from drgn import cast
 import socket
 
 import subprocess
@@ -274,6 +275,34 @@ def hash(rhashtable, type, member):
         while True:
             if rhash_head.value_() & 1:
                 break;
+            obj = container_of(rhash_head, type, member)
+            nodes.append(obj)
+            rhash_head = rhash_head.next
+
+    return nodes
+
+def hash2(rhashtable, type, member):
+    nodes = []
+
+    tbl = rhashtable.tbl
+
+#     print("rhashtable %lx" % rhashtable.address_of_())
+#     print("bucket_table %lx" % tbl)
+#     buckets = tbl.buckets
+#     print("buckets %lx" % buckets.address_of_())
+
+    buckets = tbl.buckets
+    size = tbl.size.value_()
+
+    print("")
+    for i in range(size):
+        addr = buckets[i]
+        rhash_head = cast("struct rhash_head *", addr)
+        if addr.value_() == 0:
+            continue
+        while True:
+            if rhash_head.value_() & 1:
+                break
             obj = container_of(rhash_head, type, member)
             nodes.append(obj)
             rhash_head = rhash_head.next

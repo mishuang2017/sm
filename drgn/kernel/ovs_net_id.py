@@ -20,9 +20,3 @@ print(ovs_net)
 
 for dp in list_for_each_entry('struct datapath', ovs_net.dps.address_of_(), 'list_node'):
     print(dp)
-#     func = cb.cb.value_()
-#     func = lib.address_to_name(hex(func))
-#     print(func)
-#     priv = cb.cb_priv
-#     priv = Object(prog, 'struct mlx5e_priv', address=priv.value_())
-#     print(priv.netdev.name.string_().decode())
