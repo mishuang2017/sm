@@ -14,7 +14,7 @@ for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
 #     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
 #         continue
-    if "vxlan_sys_4789" != name:
+    if "vnet0" != name:
         continue
     ingress_queue = dev.ingress_queue
     if ingress_queue.value_() == 0:
@@ -48,6 +48,7 @@ for x, dev in enumerate(lib.get_netdevs()):
             print("chain 0, continue")
             continue
         print("tcf_chain %lx" % chain.value_())
+        print("tcf_block %lx" % chain.block.value_())
         print("chain index: %d, 0x%x" % (chain.index, chain.index))
         print("chain refcnt: %d" % (chain.refcnt))
         print("chain action_refcnt: %d" % (chain.action_refcnt))

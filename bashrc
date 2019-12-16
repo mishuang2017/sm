@@ -3462,6 +3462,67 @@ set -x
 set +x
 }
 
+function tc-vnet
+{
+set -x
+	tc-setup vnet0
+	tc filter add dev vnet0 protocol ip parent ffff: prio 10 flower ip_proto tcp dst_mac 00:11:22:33:44:55 action mirred egress redirect dev $link
+set +x
+}
+
+function tc-vxlan-tap
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+	tap=vnet1
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+	$TC qdisc del dev $tap ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect  hw-tc-offload on 
+	ethtool -K $tap  hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	$TC qdisc add dev $vx ingress 
+	$TC qdisc add dev $tap ingress 
+#	$TC qdisc add dev $link clsact
+#	$TC qdisc add dev $redirect clsact
+#	$TC qdisc add dev $vx clsact
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+	ip link set $tap promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $vx protocol ip  parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac	\
+		dst_mac $local_vm_mac	\
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $link
+set +x
+}
+
 # outer v6, inner v6
 function tc-vxlan66
 {
@@ -9942,6 +10003,12 @@ set +x
 }
 
 alias show-bond='cat /proc/net/bonding/bond0'
+
+alias cd-ports='cd /sys/class/infiniband/mlx5_0/ports'
+function cat-ports
+{
+	cat /sys/class/infiniband/mlx5_0/ports/1/counters/port_xmit_discards
+}
 
 function ka
 {
