@@ -14,7 +14,7 @@ for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
 #     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
 #         continue
-    if "vnet0" != name:
+    if "vxlan_sys_4789" != name:
         continue
     ingress_queue = dev.ingress_queue
     if ingress_queue.value_() == 0:
@@ -31,14 +31,35 @@ for x, dev in enumerate(lib.get_netdevs()):
         continue
 
 #     print(block)
-    for cb in list_for_each_entry('struct tcf_block_cb', block.cb_list.address_of_(), 'list'):
-#         print(cb)
-        func = cb.cb.value_()
-        func = lib.address_to_name(hex(func))
-        print("tcf_block_cb cb: %s" % func)
-        priv = cb.cb_priv
-        priv = Object(prog, 'struct mlx5e_priv', address=priv.value_())
-        print("tcf_block_cb cb_priv name: %s" % priv.netdev.name.string_().decode())
+
+    if lib.struct_exist("struct flow_block_cb"):
+        for cb in list_for_each_entry('struct flow_block_cb', block.flow_block.cb_list.address_of_(), 'list'):
+#             print(cb)
+
+            func = cb.cb.value_()
+            func = lib.address_to_name(hex(func))
+            print("flow_block_cb cb     : %s" % func)
+
+            release = cb.release.value_()
+            release = lib.address_to_name(hex(release))
+            print("flow_block_cb release: %s" % release)
+
+            cb_priv = Object(prog, 'struct mlx5e_rep_indr_block_priv', address=cb.cb_priv.value_())
+            print("mlx5e_rep_indr_block_priv %lx" % cb_priv.address_of_())
+            print(cb_priv)
+    else:
+        for cb in list_for_each_entry('struct tcf_block_cb', block.cb_list.address_of_(), 'list'):
+            print(cb)
+            func = cb.cb.value_()
+            func = lib.address_to_name(hex(func))
+            print("tcf_block_cb cb: %s" % func)
+
+            # ofed 4.7, cb is mlx5e_rep_indr_setup_block_cb
+            priv = cb.cb_priv
+            priv = Object(prog, 'struct mlx5e_rep_indr_block_priv', address=priv.value_())
+            print(priv)
+
+            # on ofed 4.6, priv is the pointer of struct mlx5e_priv
 
     print("\n%20s ingress_sched_data %20x\n" % (name, addr))
 
