@@ -15,9 +15,16 @@ import lib
 def print_ip_address(dev):
     ifa_list = dev.ip_ptr.ifa_list
     if ifa_list:
-        print("%s" % lib.ipv4(socket.ntohl(dev.ip_ptr.ifa_list.ifa_address.value_())))
+        print("%15s" % lib.ipv4(socket.ntohl(dev.ip_ptr.ifa_list.ifa_address.value_())), end="")
     else:
-        print("")
+        print("%15s" % "", end="")
+
+def print_kind(dev):
+    rtnl_link_ops = dev.rtnl_link_ops
+#     print("%lx" % rtnl_link_ops.value_())
+    if rtnl_link_ops.value_():
+        kind = dev.rtnl_link_ops.kind
+        print("%15s" % kind.string_().decode(), end='')
 
 for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
@@ -25,3 +32,5 @@ for x, dev in enumerate(lib.get_netdevs()):
 #     if "enp" in name:
     print("%20s%20x\t" % (name, addr), end="")
     print_ip_address(dev)
+    print_kind(dev)
+    print("")
