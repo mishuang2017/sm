@@ -59,6 +59,6 @@ def print_indr_setup_block_ht(block):
 #         print(priv)
         print("mlx5e_rep_priv %lx" % e.cb_priv.address_of_())
 
-for i, node in enumerate(hash(indr_setup_block_ht, 'struct flow_indr_block_dev', 'ht_node')):
+for i, node in enumerate(lib.hash(indr_setup_block_ht, 'struct flow_indr_block_dev', 'ht_node')):
     print(i)
     print_indr_setup_block_ht(node)

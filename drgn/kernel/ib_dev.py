@@ -24,5 +24,5 @@ port_list = ib_device.port_list
 print(port_list)
 
 i=0
-for port in list_for_each_entry('struct ib_port', port_list.address_of_(), 'kobj.entry'):
-    print(port)
+# for port in list_for_each_entry('struct ib_port', port_list.address_of_(), 'kobj.entry'):
+#     print(port.port_num.value_())

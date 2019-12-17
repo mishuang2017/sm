@@ -296,7 +296,20 @@ def get_mlx5_ib_dev():
     mlx5_ib_dev = Object(prog, 'struct mlx5_ib_dev', address=priv.value_())
     return mlx5_ib_dev
 
+def struct_exist(name):
+    try:
+        prog.type(name)
+        return True
+    except LookupError as x:
+        return False
+
 def hash(rhashtable, type, member):
+    if struct_exist("struct rhash_lock_head"):
+        return hash_new(rhashtable, type, member)
+    else:
+        return hash_old(rhashtable, type, member)
+
+def hash_old(rhashtable, type, member):
     nodes = []
 
     tbl = rhashtable.tbl
@@ -315,7 +328,7 @@ def hash(rhashtable, type, member):
 
     return nodes
 
-def hash2(rhashtable, type, member):
+def hash_new(rhashtable, type, member):
     nodes = []
 
     tbl = rhashtable.tbl

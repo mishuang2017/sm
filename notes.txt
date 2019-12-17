@@ -1621,7 +1621,7 @@ git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue-for-bond
 
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/nic_netdev_cleanup_fix
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/index_bugs_bd
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/fix_syndrome_for_tap
 
 git push origin HEAD:refs/for/master/stats-update
 
@@ -11369,6 +11369,118 @@ static int __esw_offloads_load_rep(struct mlx5_eswitch *esw,
 
         return err;
 }
+
+===vhost===
+
+ 25 ffff8e148b474d80 ffff8e0c96975b80 ffff8e0c96e85068 CHR  /dev/net/tun
+ 27 ffff8e148b476d00 ffff8e0c8bbfcc80 ffff8e0c8c2a4090 CHR  /dev/vhost-net
+
+static const struct net_device_ops tun_netdev_ops = {
+        .ndo_uninit             = tun_net_uninit,
+        .ndo_open               = tun_net_open,
+        .ndo_stop               = tun_net_close,
+        .ndo_start_xmit         = tun_net_xmit,
+        .ndo_fix_features       = tun_net_fix_features,
+        .ndo_select_queue       = tun_select_queue,
+        .ndo_set_rx_headroom    = tun_set_headroom,
+        .ndo_get_stats64        = tun_net_get_stats64,
+};
+
+
+/* Ops structure to mimic raw sockets with tun */
+static const struct proto_ops tun_socket_ops = {
+        .peek_len = tun_peek_len,
+        .sendmsg = tun_sendmsg,
+        .recvmsg = tun_recvmsg,
+};
+
+tun_do_read
+	tun_ring_recv
+		ptr_ring_consume
+			__ptr_ring_consume
+
+        worker = kthread_create(vhost_worker, dev, "vhost-%d", current->pid);
+
+crash> vhost_net_misc
+vhost_net_misc = $1 = {
+  minor = 0xee,
+  name = 0xffffffffc0308439 "vhost-net",
+  fops = 0xffffffffc03080a0 <vhost_net_fops>,
+  list = {
+    next = 0xffffffffc02ec078,
+    prev = 0xffffffffc04b8058
+  },
+  parent = 0x0,
+  this_device = 0xffff8e14fc616800,
+  groups = 0x0,
+  nodename = 0x0,
+  mode = 0x0
+}
+
+crash> vhost_net.poll 0xffff8e1496d60000
+  poll = {{
+      table = {
+        _qproc = 0xffffffffc03131a0 <vhost_poll_func>,
+        _key = 0xffffffff
+      },
+      wqh = 0xffff8e0c41b92500,
+      wait = {
+        flags = 0x0,
+        private = 0x0,
+        func = 0xffffffffc0314950 <vhost_poll_wakeup>,
+        entry = {
+          next = 0xffff8e0c41b92548,
+          prev = 0xffff8e0c41b92548
+        }
+      },
+      work = {
+        node = {
+          next = 0x0
+        },
+        fn = 0xffffffffc0307af0 <handle_rx_net>,
+        flags = 0x0
+      },
+      mask = 0x1,
+      dev = 0xffff8e1496d60000
+    }, {
+      table = {
+        _qproc = 0xffffffffc03131a0 <vhost_poll_func>,
+        _key = 0xffffffff
+      },
+      wqh = 0x0,
+      wait = {
+        flags = 0x0,
+        private = 0x0,
+        func = 0xffffffffc0314950 <vhost_poll_wakeup>,
+        entry = {
+          next = 0xdead000000000100,
+          prev = 0xdead000000000200
+        }
+      },
+      work = {
+        node = {
+          next = 0x0
+        },
+        fn = 0xffffffffc03062e0 <handle_tx_net>,
+        flags = 0x0
+      },
+      mask = 0x4,
+      dev = 0xffff8e1496d60000
+    }},
+
+[chrism@dev-r630-03 linux]$ gg "vhost-net"
+Documentation/admin-guide/devices.txt:374:              238 = /dev/vhost-net    Host kernel accelerator for virtio net
+drivers/vhost/net.c:1592:       .name = "vhost-net",
+drivers/vhost/net.c:1615:MODULE_ALIAS("devname:vhost-net");
+include/uapi/linux/vhost.h:192:/* vhost-net should add virtio_net_hdr for RX, and strip for TX packets. */
+tools/include/uapi/linux/vhost.h:192:/* vhost-net should add virtio_net_hdr for RX, and strip for TX packets. */
+
+/dev/vhost-net
+
+handle_rx_net
+
+handle_rx
+handle_tx
 
 ===fib===
 

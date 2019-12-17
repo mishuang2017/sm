@@ -422,6 +422,7 @@ alias v4.19='git checkout v4.19; git checkout -b 4.19'
 alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
 alias v5.3='git checkout v5.3; git checkout -b 5.3'
+alias v5.4='git checkout v5.4; git checkout -b 5.4'
 alias v4.10='git checkout v4.10; git checkout -b 4.10'
 alias v4.8='git checkout v4.8; git checkout -b 4.8'
 alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
@@ -3462,11 +3463,15 @@ set -x
 set +x
 }
 
-function tc-vnet
+alias tun0='sudo ~chrism/sm/prg/c/tun/tun -i tun0 -s -d'
+
+function tc-tap
 {
 set -x
-	tc-setup vnet0
-	tc filter add dev vnet0 protocol ip parent ffff: prio 10 flower ip_proto tcp dst_mac 00:11:22:33:44:55 action mirred egress redirect dev $link
+	local tap=tun0
+	[[ $# == 1 ]] && tap=$1
+	tc-setup $tap
+	tc filter add dev $tap protocol ip parent ffff: prio 10 flower ip_proto tcp dst_mac 00:11:22:33:44:55 action mirred egress redirect dev $link
 set +x
 }
 
