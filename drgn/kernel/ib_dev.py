@@ -14,6 +14,9 @@ sys.path.append(libpath)
 import lib
 
 mlx5_ib_dev = lib.get_mlx5_ib_dev()
+if mlx5_ib_dev.address_of_().value_() == 0:
+    sys.exit(0)
+
 print("mlx5_ib_dev %lx" % mlx5_ib_dev.address_of_())
 print("num_ports %d" % mlx5_ib_dev.num_ports)
 
@@ -26,3 +29,5 @@ print(port_list)
 i=0
 # for port in list_for_each_entry('struct ib_port', port_list.address_of_(), 'kobj.entry'):
 #     print(port.port_num.value_())
+
+

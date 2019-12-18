@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=2
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -7178,7 +7178,7 @@ function ofed-unload
 function force-stop
 {
 set -x
-# 	ofed-unload
+	ofed-unload
 	sudo /etc/init.d/openibd force-stop
 set +x
 }
@@ -7239,7 +7239,7 @@ alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --wi
 alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
 
 alias ofed-configure='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
-alias ofed-configure-miniflow="ofed-configure --with-mlx5-miniflow"
+alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
@@ -10012,7 +10012,9 @@ alias show-bond='cat /proc/net/bonding/bond0'
 alias cd-ports='cd /sys/class/infiniband/mlx5_0/ports'
 function cat-ports
 {
-	cat /sys/class/infiniband/mlx5_0/ports/1/counters/port_xmit_discards
+	port=1
+	[[ $# == 1 ]] && port=$1
+	cat /sys/class/infiniband/mlx5_0/ports/$port/counters/port_xmit_discards
 }
 
 function ka

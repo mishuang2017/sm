@@ -36,18 +36,34 @@ import lib
 #   }
 # }
 
-mlx5e_priv = lib.get_mlx5_pf0()
-mlx5e_core_dev = mlx5e_priv.mdev
-print("mlx5e_core_dev %lx\n" % mlx5e_core_dev.value_())
-mlx5_priv = mlx5e_core_dev.priv
-ctx_list = mlx5_priv.ctx_list
+devs = lib.get_mlx5_core_devs()
+for i in devs.keys():
+    dev = devs[i]
+    pci_name = dev.device.kobj.name.string_().decode()
+    print(pci_name)
+    print(dev.coredev_type)
+    print("mlx5_core_dev %lx" % dev.address_of_())
+    ctx_list = dev.priv.ctx_list
 
-for ctx in list_for_each_entry('struct mlx5_device_context', ctx_list.address_of_(), 'list'):
-    intf = ctx.intf
-    print("intf %20s, state: %x, contex: %lx" % (lib.address_to_name(hex(intf)), ctx.state, ctx.context))
-    print(ctx)
+    if i == 0:
+        print("mode: %d" % dev.priv.eswitch.mode)
+        mode = dev.priv.eswitch.mode
 
-print('')
+    for ctx in list_for_each_entry('struct mlx5_device_context', ctx_list.address_of_(), 'list'):
+        intf = ctx.intf
+        name = lib.address_to_name(hex(intf))
+        if name == "mlx5_ib_interface":
+            print("intf %20s, state: %x, contex: %lx" % (name, ctx.state, ctx.context))
+            print(ctx)
+            # for legacy mode, context is the pointer of mlx5_ib_dev
+            # for switchdev mode, it is mlx5_core_dev
+            if mode.value_() == prog['SRIOV_LEGACY']:
+                mlx5_ib_dev = Object(prog, 'struct mlx5_ib_dev', address=ctx.context)
+                print("mlx5_ib_dev.num_ports: %d" % mlx5_ib_dev.num_ports.value_())
+                print("ib_dev.phys_port_cnt: %d" % mlx5_ib_dev.ib_dev.phys_port_cnt.value_())
+#         if name == "mlx5e_interface":
+    print("")
+
 
 # intf_list = prog['intf_list']
 # for intf in list_for_each_entry('struct mlx5_interface', intf_list.address_of_(), 'list'):

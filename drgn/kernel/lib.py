@@ -351,3 +351,32 @@ def print_mlx5_fc(fc):
     lastuse = fc.cache.lastuse
     print("mlx5_fc: %lx, id: %4x, dummy: %d, nr_dummy: %d, lastpackets: %-10ld, lastbytes: %-10ld, packets: %-10ld, bytes: %-10ld, lastuse: %-10ld" % (fc, id, dummy, nr_dummies, p, b, cachepackets, cachebytes, lastuse / 1000))
 #     print(fc.cache)
+
+def get_mlx5_core_devs():
+    devs = {}
+
+    bus_type = prog["pci_bus_type"]
+    subsys_private = bus_type.p
+    k_list = subsys_private.klist_devices.k_list
+
+    for dev in list_for_each_entry('struct device_private', k_list.address_of_(), 'knode_bus.n_node'):
+        addr = dev.value_()
+        device_private = Object(prog, 'struct device_private', address=addr)
+        device = device_private.device
+
+        # struct pci_dev {
+        #     struct device dev;
+        # }
+        pci_dev = container_of(device, "struct pci_dev", "dev")
+
+        driver_data = device.driver_data
+        mlx5_core = Object(prog, 'struct mlx5_core_dev', address=driver_data)
+        driver = device.driver
+        if driver_data.value_():
+            name = driver.name.string_().decode()
+            if name == "mlx5_core":
+                pci_name = device.kobj.name.string_().decode()
+                index = pci_name.split('.')[1]
+                devs[int(index)] = mlx5_core
+
+    return devs
