@@ -11372,6 +11372,9 @@ static int __esw_offloads_load_rep(struct mlx5_eswitch *esw,
 
 ===vhost===
 
+https://www.cnblogs.com/ck1020/category/884534.html
+https://blog.csdn.net/majieyue/article/details/51354232
+
  25 ffff8e148b474d80 ffff8e0c96975b80 ffff8e0c96e85068 CHR  /dev/net/tun
  27 ffff8e148b476d00 ffff8e0c8bbfcc80 ffff8e0c8c2a4090 CHR  /dev/vhost-net
 

@@ -380,3 +380,7 @@ def get_mlx5_core_devs():
                 devs[int(index)] = mlx5_core
 
     return devs
+
+def get_mlx5_core_dev(index):
+    devs = get_mlx5_core_devs()
+    return devs[index]
