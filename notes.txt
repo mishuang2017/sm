@@ -332,7 +332,7 @@ ts: 10, 4
  0x534e2c : netdev_tc_flow_put          d4c/0x1650 [/usr/sbin/ovs-vswitchd]
  0x527031 : dpif_netlink_operate 
  0x476428 : dpif_operate          a8/0x260 [/usr/sbin/ovs-vswitchd]
- 0x43d591 : recv_upcalls.isra.24          6f1/0x870 [/usr/sbin/ovs-vswitchd]
+ 0x43d591 : recv_upcalls          6f1/0x870 [/usr/sbin/ovs-vswitchd]
  0x43d752 : udpif_upcall_handler          42/0x70 [/usr/sbin/ovs-vswitchd]
  0x4e9f8d : ovsthread_wrapper          5d/0x70 [/usr/sbin/ovs-vswitchd]
  0x7f6a6e63550b : start_thread          db/0x3c0 [/usr/lib64/libpthread-2.26.so]

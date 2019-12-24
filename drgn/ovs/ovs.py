@@ -136,9 +136,10 @@ def address_to_name(address):
     return output
 
 dpif = udpif.dpif
+print("dpif")
 print(dpif)
 print(address_to_name(hex(dpif.dpif_class.get_stats.value_())))
 print(address_to_name(hex(dpif.dpif_class.flow_dump_thread_create.value_())))
 print(address_to_name(hex(dpif.dpif_class.port_add.value_())))
-
-print("erorrs: %d" % prog['errors'])
+print(address_to_name(hex(dpif.dpif_class.recv.value_())))
+print(address_to_name(hex(dpif.dpif_class.recv_wait.value_())))
