@@ -32,6 +32,8 @@ def print_sock(nsock):
     print("\tsock %lx" % sock.address_of_().value_())
     head = sock.sk_wq.wait.head
 #     print(head)
+    if 1:
+        return
     for entry in list_for_each_entry('struct wait_queue_entry', head.address_of_(), 'entry'):
         print("\twait_queue_entry %lx" % entry.value_())
         print("\twait_queue_entry.flags %d" % entry.flags.value_())

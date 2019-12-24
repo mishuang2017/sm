@@ -1621,10 +1621,14 @@ git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue-for-bond
 
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/0-counter-issue
 git push origin HEAD:refs/for/mlnx_ofed_4_7_3/nic_netdev_cleanup_fix
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd/fix_syndrome_for_tap
+
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd_te/fix_syndrome_for_tap
+
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd_te/fix_access_reg_syndrome
 
 git push origin HEAD:refs/for/master/stats-update
 
+git push origin HEAD:refs/for/net-mlx5/fix-ppcnt-syndrome-issue
 
 If commit was abandoned, don't reuse the change-id. Otherwise, will fail to push
 
@@ -11484,6 +11488,10 @@ handle_rx_net
 
 handle_rx
 handle_tx
+
+===python3===
+
+https://docs.python.org/3/tutorial/inputoutput.html
 
 ===fib===
 
