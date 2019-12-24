@@ -16,6 +16,7 @@ nl_table = prog['nl_table']
 MAX_LINKS = 32
 
 NETLINK_GENERIC = 16
+NETLINK_ROUTE = 0
 
 # for i in range(MAX_LINKS):
 # print(nl_table[NETLINK_GENERIC])
@@ -31,6 +32,8 @@ def print_sock(nsock):
     sock = nsock.sk
     print("\tsock %lx" % sock.address_of_().value_())
     head = sock.sk_wq.wait.head
+    print("\tsk_data_ready: %s" % lib.address_to_name(hex(sock.sk_data_ready)))
+    print("")
 #     print(head)
     if 1:
         return
@@ -55,8 +58,6 @@ def print_sock(nsock):
         func = entry.func
         print("\t%s" % lib.address_to_name(hex(func)))
         print("")
-    print("\tsk_data_ready: %s" % lib.address_to_name(hex(sock.sk_data_ready)))
-    print("")
 
 for i, nsock in enumerate(lib.hash(hash, 'struct netlink_sock', 'node')):
     print("netlink_sock %lx" % nsock.value_())
