@@ -4304,7 +4304,7 @@ set -x
 	ip addr add dev $br $link_ip/24;
 	ip link set dev $br up
 	ifconfig $link $link_ip/24 up
-# 	ovs-ofctl add-flow $br "table=0,ip,icmp,in_port=$link,nw_src=192.168.1.14,nw_dst=192.168.1.13 actions=normal"
+	ovs-ofctl add-flow $br "table=0,ip,icmp,in_port=$link,nw_src=192.168.1.14,nw_dst=192.168.1.13 actions=normal"
 set +x
 }
 
@@ -10020,7 +10020,6 @@ set -x
 
 	local cmdline=$(cat /proc/cmdline | cut -d " " -f 2-)
 	sudo kexec -l /boot/vmlinuz-$uname --append="BOOT_IMAGE=/vmlinuz-$uname $cmdline" --initrd=/boot/initrd.img-$uname
-	return
 	sudo kexec -e
 set +x
 }
