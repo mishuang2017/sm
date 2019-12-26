@@ -58,3 +58,5 @@ sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils lib
 
 # No LSB modules are available.
 sudo apt-get install lsb-core
+
+sudo apt install python3-venv python3-pip

@@ -7,6 +7,10 @@ dpkg-query -S /usr/bin/crash
 
 dpkg -i linux-image-unsigned-4.18.0-17-generic-dbgsym_4.18.0-17.18_amd64.ddeb
 
+apt-get install --download-only linux-image-4.19.0-6-amd64
+
+dpkg --contents linux-image-4.19.0-6-amd64-dbg_4.19.67-2+deb10u2_amd64.deb
+
 # add a user to sudoer
 usermod -aG sudo chrism
 

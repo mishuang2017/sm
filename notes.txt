@@ -8902,6 +8902,11 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+kill -0 $pid
+If sig is 0, then no signal is sent, but error checking is still performed; 
+this can be used to check for the existence of a process ID or process 
+group ID.
+
 size_t x = ...;
 ssize_t y = ...;
 printf("%zu\n", x);  // prints as unsigned decimal
@@ -11161,6 +11166,7 @@ sudo apt-get install  openssh-client=1:6.6p1-2ubuntu1
 ===link===
 
 https://mirrors.tuna.tsinghua.edu.cn
+https://mirrors.huaweicloud.com/debian-cd/10.2.0/amd64/iso-cd/debian-10.2.0-amd64-netinst.iso
 
 ===header_rewrite===
 

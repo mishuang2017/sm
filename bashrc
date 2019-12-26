@@ -46,7 +46,6 @@ if (( host_num == 13 )); then
 elif (( host_num == 14 )); then
 	export DISPLAY=MTBC-CHRISM-N:0.0
 	export DISPLAY=MTBC-CHRISM:0.0
-	export DISPLAY=10.12.68.111:0.0
 
 	link=enp4s0f0
 	link2=enp4s0f1
@@ -6027,6 +6026,12 @@ function git-checkout
 	[[ $# == 0 ]] && return
 	git checkout $1
 	git checkout -b $1
+}
+
+function git-revert
+{
+	local commit=$(git slog -1 | awk '{print $1}')
+	git revert $commit
 }
 
 function git-patch
