@@ -42,8 +42,12 @@ sudo apt install -y python3-setuptools
 sudo apt install -y python3-dev
 sudo apt install -y liblzma-dev
 
+# git clone https://github.com/ptesarik/libkdumpfile.git
+# error: possibly undefined macro: AC_CHECK_HEADERS #2
+sudo apt install -y pkg-config
+
 # install libvirt for debian
-sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils libguestfs-tools genisoimage virtinst libosinfo-bin
+sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils libguestfs-tools genisoimage virtinst libosinfo-bin
 # sudo apt install libvirt-daemon*
 
 
@@ -58,6 +62,6 @@ sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils lib
 # apt install -y *pinyin*
 
 # No LSB modules are available.
-sudo apt-get install lsb-core
+sudo apt-get install -y lsb-core
 
-sudo apt install python3-venv python3-pip
+sudo apt install -y python3-venv python3-pip
