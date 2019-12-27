@@ -59,6 +59,12 @@ ln -s /usr/share/pyshared/lsb_release.py /usr/lib/python3.6/site-packages/lsb_re
 
 # debian kdump-tools
 apt-get install kdump-tools crash kexec-tools makedumpfile `uname -r`-dbg
+crash /usr/lib/debug/lib/modules/4.19.0-6-amd64/vmlinux /var/crash/201912270351/dump.201912270351
+
+mod -s virtio_net /usr/lib/debug/lib/modules/4.19.0-6-amd64/kernel/drivers/net/virtio_net.ko
+mod -s virtio /usr/lib/debug/lib/modules/4.19.0-6-amd64/kernel/drivers/virtio/virtio.ko
+mod -s virtio_ring /usr/lib/debug/lib/modules/4.19.0-6-amd64/kernel/drivers/virtio/virtio_ring.ko
+hex
 
 vi /etc/sudoers
 %admin ALL=(ALL)  NOPASSWD:  ALL
