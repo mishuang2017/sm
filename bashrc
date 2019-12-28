@@ -9057,8 +9057,8 @@ function install-bpftrace
 BCC_DIR=/images/chrism/bcc
 BCC_DIR=/usr/share/bcc
 alias trace="sudo $BCC_DIR/tools/trace -t"
-alias execsnoop="$BCC_DIR/tools/execsnoop"
-alias funccount="$BCC_DIR/tools/funccount -i 1"
+alias execsnoop="sudo $BCC_DIR/tools/execsnoop"
+alias funccount="sudo $BCC_DIR/tools/funccount -i 1"
 alias fl="$BCC_DIR/tools/funclatency"
 
 function trace1
