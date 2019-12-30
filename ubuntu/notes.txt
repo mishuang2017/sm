@@ -87,8 +87,18 @@ deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib
 deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib
 deb http://httpredir.debian.org/debian stretch-backports main contrib non-free
 
-build debian kernel:
 
+
+build debian kernel:
 https://wiki.debian.org/BuildADebianKernelPackage
 
+Using your current Debian kernel configuration as a starting point
+Alternatively, you can use the configuration from a Debian-built kernel that you already have installed by copying the /boot/config-* file to .config and then running make oldconfig to only answer new questions.
+If you do this, ensure that you modify the configuration to set:
+
+CONFIG_SYSTEM_TRUSTED_KEYS = ""
+otherwise the build may fail:
+
+make[4]: *** No rule to make target 'debian/certs/test-signing-certs.pem', needed by 'certs/x509_certificate_list'.  Stop.
+make[4]: *** Waiting for unfinished jobs....
 
