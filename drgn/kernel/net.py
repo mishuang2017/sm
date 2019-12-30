@@ -30,7 +30,7 @@ for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
     addr = dev.value_()
 #     if "enp" in name:
-    print("%20s%20x\t" % (name, addr), end="")
+    print("%5i%20s%20x\t" % (dev.ifindex, name, addr), end="")
     print_ip_address(dev)
     print_kind(dev)
     print("")

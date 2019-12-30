@@ -70,7 +70,7 @@ def print_flow_key(key):
 #     print(mac_proto)
     print_eth(key.eth)
     proto = key.ip.proto.value_()
-#     print("proto: %d, src: %s" % (proto, lib.ipv4(key.ipv4.addr.src)))
+    print("proto: %d, src: %s" % (proto, lib.ipv4(socket.ntohl(key.ipv4.addr.src.value_()))))
     tp_dst = key.tp.dst
     print("tp_dst: %d" % socket.ntohs(tp_dst))
 
