@@ -4299,10 +4299,9 @@ set -x
 	del-br
 	vs add-br $br
 	ifconfig $link 0
-	vs add-port $br $link -- set Interface $link ofport_request=5
+	vs add-port $br $link
 	ifconfig $br $link_ip/24 up
 	ifconfig $link $link_ip/24 up
-	ovs-ofctl add-flow $br "table=0,ip,icmp,in_port=$link,nw_src=192.168.1.14,nw_dst=192.168.1.13 actions=normal"
 set +x
 }
 
@@ -4312,9 +4311,10 @@ set -x
 	del-br
 	vs add-br $br
 	ifconfig $link 0
-	vs add-port $br $link -- set Interface $link ofport_request=5
+	vs add-port $br $link
 	ifconfig $br $link_ip/24 up
 	ifconfig $link $link_ip/24 up
+	ovs-ofctl add-flow $br "table=0,ip,icmp,in_port=$link,nw_src=192.168.1.14,nw_dst=192.168.1.13 actions=normal"
 set +x
 }
 
