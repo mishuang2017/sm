@@ -9513,7 +9513,7 @@ function kmsg() {
 	fi
 }
 
-drgn_dir=~/sm/drgn/kernel
+drgn_dir=~chrism//sm/drgn/kernel
 
 function _flowtable
 {
@@ -9536,6 +9536,12 @@ function dev_table
 {
 	cd $drgn_dir
 	sudo $drgn_dir/dev_table.py
+}
+
+function buf
+{
+	cd $drgn_dir
+	sudo $drgn_dir/buf.py
 }
 
 function num_rules
