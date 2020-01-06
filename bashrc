@@ -43,6 +43,8 @@ if (( host_num == 13 )); then
 # 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 # 	fi
 
+	modprobe aer-inject
+
 elif (( host_num == 14 )); then
 	export DISPLAY=MTBC-CHRISM-N:0.0
 	export DISPLAY=MTBC-CHRISM:0.0
@@ -5213,7 +5215,7 @@ set -x
 	fi
 # 	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdbwait kgdboc=ttyS1,$base_baud\"" >> $file
 	if (( host_num == 13)); then
-		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on iommu=bt net.ifnames=1 biosdevname=0 pci=realloc isolcpus=8,10,12,14 intel_idle.max_cstate=0 nohz_full=8,10,12,14 intel_pstate=disable crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
+		sudo echo "GRUB_CMDLINE_LINUX=\"pcie_ports=native intel_iommu=on iommu=bt net.ifnames=1 biosdevname=0 pci=realloc isolcpus=8,10,12,14 intel_idle.max_cstate=0 nohz_full=8,10,12,14 intel_pstate=disable crashkernel=256M hugepagesz=2M hugepages=1024\"" >> $file
 # 		sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M console=tty0 console=ttyS1,$base_baud kgdboc=ttyS1,$base_baud nokaslr\"" >> $file
 	fi
 

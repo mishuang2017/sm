@@ -2,6 +2,7 @@
 
 from drgn.helpers.linux import *
 from drgn import Object
+from drgn import cast
 import time
 import socket
 import sys
@@ -47,20 +48,22 @@ def print_fib(fib):
         if IS_LEAF(kv[i]):
             print("kv[%d] is LEAF" % i)
 
-#     for n in hlist_for_each_entry('struct fib_alias', leaf.address_of_(), 'fa_list'):
-#         print(n)
+    for n in hlist_for_each_entry('struct fib_alias', leaf.address_of_(), 'fa_list'):
+        print(n)
 
 ipv4 = prog['init_net'].ipv4
-hash = ipv4.fib_table_hash[0]
-for fib in hlist_for_each_entry('struct fib_table', hash.address_of_(), 'tb_hlist'):
-    print_fib(fib)
+fib_main = ipv4.fib_main
+print_fib(fib_main)
+
+trie = cast("struct trie *", fib_main.tb_data)
+print(trie)
 
 
 # kv = Object(prog, 'struct key_vector', address=0xffff8bc2f72f32f0)
-kv = Object(prog, 'struct key_vector', address=0xffff8bc2f72f3350)
-print(kv)
-leaf = kv.leaf
+# kv = Object(prog, 'struct key_vector', address=0xffff8bc2f72f3350)
+# print(kv)
+# leaf = kv.leaf
 
-for alias in hlist_for_each_entry('struct fib_alias', leaf.address_of_(), 'fa_list'):
-    print(alias)
-    print(alias.fa_info)
+# for alias in hlist_for_each_entry('struct fib_alias', leaf.address_of_(), 'fa_list'):
+#     print(alias)
+#     print(alias.fa_info)
