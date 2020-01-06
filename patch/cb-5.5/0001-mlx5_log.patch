@@ -1,29 +1,30 @@
-From 84240b8c9c9ee23448d6cda84feeba036dacce87 Mon Sep 17 00:00:00 2001
+From c7eba6b674076beeb88379ab9618247056f1399d Mon Sep 17 00:00:00 2001
 From: Chris Mi <chrism@mellanox.com>
 Date: Mon, 6 Jan 2020 13:20:54 +0800
 Subject: [PATCH] mlx5_log
 
 Change-Id: I8d841c5b5991baa824d9447ee9ba767734a04233
 ---
- drivers/net/ethernet/mellanox/mlx5/core/main.c |  3 ++
- include/linux/slab.h                           |  4 ++
- mm/slub.c                                      | 56 ++++++++++++++++++++++++++
- 3 files changed, 63 insertions(+)
+ drivers/net/ethernet/mellanox/mlx5/core/main.c |  4 ++
+ include/linux/slab.h                           |  5 ++
+ mm/slub.c                                      | 65 ++++++++++++++++++++++++++
+ 3 files changed, 74 insertions(+)
 
 diff --git a/drivers/net/ethernet/mellanox/mlx5/core/main.c b/drivers/net/ethernet/mellanox/mlx5/core/main.c
-index cf7b8da0f010..795375f7b9d0 100644
+index cf7b8da0f010..dda00e6263c6 100644
 --- a/drivers/net/ethernet/mellanox/mlx5/core/main.c
 +++ b/drivers/net/ethernet/mellanox/mlx5/core/main.c
-@@ -1623,6 +1623,8 @@ static int __init init(void)
- 	mlx5e_init();
- #endif
+@@ -1609,6 +1609,9 @@ static int __init init(void)
+ {
+ 	int err;
  
 +	mlx5_buf_lock_init();
++	mlx5_buf_reset();
 +
- 	return 0;
+ 	get_random_bytes(&sw_owner_id, sizeof(sw_owner_id));
  
- err_debug:
-@@ -1637,6 +1639,7 @@ static void __exit cleanup(void)
+ 	mlx5_core_verify_params();
+@@ -1637,6 +1640,7 @@ static void __exit cleanup(void)
  #endif
  	pci_unregister_driver(&mlx5_core_driver);
  	mlx5_unregister_debugfs();
@@ -32,25 +33,26 @@ index cf7b8da0f010..795375f7b9d0 100644
  
  module_init(init);
 diff --git a/include/linux/slab.h b/include/linux/slab.h
-index 877a95c6a2d2..0822d21833b5 100644
+index 877a95c6a2d2..f0779838e131 100644
 --- a/include/linux/slab.h
 +++ b/include/linux/slab.h
-@@ -670,6 +670,10 @@ static inline void *kzalloc(size_t size, gfp_t flags)
+@@ -670,6 +670,11 @@ static inline void *kzalloc(size_t size, gfp_t flags)
  	return kmalloc(size, flags | __GFP_ZERO);
  }
  
 +void mlx5_log(char *fmt, ...);
 +void mlx5_buf_lock_init(void);
 +void mlx5_buf_lock_destroy(void);
++void mlx5_buf_reset(void);
 +
  /**
   * kzalloc_node - allocate zeroed memory from a particular memory node.
   * @size: how many bytes of memory are required.
 diff --git a/mm/slub.c b/mm/slub.c
-index d11389710b12..b33b5344e6df 100644
+index d11389710b12..83fb9369897f 100644
 --- a/mm/slub.c
 +++ b/mm/slub.c
-@@ -3013,6 +3013,62 @@ void ___cache_free(struct kmem_cache *cache, void *x, unsigned long addr)
+@@ -3013,6 +3013,71 @@ void ___cache_free(struct kmem_cache *cache, void *x, unsigned long addr)
  }
  #endif
  
@@ -108,7 +110,16 @@ index d11389710b12..b33b5344e6df 100644
 +}
 +EXPORT_SYMBOL(mlx5_buf_lock_destroy);
 +
++void mlx5_buf_reset(void)
++{
++	mlx5_log_buf = __mlx5_log_buf;
++	mlx5_log_buf_len = MLX5_LOG_BUF_LEN;
 +
++	mlx5_log_next_seq = 0;
++	mlx5_log_next_idx = 0;
++	memset(__mlx5_log_buf, 0, MLX5_LOG_BUF_LEN);
++}
++EXPORT_SYMBOL(mlx5_buf_reset);
 +
  void kmem_cache_free(struct kmem_cache *s, void *x)
  {

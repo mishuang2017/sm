@@ -3,7 +3,7 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=1
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -7182,8 +7182,8 @@ function force-restart
 {
 set -x
 # 	ofed-unload
-	sudo /etc/init.d/openibd force-stop
-	sudo /etc/init.d/openibd force-start
+	force-stop
+	force-start
 # 	sudo systemctl restart systemd-udevd.service
 set +x
 }
@@ -9538,6 +9538,12 @@ function dev_table
 	sudo $drgn_dir/dev_table.py
 }
 
+function bus_type
+{
+	cd $drgn_dir
+	sudo $drgn_dir/bus_type.py
+}
+
 function buf
 {
 	cd $drgn_dir
@@ -10014,6 +10020,14 @@ function ka
 	[[ $# != 1 ]] && return
 	addr=$(echo $1 | sed 's/0x//')
 	sudo grep $addr /proc/kallsyms
+}
+
+function inject
+{
+set -x
+	cd /root/aer-inject-0.1/
+	./aer-inject ./test/cx3/aer1
+set +x
 }
 
 ######## ubuntu #######
