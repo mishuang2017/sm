@@ -57,7 +57,8 @@ for i in devs.keys():
             print(ctx)
             # for legacy mode, context is the pointer of mlx5_ib_dev
             # for switchdev mode, it is mlx5_core_dev
-            if mode.value_() == prog['SRIOV_LEGACY']:
+#             if mode.value_() == prog['SRIOV_LEGACY']:
+            if mode.value_() == prog['MLX5_ESWITCH_LEGACY']:
                 mlx5_ib_dev = Object(prog, 'struct mlx5_ib_dev', address=ctx.context)
                 print("mlx5_ib_dev.num_ports: %d" % mlx5_ib_dev.num_ports.value_())
                 print("ib_dev.phys_port_cnt: %d" % mlx5_ib_dev.ib_dev.phys_port_cnt.value_())
@@ -65,14 +66,14 @@ for i in devs.keys():
     print("")
 
 
-# intf_list = prog['intf_list']
-# for intf in list_for_each_entry('struct mlx5_interface', intf_list.address_of_(), 'list'):
-#     add = intf.add
-#     remove = intf.remove
-#     attach = intf.attach
-#     detach = intf.detach
-#     print("add   : %s" % (lib.address_to_name(hex(add))))
-#     print("remove: %s" % (lib.address_to_name(hex(remove))))
-#     print("attach: %s" % (lib.address_to_name(hex(attach))))
-#     print("detach: %s" % (lib.address_to_name(hex(detach))))
-#     print(intf)
+intf_list = prog['intf_list']
+for intf in list_for_each_entry('struct mlx5_interface', intf_list.address_of_(), 'list'):
+    add = intf.add
+    remove = intf.remove
+    attach = intf.attach
+    detach = intf.detach
+    print("add   : %s" % (lib.address_to_name(hex(add))))
+    print("remove: %s" % (lib.address_to_name(hex(remove))))
+    print("attach: %s" % (lib.address_to_name(hex(attach))))
+    print("detach: %s" % (lib.address_to_name(hex(detach))))
+    print(intf)

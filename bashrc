@@ -63,6 +63,8 @@ elif (( host_num == 14 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
+	modprobe aer-inject
+
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
@@ -9543,6 +9545,7 @@ function bus_type
 	cd $drgn_dir
 	sudo $drgn_dir/bus_type.py
 }
+alias bus=bus_type
 
 function buf
 {
