@@ -841,6 +841,13 @@ alias corrupt2="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt2"
 
 # ================================================================================
 
+function vf1
+{
+	ifconfig $link 0
+	ifconfig $link up
+	ifconfig $vf1 $link_ip/24 up
+}
+
 function ip1
 {
 	local l=$link
@@ -6014,7 +6021,7 @@ function git-ofed-reset
 	echo $file | egrep "^a\/||^b\/" > /dev/null || return
 	file2=$(echo $file | sed "s/^..//")
 	git show --stat
-	git rest HEAD~ $file2
+	git reset HEAD~ $file2
 	amend
 	git show --stat
 }
@@ -8821,7 +8828,7 @@ function jd-hugepage
 
 /bin/cp ~/.bashrc ~/.bashrc.bak
 
-function net
+function restart-net
 {
 	/etc/init.d/network restart
 }
@@ -8886,22 +8893,6 @@ function rca
 }
 
 alias hping='hping3 -S -s 10001 -p 12345 1.1.1.122'
-
-function updown
-{
-set -x
-	while true; do
-		ifconfig $link down
-		sleep 20
-		ifconfig $link up
-		sleep 1
-#		ip route add 10.254.0.0/15 via 10.255.8.193 dev p6p1
-		ip1
-		sleep 10
-	done
-set +x
-}
-
 alias f1="sudo flint -d $pci q"
 
 alias cd-miniflow-cache='cd /sys/kernel/slab/mlx5_miniflow_cache'
