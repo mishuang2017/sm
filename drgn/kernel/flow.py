@@ -14,7 +14,7 @@ sys.path.append(libpath)
 import lib
 
 def flow_table(name, table):
-    print("\n%s\nflow table id: %x leve: %x, type: %x" % (name, table.id.value_(), table.level.value_(), table.type))
+    print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x" % (name, table.id.value_(), table.level.value_(), table.type))
     print("mlx5_flow_table %lx" % table.value_())
 #     print("flow table address")
 #     print("%lx" % table.value_())
@@ -27,6 +27,7 @@ def flow_table(name, table):
     group_addr = fs_node.children.address_of_()
 #     print(group_addr)
     for group in list_for_each_entry('struct fs_node', group_addr, 'list'):
+        print("mlx5_flow_group %lx" % group)
         fte_addr = group.children.address_of_()
         for fte in list_for_each_entry('struct fs_node', fte_addr, 'list'):
             fs_fte = Object(prog, 'struct fs_fte', address=fte.value_())
@@ -44,7 +45,9 @@ def print_mac(mac):
             print(":", end='')
 
 def print_match(fte):
+    print("fs_fte %lx" % fte.address_of_().value_())
     val = fte.val
+#     print(val)
 #     smac = str(socket.ntohl(hex(val[0])))
     print("%8x: " % fte.index.value_(), end='')
     smac_47_16 = socket.ntohl(val[0].value_())
@@ -67,9 +70,11 @@ def print_match(fte):
     if ethertype:
         print(" et: %x" % ethertype, end='')
 
-    vport = socket.ntohl(val[17].value_() & 0xffff0000)
+#     vport = socket.ntohl(val[17].value_() & 0xffff0000)
+    # metadata_reg_a ?
+    vport = socket.ntohl(val[59].value_() & 0xffff0000)
     if vport:
-        print(" vport: %4x" % vport, end='')
+        print(" vport: %-2d" % vport, end='')
 
     ip_protocol = val[4].value_() & 0xff
     if ip_protocol:
@@ -193,7 +198,7 @@ def print_dest(rule):
         return
     if prog['MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE'] == rule.dest_attr.type:
         print("\t\tdest: ft: %lx" % (rule.dest_attr.ft.value_()))
-        flow_table("rule", rule.dest_attr.ft)
+        flow_table("goto table", rule.dest_attr.ft)
         return
     else:
         print(rule)
