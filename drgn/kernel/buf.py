@@ -24,7 +24,7 @@ result = {}
 for line in buf.string_().decode("utf-8").split('\n'):
 #     print(line)
     index = line.split(':')[0]
-    if len(index) != 0 and index.isdigit():
+    if len(index) != 0 and index.strip().isdigit():
         index = int(index)
 #         print(index)
         result[index] = line
