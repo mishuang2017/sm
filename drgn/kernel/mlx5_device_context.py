@@ -51,6 +51,9 @@ for i in devs.keys():
 
     for ctx in list_for_each_entry('struct mlx5_device_context', ctx_list.address_of_(), 'list'):
         intf = ctx.intf
+        print("intf")
+        print(intf)
+        continue
         name = lib.address_to_name(hex(intf))
         if name == "mlx5_ib_interface":
             print("intf %20s, state: %x, contex: %lx" % (name, ctx.state, ctx.context))
@@ -62,7 +65,8 @@ for i in devs.keys():
                 mlx5_ib_dev = Object(prog, 'struct mlx5_ib_dev', address=ctx.context)
                 print("mlx5_ib_dev.num_ports: %d" % mlx5_ib_dev.num_ports.value_())
                 print("ib_dev.phys_port_cnt: %d" % mlx5_ib_dev.ib_dev.phys_port_cnt.value_())
-#         if name == "mlx5e_interface":
+        if name == "mlx5e_interface":
+            print(intf)
     print("")
 
 

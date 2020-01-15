@@ -7347,6 +7347,38 @@ enum {
 
 ===pci===
 
+ 0xffffffffc083d5d0 : mlx5_satisfy_startup_pages                    +0x0/0x130 [mlx5_core]
+ 0xffffffffc08336c3 : mlx5_load_one.isra.20                    +0x263/0xed0 [mlx5_core]
+ 0xffffffffc0834791 : init_one                    +0x3d1/0x5f0 [mlx5_core]
+ 0xffffffff813717ba : local_pci_probe                    +0x4a/0xb0 [kernel]
+ 0xffffffff810a8bca : work_for_cpu_fn                    +0x1a/0x30 [kernel]
+ 0xffffffff810abebf : process_one_work                    +0x17f/0x440 [kernel]
+ 0xffffffff810ad0a8 : worker_thread                    +0x278/0x3c0 [kernel]
+ 0xffffffff810b40e1 : kthread                    +0xd1/0xe0 [kernel]
+ 0xffffffff810b4010 : kthread                    +0x0/0xe0 [kernel] (inexact)
+ 0xffffffff816c6537 : ret_from_fork                    +0x77/0xb0 [kernel] (inexact)
+ 0xffffffff810b4010 : kthread                    +0x0/0xe0 [kernel] (inexact)
+parms: dev=0xffff880851fc0060 boot=0x1
+
+12.17002 14636   14636   modprobe        pci_device_probe
+        pci_device_probe+0x1 [kernel]
+        driver_probe_device+0x11b [kernel]
+        device_driver_attach+0x58 [kernel]
+        __driver_attach+0xa5 [kernel]
+        bus_for_each_dev+0x7b [kernel]
+        driver_attach+0x1e [kernel]
+        bus_add_driver+0x14d [kernel]
+        driver_register+0x60 [kernel]
+        __pci_register_driver+0x6b [kernel]
+        init+0x82 [kernel]
+        do_one_initcall+0x64 [kernel]
+        do_init_module+0x5f [kernel]
+        load_module+0x1977 [kernel]
+        __do_sys_finit_module+0xfc [kernel]
+        __x64_sys_finit_module+0x1a [kernel]
+        do_syscall_64+0x5a [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
 [88] bus_type.p  pci_bus_type
 [89] subsys_private.klist_devices 0xffff9bb11a545800
 [90] subsys_private.klist_devices 0xffff9bb11a545800 -o

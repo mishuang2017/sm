@@ -71,7 +71,7 @@ def print_match(fte):
         print(" et: %x" % ethertype, end='')
 
 #     vport = socket.ntohl(val[17].value_() & 0xffff0000)
-    # metadata_reg_a ?
+    # metadata_reg_c_0
     vport = socket.ntohl(val[59].value_() & 0xffff0000)
     if vport:
         print(" vport: %-2d" % vport, end='')

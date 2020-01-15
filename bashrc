@@ -3,7 +3,8 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-numvfs=3
+numvfs=12
+numvfs=1
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -1035,7 +1036,13 @@ alias on-sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.
 alias on-sriov="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
 alias on1='on-sriov; set-mac 1; un; ip link set $link vf 0 spoofchk on'
 alias un2="unbind_all $link2"
-alias off_sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
+alias off-sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
+
+function off-sriov2
+{
+	echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs &
+	echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs
+}
 
 function bind_all
 {
@@ -5025,12 +5032,15 @@ function start-switchdev
 		fi
 #		echo basic > $sysfs_dir/encap || echo "baisc failed"
 	else
+# 		off-sriov &
 		devlink dev eswitch set pci/$pci_addr mode switchdev
 		if (( cx5 == 0 )); then
 			devlink dev eswitch set pci/$pci_addr inline-mode transport
 		fi
 #		devlink dev eswitch set pci/$pci_addr encap enable
 	fi
+
+# 	return
 
 #	local time=0
 #	while ! ip link show $link > /dev/null; do
