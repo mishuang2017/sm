@@ -4,7 +4,7 @@ if [ -f /etc/bashrc ]; then
 fi
 
 numvfs=12
-numvfs=1
+numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -39,12 +39,12 @@ if (( host_num == 13 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-# 	if [[ "$USER" == "root" ]]; then
-# 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
-# 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
-# 	fi
+	if [[ "$USER" == "root" ]]; then
+		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
+		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+	fi
 
-	modprobe aer-inject
+# 	modprobe aer-inject
 
 elif (( host_num == 14 )); then
 	export DISPLAY=MTBC-CHRISM-N:0.0
@@ -64,7 +64,7 @@ elif (( host_num == 14 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-	modprobe aer-inject
+# 	modprobe aer-inject
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -387,6 +387,7 @@ alias clone-git='git clone git@github.com:git/git.git'
 alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
+alias clone-ofed5='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0'
 alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
 alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_7_3'
 alias clone-ofed-4.6='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3'
@@ -543,6 +544,7 @@ alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
 alias smu="cd /$images/chrism/upstream"
 alias smm="cd /$images/chrism/mlnx-ofa_kernel-4.0"
+alias o5="cd /$images/chrism/ofed-5.0/mlnx-ofa_kernel-4.0"
 alias m7="cd /$images/chrism/ofed-4.7/mlnx-ofa_kernel-4.0"
 alias m6="cd /$images/chrism/ofed-4.6/mlnx-ofa_kernel-4.0"
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
@@ -775,6 +777,7 @@ alias ethtool2=/images/chrism/ethtool/ethtool
 alias restart-virt='systemctl restart libvirtd.service'
 
 export PATH=$PATH:~/bin
+export PATH=/usr/local/bin:/usr/local/sbin/:/usr/bin/:/usr/sbin:/bin/:/sbin:~/bin
 # export PATH=$PATH:/images/chrism/dpdk-stable-17.11.2/install
 export EDITOR=vim
 export TERM=xterm
@@ -5059,8 +5062,9 @@ function start-switchdev
 	hw_tc_all $port
 
 	time set_netns_all $port
-	combined 3
-	affinity-set
+
+# 	combined 3
+# 	affinity-set
 
 #	iptables -F
 #	iptables -Z
@@ -5868,6 +5872,16 @@ function ovs-thread
 {
 	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
 	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
+}
+
+function vsconfig-wrk-nginx
+{
+	ovs-vsctl set open_vswitch . other_config:hw-offload=True
+	ovs-vsctl set open_vswitch . other_config:max-idle="30000"
+	ovs-vsctl set open_vswitch . other_config:n-handler-threads="8"
+	ovs-vsctl set open_vswitch . other_config:n-revalidator-threads="8"
+	restart-ovs
+	vsconfig
 }
 
 function none
@@ -7576,7 +7590,8 @@ function nat
 
 set -x
 	clear-nat
-	iptables -t nat -A POSTROUTING -s 100.64.0.10/32 -j SNAT --to-source 8.9.10.1
+	iptables -t nat -A POSTROUTING -s 192.168.0.2/32 -j SNAT --to-source 192.168.1.13
+# 	iptables -t nat -A POSTROUTING -s 100.64.0.10/32 -j SNAT --to-source 8.9.10.1
 	iptables -t nat -L
 set +x
 }
@@ -7602,7 +7617,33 @@ set -x
 
  	iptables -t nat -A POSTROUTING -s 1.1.1.1/32 -j SNAT --to-source 8.9.10.13
 	ifconfig $link 8.9.10.13/24 up
-	ssh 10.12.205.14 ifconfig $link 8.9.10.11/24 up
+	ssh 10.112.205.14 ifconfig $link 8.9.10.11/24 up
+set +x
+}
+
+function nat-veth
+{
+set -x
+	local n=ns1
+	ip link del veth0
+	ip link add veth0 type veth peer name veth1
+	ip link set dev veth0 up
+	ip addr add 1.1.1.100/24 brd + dev veth0
+	ip netns del $n 2>/dev/null
+	ip netns add $n
+	ip link set dev veth1 netns $n
+	ip netns exec $n ip addr add 1.1.1.$host_num/24 brd + dev veth1
+	ip netns exec $n ip link set dev veth1 up
+
+	# run the following command after login to namespace
+# 	ip route add default via 1.1.1.100
+
+	del-br
+	clear-nat
+
+	iptables -t nat -A POSTROUTING -s 1.1.1.$host_num/32 -j SNAT --to-source 8.9.10.13
+	ifconfig $link 8.9.10.13/24 up
+	ssh 10.112.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
 }
 
@@ -8920,8 +8961,8 @@ alias co=counters_tc_ct
 function counters_tc_ct10
 {
 	while :; do
-# 		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
-		cat /sys/class/net/$link/device/counters_tc_ct | grep in_hw
+		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
+# 		cat /sys/class/net/$link/device/counters_tc_ct | grep in_hw
 		sleep 10
 	done | tee co.txt
 }
@@ -10032,6 +10073,75 @@ set -x
 	cd /root/aer-inject-0.1/
 	./aer-inject ./test/cx3/aer1
 set +x
+}
+
+function dmfs
+{
+set -x
+	echo dmfs > /sys/class/net/$link/compat/devlink/steering_mode 
+set +x
+}
+
+function smfs
+{
+set -x
+	echo smfs > /sys/class/net/$link/compat/devlink/steering_mode
+set +x
+}
+
+function get-fs
+{
+set -x
+	cat /sys/class/net/$link/compat/devlink/steering_mode
+set +x
+}
+
+function tune-eth2
+{
+	ethtool -L $rep2 combined 16
+	ethtool -l $rep2
+	ethtool -g $rep2
+	ethtool -G $rep2 rx 8192
+	ethtool -G $rep2 tx 8192
+}
+
+function run-wrk
+{
+set -x
+	cd /root/container-test
+	WRK=/images/chrism/wrk/wrk
+	$WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:80
+# 	$WRK -d 1 -t 1 -c 1 --latency --script=counter.lua http://[8.9.10.11]:80
+set +x
+}
+
+function run-wrk2
+{
+	port=0
+
+	cd /root/container-test
+
+	WRK=/usr/bin/wrk
+	WRK=/images/chrism/wrk/wrk
+# 	for i in {0..50}; do
+		for cpu in {0..7}; do
+			#taskset -c $cpu ./wrk -d 300 -t 1 -c 30  --latency --script=counter.lua http://[10.144.20.75]:8$port > /tmp/result-$cpu &
+			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
+			port=$((port+1))
+			if (( $port > 9 )); then
+				port=0
+			fi
+		done
+		wait %1
+		sleep 1
+		cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+# 		sleep 90
+# 	done
+}
+
+function wrk-result
+{
+	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 }
 
 ######## ubuntu #######

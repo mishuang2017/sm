@@ -1632,6 +1632,8 @@ git push origin HEAD:refs/for/net-mlx5/fix-ppcnt-syndrome-issue
 
 If commit was abandoned, don't reuse the change-id. Otherwise, will fail to push
 
+git push origin HEAD:refs/for/mlnx_ofed_5_0/fix_sriov_race_issue
+
 ===git===
 
 git remote update # update all branches

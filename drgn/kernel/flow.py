@@ -187,6 +187,7 @@ def print_match(fte):
     print(" action %4x: " % fte.action.action.value_())
 
 def print_dest(rule):
+    print("\t\tmlx5_flow_rule %lx" % rule.address_of_().value_())
     if prog['MLX5_FLOW_DESTINATION_TYPE_COUNTER'] == rule.dest_attr.type:
 #         print("\t\tdest: counter_id: %d, name: %s" % (rule.dest_attr.counter_id, rule.node.name.string_().decode()))
         return
@@ -218,9 +219,9 @@ for i in range(4):
 
 # slow_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb
 # flow_table("mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads.slow_fdb", slow_fdb)
-vport_to_tir = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads
+# vport_to_tir = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads
 # print(vport_to_tir)
-flow_table("mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads", vport_to_tir)
+# flow_table("mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads", vport_to_tir)
 
 print("--------------------------------")
 

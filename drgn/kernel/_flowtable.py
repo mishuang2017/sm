@@ -74,4 +74,4 @@ for i in entries:
         name = flow.priv.netdev.name.string_().decode()
         lastuse = flow.dummy_counter.cache.lastuse
         refcnt = flow.refcnt.refs.counter.value_()
-        print("\t%-10s: %lx, lastuse: %ld, refcnt: %d" % (name, flow.value_(), lastuse / 1000, refcnt))
+        print("\t%-10s: %lx, flags: %x, lastuse: %ld, refcnt: %d" % (name, flow.value_(), flow.flags.value_(), lastuse / 1000, refcnt))

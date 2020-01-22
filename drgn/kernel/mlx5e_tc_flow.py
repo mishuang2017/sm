@@ -17,6 +17,9 @@ mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
 # else:
 #     tc_ht = mlx5e_rep_priv.tc_ht
 
+print("MLX5E_TC_FLOW_FLAG_SIMPLE %x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SIMPLE'].value_()))
+# print("MLX5E_TC_FLOW_FLAG_ESWITCH %x" % 1 << prog['MLX5E_TC_FLOW_FLAG_ESWITCH'].value_())
+
 try:
     prog.type('struct mlx5_rep_uplink_priv')
     tc_ht = mlx5e_rep_priv.uplink_priv.tc_ht
@@ -25,7 +28,8 @@ except LookupError as x:
 
 for i, flow in enumerate(lib.hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
-    print("%-10s mlx5e_tc_flow %lx, cookie: %lx" % (name, flow.value_(), flow.cookie.value_()))
+    print("%-10s mlx5e_tc_flow %lx, cookie: %lx, flags: %x" % \
+        (name, flow.value_(), flow.cookie.value_(), flow.flags.value_()))
 
 #     continue
 #     print(flow.miniflow_list)
