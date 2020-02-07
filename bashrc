@@ -7962,8 +7962,10 @@ function addflow-port
 	rm -f $file
 
 	restart-ovs
-	for(( src = 1; src < 65536; src++)); do
-		echo "table=0,priority=10,udp,nw_dst=1.1.1.1,tp_dst=80,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
+	for(( ip = 2; ip < 3; ip++)); do
+		for(( src = 1; src < 65536; src++)); do
+			echo "table=0,priority=10,udp,nw_src=1.1.1.$ip,tp_dst=80,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
+		done
 	done >> $file
 
 	br=br
