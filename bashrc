@@ -869,6 +869,14 @@ function ip8
 	ip link set $l up
 }
 
+function ip200
+{
+	local l=$link
+	ip addr flush $l
+	ip addr add dev $l 1.1.1.200/16
+	ip link set $l up
+}
+
 function ip2
 {
 	local l=$link2
@@ -1657,6 +1665,7 @@ alias bnetfilter='b4 nft_gen_flow_offload'
 # modprobe -v cls_flower tuple_offload=0
 function reprobe
 {
+set -x
 #	sudo /etc/init.d/openibd stop
 	sudo modprobe -r cls_flower
 	sudo modprobe -r mlx5_fpga_tools
@@ -1666,6 +1675,7 @@ function reprobe
 #	sudo modprobe -v mlx5_ib
 
 #	/etc/init.d/network restart
+set +x
 }
 
 function unload
@@ -4296,8 +4306,8 @@ set -x
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 
-	ifconfig $link 0
-	ifconfig $br $link_ip/24 up
+# 	ifconfig $link 0
+# 	ifconfig $br $link_ip/24 up
 # 	ifconfig $link 192.168.1.13/24 up
 set +x
 }
@@ -5061,7 +5071,13 @@ function start-switchdev
 	time up_all_reps $port
 	hw_tc_all $port
 
+	ip link set dev $vf1 address 02:25:d0:13:01:01
+	ip link set dev $vf2 address 02:25:d0:13:01:02
+	ip link set dev $vf3 address 02:25:d0:13:01:03
+
 	time set_netns_all $port
+
+	ethtool -K $link tx-vlan-stag-hw-insert off
 
 # 	combined 3
 # 	affinity-set
@@ -6127,7 +6143,7 @@ set +x
 function checkin
 {
 set -x
-	sm1
+	sml
 	[[ $# != 1 ]] && return
 	local list=$linux_file/$1
 	local new_dir=$linux_file/2
@@ -6439,7 +6455,7 @@ alias d1="disable-tcp-offload $link"
 
 function pktgen0
 {
-	sm1
+	sml
 	cd ./samples/pktgen
 	./pktgen_sample01_simple.sh -i $link -s 1 -m 02:25:d0:$rhost_num:01:02 -d 1.1.1.22 -t 1 -n 0
 }
@@ -6448,7 +6464,7 @@ function pktgen1
 {
 	mac_count=1
 	[[ $# == 1 ]] && mac_count=$1
-	sm1
+	sml
 	cd ./samples/pktgen
 	export SRC_MAC_COUNT=$mac_count
 	./pktgen_sample02_multiqueue.sh -i $link -s 1 -m 02:25:d0:$rhost_num:01:02 -d 1.1.1.22 -t 16 -n 0
@@ -6456,7 +6472,7 @@ function pktgen1
 
 function pktgen2
 {
-	sm1
+	sml
 	cd ./samples/pktgen
 
 	n=10
@@ -6484,21 +6500,21 @@ function pktgen2
 
 function pktgen-pf
 {
-	sm1
+	sml
 	cd ./samples/pktgen
 
 	n=10
 	[[ $# == 1 ]] && n=$1
 
-	export UDP_SRC_MIN=10000
-	export UDP_SRC_MAX=15000
-	export UDP_DST_MIN=10000
-	export UDP_DST_MAX=$((10000+n))
+	export UDP_SRC_MIN=1
+	export UDP_SRC_MAX=65536
+	export UDP_DST_MIN=80
+	export UDP_DST_MAX=80
 	i=0
 
 	if [[ "$(hostname -s)" == "dev-r630-04" ]]; then
 # 		while :; do
-			./pktgen_sample02_multiqueue.sh -i $vf2 -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.220 -t 8 -n 0	# vm1
+			./pktgen_sample02_multiqueue.sh -i $link -s 1 -m 02:25:d0:13:01:02 -d 1.1.1.1 -t 8 -n 0	# vm1
 # 			sleep 15
 # 			i=$((i+1))
 # 			echo "================= $i ===================="
@@ -6542,7 +6558,7 @@ function destroy-net
 	systemctl restart libvirtd.service
 }
 
-function restart-net
+function restart-libvirtd
 {
 set -x
 	virsh net-destroy default
@@ -7461,7 +7477,8 @@ function vm3-dpdk
 {
 	echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 	cd /root/dpdk-stable-17.11.4/
-	./x86_64-native-linuxapp-gcc/app/testpmd -l 0-5 -n 4	-m=4096  -w 0000:00:09.0 -- -i --rxq=4 --txq=4	--nb-cores=4 -i --forward-mode=flowgen -i -a --rss-udp
+	./x86_64-native-linuxapp-gcc/app/testpmd -l 0-2 -n 4	-m=1024  -w 0000:00:09.0 -- -i --rxq=2 --txq=2	--nb-cores=2 -i --forward-mode=flowgen -i -a --rss-udp
+# 	./x86_64-native-linuxapp-gcc/app/testpmd -l 0-6 -n 4	-m=4096  -w 0000:00:09.0 -- -i --rxq=4 --txq=4	--nb-cores=4 -i --forward-mode=flowgen -i -a --rss-udp
 }
 
 function 13-dpdk
@@ -7945,10 +7962,8 @@ function addflow-port
 	rm -f $file
 
 	restart-ovs
-	for(( src = 2000; src < 52000; src++)); do
-		for(( dst = 1000; dst < 1020; dst++)); do
-			echo "table=0,priority=10,udp,nw_dst=1.1.1.23,tp_dst=$dst,tp_src=$src,in_port=enp4s0f0_1,action=output:enp4s0f0_2"
-		done
+	for(( src = 1; src < 65536; src++)); do
+		echo "table=0,priority=10,udp,nw_dst=1.1.1.1,tp_dst=80,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
 	done >> $file
 
 	br=br
@@ -8074,7 +8089,7 @@ alias gen1='gen -i $vf1 -m 02:25:d0:13:01:03 -d 1.1.1.23'
 
 function pgset1
 {
-	sm1
+	sml
 	export PGDEV=/proc/net/pktgen/$vf2@0
 #	source $pg_linux/samples/pktgen/functions.sh
 	source $pg_linux/samples/pktgen/functions.sh
@@ -9115,6 +9130,7 @@ BCC_DIR=/images/chrism/bcc
 BCC_DIR=/usr/share/bcc
 alias trace="sudo $BCC_DIR/tools/trace -t"
 alias execsnoop="sudo $BCC_DIR/tools/execsnoop"
+alias tcpaccept="sudo $BCC_DIR/tools/tcpaccept"
 alias funccount="sudo $BCC_DIR/tools/funccount -i 1"
 alias fl="$BCC_DIR/tools/funclatency"
 
@@ -10096,13 +10112,47 @@ set -x
 set +x
 }
 
+function dmfs2
+{
+set -x
+	devlink dev param set pci/$pci name flow_steering_mode value "dmfs" \
+		cmode runtime || err "Failed to set steering sw"
+set +x
+}
+
+function smfs2
+{
+set -x
+	devlink dev param set pci/$pci name flow_steering_mode value "smfs" \
+		cmode runtime || err "Failed to set steering sw"
+set +x
+}
+
+function get-fs2
+{
+set -x
+	devlink dev  param show  pci/0000:04:00.0 name flow_steering_mode
+set +x
+}
+
+
+
 function tune-eth2
 {
+set -x
 	ethtool -L $rep2 combined 16
 	ethtool -l $rep2
 	ethtool -g $rep2
+
 	ethtool -G $rep2 rx 8192
 	ethtool -G $rep2 tx 8192
+
+	ethtool -G $link rx 8192
+	ethtool -G $link tx 8192
+
+	n1 ethtool -G $vf2 rx 8192
+	n1 ethtool -G $vf2 tx 8192
+set +x
 }
 
 function run-wrk
@@ -10110,7 +10160,7 @@ function run-wrk
 set -x
 	cd /root/container-test
 	WRK=/images/chrism/wrk/wrk
-	$WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:80
+	$WRK -d 60 -t 1 -c 1  --latency --script=counter.lua http://[8.9.10.11]:80
 # 	$WRK -d 1 -t 1 -c 1 --latency --script=counter.lua http://[8.9.10.11]:80
 set +x
 }
@@ -10125,7 +10175,6 @@ function run-wrk2
 	WRK=/images/chrism/wrk/wrk
 # 	for i in {0..50}; do
 		for cpu in {0..7}; do
-			#taskset -c $cpu ./wrk -d 300 -t 1 -c 30  --latency --script=counter.lua http://[10.144.20.75]:8$port > /tmp/result-$cpu &
 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
 			port=$((port+1))
 			if (( $port > 9 )); then

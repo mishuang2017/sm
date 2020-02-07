@@ -10,6 +10,8 @@ libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
+n=0
+
 mlx5e_priv = lib.get_mlx5_pf0()
 mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
 while True:
@@ -18,5 +20,6 @@ while True:
             for k in range(2):
                 num_rules = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].num_rules
                 if num_rules:
-                    print(i, j, k, num_rules)
-                    time.sleep(1)
+                    n=n+1
+                    print(n, i, j, k, num_rules)
+    time.sleep(1)

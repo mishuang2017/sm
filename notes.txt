@@ -1632,7 +1632,7 @@ git push origin HEAD:refs/for/net-mlx5/fix-ppcnt-syndrome-issue
 
 If commit was abandoned, don't reuse the change-id. Otherwise, will fail to push
 
-git push origin HEAD:refs/for/mlnx_ofed_5_0/fix_sriov_race_issue
+git push origin HEAD:refs/for/mlnx_ofed_5_0/fix_sysfs_counters_issue
 
 ===git===
 
@@ -11537,6 +11537,12 @@ https://docs.python.org/3/tutorial/inputoutput.html
 
 cat /proc/net/fib_trie
 fib_trie_seq_start
+
+===veth===
+
+mlx5e_xdp_handle
+mlx5e_skb_from_cqe_mpwrq_linear
+mlx5e_xmit_xdp_frame_mpwqe
 
 ===veth===
 
