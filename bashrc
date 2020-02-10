@@ -2413,10 +2413,10 @@ set +x
 
 function tc-setup
 {
-	[[ $# != 1 ]] && return
+	local l=$link
+	[[ $# == 1 ]] && l=$1
 	TC=/images/chrism/iproute2/tc/tc
 	TC=tc
-	local link=$1
 	$TC qdisc del dev $link ingress > /dev/null 2>&1
 	ethtool -K $link hw-tc-offload on 
 	$TC qdisc add dev $link ingress 
@@ -7964,7 +7964,8 @@ function addflow-port
 	restart-ovs
 	for(( ip = 2; ip < 3; ip++)); do
 		for(( src = 1; src < 65536; src++)); do
-			echo "table=0,priority=10,udp,nw_src=1.1.1.$ip,tp_dst=80,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
+			echo "table=0,priority=10,udp,nw_src=1.1.1.$ip,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
+			echo "table=0,priority=10,udp,nw_dst=1.1.1.$ip,tp_dst=$src,in_port=enp4s0f0_1,action=output:enp4s0f0"
 		done
 	done >> $file
 
