@@ -8676,6 +8676,7 @@ function br-pf-ct
 	ovs-ofctl dump-flows $br
 }
 
+# do dnat using ct(nat(dst))
 function br-dnat
 {
 	del-br
@@ -8703,6 +8704,7 @@ function br-dnat
 	ovs-ofctl dump-flows $br
 }
 
+# do dnat using CT and header rewrite
 function br-dnat2
 {
 	IPERF_PORT=5001
@@ -8723,6 +8725,39 @@ function br-dnat2
 	ovs-ofctl add-flow $br "table=0,priority=2,ip,udp,in_port=$rep2,nw_src=$VM_IP,tp_src=$IPERF_PORT actions=ct(table=3)"
 	ovs-ofctl add-flow $br "table=3,priority=1,ct_state=+trk+new,ip,udp actions=ct(commit),mod_nw_src:$ROUTE_IP,mod_tp_src:$NEW_PORT,$link"
 	ovs-ofctl add-flow $br "table=3,priority=1,ct_state=+trk+est,ip,udp actions=mod_nw_src:$ROUTE_IP,mod_tp_src:$NEW_PORT,$link"
+}
+
+# do dnat without CT
+function br-dnat3
+{
+	local file=/tmp/of.txt
+	rm -f $file
+
+	IPERF_PORT=5001
+	# trex default dest port is 12
+	NEW_PORT=12
+	ROUTE_IP=192.168.1.13
+	VM_IP=1.1.1.220
+
+	del-br
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $link
+
+	i=0
+	for(( j = 1; j < 255; j++)); do
+		for(( k = 1; k < 255; k++)); do
+			i=$((i+1))
+			echo "table=0,priority=2,in_port=$link,ip,udp,tp_dst=$NEW_PORT,nw_src=192.168.$j.$k,nw_dst=$ROUTE_IP actions=mod_nw_dst:$VM_IP,mod_tp_dst:$i,$rep2"
+		done
+	done >> $file
+
+# 	ovs-ofctl add-flow $br "table=0,priority=2,ip,udp,in_port=$rep2,nw_src=$VM_IP,tp_src=$IPERF_PORT actions=mod_nw_src:$ROUTE_IP,mod_tp_src:$NEW_PORT,$link"
+
+	set -x
+	ovs-ofctl add-flows $br -O openflow13 $file
+	ovs-ofctl dump-flows $br | wc -l
+	set +x
 }
 
 # [chrism@vnc14 ~]$ cat  /.autodirect/mgwork/maord/scripts/set_bond.sh
