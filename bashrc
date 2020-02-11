@@ -810,6 +810,7 @@ alias baidu='del-br; sudo ~chrism/bin/test_router-baidu.sh; enable-ovs-debug'	# 
 alias dnat-no-ct='restart-ovs; sudo ~chrism/bin/test_router-dnat.sh; enable-ovs-debug'	# dnat
 alias dnat-ct='del-br; sudo ~chrism/bin/test_router-dnat-ct.sh; enable-ovs-debug'	# dnat
 alias dnat='del-br; sudo ~chrism/bin/test_router-dnat-ct-new.sh; enable-ovs-debug'	# dnat
+alias dnat-trex='del-br; sudo ~chrism/bin/test_router-dnat-trex.sh; enable-ovs-debug'	# dnat
 alias rx2='restart-ovs; sudo ~chrism/bin/test_router-vxlan2.sh; enable-ovs-debug'
 alias r9t='restart-ovs; sudo ~chrism/bin/test_router9-test.sh; enable-ovs-debug'
 
@@ -4475,9 +4476,9 @@ set -x
 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
 
-	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
-	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
-	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+# 	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+# 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+# 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
 
 # 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
 
@@ -8671,6 +8672,33 @@ function br-pf-ct
 	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
 	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
 	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	ovs-ofctl dump-flows $br
+}
+
+function br-dnat
+{
+	del-br
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $link
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+
+#     ovs-ofctl1 add-flow ovs-br -O openflow13 "table=0,in_port=$rep2,ip,udp,action=ct(table=1,zone=1,nat)"
+#     ovs-ofctl1 add-flow ovs-br -O openflow13 "table=0,in_port=$link,ip,udp,ct_state=-trk,ip,action=ct(table=1,zone=1,nat)"
+# 
+#     ovs-ofctl1 add-flow ovs-br -O openflow13 "table=1,in_port=$rep2,ip,udp,ct_state=+trk+new,ct_zone=1,ip,action=ct(commit,nat(dst=$IP2:$NAT_PORT)),$link"
+#     ovs-ofctl1 add-flow ovs-br -O openflow13 "table=1,in_port=$rep2,ip,udp,ct_state=+trk+est,ct_zone=1,ip,action=$link"
+#     ovs-ofctl1 add-flow ovs-br -O openflow13 "table=1,in_port=$link,ip,udp,ct_state=+trk+est,ct_zone=1,ip,action=$rep2"
+
+	ovs-ofctl add-flow $br -O openflow13 "table=0,in_port=$link,ip,udp,action=ct(table=1,zone=1,nat)"
+	ovs-ofctl add-flow $br -O openflow13 "table=0,in_port=$rep2,ip,udp,ct_state=-trk,ip,action=ct(table=1,zone=1,nat)"
+
+	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ct_zone=1,ip,action=ct(commit,nat(dst=1.1.1.220)),$rep2"
+	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$link,ip,udp,ct_state=+trk+est,ct_zone=1,ip,action=$rep2"
+	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$rep2,ip,udp,ct_state=+trk+new,ct_zone=1,ip,action=ct(commit),$link"
+	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$rep2,ip,udp,ct_state=+trk+est,ct_zone=1,ip,action=$link"
 
 	ovs-ofctl dump-flows $br
 }
