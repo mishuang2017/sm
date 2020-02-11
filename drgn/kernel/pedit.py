@@ -148,7 +148,10 @@ for i in range(256):
     while node.value_():
         obj = container_of(node, "struct mlx5e_mod_hdr_entry", "mod_hdr_hlist")
         mlx5e_mod_hdr_entry = Object(prog, 'struct mlx5e_mod_hdr_entry', address=obj.value_())
-        print("mlx5e_mod_hdr_entry %lx, mod_hdr_id %lx" % (obj.value_(), mlx5e_mod_hdr_entry.mod_hdr_id.value_()))
+#         print("mlx5e_mod_hdr_entry %lx, mod_hdr_id %lx" % (obj.value_(), mlx5e_mod_hdr_entry.mod_hdr_id.value_()))
+
+        # ofed 5.0
+        print("mlx5e_mod_hdr_entry %lx, mod_hdr_id %lx" % (obj.value_(), mlx5e_mod_hdr_entry.modify_hdr.id.value_()))
 
 #         print(mlx5e_mod_hdr_entry.key)
         actions = mlx5e_mod_hdr_entry.key.actions

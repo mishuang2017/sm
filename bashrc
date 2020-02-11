@@ -8695,12 +8695,34 @@ function br-dnat
 	ovs-ofctl add-flow $br -O openflow13 "table=0,in_port=$link,ip,udp,action=ct(table=1,zone=1,nat)"
 	ovs-ofctl add-flow $br -O openflow13 "table=0,in_port=$rep2,ip,udp,ct_state=-trk,ip,action=ct(table=1,zone=1,nat)"
 
-	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ct_zone=1,ip,action=ct(commit,nat(dst=1.1.1.220)),$rep2"
+	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ct_zone=1,ip,action=ct(commit,nat(dst=1.1.1.220:1-60000)),$rep2"
 	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$link,ip,udp,ct_state=+trk+est,ct_zone=1,ip,action=$rep2"
 	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$rep2,ip,udp,ct_state=+trk+new,ct_zone=1,ip,action=ct(commit),$link"
 	ovs-ofctl add-flow $br -O openflow13 "table=1,in_port=$rep2,ip,udp,ct_state=+trk+est,ct_zone=1,ip,action=$link"
 
 	ovs-ofctl dump-flows $br
+}
+
+function br-dnat2
+{
+	IPERF_PORT=5001
+	# trex default dest port is 12
+	NEW_PORT=12
+	ROUTE_IP=192.168.1.13
+	VM_IP=1.1.1.220
+
+	del-br
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $link
+
+	ovs-ofctl add-flow $br "table=0,priority=2,in_port=$link,ip,udp,tp_dst=$NEW_PORT,nw_dst=$ROUTE_IP actions=mod_nw_dst:$VM_IP,mod_tp_dst:$IPERF_PORT,ct(table=2)"
+	ovs-ofctl add-flow $br "table=2,priority=1,ct_state=+trk+new,ip,udp actions=ct(commit),$rep2"
+	ovs-ofctl add-flow $br "table=2,priority=2,ct_state=+trk+est,ip,udp actions=$rep2"
+
+	ovs-ofctl add-flow $br "table=0,priority=2,ip,udp,in_port=$rep2,nw_src=$VM_IP,tp_src=$IPERF_PORT actions=ct(table=3)"
+	ovs-ofctl add-flow $br "table=3,priority=1,ct_state=+trk+new,ip,udp actions=ct(commit),mod_nw_src:$ROUTE_IP,mod_tp_src:$NEW_PORT,$link"
+	ovs-ofctl add-flow $br "table=3,priority=1,ct_state=+trk+est,ip,udp actions=mod_nw_src:$ROUTE_IP,mod_tp_src:$NEW_PORT,$link"
 }
 
 # [chrism@vnc14 ~]$ cat  /.autodirect/mgwork/maord/scripts/set_bond.sh
