@@ -19,7 +19,7 @@ NETLINK_GENERIC = 16
 NETLINK_ROUTE = 0
 
 # for i in range(MAX_LINKS):
-# print(nl_table[NETLINK_GENERIC])
+#     print(nl_table[i])
 
 hash = nl_table[NETLINK_GENERIC].hash
 

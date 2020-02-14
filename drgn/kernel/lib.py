@@ -79,6 +79,35 @@ def print_mlx5e_ct_tuple(k, tuple):
 #define TCA_FLOWER_KEY_CT_FLAGS_SRC_NAT           0x40
 #define TCA_FLOWER_KEY_CT_FLAGS_DST_NAT           0x80
 
+def print_action_stats(a):
+    bytes = 0
+    packets = 0
+    if a.cpu_bstats.value_():
+        for cpu in for_each_online_cpu(prog):
+            bstats = per_cpu_ptr(a.cpu_bstats, cpu).bstats
+            bytes += bstats.bytes
+            packets += bstats.packets
+        print("   percpu bytes: %d, packets: %d" % (bytes, packets))
+    else:
+        bstats = a.tcfa_bstats
+        bytes += bstats.bytes
+        packets += bstats.packets
+        print("   bytes: %d, packets: %d" % (bytes, packets))
+
+    bytes = 0
+    packets = 0
+    if a.cpu_bstats_hw.value_():
+        for cpu in for_each_online_cpu(prog):
+            bstats = per_cpu_ptr(a.cpu_bstats_hw, cpu).bstats
+            bytes += bstats.bytes
+            packets += bstats.packets
+        print("hw percpu bytes: %d, packets: %d" % (bytes, packets))
+    else:
+        bstats = a.tcfa_bstats_hw
+        bytes += bstats.bytes
+        packets += bstats.packets
+        print("hw bytes: %d, packets: %d" % (bytes, packets))
+
 def print_exts(e):
     print("\nnr_actions: %d" % e.nr_actions)
     for i in range(e.nr_actions):
@@ -108,6 +137,8 @@ def print_exts(e):
                 print("mask:   %08x" % tcf_pedit.tcfp_keys[i].mask)
                 print("value:  %08x" % tcf_pedit.tcfp_keys[i].val)
         if kind == "mirred":
+            print("tc_action %lx" % a.value_())
+            print_action_stats(a)
             tcf_mirred = Object(prog, 'struct tcf_mirred', address=a.value_())
             print("output: %s" % tcf_mirred.tcfm_dev.name.string_().decode())
         if kind == "gact":

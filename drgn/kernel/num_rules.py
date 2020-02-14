@@ -10,7 +10,7 @@ libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
-n=0
+n=1
 
 d=0
 
@@ -23,10 +23,10 @@ while True:
                 num_rules = mlx5_eswitch_fdb.offloads.fdb_prio[i][j][k].num_rules
                 d=d+num_rules
                 if num_rules:
-                    n=n+1
 #                     print(n, i, j, k, num_rules)
                     print("%4d: %d" % (n, num_rules.value_()))
     time.sleep(1)
+    n=n+1
     if d == 0:
         n=0
     d=0
