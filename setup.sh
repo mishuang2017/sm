@@ -31,6 +31,9 @@ set -x
 	sleep 1
 	yum -y install ctags tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx gcc-c++
 
+	# install /sbin/installkernel. otherwise, will hit Cannot find LILO error
+	yum -y install grubby
+
 	# ofed
 	yum -y install gtk2 atk cairo python2-libxml2 createrepo cmake libnl3-devel automake
 	yum -y install infiniband-diags.x86_64 ibutils.x86_64
