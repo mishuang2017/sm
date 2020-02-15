@@ -24,13 +24,10 @@ set -x
 	done
 
 	# 'libvirt_driver_storage.so' fails to load due to "undefined symbol: rbd_diff_iterate2"
-	yum install librbd1-devel
+# 	yum install librbd1-devel
 	# pip install requests urllib3 pyOpenSSL --upgrade
 
-	dnf -y install @virtualization
-	yum -y groupinstall "Virtualization Host"
-	dnf -y groupinstall "C Development Tools and Libraries"
-	dnf -y groupinstall "Development Tools"
+	yum -y install virt-manager
 	sleep 1
 	yum -y install ctags tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx gcc-c++
 
