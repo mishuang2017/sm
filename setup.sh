@@ -226,3 +226,7 @@ setenforce 0
 
 set +x
 # http://xmodulo.com/how-to-configure-linux-bridge-interface.html
+
+# netinstall installation source
+#	https://mirrors.huaweicloud.com/centos/7/os/x86_64/
+#	http://mirror.centos.org/centos/7/os/x86_64/
