@@ -8936,6 +8936,8 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+find . -type f -exec ls -lShd {} +
+
 kill -0 $pid
 If sig is 0, then no signal is sent, but error checking is still performed; 
 this can be used to check for the existence of a process ID or process 
