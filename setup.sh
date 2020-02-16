@@ -230,3 +230,6 @@ set +x
 # netinstall installation source
 #	https://mirrors.huaweicloud.com/centos/7/os/x86_64/
 #	http://mirror.centos.org/centos/7/os/x86_64/
+
+# sudo EDITOR=vi visudo
+# chrism ALL=(ALL) NOPASSWD:ALL
