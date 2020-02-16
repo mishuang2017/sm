@@ -8936,6 +8936,7 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+du -sh * | sort -hr
 find . -type f -exec ls -lShd {} +
 
 kill -0 $pid
