@@ -55,8 +55,8 @@ set -x
 	# gdb needs makeinfo
 	yum -y instal texinfo
 
-	# drgn
-	yum -y install python3-devel dh-autoreconf
+	# drgn, xz-devel for lzma
+	yum -y install python3-devel dh-autoreconf xz-devel
 
 	sleep 1
 	systemctl disable gdm
