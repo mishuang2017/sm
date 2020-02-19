@@ -29,7 +29,8 @@ set -x
 
 	yum -y install virt-manager
 	sleep 1
-	yum -y install ctags tmux screen ncurses-devel openssl-devel *lzo* *elf* readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx gcc-c++
+	yum -y install ctags tmux screen ncurses-devel openssl-devel readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx gcc-c++ bison flex make
+	# lzo elf ?
 
 	# install /sbin/installkernel. otherwise, will hit Cannot find LILO error
 	yum -y install grubby

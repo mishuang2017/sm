@@ -47,8 +47,8 @@ if (( host_num == 13 )); then
 # 	modprobe aer-inject
 
 elif (( host_num == 14 )); then
-	export DISPLAY=MTBC-CHRISM-N:0.0
-	export DISPLAY=MTBC-CHRISM:0.0
+# 	export DISPLAY=MTBC-CHRISM:0.0
+	export DISPLAY=MTBC-CHRISM-N1:0.0
 
 	link=enp4s0f0
 	link2=enp4s0f1
@@ -454,7 +454,11 @@ alias gityossi='git log --tags --source --author="yossiku@mellanox.com"'
 alias gitelib='git log --tags --source --author="elibr@mellanox.com"'
 alias git-linux-origin='git remote set-url origin ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias git-linus='git remote add linus git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git; git fetch --tags linus'
-alias git-vlad='git remote add vlad git@github.com:vbuslov/linux.git'
+# alias git-vlad='git remote add vlad git@github.com:vbuslov/linux.git'
+alias git-vlad-v5.4='git log --author=vladbu@mellanox.com --oneline v5.4..'
+alias git-vlad-v5.3='git log --author=vladbu@mellanox.com --oneline v5.3..v5.4'
+alias git-vlad-v5.2='git log --author=vladbu@mellanox.com --oneline v5.2..v5.3'
+alias git-vlad-v5.1='git log --author=vladbu@mellanox.com --oneline v5.1..v5.2'
 # git checkout v4.12
 
 # for legacy
@@ -695,6 +699,7 @@ alias vi1='vi ~/Documents/ovs.txt'
 alias vi2='vi ~/Documents/mirror.txt'
 alias vib='vi ~/Documents/bug.txt'
 alias vip='vi ~/Documents/private.txt'
+alias viperf='vi ~/Documents/perf.txt'
 alias vig='sudo vim /boot/grub2/grub.cfg'
 alias vig1='sudo vim /boot/grub/grub.conf'
 alias vig2='sudo vim /etc/default/grub'
@@ -5073,15 +5078,15 @@ function start-switchdev
 	time up_all_reps $port
 	hw_tc_all $port
 
-	ip link set dev $vf1 address 02:25:d0:13:01:01
-	ip link set dev $vf2 address 02:25:d0:13:01:02
-	ip link set dev $vf3 address 02:25:d0:13:01:03
+	ip link set dev $vf1 address 02:25:d0:$host_num:01:01
+	ip link set dev $vf2 address 02:25:d0:$host_num:01:02
+	ip link set dev $vf3 address 02:25:d0:$host_num:01:03
 
 	time set_netns_all $port
 
 	ethtool -K $link tx-vlan-stag-hw-insert off
 
-# 	combined 3
+ 	combined 4
 # 	affinity-set
 
 #	iptables -F
@@ -6064,7 +6069,17 @@ function git-ofed-reset
 	file2=$(echo $file | sed "s/^..//")
 	git show --stat
 	git reset HEAD~ $file2
-	amend
+	git commit --amend
+	git show --stat
+}
+
+function git-ofed-reset2
+{
+	[[ $# != 1 ]] && return
+	local file=$1
+	git show --stat
+	git reset HEAD~ $file
+	git commit --amend
 	git show --stat
 }
 
@@ -10229,7 +10244,7 @@ set +x
 function tune-eth2
 {
 set -x
-	ethtool -L $rep2 combined 16
+	ethtool -L $rep2 combined 4
 	ethtool -l $rep2
 	ethtool -g $rep2
 
@@ -10264,7 +10279,8 @@ function run-wrk2
 	WRK=/images/chrism/wrk/wrk
 # 	for i in {0..50}; do
 		for cpu in {0..7}; do
-			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
+# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
+			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[1.1.1.200]:8$port > /tmp/result-$cpu &
 			port=$((port+1))
 			if (( $port > 9 )); then
 				port=0
@@ -10280,6 +10296,12 @@ function run-wrk2
 function wrk-result
 {
 	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+}
+
+function tc-5t
+{
+	cd /root/dev
+	./test-tc-perf-update.sh 5t 100000 2
 }
 
 ######## ubuntu #######

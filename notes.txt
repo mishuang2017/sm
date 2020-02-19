@@ -451,6 +451,19 @@ rpm -ql simx-qenu
 /opt/simx/bin/manage_virt_manager_device_support.py add
 /opt/simx/bin/manage_vm_simx_support.py -n vm1
 
+[root@dev-r630-04 simx]# ./install.sh
+
+[*] Printing build information
+
+simx-qemu-4.5-3836
+
+Package:       simx-qemu-4.5-3836.el7.x86_64.rpm
+Time:          20200205-180019
+GIT URL:       /mswg/git/simx.git
+GIT branch:    master
+GIT commit:    23f97bc7dcfe7bebfa8b1e6261d1650a3f175b0a
+Lib version:   e962ba8ad6ea0733e6aa68be62fe2bb200751111
+
 ===perf===
 
 perf stat -e cycles:k,instructions:k -B --cpu=0-15 sleep 2
@@ -1543,6 +1556,10 @@ ts: 5
  0x746202 : mlx5_flow_list_create.isra.12            342/0xa90 [/home1/chrism/dpdk-18.05/build/app/testpmd]
  0x748ff2 : mlx5_ctrl_flow            2f2/0x370 [/home1/chrism/dpdk-18.05/build/app/testpmd]
 
+===iso===
+
+https://mirrors.huaweicloud.com/fedora/releases/31/Server/x86_64/iso/Fedora-Server-dvd-x86_64-31-1.9.iso
+
 ===sig===
 
  0xffffffff812ae300 : do_coredump              0/0xeb0 [kernel]
@@ -1632,7 +1649,7 @@ git push origin HEAD:refs/for/net-mlx5/fix-ppcnt-syndrome-issue
 
 If commit was abandoned, don't reuse the change-id. Otherwise, will fail to push
 
-git push origin HEAD:refs/for/mlnx_ofed_5_0/fix_sysfs_counters_issue
+git push origin HEAD:refs/for/mlnx_ofed_5_0/kernel-5.4-perf-issue
 
 ===git===
 
@@ -8935,6 +8952,9 @@ CONFIG_NET_SWITCHDEV=y
 http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
+
+linux16 /vmlinuz-5.5.0-rc4+ root=/dev/mapper/fedora-root
+initrd16 /initramfs-5.5.0-rc4+.img
 
 du -sh * | sort -hr
 find . -type f -exec ls -lShd {} +

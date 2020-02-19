@@ -30,7 +30,7 @@ for x, dev in enumerate(lib.get_netdevs()):
     if block.value_() == 0:
         continue
 
-#     print(block)
+    print("block.lockeddevcnt: %d" % block.lockeddevcnt)
 
     if lib.struct_exist("struct flow_block_cb"):
         for cb in list_for_each_entry('struct flow_block_cb', block.flow_block.cb_list.address_of_(), 'list'):
