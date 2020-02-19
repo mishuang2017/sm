@@ -50,6 +50,9 @@ set -x
 	# tc
 	yum -y install libmnl libmnl-devel
 
+	# ovs
+	yum -y install openvswitch libcap-ng-devel
+
         # gdb debug
         # dnf -y debuginfo-install glibc-2.26-15.fc27.x86_64
 	# gdb needs makeinfo
