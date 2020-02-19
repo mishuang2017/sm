@@ -55,7 +55,7 @@ set -x
 	yum -y instal texinfo
 
 	# drgn
-	yum -y install python3-devel
+	yum -y install python3-devel dh-autoreconf
 
 	sleep 1
 	systemctl disable gdm
