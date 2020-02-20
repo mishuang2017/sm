@@ -428,6 +428,7 @@ alias v5.1='git checkout v5.1; git checkout -b 5.1'
 alias v5.2='git checkout v5.2; git checkout -b 5.2'
 alias v5.3='git checkout v5.3; git checkout -b 5.3'
 alias v5.4='git checkout v5.4; git checkout -b 5.4'
+alias v5.5='git checkout v5.5; git checkout -b 5.5'
 alias v4.10='git checkout v4.10; git checkout -b 4.10'
 alias v4.8='git checkout v4.8; git checkout -b 4.8'
 alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
@@ -546,6 +547,7 @@ fi
 
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
+alias sm-build="cdr; cd build"
 alias smu="cd /$images/chrism/upstream"
 alias smm="cd /$images/chrism/mlnx-ofa_kernel-4.0"
 alias o5="cd /$images/chrism/ofed-5.0/mlnx-ofa_kernel-4.0"
@@ -5849,6 +5851,11 @@ function skip_sw
 	vsconfig
 }
 
+function idle10
+{
+	ovs-vsctl set Open_vSwitch . other_config:max-idle=10000
+}
+
 function none1
 {
 	vsconfig2
@@ -7981,8 +7988,8 @@ function addflow-port
 	restart-ovs
 	for(( ip = 2; ip < 3; ip++)); do
 		for(( src = 1; src < 65536; src++)); do
-			echo "table=0,priority=10,udp,nw_src=1.1.1.$ip,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
-			echo "table=0,priority=10,udp,nw_dst=1.1.1.$ip,tp_dst=$src,in_port=enp4s0f0_1,action=output:enp4s0f0"
+			echo "table=0,priority=1,udp,nw_src=1.1.1.$ip,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
+			echo "table=0,priority=1,udp,nw_dst=1.1.1.$ip,tp_dst=$src,in_port=enp4s0f0_1,action=output:enp4s0f0"
 		done
 	done >> $file
 

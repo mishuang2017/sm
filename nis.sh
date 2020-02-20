@@ -139,7 +139,7 @@ EOF
 	cp ~chrism/.crash .
 	sleep 1
 
-	home=/home1/chrism
+	home=/images/chrism
 	mkdir -p $home
 	chown chrism.mtl $home
 	sleep 1
