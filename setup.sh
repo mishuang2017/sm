@@ -238,3 +238,14 @@ set +x
 
 # sudo EDITOR=vi visudo
 # chrism ALL=(ALL) NOPASSWD:ALL
+
+
+# Trex
+function install-trex
+{
+	install-pip
+	pip install pexpect
+	yum -y install python-devel
+	yum -y install tkinter
+	pip install matplotlib
+}

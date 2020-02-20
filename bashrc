@@ -9477,6 +9477,7 @@ function dist
 		return
 	fi
 
+	mkdir -p /etc/depmod.d
 cat << EOF > $file
 #
 # depmod.conf
@@ -10293,14 +10294,16 @@ function run-wrk2
 {
 	port=0
 
-	cd /root/container-test
+# 	cd /root/container-test
+set -x
+	cd wrk-nginx-container
 
 	WRK=/usr/bin/wrk
 	WRK=/images/chrism/wrk/wrk
 # 	for i in {0..50}; do
 		for cpu in {0..7}; do
-# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
-			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[1.1.1.200]:8$port > /tmp/result-$cpu &
+			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
+# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[1.1.1.200]:8$port > /tmp/result-$cpu &
 			port=$((port+1))
 			if (( $port > 9 )); then
 				port=0
@@ -10311,6 +10314,7 @@ function run-wrk2
 		cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 # 		sleep 90
 # 	done
+set +x
 }
 
 function wrk-result
