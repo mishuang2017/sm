@@ -2,8 +2,11 @@ sudo apt-get -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 	git make build-essential flex bison libssl-dev libelf-dev		\
 	ethtool tree bc sysstat
 
+# For ovs
+sudo apt-get install libcap-ng-dev openvswitch-switch dh-autoreconf
+
 # For bionic bcc
-sudo apt-get install bpfcc-tools linux-headers-$(uname -r)
+sudo apt-get -y install bpfcc-tools linux-headers-$(uname -r)
 # sudo apt-get -y install bison build-essential cmake flex git libedit-dev	\
 # 	llvm python zlib1g-dev libelf-dev
 # sudo apt-get -y install libclang-6.0-dev

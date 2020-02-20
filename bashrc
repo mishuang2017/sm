@@ -551,7 +551,7 @@ alias sm-build="cdr; cd build"
 alias smu="cd /$images/chrism/upstream"
 alias smm="cd /$images/chrism/mlnx-ofa_kernel-4.0"
 alias o5="cd /$images/chrism/ofed-5.0/mlnx-ofa_kernel-4.0"
-alias o5-5.4="cd /$images/chrism/ofed-5.0/mlnx-ofa_kernel-4.0-kernel-5.4"
+alias o5-5.4="cd /$images/chrism/ofed-5.0/mlnx-ofa_kernel-4.0"
 alias m7="cd /$images/chrism/ofed-4.7/mlnx-ofa_kernel-4.0"
 alias m6="cd /$images/chrism/ofed-4.6/mlnx-ofa_kernel-4.0"
 alias cd-test="cd $linux_dir/tools/testing/selftests/tc-testing/"
@@ -5851,10 +5851,9 @@ function skip_sw
 	vsconfig
 }
 
-function idle10
-{
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=10000
-}
+alias idle0='ovs-vsctl set Open_vSwitch . other_config:max-idle=0'
+alias idle10000='ovs-vsctl set Open_vSwitch . other_config:max-idle=10000'
+alias idle10='ovs-vsctl set Open_vSwitch . other_config:max-idle=10'
 
 function none1
 {
@@ -5864,19 +5863,6 @@ function none1
 	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 
 #	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=5000
 #	ovs-vsctl set Open_vSwitch . other_config:min_revalidate_pps=1
-	restart-ovs
-	vsconfig
-}
-
-alias idle0='ovs-vsctl set Open_vSwitch . other_config:max-idle=0'
-alias idle10='ovs-vsctl set Open_vSwitch . other_config:max-idle=10000'
-
-function none0
-{
-	vsconfig2
-	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
-	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=6000000
 	restart-ovs
 	vsconfig
 }
@@ -7296,6 +7282,7 @@ alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
 alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
+alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
 
 alias ofed-configure='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
 alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
@@ -7987,7 +7974,15 @@ function addflow-port
 
 	restart-ovs
 	for(( ip = 2; ip < 3; ip++)); do
-		for(( src = 1; src < 65536; src++)); do
+		for(( src = 1; src < 65535; src++)); do
+
+			# on kernel 5.4, remove priority
+
+# 			echo "table=0,priority=1,udp,nw_src=1.1.1.$ip,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
+# 			echo "table=0,priority=1,udp,nw_dst=1.1.1.$ip,tp_dst=$src,in_port=enp4s0f0_1,action=output:enp4s0f0"
+
+			# on kernel 4.19.36, add priority
+
 			echo "table=0,priority=1,udp,nw_src=1.1.1.$ip,tp_src=$src,in_port=enp4s0f0,action=output:enp4s0f0_1"
 			echo "table=0,priority=1,udp,nw_dst=1.1.1.$ip,tp_dst=$src,in_port=enp4s0f0_1,action=output:enp4s0f0"
 		done
