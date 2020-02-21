@@ -74,9 +74,12 @@ set -x
 	systemctl disable NetworkManager
 	systemctl stop NetworkManager
 	sleep 1
+
+	# very important to make vxlan work
 	systemctl disable firewalld
 	systemctl stop firewalld
 	dnf -y remove firewalld
+
 	sleep 1
 	systemctl enable network
 	sleep 1
@@ -226,6 +229,7 @@ config-nis
 sed -i 's/timeout=30/timeout=10/' /lib/systemd/system/NetworkManager-wait-online.service
 sleep 1
 
+# very important to make vxlan work
 sed -i 's/SELINUX=enforcing/SELINUX=disable/' /etc/selinux/config
 setenforce 0
 

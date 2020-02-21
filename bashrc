@@ -4444,7 +4444,8 @@ function brx
 set -x
 	del-br
 	vs add-br $br
-	for (( i = 0; i < numvfs; i++)); do
+# 	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < 2; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
@@ -4472,7 +4473,8 @@ function brx-ct
 set -x
 	del-br
 	vs add-br $br
-	for (( i = 0; i < numvfs; i++)); do
+# 	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < 2; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
@@ -8051,6 +8053,11 @@ alias a5='addflow-ip  500000'
 alias a1='addflow-ip 100000'
 alias a100='addflow-ip 100'
 
+#     tc_filter add dev $VXLAN protocol ip parent ffff: prio 1 flower \
+#                     enc_key_id 100 enc_dst_port 4789 src_mac $VM_DST_MAC \
+#                     enc_src_ip $TUN_SRC_V4 \
+#                     action drop
+ 
 alias send='/labhome/chrism/prg/python/scapy/send.py'
 alias visend='vi /labhome/chrism/prg/python/scapy/send.py'
 alias sendm='/labhome/chrism/prg/python/scapy/m.py'

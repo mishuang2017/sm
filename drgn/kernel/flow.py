@@ -199,7 +199,7 @@ def print_dest(rule):
         return
     if prog['MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE'] == rule.dest_attr.type:
         print("\t\tdest: ft: %lx" % (rule.dest_attr.ft.value_()))
-        flow_table("goto table", rule.dest_attr.ft)
+#         flow_table("goto table", rule.dest_attr.ft)
         return
     else:
         print(rule)

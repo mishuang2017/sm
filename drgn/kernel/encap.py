@@ -25,7 +25,8 @@ for i in range(256):
 #         print(obj)
         print("mlx5e_encap_entry %lx" % obj.value_())
         mlx5e_encap_entry = Object(prog, 'struct mlx5e_encap_entry', address=obj.value_())
-        print("encap_id %lx" % mlx5e_encap_entry.encap_id.value_())
+#         print("encap_id %lx" % mlx5e_encap_entry.encap_id.value_())
+        print(mlx5e_encap_entry.pkt_reformat)
         node = node.next
 
 mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
