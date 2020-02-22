@@ -9946,7 +9946,7 @@ function msi
 #         - socket: 0
 #           threads: [2,4,6,8,10,12,14]
 
-alias cd-trex='cd /images/chrism/DPIX'
+alias cd-trex='cd /images/chrism/DPIX/trex/trexPackage'
 alias vit1='vi /images/chrism/DPIX/AsapPerfTester/TestParams/AsapPerfTestParams.py'
 alias vitx='vi /images/chrism/DPIX/AsapPerfTester/TestParams/IpVarianceVxlan.py'
 alias vit2='vi /images/chrism/DPIX/dpdk_conf/frame_size_-_64.dpdk.conf'
