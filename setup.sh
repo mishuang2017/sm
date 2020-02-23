@@ -43,15 +43,12 @@ set -x
 	yum -y install numactl-devel 
 
 	# ovs
-	yum -y install libatomic
-	yum -y install libtool
-	yum -y install dh-autoreconf
 
 	# tc
 	yum -y install libmnl libmnl-devel
 
 	# ovs
-	yum -y install openvswitch libcap-ng-devel
+	yum -y install openvswitch libcap-ng-devel libatomic libtool dh-autoreconf
 
         # gdb debug
         # dnf -y debuginfo-install glibc-2.26-15.fc27.x86_64
