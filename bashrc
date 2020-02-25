@@ -407,7 +407,8 @@ alias clone-ovs-ct='git clone https://github.com/roidayan/ovs --branch=ct-one-ta
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
-alias clone-drgn='git clone https://github.com/osandov/drgn.git'
+alias clone-drgn='git clone https://github.com/osandov/drgn.git'	# pip3 install drgn
+alias clone-wrk='git clone git@github.com:wg/wrk.git'
 
 alias clone-ubuntu-xenial='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-xential.git'
 alias clone-ubuntu='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-bionic.git'
@@ -2072,6 +2073,11 @@ function printk8
 	echo 'module nf_conntrack +p' > /sys/kernel/debug/dynamic_debug/control
 }
 
+function headers_install
+{
+	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr -j
+}
+
 function make-all
 {
 	[[ $UID == 0 ]] && break
@@ -2081,9 +2087,9 @@ function make-all
 	unset CONFIG_LOCALVERSION_AUTO
 	make olddefconfig
 	make -j $cpu_num
-#	sudo make headers_install
 	sudo make modules_install -j $cpu_num
 	sudo make install
+	make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
 
 	/bin/rm -rf ~/.ccache
 }
@@ -7359,6 +7365,8 @@ set -x
 	sudo ovs-appctl vlog/set tc:file:DBG
 	sudo ovs-appctl vlog/set dpif_netlink:file:DBG
 	sudo ovs-appctl vlog/set netdev_tc_offloads:file:DBG
+
+	sudo ovs-appctl vlog/set netlink:file:DBG
 set +x
 }
 
@@ -10290,12 +10298,14 @@ set +x
 function run-wrk
 {
 set -x
-	cd /root/container-test
+	cd wrk-nginx-container
 	WRK=/images/chrism/wrk/wrk
-	$WRK -d 60 -t 1 -c 1  --latency --script=counter.lua http://[8.9.10.11]:80
-# 	$WRK -d 1 -t 1 -c 1 --latency --script=counter.lua http://[8.9.10.11]:80
+# 	$WRK -d 60 -t 1 -c 1  --latency --script=counter.lua http://[8.9.10.11]:80
+	$WRK -d 60 -t 1 -c 1 --latency --script=counter.lua http://[1.1.1.200]:80
 set +x
 }
+
+# keepalive_requests
 
 function run-wrk2
 {
@@ -10309,6 +10319,8 @@ set -x
 	WRK=/images/chrism/wrk/wrk
 # 	for i in {0..50}; do
 		for cpu in {0..7}; do
+# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
+
 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
 # 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[1.1.1.200]:8$port > /tmp/result-$cpu &
 			port=$((port+1))
