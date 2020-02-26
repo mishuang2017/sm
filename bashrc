@@ -21,8 +21,23 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 [[ "$(hostname -s)" == "nps-server-30" ]] && host_num=20
 [[ "$(hostname -s)" == "nps-server-31" ]] && host_num=40
+[[ "$(hostname -s)" == "clx-ibmc-01" ]] && host_num=1
+[[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 
-if (( host_num == 13 )); then
+if (( host_num == 1 || host_num == 2 )); then
+	numvfs=3
+	link=ens1f0
+	link2=ens1f1
+	vf1=ens1f2
+	vf2=ens1f3
+	vf3=ens1f4
+
+	if [[ "$USER" == "root" ]]; then
+		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
+		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+	fi
+
+elif (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 
 	link=enp4s0f0
@@ -91,8 +106,6 @@ elif (( host_num == 40 )); then
 	numvfs=2
 	link=enp59s0f0
 	link2=enp59s0f1
-
-
 elif (( host_num == 15 )); then
 	link=ens9
 elif (( host_num == 16 )); then
@@ -5096,8 +5109,9 @@ function start-switchdev
 
 	ethtool -K $link tx-vlan-stag-hw-insert off
 
- 	combined 4
+#  	combined 4
 # 	affinity-set
+	ethtool -L $rep2 combined 63
 
 #	iptables -F
 #	iptables -Z
@@ -10318,7 +10332,7 @@ set -x
 	WRK=/usr/bin/wrk
 	WRK=/images/chrism/wrk/wrk
 # 	for i in {0..50}; do
-		for cpu in {0..7}; do
+		for cpu in {0..95}; do
 # 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
 
 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
@@ -10329,7 +10343,7 @@ set -x
 			fi
 		done
 		wait %1
-		sleep 1
+		sleep 10
 		cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 # 		sleep 90
 # 	done
