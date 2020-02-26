@@ -25,7 +25,7 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 
 if (( host_num == 1 || host_num == 2 )); then
-	numvfs=3
+	numvfs=97
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -4930,7 +4930,8 @@ function set-mac
 	mac_vf=1
 
 	# echo "Set mac: "
-	for vf in `ip link show $l | grep "vf " | awk {'print $2'}`; do
+# 	for vf in `ip link show $l | grep "vf " | awk {'print $2'}`; do
+	for vf in `ip link | grep "vf " | awk {'print $2'}`; do
 		local mac_addr=$mac_prefix:$(printf "%x" $mac_vf)
 		echo "vf${vf} mac address: $mac_addr"
 		ip link set $l vf $vf mac $mac_addr
@@ -10332,7 +10333,7 @@ set -x
 	WRK=/usr/bin/wrk
 	WRK=/images/chrism/wrk/wrk
 # 	for i in {0..50}; do
-		for cpu in {0..95}; do
+		for cpu in {0..23}; do
 # 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
 
 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
@@ -10348,6 +10349,52 @@ set -x
 # 		sleep 90
 # 	done
 set +x
+}
+
+function run-wrk3
+{
+	port=0
+
+# 	cd /root/container-test
+set -x
+	cd wrk-nginx-container
+
+	time=20
+	/bin/rm -rf  /tmp/result-*
+	WRK=/usr/bin/wrk
+	WRK=/images/chrism/wrk/wrk
+# 	for i in {0..50}; do
+		for cpu in {0..95}; do
+# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
+
+# 			ns=n1$((cpu%16+1))
+			ns=n1$((cpu+1))
+			ip netns exec $ns taskset -c $cpu $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+# 			ip netns exec $ns $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+			port=$((port+1))
+			if (( $port >= 30 )); then
+				port=0
+			fi
+		done
+# 		wait %1
+		sleep $((time+5))
+		cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+# 	done
+set +x
+}
+
+function worker_cpu_affinity
+{
+	for i in {1..96}; do
+		for j in {1..96}; do
+			if (( i == j )); then
+				printf "1"
+			else
+				printf "0"
+			fi
+		done
+		printf " "
+	done
 }
 
 function wrk-result
