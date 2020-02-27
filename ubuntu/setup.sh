@@ -68,3 +68,5 @@ sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils 
 sudo apt-get install -y lsb-core
 
 sudo apt install -y python3-venv python3-pip
+# fix: ImportError: No module named pip
+sudo python3 -m ensurepip
