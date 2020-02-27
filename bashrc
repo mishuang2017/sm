@@ -13,8 +13,6 @@ alias rc='. ~/.bashrc'
 
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
-[[ "$(hostname -s)" == "dev-l-vrt-202" ]] && host_num=2
-[[ "$(hostname -s)" == "dev-l-vrt-203" ]] && host_num=3
 [[ "$(hostname -s)" == "dev-chrism-vm1" ]] && host_num=15
 [[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
@@ -86,19 +84,6 @@ elif (( host_num == 14 )); then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
-
-elif (( host_num == 2 )); then
-	numvfs=2
-	link=$link
-	rhost_num=3
-	link_remote_ip=192.168.1.$rhost_num
-
-elif (( host_num == 3 )); then
-	numvfs=2
-	rhost_num=2
-	link_remote_ip=192.168.1.$rhost_num
-	link=$link
-
 elif (( host_num == 20 )); then
 	numvfs=2
 	link=enp59s0f0
