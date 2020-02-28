@@ -17,20 +17,24 @@ def print_channel(priv):
     print("num of channels: %d" % num)
     channels = priv.channels.c
 
-#     for i in range(num):
-    for i in range(1):
+    for i in range(num):
+#     for i in range(1):
         print("channel[%d]" % i)
-        print(channels[i].sq[0].cq.mcq.irqn.value_())
-        print(channels[i].rq.cq.mcq.irqn.value_())
-        print(channels[i].sq[0].cq.mcq.vector.value_())
-        print(channels[i].rq.cq.mcq.vector.value_())
-        print(channels[i].sq[0].cq.mcq)
-        print(channels[i].rq.cq.mcq)
+#         print(channels[i].sq[0].cq.mcq.irqn.value_())
+#         print(channels[i].rq.cq.mcq.irqn.value_())
+#         print(channels[i].sq[0].cq.mcq.vector.value_())
+#         print(channels[i].rq.cq.mcq.vector.value_())
+
+        print(channels[i].sq[0].cq.mcq.tasklet_ctx.comp)
+        print(channels[i].rq.cq.mcq.tasklet_ctx.comp)
+
+#         print("sq[0].cq.napi: %d" % channels[i].sq[0].cq.napi.napi_id.value_())
+#         print("rq.cq.napi: %d" % channels[i].rq.cq.napi.napi_id.value_())
 
 for x, dev in enumerate(get_netdevs()):
     name = dev.name.string_().decode()
-#     if "ens1f0" in name:
-    if "ens1f0" == name:
+    if "ens1f0" in name:
+#     if "ens1f0" == name:
         mlx5e_priv = get_mlx5(dev)
         print(name)
         print_channel(mlx5e_priv)

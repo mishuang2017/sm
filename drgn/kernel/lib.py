@@ -12,6 +12,7 @@ prog = drgn.program_from_kernel()
 
 pf_name = "enp4s0f"
 pf_name = "enp59s0f"
+pf_name = "ens1f"
 
 import os
 

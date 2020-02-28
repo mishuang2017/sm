@@ -23,9 +23,10 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 
 if (( host_num == 1 || host_num == 2 )); then
-	numvfs=97
-	numvfs=3
+	numvfs=2
+	numvfs=17
 	numvfs=50
+	numvfs=97
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -5023,6 +5024,16 @@ alias restart='off; start'
 # alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
 alias mystart=start-switchdev-all
 # alias r=restart
+
+function wrk-setup
+{
+	off
+	sleep 5
+	smfs
+	restart
+	/root/bin/test_router5-snat-all-ofed5.sh $numvfs
+	set_channels_all_reps 1 63
+}
 
 function start-bd
 {
@@ -10359,34 +10370,34 @@ function run-wrk
 set -x
 	local port=0
 	local n=1
+	local start=8
 	local start=0
-	local start=64
 
+	local time=60
 	local time=20
-	local connection=100
 	local connection=30
+	local thread=1
+	local connection=300
 
 	[[ $# == 1 ]] && n=$1
 
 	end=$((start+n))
 
-	cd wrk-nginx-container
+	cd /root/wrk-nginx-container
 
 	/bin/rm -rf  /tmp/result-*
 	WRK=/usr/bin/wrk
 	WRK=/images/chrism/wrk/wrk
 	for (( cpu = start; cpu < end; cpu++ )); do
 		ns=n1$((cpu+1-start))
-		ip netns exec $ns taskset -c $cpu $WRK -d $time -t 1 -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
-# 		ip netns exec $ns $WRK -d $time -t 1 -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+		ip netns exec $ns taskset -c $cpu $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+# 		ip netns exec $ns $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
 		port=$((port+1))
 		if (( $port >= 9 )); then
 			port=0
 		fi
 	done
-# 	sleep $((time+5))
-	wait %1
-	sleep 5
+	sleep $((time+3))
 	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 set +x
 }
@@ -10432,6 +10443,7 @@ set -x
 set +x
 }
 
+# for nginx
 function worker_cpu_affinity
 {
 	for i in {1..96}; do
