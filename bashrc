@@ -3,6 +3,9 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+debian=0
+[[ -f /usr/bin/lsb_release ]] && debian=1
+
 numvfs=12
 numvfs=9
 
@@ -10375,9 +10378,9 @@ set -x
 
 	local time=60
 	local time=20
-	local connection=30
 	local thread=1
 	local connection=300
+	local connection=30
 
 	[[ $# == 1 ]] && n=$1
 
@@ -10446,8 +10449,10 @@ set +x
 # for nginx
 function worker_cpu_affinity
 {
-	for i in {1..96}; do
-		for j in {1..96}; do
+	n=96
+	[[ $# == 1 ]] && n=$1
+	for (( i = 1; i <= $n; i++ )); do
+		for (( j = 1; j <= $n; j++ )); do
 			if (( i == j )); then
 				printf "1"
 			else
@@ -10542,7 +10547,7 @@ function ln-crash
 	cd $crash_dir
 	local dir=$(ls -td $(date +%Y)*/ | head -1)
 	local n=$(ls vmcore* | wc -l)
-# 	ln -s ${dir}dump* vmcore.$n
+	ln -s ${dir}dump* vmcore.$n
 	ln -s ${dir}vmcore* vmcore.$n
 }
 
