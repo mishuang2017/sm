@@ -10446,8 +10446,10 @@ set +x
 # for nginx
 function worker_cpu_affinity
 {
-	for i in {1..96}; do
-		for j in {1..96}; do
+	n=96
+	[[ $# == 1 ]] && n=$1
+	for (( i = 1; i <= $n; i++ )); do
+		for (( j = 1; j <= $n; j++ )); do
 			if (( i == j )); then
 				printf "1"
 			else
