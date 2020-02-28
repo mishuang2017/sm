@@ -4,7 +4,7 @@ if [ -f /etc/bashrc ]; then
 fi
 
 numvfs=12
-numvfs=3
+numvfs=9
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -750,7 +750,7 @@ alias simx='/opt/simx/bin/manage_vm_simx_support.py -n vm2'
 alias vfs99="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=99"
 alias vfs127="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=127"
 alias vfs63="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=63"
-alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=4"
+alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=16"
 alias vfs2="mlxconfig -d $pci2 set SRIOV_EN=1 NUM_OF_VFS=4"
 alias vfq="mlxconfig -d $pci q"
 alias vfq2="mlxconfig -d $pci2 q"
