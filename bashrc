@@ -10589,3 +10589,10 @@ function sound
 {
 	sudo modprobe -v snd_hda_intel
 }
+
+function github-push
+{
+	git remote rm origin
+	git remote add origin git@github.com:mishuang2017/sm.git
+	git push -u origin master
+}
