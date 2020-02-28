@@ -533,7 +533,7 @@ alias smip="cd /$images/chrism/iproute2"
 alias smipu="cd /$images/chrism/iproute2-upstream"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
-alias smk="cd ~chrism/sm/drgn/kernel"
+alias smk="cd /$images/chrism/sm/drgn/kernel"
 alias smdo="cd ~chrism/sm/drgn/ovs"
 alias d-ovs="sudo ~chrism/sm/drgn/ovs/ovs.py"
 alias err="sudo ~chrism/sm/drgn/ovs/errors.py"
@@ -4856,6 +4856,39 @@ function up_all_reps
 	echo "end up_all_reps"
 }
 
+function set_channels_all_reps
+{
+	local port=$1
+	local l
+	local rep
+
+	if [[ $# != 2 ]]; then
+		echo "Usage: set_channels_all_reps 1 1"
+		return
+	fi
+	local n=1
+	[[ $# == 2 ]] && n=$2
+
+	if (( $port == 1 )); then
+		l=$link
+	elif (( $port == 2 )); then
+		l=$link2
+	else
+		echo "up_all_reps error"
+		return
+	fi
+
+	echo
+	echo "start set_channels_all_reps"
+	for (( i = 0; i < numvfs; i++)); do
+		rep=${l}_$i
+set -x
+		ethtool -L $rep combined $n
+set +x
+	done
+	echo "end set_channels_all_reps"
+}
+
 function hw_tc_all
 {
 	ETHTOOL=/usr/local/sbin/ethtool
@@ -5089,9 +5122,9 @@ function start-switchdev
 	time up_all_reps $port
 	hw_tc_all $port
 
-	ip link set dev $vf1 address 02:25:d0:$host_num:01:01
-	ip link set dev $vf2 address 02:25:d0:$host_num:01:02
-	ip link set dev $vf3 address 02:25:d0:$host_num:01:03
+# 	ip link set dev $vf1 address 02:25:d0:$host_num:01:01
+# 	ip link set dev $vf2 address 02:25:d0:$host_num:01:02
+# 	ip link set dev $vf3 address 02:25:d0:$host_num:01:03
 
 	time set_netns_all $port
 
@@ -10303,8 +10336,6 @@ set -x
 set +x
 }
 
-
-
 function tune-eth2
 {
 set -x
@@ -10324,6 +10355,43 @@ set +x
 }
 
 function run-wrk
+{
+set -x
+	local port=0
+	local n=1
+	local start=0
+	local start=64
+
+	local time=20
+	local connection=100
+	local connection=30
+
+	[[ $# == 1 ]] && n=$1
+
+	end=$((start+n))
+
+	cd wrk-nginx-container
+
+	/bin/rm -rf  /tmp/result-*
+	WRK=/usr/bin/wrk
+	WRK=/images/chrism/wrk/wrk
+	for (( cpu = start; cpu < end; cpu++ )); do
+		ns=n1$((cpu+1-start))
+		ip netns exec $ns taskset -c $cpu $WRK -d $time -t 1 -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+# 		ip netns exec $ns $WRK -d $time -t 1 -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+		port=$((port+1))
+		if (( $port >= 9 )); then
+			port=0
+		fi
+	done
+# 	sleep $((time+5))
+	wait %1
+	sleep 5
+	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+set +x
+}
+
+function run-wrk1
 {
 set -x
 	cd wrk-nginx-container
@@ -10363,45 +10431,6 @@ set -x
 # 	done
 set +x
 }
-
-function run-wrk3
-{
-	port=0
-
-	n=1
-
-	start=16
-	[[ $# == 1 ]] && n=$1
-	end=$((16+n))
-
-# 	cd /root/container-test
-set -x
-	cd wrk-nginx-container
-
-	time=20
-	/bin/rm -rf  /tmp/result-*
-	WRK=/usr/bin/wrk
-	WRK=/images/chrism/wrk/wrk
-# 	for i in {0..50}; do
-			for (( cpu = start; cpu < end; cpu++ )); do
-# 			for cpu in {16..39}; do
-	# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
-
-	# 			ns=n1$((cpu%16+1))
-				ns=n1$((cpu+1-start))
-				ip netns exec $ns taskset -c $cpu $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
-	# 			ip netns exec $ns $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
-				port=$((port+1))
-				if (( $port >= 9 )); then
-					port=0
-				fi
-			done
-	# 		wait %1
-			sleep $((time+5))
-			cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
-	# 	done
-	set +x
-	}
 
 function worker_cpu_affinity
 {
