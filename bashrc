@@ -25,6 +25,7 @@ alias rc='. ~/.bashrc'
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=97
 	numvfs=3
+	numvfs=50
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -4988,7 +4989,7 @@ alias start-bind='start-switchdev bind'
 alias restart='off; start'
 # alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
 alias mystart=start-switchdev-all
-alias r=restart
+# alias r=restart
 
 function start-bd
 {
@@ -5098,7 +5099,7 @@ function start-switchdev
 
 #  	combined 4
 # 	affinity-set
-	ethtool -L $rep2 combined 63
+# 	ethtool -L $rep2 combined 63
 
 #	iptables -F
 #	iptables -Z
@@ -8710,8 +8711,8 @@ function br-qa-ct
 	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,tcp,action=ct(table=1)"
 	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,tcp,ct_state=+trk+new,ip,tcp,action=ct(commit),$link"
 	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,tcp,ct_state=+trk+est,ip,tcp,action=$link"
-	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,dl_src=$mac,ct_state=+trk+new,ip,tcp,action=ct(commit),$rep2"
-	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,dl_src=$mac,ct_state=+trk+est,ip,tcp,action=$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,ct_state=+trk+new,ip,tcp,action=ct(commit),$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,tp_src=0x1389/0xf000,ct_state=+trk+est,ip,tcp,action=$rep2"
 }
 
 function br-pf-ct
@@ -10367,6 +10368,12 @@ function run-wrk3
 {
 	port=0
 
+	n=1
+
+	start=16
+	[[ $# == 1 ]] && n=$1
+	end=$((16+n))
+
 # 	cd /root/container-test
 set -x
 	cd wrk-nginx-container
@@ -10376,24 +10383,25 @@ set -x
 	WRK=/usr/bin/wrk
 	WRK=/images/chrism/wrk/wrk
 # 	for i in {0..50}; do
-		for cpu in {0..95}; do
-# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
+			for (( cpu = start; cpu < end; cpu++ )); do
+# 			for cpu in {16..39}; do
+	# 			taskset -c $cpu $WRK -d 60 -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:8$port > /tmp/result-$cpu &
 
-# 			ns=n1$((cpu%16+1))
-			ns=n1$((cpu+1))
-			ip netns exec $ns taskset -c $cpu $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
-# 			ip netns exec $ns $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
-			port=$((port+1))
-			if (( $port >= 30 )); then
-				port=0
-			fi
-		done
-# 		wait %1
-		sleep $((time+5))
-		cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
-# 	done
-set +x
-}
+	# 			ns=n1$((cpu%16+1))
+				ns=n1$((cpu+1-start))
+				ip netns exec $ns taskset -c $cpu $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+	# 			ip netns exec $ns $WRK -d $time -t 1 -c 30  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+				port=$((port+1))
+				if (( $port >= 9 )); then
+					port=0
+				fi
+			done
+	# 		wait %1
+			sleep $((time+5))
+			cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+	# 	done
+	set +x
+	}
 
 function worker_cpu_affinity
 {
