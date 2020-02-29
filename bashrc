@@ -5332,12 +5332,8 @@ set -x
 # 	sudo echo "GRUB_TERMINAL_OUTPUT=\"serial\"" >> $file
 # 	sudo echo "GRUB_SERIAL_COMMAND=\"serial --speed=$base_baud --unit=1 --word=8 --parity=no --stop=1\"" >> $file
 
-	if [[ $# == 0 ]]; then
-		sudo echo "GRUB_DEFAULT=saved" >> $file
-		sudo echo "GRUB_SAVEDEFAULT=true" >> $file
-	else
-		sudo echo "GRUB_DEFAULT=$kernel" >> $file
-	fi
+	sudo echo "GRUB_DEFAULT=saved" >> $file
+	sudo echo "GRUB_SAVEDEFAULT=true" >> $file
 
 	sudo /bin/rm -rf /boot/*.old
 	sudo mv /boot/grub2/grub.cfg /boot/grub2/grub.cfg.orig
