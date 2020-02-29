@@ -6834,19 +6834,11 @@ function reboot1
 	[[ $# == 1 ]] && uname=$1
 
 	sync
-	sleep 1
-	sync
-	sleep 1
-	sync
-	sleep 1
-	cmdline=$(cat /proc/cmdline | cut -d " " -f 2-)
 set -x
-	sudo kexec -l /boot/vmlinuz-$uname --append="BOOT_IMAGE=/vmlinuz-$uname $cmdline" --initrd=/boot/initramfs-$uname.img
+	sudo kexec -l /boot/vmlinuz-$uname --reuse-cmdline --initrd=/boot/initramfs-$uname.img
 set +x
 	sudo kexec -e
 }
-
-alias reboot3='reboot1 3.10.0+'
 
 function disable-firewall
 {
@@ -10504,8 +10496,7 @@ set -x
 
 	[[ $# == 1 ]] && uname=$1
 
-	local cmdline=$(cat /proc/cmdline | cut -d " " -f 2-)
-	sudo kexec -l /boot/vmlinuz-$uname --append="BOOT_IMAGE=/vmlinuz-$uname $cmdline" --initrd=/boot/initrd.img-$uname
+	sudo kexec -l /boot/vmlinuz-$uname --reuse-cmdline --initrd=/boot/initrd.img-$uname
 	sudo kexec -e
 set +x
 }
