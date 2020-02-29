@@ -102,7 +102,6 @@ otherwise the build may fail:
 make[4]: *** No rule to make target 'debian/certs/test-signing-certs.pem', needed by 'certs/x509_certificate_list'.  Stop.
 make[4]: *** Waiting for unfinished jobs....
 
-
 debian mirror in Israel:
 # cat /etc/apt/sources.list
 deb http://mirror.isoc.org.il/pub/debian/ buster main non-free contrib
@@ -112,3 +111,5 @@ deb-src http://mirror.isoc.org.il/pub/debian/ buster main non-free contrib
 squid:
 
 http_access allow all
+
+sudo ln -fs gcc-8 /usr/bin/gcc
