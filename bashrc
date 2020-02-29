@@ -43,6 +43,7 @@ if (( host_num == 1 || host_num == 2 )); then
 
 elif (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
+	export DISPLAY=localhost:10.0	# via vpn
 
 	link=enp4s0f0
 	link2=enp4s0f1
@@ -67,7 +68,7 @@ elif (( host_num == 13 )); then
 
 elif (( host_num == 14 )); then
 # 	export DISPLAY=MTBC-CHRISM:0.0
-	export DISPLAY=MTBC-CHRISM-N1:0.0
+	export DISPLAY=localhost:10.0
 
 	link=enp4s0f0
 	link2=enp4s0f1
