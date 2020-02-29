@@ -658,22 +658,16 @@ alias tcss-vx="tc -stats filter show dev $vx ingress"
 alias tcs-rep="tc filter show dev $rep1 protocol ip parent ffff:"
 alias tcs-arp-rep="tc filter show dev $rep1 protocol arp parent ffff:"
 
-alias suc='[[ $UID == 0 ]] && su - chrism'
-alias s=suc
-# [[ "$USER" == "chrism" ]] && alias s='sudo su -'
+alias s='[[ $UID == 0 ]] && su - chrism'
 alias s2='su - mi'
 alias s0='[[ $UID == 0 ]] && su chrism'
 alias e=exit
-alias 160='ssh root@10.200.0.160'
 alias vnc2='ssh chrism@10.7.2.14'
 alias vnc='ssh chrism@10.112.68.111'
 alias netstat1='netstat -ntlp'
 
-alias f7="ssh root@l-csi-0937h.mtl.labs.mlnx"
-alias f8="ssh root@l-csi-0938h.mtl.labs.mlnx"
-
-alias 13='ssh root@10.112.205.13'
-alias 14='ssh root@10.112.205.14'
+alias 13='ssh -X root@10.112.205.13'
+alias 14='ssh -X root@10.112.205.14'
 
 alias 15='ssh root@10.112.205.15'
 alias vm1=15
@@ -10471,6 +10465,7 @@ function tc-5t
 
 [[ -f /usr/bin/lsb_release ]] || return
 
+[[ "$USER" == "chrism" ]] && alias s='sudo su -'
 alias vig='sudo vim /boot/grub/grub.cfg'
 
 [[ "$(hostname -s)" == "xiaomi" ]] && host_num=200
@@ -10505,18 +10500,9 @@ set -x
 	[[ $# == 1 ]] && kernel=$1
 	file=/etc/default/grub
 	MKCONFIG=grub-mkconfig
-	sudo sed -i '/GRUB_DEFAULT/d' $file
-	sudo sed -i '/GRUB_SAVEDEFAULT/d' $file
 	sudo sed -i '/GRUB_CMDLINE_LINUX/d' $file
-	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc\"" >> $file
+	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
 	# for crashkernel, configure /etc/default/grub.d/kdump-tools.cfg
-
-	if [[ $# == 0 ]]; then
-		sudo echo "GRUB_DEFAULT=saved" >> $file
-		sudo echo "GRUB_SAVEDEFAULT=true" >> $file
-	else
-		sudo echo "GRUB_DEFAULT=$kernel" >> $file
-	fi
 
 	sudo /bin/rm -rf /boot/*.old
 	sudo mv /boot/grub/grub.cfg /boot/grub/grub.cfg.orig
