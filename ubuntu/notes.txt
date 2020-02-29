@@ -107,3 +107,8 @@ debian mirror in Israel:
 # cat /etc/apt/sources.list
 deb http://mirror.isoc.org.il/pub/debian/ buster main non-free contrib
 deb-src http://mirror.isoc.org.il/pub/debian/ buster main non-free contrib
+
+
+squid:
+
+http_access allow all

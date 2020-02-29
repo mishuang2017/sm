@@ -36,7 +36,7 @@ sudo apt-get -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev lib
 # sysctl vm.min_free_kbytes
 
 # For crash, no termcap
-sudo apt install -y libncurses5-dev
+sudo apt install -y libncurses5-dev zlib1g-dev
 
 # For drgn
 # must install libreadline-dev before install python 3.6
