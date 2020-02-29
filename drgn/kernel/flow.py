@@ -13,6 +13,8 @@ libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
+from lib import pf0_name
+
 def flow_table(name, table):
     print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x" % (name, table.id.value_(), table.level.value_(), table.type))
     print("mlx5_flow_table %lx" % table.value_())
@@ -204,7 +206,8 @@ def print_dest(rule):
     else:
         print(rule)
 
-mlx5e_priv = lib.get_mlx5_pf0()
+# mlx5e_priv = lib.get_mlx5_pf0()
+mlx5e_priv = lib.get_mlx5e_priv(pf0_name)
 mlx5_eswitch_fdb = mlx5e_priv.mdev.priv.eswitch.fdb_table
 
 for i in range(4):

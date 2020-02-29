@@ -10,9 +10,11 @@ prog = drgn.program_from_kernel()
 
 # prog = drgn.program_from_core_dump("/var/crash/vmcore.0")
 
-pf_name = "enp4s0f"
-pf_name = "enp59s0f"
-pf_name = "ens1f"
+pf0_name = "enp4s0f0"
+pf1_name = "enp4s0f1"
+
+pf0_name = "ens1f0"
+pf1_name = "ens1f1"
 
 import os
 
@@ -236,14 +238,14 @@ def get_mlx5e_priv(n):
 def get_mlx5_pf0():
     for x, dev in enumerate(get_netdevs()):
         name = dev.name.string_().decode()
-        if name == pf_name + "0":
+        if name == pf0_name:
             mlx5e_priv = get_mlx5(dev)
     return mlx5e_priv
 
 def get_mlx5_pf1():
     for x, dev in enumerate(get_netdevs()):
         name = dev.name.string_().decode()
-        if name == pf_name + "1":
+        if name == pf1_name:
             mlx5e_priv = get_mlx5(dev)
     return mlx5e_priv
 
@@ -251,7 +253,7 @@ def get_mlx5_pf1():
 def get_pf0_netdev():
     for x, dev in enumerate(get_netdevs()):
         name = dev.name.string_().decode()
-        if name == pf_name + "0":
+        if name == pf0_name:
             return dev
 
 def kernel(name):
