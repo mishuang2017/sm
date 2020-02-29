@@ -123,7 +123,7 @@ base_baud=115200
 base_baud=9600
 
 nfs_dir='/auto/mtbcswgwork/chrism'
-if which kdump-config 2> /dev/null; then
+if which kdump-config > /dev/null 2>&1; then
 	crash_dir=$(kdump-config show | grep KDUMP_COREDIR | awk '{print $2}')
 else
 	crash_dir=/var/crash
