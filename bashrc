@@ -123,7 +123,7 @@ base_baud=115200
 base_baud=9600
 
 nfs_dir='/auto/mtbcswgwork/chrism'
-crash_dir=/var/crash
+crash_dir=$(kdump-config show | grep KDUMP_COREDIR | awk '{print $2}')
 linux_dir=$(readlink /lib/modules/$(uname -r)/build)
 images=images
 
