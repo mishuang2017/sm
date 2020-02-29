@@ -10543,7 +10543,6 @@ function ln-crash
 	local dir=$(ls -td $(date +%Y)*/ | head -1)
 	local n=$(ls vmcore* | wc -l)
 	ln -s ${dir}dump* vmcore.$n
-	ln -s ${dir}vmcore* vmcore.$n
 }
 
 # uncomment the following for built-in kernel
