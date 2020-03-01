@@ -529,7 +529,7 @@ alias lv='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/03-vlan_in_host.x
 alias lh='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/header_rewrite.xml'
 alias iso='cd /mnt/d/software/iso'
 
-alias win='vncviewer 10.112.201.135:0'
+alias win='vncviewer 10.75.201.135:0'
 
 # alias uperf="$nfs_dir/uperf-1.0.5/src/uperf"
 
@@ -663,23 +663,23 @@ alias s2='su - mi'
 alias s0='[[ $UID == 0 ]] && su chrism'
 alias e=exit
 alias vnc2='ssh chrism@10.7.2.14'
-alias vnc='ssh chrism@10.112.68.111'
+alias vnc='ssh chrism@10.75.68.111'
 alias netstat1='netstat -ntlp'
 
-alias 13='ssh -X root@10.112.205.13'
-alias 14='ssh -X root@10.112.205.14'
+alias 13='ssh -X root@10.75.205.13'
+alias 14='ssh -X root@10.75.205.14'
 
-alias 15='ssh root@10.112.205.15'
+alias 15='ssh root@10.75.205.15'
 alias vm1=15
-alias 16='ssh root@10.112.205.16'
+alias 16='ssh root@10.75.205.16'
 alias vm2=16
-alias 17='ssh root@10.112.205.17'
+alias 17='ssh root@10.75.205.17'
 alias vm3=17
-alias 18='ssh root@10.112.205.18'
+alias 18='ssh root@10.75.205.18'
 alias vm4=18
-alias 9='ssh root@10.112.205.9'
+alias 9='ssh root@10.75.205.9'
 alias vm5=9
-alias 8='ssh root@10.112.205.8'
+alias 8='ssh root@10.75.205.8'
 alias vm6=8
 
 alias b3='lspci -d 15b3: -nn'
@@ -7691,7 +7691,7 @@ set -x
 
  	iptables -t nat -A POSTROUTING -s 1.1.1.1/32 -j SNAT --to-source 8.9.10.13
 	ifconfig $link 8.9.10.13/24 up
-	ssh 10.112.205.14 ifconfig $link 8.9.10.11/24 up
+	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
 }
 
@@ -7717,7 +7717,7 @@ set -x
 
 	iptables -t nat -A POSTROUTING -s 1.1.1.$host_num/32 -j SNAT --to-source 8.9.10.13
 	ifconfig $link 8.9.10.13/24 up
-	ssh 10.112.205.14 ifconfig $link 8.9.10.11/24 up
+	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
 }
 
@@ -10605,7 +10605,7 @@ alias pi='ssh pi@1.1.1.2'
 
 function chrome
 {
-	sudo google-chrome --proxy-server="10.112.205.14:79" --no-sandbox
+	sudo google-chrome --proxy-server="10.75.205.14:79" --no-sandbox
 }
 
 function sound
