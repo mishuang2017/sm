@@ -418,6 +418,7 @@ alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
 alias clone-drgn='git clone https://github.com/osandov/drgn.git'	# pip3 install drgn
 alias clone-wrk='git clone git@github.com:wg/wrk.git'
+alias pull='git pull origin master'
 
 alias clone-ubuntu-xenial='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-xential.git'
 alias clone-ubuntu='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-bionic.git'
