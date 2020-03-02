@@ -117,3 +117,5 @@ sudo ln -fs gcc-8 /usr/bin/gcc
 How to repare bad efi partition:
 https://askubuntu.com/questions/778117/installation-fails-on-grub-read-only-efi-partition
 sudo dosfsck -t -a -w /dev/nvme0n1p1
+
+sudo apt install gnome-tweak-tool
