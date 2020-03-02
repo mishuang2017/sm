@@ -41,6 +41,11 @@ if (( host_num == 1 || host_num == 2 )); then
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
 
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link}_$i
+	done
+
 elif (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
@@ -5037,7 +5042,7 @@ function wrk-setup
 	smfs
 	restart
 	/root/bin/test_router5-snat-all-ofed5.sh $link $((numvfs-1))
-# 	set_channels_all_reps 1 63
+	set_channels_all_reps 1 8
 }
 
 function start-bd
@@ -5146,7 +5151,7 @@ function start-switchdev
 
 	ethtool -K $link tx-vlan-stag-hw-insert off
 
-#  	combined 4
+	combined 8
 # 	affinity-set
 # 	ethtool -L $rep2 combined 63
 
@@ -10363,13 +10368,14 @@ function run-wrk
 set -x
 	local port=0
 	local n=1
-	local start=8
 	local start=0
+	local start=8
 
-	local time=60
-	local time=20
 	local thread=1
+	local time=120
 	local connection=300
+
+	local time=20
 	local connection=30
 
 	[[ $# == 1 ]] && n=$1
