@@ -30,6 +30,7 @@ if (( host_num == 1 || host_num == 2 )); then
 	numvfs=50
 	numvfs=17
 	numvfs=97
+	numvfs=49
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -5042,7 +5043,7 @@ function wrk-setup
 	smfs
 	restart
 	/root/bin/test_router5-snat-all-ofed5.sh $link $((numvfs-1))
-	set_channels_all_reps 1 8
+	set_channels_all_reps 1 24
 }
 
 function start-bd
@@ -5151,7 +5152,7 @@ function start-switchdev
 
 	ethtool -K $link tx-vlan-stag-hw-insert off
 
-	combined 8
+	combined 24
 # 	affinity-set
 # 	ethtool -L $rep2 combined 63
 
@@ -10139,7 +10140,10 @@ function vf-affinity
 {
 	local vf
 
+	cpu_num=24
+
 	start_cpu=96
+	num=0
 	for (( i = 0; i < numvfs; i++ )); do
 		vf=${link}v$i
 		echo $vf
@@ -10148,7 +10152,11 @@ function vf-affinity
 			echo "$(cpu $start_cpu)" > /proc/irq/$n/smp_affinity
 			set +x
 			start_cpu=$((start_cpu-1))
-			(( start_cpu == 80 )) && start_cpu=96
+			num=$((num+1))
+			if (( num == cpu_num )); then
+				start_cpu=96
+				num=0
+			fi
 		done
 	done
 }
@@ -10411,20 +10419,26 @@ set -x
 set +x
 }
 
+function isolcpus
+{
+        [[ $# != 2 ]] && return
+        for (( i = $1; i <= $2; i++ )); do
+                printf "%d," $i
+        done
+}
+
 function run-wrk
 {
 set -x
 	local port=0
 	local n=1
 	local start=0
-	local start=8
+	local start=24
 
 	local thread=1
-	local time=120
-	local connection=300
 
-	local time=20
-	local connection=30
+	local time=30
+	local connection=100
 
 	[[ $# == 1 ]] && n=$1
 
