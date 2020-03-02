@@ -10105,6 +10105,54 @@ function irq
 	done
 }
 
+#  1062  echo 08000000,00000000,00000000 > /proc/irq/281/smp_affinity
+#  1063  echo 10000000,00000000,00000000 > /proc/irq/282/smp_affinity
+#  1064* echo 20000000,00000000,00000000 > /proc/irq/283/smp_affinity
+#  1065  echo 40000000,00000000,00000000 > /proc/irq/284/smp_affinity
+#  1066  echo 80000000,00000000,00000000 > /proc/irq/285/smp_affinity
+
+function cpu32
+{
+	[[ $# != 1 ]] && return
+	local i=$1
+
+	printf "%08x" $((1<<$((i-1))))
+}
+
+function cpu
+{
+	[[ $# != 1 ]] && return
+	local i=$1
+	
+	if (( i >= 1 && i <= 32 )); then
+		echo "00000000,00000000,$(cpu32 $i)"
+	fi
+	if (( i >= 33 && i <= 64 )); then
+		echo "00000000,$(cpu32 $((i-32))),00000000"
+	fi
+	if (( i >= 65 && i <= 96 )); then
+		echo "$(cpu32 $((i-64))),00000000,00000000"
+	fi
+}
+
+function vf-affinity
+{
+	local vf
+
+	start_cpu=96
+	for (( i = 0; i < numvfs; i++ )); do
+		vf=${link}v$i
+		echo $vf
+		for n in $(grep -w $vf /proc/interrupts | cut -f 1 -d":"); do
+			set -x
+			echo "$(cpu $start_cpu)" > /proc/irq/$n/smp_affinity
+			set +x
+			start_cpu=$((start_cpu-1))
+			(( start_cpu == 80 )) && start_cpu=96
+		done
+	done
+}
+
 alias numa="cat /sys/class/net/$link/device/numa_node"
 
 # ip a | grep 10.12.205.15 && hostname dev-chrism-vm1
