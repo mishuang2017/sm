@@ -27,8 +27,8 @@ alias rc='. ~/.bashrc'
 
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=2
-	numvfs=17
 	numvfs=50
+	numvfs=17
 	numvfs=97
 	link=ens1f0
 	link2=ens1f1
@@ -668,6 +668,8 @@ alias netstat1='netstat -ntlp'
 
 alias 13='ssh -X root@10.75.205.13'
 alias 14='ssh -X root@10.75.205.14'
+alias i1='ssh -X root@10.130.41.1'
+alias i2='ssh -X root@10.130.42.1'
 
 alias 15='ssh root@10.75.205.15'
 alias vm1=15
@@ -5033,8 +5035,8 @@ function wrk-setup
 	sleep 5
 	smfs
 	restart
-	/root/bin/test_router5-snat-all-ofed5.sh $numvfs
-	set_channels_all_reps 1 63
+	/root/bin/test_router5-snat-all-ofed5.sh $link $((numvfs-1))
+# 	set_channels_all_reps 1 63
 }
 
 function start-bd
