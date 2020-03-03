@@ -26,11 +26,11 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 
 if (( host_num == 1 || host_num == 2 )); then
-	numvfs=2
 	numvfs=50
 	numvfs=17
-	numvfs=97
+	numvfs=3
 	numvfs=49
+	numvfs=97
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -5036,6 +5036,15 @@ alias restart='off; start'
 alias mystart=start-switchdev-all
 # alias r=restart
 
+function vf_combined_all
+{
+set -x
+	for (( i = 0; i < numvfs; i++)); do
+		ethtool -L ${link}v${i} combined 1
+	done
+set +x
+}
+
 function start-bd
 {
 	stop1
@@ -5127,6 +5136,8 @@ function start-switchdev
 	sleep 1
 	time bind_all $l
 	sleep 1
+
+	vf_combined_all
 
 	ip1
 
@@ -10127,11 +10138,11 @@ function cpu
 }
 
 # set vf affinity to the last 24 cpus
-function vf-affinity
+function affinity_vf
 {
 	local vf
 
-	cpu_num=24
+	cpu_num=$numvfs
 	[[ $# == 1 ]] && cpu_num=$1
 
 	start_cpu=1
@@ -10419,7 +10430,7 @@ function isolcpus
         done
 }
 
-function wrk-setup
+function wrk_setup
 {
 	off
 	sleep 5
@@ -10427,23 +10438,29 @@ function wrk-setup
 	restart
 	/root/bin/test_router5-snat-all-ofed5.sh $link $((numvfs-1))
 	set_channels_all_reps 1 63
-	vf-affinity
+	affinity_vf
 }
 
-function run-wrk
+# best performance, conneciton=60, set all VFs affinity to cpu 0-11
+# wrk_run 84 12
+# 3157681
+
+function wrk_run
 {
-set -x
 	local port=0
 	local n=1
 	local start=0
-	local start=24
 
 	local thread=1
 
 	local time=30
-	local connection=30
+	local connection=60
 
 	[[ $# == 1 ]] && n=$1
+	if [[ $# == 2 ]]; then
+		n=$1
+		start=$2
+	fi
 	total=0
 
 	end=$((start+n))
@@ -10456,24 +10473,65 @@ set -x
 	for (( cpu = start; cpu < end; cpu++ )); do
 		ns=n1$((cpu+1-start))
 		cpu1=$cpu
-		if (( cpu >= 48 )); then
-			cpu1=$((cpu+24))
-		fi
+# 		if (( cpu >= 48 )); then
+# 			cpu1=$((cpu+24))
+# 		fi
+set -x
 		ip netns exec $ns taskset -c $cpu1 $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+set +x
 		port=$((port+1))
 		if (( $port >= 9 )); then
 			port=0
 		fi
-		if (( cpu1 >= 96 )); then
-			cpu=start
-		fi
+# 		if (( cpu1 >= 96 )); then
+# 			cpu=start
+# 		fi
 		total=$((total+1))
 		(( total == n )) && break
 	done
 	sleep $((time+3))
 	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+}
+
+function wrk_run2
+{
+set -x
+	local thread=1
+	local time=30
+	local connection=30
+
+	cd /root/wrk-nginx-container
+
+	/bin/rm -rf  /tmp/result-*
+	WRK=/usr/bin/wrk
+	WRK=/images/chrism/wrk/wrk
+
+	local port=0
+	for (( cpu = 0; cpu < 12; cpu++ )); do
+		ns=n1$((cpu+1))
+		ip netns exec $ns taskset -c $cpu $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+		port=$((port+1))
+		if (( $port >= 9 )); then
+			port=0
+		fi
+	done
+
+	port=0
+	for (( cpu = 24; cpu < 36; cpu++ )); do
+		ns=n1$((cpu+1))
+		ip netns exec $ns taskset -c $cpu $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+		port=$((port+1))
+		if (( $port >= 9 )); then
+			port=0
+		fi
+	done
+
+	sleep $((time+3))
+	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 set +x
 }
+
+
 
 function run-wrk1
 {
