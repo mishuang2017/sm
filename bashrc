@@ -7,7 +7,7 @@ debian=0
 [[ -f /usr/bin/lsb_release ]] && debian=1
 
 numvfs=12
-numvfs=9
+numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -5137,7 +5137,7 @@ function start-switchdev
 	time bind_all $l
 	sleep 1
 
-	vf_combined_all
+# 	vf_combined_all
 
 	ip1
 
@@ -5153,7 +5153,7 @@ function start-switchdev
 
 	ethtool -K $link tx-vlan-stag-hw-insert off
 
-	combined 63
+	combined 4
 # 	affinity-set
 # 	ethtool -L $rep2 combined 63
 
@@ -8735,6 +8735,7 @@ function br-ct
 
 function br-qa-ct
 {
+set -x
 	del-br
 	ovs-vsctl add-br $br
 	ovs-vsctl add-port $br $link
@@ -8748,8 +8749,8 @@ function br-qa-ct
 	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,udp,action=ct(table=1)"
 	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+new,ip,udp,action=ct(commit),$link"
 	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+est,ip,udp,action=$link"
-	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,dl_src=$mac,tp_src=0x1389/0xf000,ct_state=+trk+new,ip,udp,action=$rep2"
-	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,dl_src=$mac,tp_src=0x1389/0xf000,ct_state=+trk+est,ip,udp,action=$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ip,udp,action=ct(commit),$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+est,ip,udp,action=$rep2"
 
 	ovs-ofctl add-flow $br "table=0,in_port=$rep2,ip,tcp,action=ct(table=1)"
 	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,tcp,action=ct(table=1)"
@@ -8757,6 +8758,44 @@ function br-qa-ct
 	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,tcp,ct_state=+trk+est,ip,tcp,action=$link"
 	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,ct_state=+trk+new,ip,tcp,action=ct(commit),$rep2"
 	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,tp_src=0x1389/0xf000,ct_state=+trk+est,ip,tcp,action=$rep2"
+set +x
+}
+
+# ovs-ofctl del-flows ovs-sriov2
+# ovs-ofctl add-flow ovs-sriov2 'arp,action=normal'
+# ovs-ofctl add-flow ovs-sriov2 'table=0,in_port=enp66s0f1_1,ip,udp,action=ct(table=1,zone=1)'
+# ovs-ofctl add-flow ovs-sriov2 'table=0,in_port=enp66s0f1,ip,udp,action=ct(table=1,zone=1)'
+# ovs-ofctl add-flow ovs-sriov2 'table=1,in_port=enp66s0f1_1,ip,udp,dl_src=e4:0b:01:42:02:03,dl_dst=e4:0c:01:42:02:03,ct_state=+trk+new,ct_zone=1,action=ct(commit),enp66s0f1'
+# ovs-ofctl add-flow ovs-sriov2 'table=1,in_port=enp66s0f1_1,ip,udp,dl_src=e4:0b:01:42:02:03,dl_dst=e4:0c:01:42:02:03,ct_state=+trk+est,ct_zone=1,action=enp66s0f1'
+# ovs-ofctl add-flow ovs-sriov2 'table=1,in_port=enp66s0f1,ip,udp,dl_src=e4:0c:01:42:02:03,dl_dst=e4:0b:01:42:02:03,tp_src=0x1389/0xf000,ct_state=+trk+new,ct_zone=1,action=enp66s0f1_1'
+# ovs-ofctl add-flow ovs-sriov2 'table=1,in_port=enp66s0f1,ip,udp,dl_src=e4:0c:01:42:02:03,dl_dst=e4:0b:01:42:02:03,tp_src=0x1389/0xf000,ct_state=+trk+est,ct_zone=1,action=enp66s0f1_1'
+
+function br-qa-ct-zone
+{
+set -x
+	del-br
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br $link
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $rep3
+
+	mac=98:03:9b:13:f4:48
+# 	ovs-ofctl del-flows $br 
+# 	ovs-ofctl add-flow $br "arp,action=normal"
+	ovs-ofctl add-flow $br "table=0,in_port=$rep2,ip,udp,action=ct(table=1,zone=1)"
+	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,udp,action=ct(table=1,zone=1)"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+new,ip,udp,ct_zone=1,action=ct(commit),$link"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+est,ip,udp,ct_zone=1,action=$link"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ip,udp,ct_zone=1,action=ct(commit),$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+est,ip,udp,ct_zone=1,action=$rep2"
+
+	ovs-ofctl add-flow $br "table=0,in_port=$rep2,ip,tcp,action=ct(table=1)"
+	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,tcp,action=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,tcp,ct_state=+trk+new,ip,tcp,action=ct(commit),$link"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,tcp,ct_state=+trk+est,ip,tcp,action=$link"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,ct_state=+trk+new,ip,tcp,action=ct(commit),$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,tp_src=0x1389/0xf000,ct_state=+trk+est,ip,tcp,action=$rep2"
+set +x
 }
 
 function br-pf-ct
@@ -10026,7 +10065,7 @@ function msi
 #         - socket: 0
 #           threads: [2,4,6,8,10,12,14]
 
-alias cd-trex='cd /images/chrism/DPIX/trex/trexPackage'
+alias cd-trex='cd /images/chrism/DPIX'
 alias vit1='vi /images/chrism/DPIX/AsapPerfTester/TestParams/AsapPerfTestParams.py'
 alias vitx='vi /images/chrism/DPIX/AsapPerfTester/TestParams/IpVarianceVxlan.py'
 alias vit2='vi /images/chrism/DPIX/dpdk_conf/frame_size_-_64.dpdk.conf'

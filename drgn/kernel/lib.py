@@ -10,11 +10,11 @@ prog = drgn.program_from_kernel()
 
 # prog = drgn.program_from_core_dump("/var/crash/vmcore.0")
 
-pf0_name = "enp4s0f0"
-pf1_name = "enp4s0f1"
-
 pf0_name = "ens1f0"
 pf1_name = "ens1f1"
+
+pf0_name = "enp4s0f0"
+pf1_name = "enp4s0f1"
 
 import os
 
