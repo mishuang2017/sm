@@ -5036,16 +5036,6 @@ alias restart='off; start'
 alias mystart=start-switchdev-all
 # alias r=restart
 
-function wrk-setup
-{
-	off
-	sleep 5
-	smfs
-	restart
-	/root/bin/test_router5-snat-all-ofed5.sh $link $((numvfs-1))
-	set_channels_all_reps 1 24
-}
-
 function start-bd
 {
 	stop1
@@ -5152,7 +5142,7 @@ function start-switchdev
 
 	ethtool -K $link tx-vlan-stag-hw-insert off
 
-	combined 24
+	combined 63
 # 	affinity-set
 # 	ethtool -L $rep2 combined 63
 
@@ -10136,13 +10126,15 @@ function cpu
 	fi
 }
 
+# set vf affinity to the last 24 cpus
 function vf-affinity
 {
 	local vf
 
 	cpu_num=24
+	[[ $# == 1 ]] && cpu_num=$1
 
-	start_cpu=96
+	start_cpu=1
 	num=0
 	for (( i = 0; i < numvfs; i++ )); do
 		vf=${link}v$i
@@ -10151,10 +10143,10 @@ function vf-affinity
 			set -x
 			echo "$(cpu $start_cpu)" > /proc/irq/$n/smp_affinity
 			set +x
-			start_cpu=$((start_cpu-1))
+			start_cpu=$((start_cpu+1))
 			num=$((num+1))
 			if (( num == cpu_num )); then
-				start_cpu=96
+				start_cpu=1
 				num=0
 			fi
 		done
@@ -10427,6 +10419,17 @@ function isolcpus
         done
 }
 
+function wrk-setup
+{
+	off
+	sleep 5
+	smfs
+	restart
+	/root/bin/test_router5-snat-all-ofed5.sh $link $((numvfs-1))
+	set_channels_all_reps 1 63
+	vf-affinity
+}
+
 function run-wrk
 {
 set -x
@@ -10438,9 +10441,10 @@ set -x
 	local thread=1
 
 	local time=30
-	local connection=100
+	local connection=30
 
 	[[ $# == 1 ]] && n=$1
+	total=0
 
 	end=$((start+n))
 
@@ -10451,12 +10455,20 @@ set -x
 	WRK=/images/chrism/wrk/wrk
 	for (( cpu = start; cpu < end; cpu++ )); do
 		ns=n1$((cpu+1-start))
-		ip netns exec $ns taskset -c $cpu $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
-# 		ip netns exec $ns $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
+		cpu1=$cpu
+		if (( cpu >= 48 )); then
+			cpu1=$((cpu+24))
+		fi
+		ip netns exec $ns taskset -c $cpu1 $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
 		port=$((port+1))
 		if (( $port >= 9 )); then
 			port=0
 		fi
+		if (( cpu1 >= 96 )); then
+			cpu=start
+		fi
+		total=$((total+1))
+		(( total == n )) && break
 	done
 	sleep $((time+3))
 	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
