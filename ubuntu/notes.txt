@@ -122,6 +122,8 @@ sudo apt install gnome-tweak-tool
 
 Add locale:
 
-1.  vi /etc/locale.gen to uncomment
+0. apt-get install locales && dpkg-reconfigure locales 
+1. vi /etc/locale.gen to uncomment
 2. locale-gen
 3. reboot
+
