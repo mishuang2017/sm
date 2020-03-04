@@ -28,9 +28,9 @@ alias rc='. ~/.bashrc'
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=50
 	numvfs=17
-	numvfs=3
 	numvfs=49
 	numvfs=97
+	numvfs=3
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -4841,6 +4841,24 @@ function set_netns_all
 	echo "end set_netns_all"
 }
 
+function netns_set_all_vf_channel
+{
+	local i
+	local l
+	local p=1
+	n=1
+	[[ $# == 1 ]] && n=$1
+
+	echo
+	echo "start netns_all_vf"
+
+	for (( i = 1; i < 3; i++)); do
+# 	for (( i = 1; i < numvfs; i++)); do
+		ip netns exec n${p}${i} ethtool -L ${link}v$i combined $n
+	done
+	echo "end netns_all_vf"
+}
+
 function up_all_reps
 {
 	local port=$1
@@ -5037,7 +5055,7 @@ alias restart='off; start'
 alias mystart=start-switchdev-all
 # alias r=restart
 
-function vf_combined_all
+function set_all_vf_channel
 {
 set -x
 	for (( i = 0; i < numvfs; i++)); do
@@ -5138,7 +5156,7 @@ function start-switchdev
 	time bind_all $l
 	sleep 1
 
-# 	vf_combined_all
+# 	set_all_vf_channel
 
 	ip1
 
