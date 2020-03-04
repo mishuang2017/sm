@@ -11571,6 +11571,11 @@ mlx5e_xdp_handle
 mlx5e_skb_from_cqe_mpwrq_linear
 mlx5e_xmit_xdp_frame_mpwqe
 
+===netperf===
+
+netserver
+netperf -H 1.1.1.200 -t UDP_RR
+
 ===veth===
 
 [root@dev-r630-03 ~]# trace veth_newlink -K

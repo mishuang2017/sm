@@ -424,6 +424,7 @@ alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
 alias clone-drgn='git clone https://github.com/osandov/drgn.git'	# pip3 install drgn
 alias clone-wrk='git clone git@github.com:wg/wrk.git'
+alias clone-netperf='git clone git@github.com:HewlettPackard/netperf.git'
 alias pull='git pull origin master'
 
 alias clone-ubuntu-xenial='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-xential.git'
@@ -8733,7 +8734,7 @@ function br-ct
 	ovs-ofctl dump-flows $br
 }
 
-function br-qa-ct
+function br_qa_ct
 {
 set -x
 	del-br
@@ -8770,7 +8771,7 @@ set +x
 # ovs-ofctl add-flow ovs-sriov2 'table=1,in_port=enp66s0f1,ip,udp,dl_src=e4:0c:01:42:02:03,dl_dst=e4:0b:01:42:02:03,tp_src=0x1389/0xf000,ct_state=+trk+new,ct_zone=1,action=enp66s0f1_1'
 # ovs-ofctl add-flow ovs-sriov2 'table=1,in_port=enp66s0f1,ip,udp,dl_src=e4:0c:01:42:02:03,dl_dst=e4:0b:01:42:02:03,tp_src=0x1389/0xf000,ct_state=+trk+est,ct_zone=1,action=enp66s0f1_1'
 
-function br-qa-ct-zone
+function br_qa
 {
 set -x
 	del-br
@@ -8779,22 +8780,34 @@ set -x
 	ovs-vsctl add-port $br $rep2
 	ovs-vsctl add-port $br $rep3
 
-	mac=98:03:9b:13:f4:48
+# 	ovs-ofctl del-flows $br 
+# 	ovs-ofctl add-flow $br "arp,action=normal"
+	ovs-ofctl add-flow $br "table=0,in_port=$rep2,ip,udp,action=ct(table=1,zone=1)"
+	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,udp,action=ct(table=1,zone=1)"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+new,ip,udp,action=ct(commit,zone=1),$link"
+	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+est,ip,udp,ct_zone=1,action=$link"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ip,udp,ct_zone=1,action=$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+est,ip,udp,ct_zone=1,action=$rep2"
+set +x
+}
+
+function br_qa2
+{
+set -x
+	del-br
+	ovs-vsctl add-br $br
+	ovs-vsctl add-port $br $link
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $rep3
+
 # 	ovs-ofctl del-flows $br 
 # 	ovs-ofctl add-flow $br "arp,action=normal"
 	ovs-ofctl add-flow $br "table=0,in_port=$rep2,ip,udp,action=ct(table=1,zone=1)"
 	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,udp,action=ct(table=1,zone=1)"
 	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+new,ip,udp,ct_zone=1,action=ct(commit),$link"
 	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,udp,ct_state=+trk+est,ip,udp,ct_zone=1,action=$link"
-	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ip,udp,ct_zone=1,action=ct(commit),$rep2"
+	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+new,ip,udp,ct_zone=1,action=$rep2"
 	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,udp,ct_state=+trk+est,ip,udp,ct_zone=1,action=$rep2"
-
-	ovs-ofctl add-flow $br "table=0,in_port=$rep2,ip,tcp,action=ct(table=1)"
-	ovs-ofctl add-flow $br "table=0,in_port=$link,ip,tcp,action=ct(table=1)"
-	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,tcp,ct_state=+trk+new,ip,tcp,action=ct(commit),$link"
-	ovs-ofctl add-flow $br "table=1,in_port=$rep2,ip,tcp,ct_state=+trk+est,ip,tcp,action=$link"
-	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,ct_state=+trk+new,ip,tcp,action=ct(commit),$rep2"
-	ovs-ofctl add-flow $br "table=1,in_port=$link,ip,tcp,tp_src=0x1389/0xf000,ct_state=+trk+est,ip,tcp,action=$rep2"
 set +x
 }
 
