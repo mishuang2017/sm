@@ -27,10 +27,10 @@ alias rc='. ~/.bashrc'
 
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=50
-	numvfs=17
-	numvfs=49
 	numvfs=97
 	numvfs=3
+	numvfs=17
+	numvfs=49
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -5172,7 +5172,9 @@ function start-switchdev
 
 	ethtool -K $link tx-vlan-stag-hw-insert off
 
-	combined 4
+	if (( host_num == 13 || host_num == 14 )); then
+		combined 4
+	fi
 # 	affinity-set
 # 	ethtool -L $rep2 combined 63
 
