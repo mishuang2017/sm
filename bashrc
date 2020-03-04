@@ -129,6 +129,9 @@ ports=1
 base_baud=115200
 base_baud=9600
 
+cpu_num=$(cat /proc/cpuinfo  | grep processor | wc -l)
+cpu_num2=$((cpu_num*2))
+
 nfs_dir='/auto/mtbcswgwork/chrism'
 if which kdump-config > /dev/null 2>&1; then
 	crash_dir=$(kdump-config show | grep KDUMP_COREDIR | awk '{print $2}')
@@ -2095,12 +2098,10 @@ function make-all
 {
 	[[ $UID == 0 ]] && break
 
-	local cpu_num=$(cat /proc/cpuinfo  | grep processor | wc -l)
-	cpu_num=$((cpu_num*2))
 	unset CONFIG_LOCALVERSION_AUTO
 	make olddefconfig
-	make -j $cpu_num
-	sudo time make modules_install -j $cpu_num
+	make -j $cpu_num2
+	sudo time make modules_install -j $cpu_num2
 # 	sudo make install
 # 	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
 
@@ -7357,10 +7358,10 @@ alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
 alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
 alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
-alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
+alias ofed-configure-all="./configure  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod -j $cpu_num2"
 
-alias ofed-configure='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
-alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
+alias ofed-configure="./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j $cpu_num2"
+alias ofed-configure="./configure --with-mlx5-core-and-ib-and-en-mod -j $cpu_num2"
 
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
