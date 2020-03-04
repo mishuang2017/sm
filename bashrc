@@ -1522,7 +1522,7 @@ function buildm
 {
 	module=mlx5_core;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
-	make M=$driver_dir -j 32
+	make M=$driver_dir -j
 }
 
 function mybuild
@@ -1532,20 +1532,20 @@ set -x;
 	module=mlx5_core;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	cd $linux_dir;
-	make M=$driver_dir -j 32 || {
+	make M=$driver_dir -j || {
 		set +x
 		return
 	}
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
-#	make modules_install -j 32
+#	make modules_install -j
 
 	sudo modprobe -r mlx5_ib
 	sudo modprobe -r mlx5_core
 	sudo modprobe -v mlx5_core
 
 #	cd $src_dir;
-#	make CONFIG_MLX5_CORE=m -C $linux_dir M=$src_dir modules -j 32;
+#	make CONFIG_MLX5_CORE=m -C $linux_dir M=$src_dir modules -j;
 #	/bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/drivers/net/ethernet/mellanox/mlx5/core
 #	sudo rmmod mlx5_ib
 #	sudo rmmod $module;
@@ -1561,20 +1561,20 @@ set -x;
 	module=mlx5_ib;
 	driver_dir=drivers/infiniband/hw/mlx5
 	cd $linux_dir;
-	make M=$driver_dir -j 32 || {
+	make M=$driver_dir -j || {
 		set +x
 		return
 	}
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
-#	make modules_install -j 32
+#	make modules_install -j
 
 	sudo modprobe -r mlx5_ib
 	sudo modprobe -r mlx5_core
 	sudo modprobe -v mlx5_core
 
 #	cd $src_dir;
-#	make CONFIG_MLX5_CORE=m -C $linux_dir M=$src_dir modules -j 32;
+#	make CONFIG_MLX5_CORE=m -C $linux_dir M=$src_dir modules -j;
 #	/bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/drivers/net/ethernet/mellanox/mlx5/core
 #	sudo rmmod mlx5_ib
 #	sudo rmmod $module;
@@ -1610,7 +1610,7 @@ set -x;
 	module=mlx5_ib;
 	driver_dir=drivers/infiniband/hw/mlx5
 	cd $linux_dir;
-	make M=$driver_dir -j 32 || return
+	make M=$driver_dir -j || return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 
@@ -1635,7 +1635,7 @@ mybuild1 ()
 	module=$1;
 	driver_dir=net/sched
 	cd $linux_dir;
-	make M=$driver_dir -j 32 || return
+	make M=$driver_dir -j || return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 
@@ -1655,7 +1655,7 @@ set -x;
 	module=openvswitch
 	driver_dir=net/openvswitch
 	cd $linux_dir;
-	make M=$driver_dir -j 32 || return
+	make M=$driver_dir -j || return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 
@@ -1672,7 +1672,7 @@ set -x;
 	module=$1;
 	driver_dir=net/netfilter
 	cd $linux_dir;
-	make M=$driver_dir -j 32 || return
+	make M=$driver_dir -j || return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 
@@ -1772,15 +1772,15 @@ function install-ovs
 set -x
 	./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
 #	./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc --with-dpdk=$DPDK_BUILD
-	make -j 32
-	sudo make install -j 32
+	make -j
+	sudo make install -j
 set +x
 }
 
 function io
 {
 set -x
-	make -j 32
+	make -j
 	sudo make install
 	restart-ovs
 set +x
@@ -2108,25 +2108,25 @@ function make-all
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
-alias mm='sudo make modules_install -j32; sudo make install'
-alias  mi='make -j 32; sudo make install_kernel -j 32; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
-alias mi2='make -j 32; sudo make install_kernel -j 32'
-alias m32='make -j 32'
+alias mm='sudo make modules_install -j; sudo make install'
+alias mi='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
+alias mi2='make -j; sudo make install_kernel -j'
+alias m32='make -j'
 
 function mi2
 {
 set -x
 	sudo echo 0 > /sys/class/net/$link/device/sriov_numvfs;
-	make -j 32; sudo make install -j 32;
+	make -j; sudo make install -j;
 	/bin/rm -rf ./drivers/infiniband/hw/mlx5/mlx5_ib.ko;
 	sudo /bin/rm -rf /lib/modules/3.10.0-957.el7.x86_64/extra/mlnx-ofa_kernel/drivers/infiniband/hw/mlx5/mlx5_ib.ko
 	force-restart
 set +x
 }
 
-alias make-local='./configure; make -j 32; sudo make install'
+alias make-local='./configure; make -j; sudo make install'
 alias ml=make-local
-alias make-usr='./configure --prefix=/usr; make -j 32; sudo make install'
+alias make-usr='./configure --prefix=/usr; make -j; sudo make install'
 alias mu=make-usr
 
 function iperfs
@@ -7343,17 +7343,17 @@ fi
 
 alias restart-udev='sudo systemctl restart systemd-udevd.service'
 
-alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
-alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j 32'
+alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j'
+alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j'
 
-alias ofed-configure2='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j 32'
+alias ofed-configure2='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j'
 
-alias ofed-configure3='./configure --with-mlx5-core-and-en-mod --with-core-mod --with-ipoib-mod --with-mlx5-mod -j 32'
-alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j 32'
+alias ofed-configure3='./configure --with-mlx5-core-and-en-mod --with-core-mod --with-ipoib-mod --with-mlx5-mod -j'
+alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j'
 alias ofed-configure-all2='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
 
 # centos 7.4
-alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j 32'
+alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j'
 # Redhat 7.5
 alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
@@ -8138,8 +8138,8 @@ alias send='/labhome/chrism/prg/python/scapy/send.py'
 alias visend='vi /labhome/chrism/prg/python/scapy/send.py'
 alias sendm='/labhome/chrism/prg/python/scapy/m.py'
 
-# alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j 32 DESTDIR=install'
-# alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j 32 DESTDIR=/usr'
+# alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j DESTDIR=install'
+# alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j DESTDIR=/usr'
 
 # ./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update
 alias ofed-dpdk='./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update --force --with-mft --with-mstflint'
@@ -9376,7 +9376,7 @@ function install-bcc
 	sm
 	mkdir -p bcc/build; cd bcc/build
 	cmake .. -DCMAKE_INSTALL_PREFIX=/usr
-	time make -j 32
+	time make -j
 	sudo make install
 }
 
@@ -9387,7 +9387,7 @@ function install-bpftrace
 	unset CXXFLAGS
 	mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=DEBUG ..
 	unset CXXFLAGS
-	make -j 32
+	make -j
 	unset CXXFLAGS
 	make install
 }
@@ -9718,7 +9718,7 @@ function install-tools
 	sm
 	clone-crash
 	cd crash
-	make -j 32
+	make -j
 
 	sm
 	clone-systemtap
