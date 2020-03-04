@@ -507,7 +507,7 @@ alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 alias watch-netstat='watch -d -n 1 netstat -s'
 alias w1='watch -d -n 1'
 alias wb='watch -d -n 1 cat /proc/buddyinfo'
-alias w2="watch -d -n 1 cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct"
+alias wco="watch -d -n 1 cat /sys/class/net/$link/device/counters_tc_ct"
 alias w3='watch -d -n 1 ovs-appctl upcall/show'
 alias w4='watch -d -n 1 sar -n DEV 1'
 # sar -n TCP 1
