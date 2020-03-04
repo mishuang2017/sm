@@ -119,3 +119,9 @@ https://askubuntu.com/questions/778117/installation-fails-on-grub-read-only-efi-
 sudo dosfsck -t -a -w /dev/nvme0n1p1
 
 sudo apt install gnome-tweak-tool
+
+Add locale:
+
+1.  vi /etc/locale.gen to uncomment
+2. locale-gen
+3. reboot
