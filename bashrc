@@ -24,13 +24,14 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "nps-server-31" ]] && host_num=40
 [[ "$(hostname -s)" == "clx-ibmc-01" ]] && host_num=1
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
+[[ "$(hostname -s)" == "clx-ibmc-03" ]] && host_num=3
 
-if (( host_num == 1 || host_num == 2 )); then
+if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
 	numvfs=97
-	numvfs=3
-	numvfs=17
 	numvfs=49
+	numvfs=17
+	numvfs=3
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -8030,8 +8031,9 @@ alias sendm='/labhome/chrism/prg/python/scapy/m.py'
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j DESTDIR=install'
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j DESTDIR=/usr'
 
+alias ofed_debian='./mlnxofedinstall --without-fw-update  --force-dkms --force'
 # ./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update
-alias ofed-dpdk='./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update --force --with-mft --with-mstflint'
+alias ofed_dpdk='./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update --force --with-mft --with-mstflint'
 
 # edit config/common_base  to enable mlx5
 # CONFIG_RTE_LIBRTE_MLX5_PMD=y 
