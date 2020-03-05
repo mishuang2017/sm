@@ -43,10 +43,12 @@ if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
 
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
-		eval rep$((i+1))=${link}_$i
-	done
+	if (( host_num == 1 )); then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link}_$i
+		done
+	fi
 
 elif (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
@@ -4981,11 +4983,13 @@ alias n21='exe n21'
 
 function set_all_vf_channel
 {
-set -x
+	p=1
 	for (( i = 0; i < numvfs; i++)); do
-		ethtool -L ${link}v${i} combined 1
-	done
+		vfn=$(get_vf $host_num $p $((i+1)))
+set -x
+		ethtool -L $vfn combined 1
 set +x
+	done
 }
 
 function start-switchdev-all
@@ -7393,6 +7397,15 @@ set +x
 set +x
 }
 
+# get vf name from namespace
+function get_vf_ns
+{
+	[[ $# != 1 ]] && return
+	local n=$1
+	ns=n1$((n))
+	ip netns exec $ns ls /sys/class/net | grep en
+}
+
 function get_vf
 {
 	local h=$1
@@ -7410,9 +7423,14 @@ function get_vf
 	[[ ! -d $dir1 ]] && return
 
 	local dir2=$(readlink $dir1)
+	# dir1=/sys/class/net/enp4s0f0
+	# dir2=../../devices/pci0000:00/0000:00:02.0/0000:04:00.0/net/enp4s0f0
 	cd $dir1
+
 	cd ../$dir2
+
 	cd ../../../
+	# /sys/devices/pci0000:00/0000:00:02.0
 	for a in $(find . -name address); do
 		local mac=$(cat $a)
 		if [[ "$mac" == "02:25:d0:$h:$p:$n" ]]; then
@@ -10105,24 +10123,22 @@ function cpu
 function affinity_vf
 {
 	local vf
+	local n
 
 	cpu_num=$numvfs
 	[[ $# == 1 ]] && cpu_num=$1
 
-	start_cpu=1
-	num=0
-	for (( i = 0; i < numvfs; i++ )); do
-		vf=${link}v$i
-		echo $vf
+	curr_cpu=1
+	for (( i = 1; i < numvfs; i++ )); do
+		vf=$(get_vf_ns $((i)))
+		echo "vf=$vf"
 		for n in $(grep -w $vf /proc/interrupts | cut -f 1 -d":"); do
-			set -x
-			echo "$(cpu $start_cpu)" > /proc/irq/$n/smp_affinity
-			set +x
-			start_cpu=$((start_cpu+1))
-			num=$((num+1))
-			if (( num == cpu_num )); then
-				start_cpu=1
-				num=0
+			echo "$n"
+			echo "$(cpu $curr_cpu)" > /proc/irq/$n/smp_affinity
+			if (( curr_cpu == cpu_num )); then
+				curr_cpu=1
+			else
+				curr_cpu=$((curr_cpu+1))
 			fi
 		done
 	done
@@ -10400,7 +10416,7 @@ function wrk_setup
 	sleep 5
 	smfs
 	restart
-	/root/bin/test_router5-snat-all-ofed5.sh $link $((numvfs-1))
+	/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))
 	set_channels_all_reps 1 63
 	affinity_vf
 }
