@@ -549,6 +549,7 @@ alias chown2="sudo chown -R chrism.mtl ."
 alias sb='tmux save-buffer'
 
 alias sm="cd /$images/chrism"
+alias sms="cd /$images/chrism/sm"
 alias smip="cd /$images/chrism/iproute2"
 alias smipu="cd /$images/chrism/iproute2-upstream"
 alias smb2="cd /$images/chrism/bcc/tools"
