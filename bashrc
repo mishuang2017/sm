@@ -29,8 +29,8 @@ alias rc='. ~/.bashrc'
 if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
 	numvfs=49
-	numvfs=3
 	numvfs=17
+	numvfs=3
 	numvfs=97
 	link=ens1f0
 	link2=ens1f1
@@ -10144,6 +10144,27 @@ function affinity_vf
 	done
 }
 
+function affinity_pf
+{
+	local pf
+	local cpu_num=63
+
+	[[ $# != 2 ]] && return
+	[[ $# == 1 ]] && pf=$1
+	[[ $# == 1 ]] && cpu_num=$1
+
+	curr_cpu=1
+	for n in $(grep -w mlx5_comp /proc/interrupts | cut -f 1 -d":"); do
+		echo "$n"
+		echo "$(cpu $curr_cpu)" > /proc/irq/$n/smp_affinity
+		if (( curr_cpu == cpu_num )); then
+			curr_cpu=1
+		else
+			curr_cpu=$((curr_cpu+1))
+		fi
+	done
+}
+
 alias numa="cat /sys/class/net/$link/device/numa_node"
 
 # ip a | grep 10.12.205.15 && hostname dev-chrism-vm1
@@ -10413,15 +10434,15 @@ function isolcpus
 function wrk_setup
 {
 	off
-	sleep 5
+	sleep 1
 	smfs
 	restart
 
-# 	ovs-vsctl set open_vswitch . other_config:max-idle="30000"
+# 	ovs-vsctl set open_vswitch . other_config:max-idle="300000"
 	ovs-vsctl set open_vswitch . other_config:n-handler-threads="8"
 	ovs-vsctl set open_vswitch . other_config:n-revalidator-threads="8"
-
 	/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))
+
 	set_channels_all_reps 1 63
 	affinity_vf
 }
@@ -10441,10 +10462,15 @@ function wrk_run
 	local time=30
 	local connection=60
 
-	[[ $# == 1 ]] && n=$1
-	if [[ $# == 2 ]]; then
+	if [[ $# == 1 ]]; then
+		n=$1
+	elif [[ $# == 2 ]]; then
 		n=$1
 		start=$2
+	elif [[ $# == 3 ]]; then
+		n=$1
+		start=$2
+		time=$3
 	fi
 	total=0
 
@@ -10456,11 +10482,9 @@ function wrk_run
 	WRK=/usr/bin/wrk
 	WRK=/images/chrism/wrk/wrk
 	for (( cpu = start; cpu < end; cpu++ )); do
+# 	for (( cpu = 2; cpu < 3; cpu++ )); do
 		ns=n1$((cpu+1-start))
 		cpu1=$cpu
-# 		if (( cpu >= 48 )); then
-# 			cpu1=$((cpu+24))
-# 		fi
 set -x
 		ip netns exec $ns taskset -c $cpu1 $WRK -d $time -t $thread -c $connection  --latency --script=counter.lua http://[8.9.10.11]:$((80+port)) > /tmp/result-$cpu &
 set +x
@@ -10468,9 +10492,6 @@ set +x
 		if (( $port >= 9 )); then
 			port=0
 		fi
-# 		if (( cpu1 >= 96 )); then
-# 			cpu=start
-# 		fi
 		total=$((total+1))
 		(( total == n )) && break
 	done
@@ -10516,7 +10537,10 @@ set -x
 set +x
 }
 
-
+function taskset_ovs
+{
+	taskset -pac 0-11,48-59 `pidof ovs-vswitchd`
+}
 
 function run-wrk1
 {
