@@ -255,7 +255,6 @@ alias ssh='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias noga='/.autodirect/sw_tools/Internal/Noga/RELEASE/latest/cli/noga_manage.py'
 
 cx5=0
-# modprobe mlx5_core > /dev/null 2>&1
 function get_pci
 {
 # 	if [[ -e /sys/class/net/$link/device && -f /usr/sbin/lspci ]]; then
@@ -348,8 +347,6 @@ alias ovs-ttl="~chrism/bin/ovs-ttl.sh $rep2 $rep3"
 
 alias pc="picocom -b $base_baud /dev/ttyS1"
 alias pcu="picocom -b $base_baud /dev/ttyUSB0"
-
-alias rq='echo g > /proc/sysrq-trigger'
 
 alias sw='vsconfig-sw; restart-ovs'
 alias hw='vsconfig-hw; restart-ovs'
@@ -497,9 +494,6 @@ alias t1="tcpdump -enn -v -i $link"
 alias t2="tcpdump -enn -vv -i $link"
 alias t4="tcpdump -enn -vvvv -i $link"
 alias ti='sudo tcpdump -enn -i'
-alias tvf="ip netns exec n0 tcpdump -enn -i $vf1"
-alias tvf2="ip netns exec n1 tcpdump -en -i $vf2"
-alias trep="tcpdump -en -i $rep1"
 alias mount-mswg='sudo mkdir -p /mswg; sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/'
 alias mount-swgwork='sudo mkdir -p /swgwork; sudo mount l1:/vol/swgwork /swgwork'
 
@@ -507,12 +501,12 @@ alias tvf1="tcpdump ip src host 1.1.1.14 -e -xxx -i $vf1"
 alias tvf2="tcpdump ip src host 1.1.1.14 -e -xxx -i $vf2"
 alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 
-alias watch-netstat='watch -d -n 1 netstat -s'
+alias watch_netstat='watch -d -n 1 netstat -s'
 alias w1='watch -d -n 1'
-alias wb='watch -d -n 1 cat /proc/buddyinfo'
-alias wco="watch -d -n 1 cat /sys/class/net/$link/device/counters_tc_ct"
-alias w3='watch -d -n 1 ovs-appctl upcall/show'
-alias w4='watch -d -n 1 sar -n DEV 1'
+alias watch_buddy='watch -d -n 1 cat /proc/buddyinfo'
+alias watch_coounters_tc_ct="watch -d -n 1 cat /sys/class/net/$link/device/counters_tc_ct"
+alias watch_upcall='watch -d -n 1 ovs-appctl upcall/show'
+alias watch_sar='watch -d -n 1 sar -n DEV 1'
 # sar -n TCP 1
 # pidstat -t -p 3794
 alias ct=conntrack
@@ -524,21 +518,9 @@ alias down="mlxlink -d $pci -p 1 -a DN"
 alias m1="mlxlink -d $pci"
 
 alias modv='modprobe --dump-modversions'
-alias 154='ssh mishuang@10.12.66.154'
 alias ctl='sudo systemctl'
 # alias dmesg='dmesg -T'
 alias dmesg1='dmesg -HwT'
-
-alias 13c='ssh root@10.12.206.25'
-alias 14c='ssh root@10.12.206.26'
-
-alias switch='ssh admin@10.12.67.39'
-
-alias slave='lnst-slave'
-alias classic='rpyc_classic.py'	# used to update mac address
-alias lv='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/03-vlan_in_host.xml'
-alias lh='lnst-ctl -d --pools=dev13_14 run recipes/ovs_offload/header_rewrite.xml'
-alias iso='cd /mnt/d/software/iso'
 
 alias win='vncviewer 10.75.201.135:0'
 
@@ -591,16 +573,12 @@ alias rmswp='find . -name *.swp -exec rm {} \;'
 alias cd-drgn='cd /usr/local/lib64/python3.6/site-packages/drgn-0.0.1-py3.6-linux-x86_64.egg/drgn/helpers/linux/'
 alias smdr="cd /$images/chrism/drgn/"
 
-alias mount-fedora="mount /dev/mapper/fedora-root /mnt"
-alias cfl="cd /$images/chrism/linux; cscope -d"
-
 alias sm2="cd $nfs_dir"
 alias smc="sm; cd crash; vi net.c"
 alias smi='cd /var/lib/libvirt/images'
 alias smi2='cd /etc/libvirt/qemu'
 
 alias smn='cd /etc/sysconfig/network-scripts/'
-alias mr='modprobe -r'
 
 alias bfdb='bridge fdb'
 alias bfdb1='bridge fdb | grep 25'
@@ -794,12 +772,6 @@ function ethtool-rxvlan-on
 	$ETHTOOL -k $link | grep rx-vlan-offload
 }
 
-alias eon=ethtool-rxvlan-on
-
-alias ethtool2=/images/chrism/ethtool/ethtool
-
-# alias a=ovs-arp-responder.sh
-
 alias restart-virt='systemctl restart libvirtd.service'
 
 export PATH=$PATH:~/bin
@@ -872,13 +844,6 @@ alias corrupt2="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt2"
 
 # ================================================================================
 
-function vf1
-{
-	ifconfig $link 0
-	ifconfig $link up
-	ifconfig $vf1 $link_ip/24 up
-}
-
 function ip1
 {
 	local l=$link
@@ -911,12 +876,6 @@ function ip2
 	ip addr add dev $l $link2_ip/24
 	ip addr add $link2_ipv6/64 dev $l
 	ip link set $l up
-}
-
-trap cleanup EXIT
-function cleanup
-{
-set +x
 }
 
 function core
@@ -991,20 +950,6 @@ function greps
 	grep include -Rn -e "struct $1 {"
 }
 
-function profile
-{
-	local host=$1
-	who=mi
-	[[ $# != 1 ]] && return
-	sshcopy who@host
-	scp ~/.bashrc $who@$host:~/bashrc
-	scp ~/.profile $who@$host:~
-	scp ~/.vimrc $who@$host:~
-	scp -r ~/.vim $who@$host:~
-	scp ~/.screenrc $who@$host:~
-	scp ~/.tmux.conf $who@$host:~
-}
-
 function ln-profile
 {
 	mv ~/.bashrc bashrc.orig
@@ -1021,19 +966,6 @@ function create-images
 {
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
-}
-
-function unprofile
-{
-	cd /root
-	unlink ~/.bashrc
-	mv bashrc.orig .bashrc
-}
-
-function rc2
-{
-	unlink ~/.bashrc
-	mv ~/bashrc.orig ~/.bashrc
 }
 
 function bind5
@@ -5046,17 +4978,6 @@ alias n3='exe n13'
 alias n20='exe n20'
 alias n21='exe n21'
 
-alias leg='start-switchdev legacy'
-alias start='start-switchdev vm'
-alias start='start-switchdev-all'
-alias start-vm='start-switchdev 1 vm'
-alias start-vf='start-switchdev vf'
-alias start-bind='start-switchdev bind'
-alias restart='off; start'
-# alias r1='off; tc2; reprobe; modprobe -r cls_flower; start'
-alias mystart=start-switchdev-all
-# alias r=restart
-
 function set_all_vf_channel
 {
 set -x
@@ -5064,33 +4985,6 @@ set -x
 		ethtool -L ${link}v${i} combined 1
 	done
 set +x
-}
-
-function start-bd
-{
-	stop1
-
-	start-ovs
-	for i in $(seq $ports); do
-		start-switchdev $i
-	done
-
-	ifconfig $vf1 mtu 1450
-	ip1
-	ip2
-
-	brx-ct
-	trex-arp
-	start1
-}
-
-function start-trex
-{
-	start-ovs
-	for i in $(seq $ports); do
-		start-switchdev $i
-	done
-	ifconfig $link 1.1.3.1/16 up
 }
 
 function start-switchdev-all
@@ -5101,14 +4995,19 @@ function start-switchdev-all
 	done
 }
 
+alias mystart=start-switchdev-all
+alias restart='off; mystart'
+
 function start-switchdev
 {
 	local port=$1
 	local mode=switchdev
+
 	if (( numvfs > 99 )); then
 		echo "numvfs = $numvfs, return to confirm"
 		read
 	fi
+
 	get_pci
 	if [[ -z $pci ]]; then
 		echo "pci is null"
@@ -5138,7 +5037,6 @@ function start-switchdev
 		fi
 #		echo basic > $sysfs_dir/encap || echo "baisc failed"
 	else
-# 		off-sriov &
 		devlink dev eswitch set pci/$pci_addr mode switchdev
 		if (( cx5 == 0 )); then
 			devlink dev eswitch set pci/$pci_addr inline-mode transport
@@ -5148,17 +5046,11 @@ function start-switchdev
 
 # 	return
 
-#	local time=0
-#	while ! ip link show $link > /dev/null; do
-#		sleep 1
-#		(( time ++ ))
-#		(( time > 10 )) && return
-#	done
 	sleep 1
 	time bind_all $l
 	sleep 1
 
-# 	set_all_vf_channel
+	set_all_vf_channel
 
 	ip1
 
@@ -5172,17 +5064,13 @@ function start-switchdev
 
 	time set_netns_all $port
 
-	ethtool -K $link tx-vlan-stag-hw-insert off
+# 	ethtool -K $link tx-vlan-stag-hw-insert off
 
 	if (( host_num == 13 || host_num == 14 )); then
 		combined 4
 	fi
-# 	affinity-set
-# 	ethtool -L $rep2 combined 63
 
-#	iptables -F
-#	iptables -Z
-#	iptables -X
+# 	affinity_set
 
 	return
 }
@@ -10152,7 +10040,7 @@ function affinity
 }
 
 # 9,11,13,15
-function affinity-set
+function affinity_set
 {
 	irq=$(grep $link /proc/interrupts | awk '{print $1}' | sed 's/://')
 	echo $irq
