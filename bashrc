@@ -663,6 +663,7 @@ alias 13='ssh -X root@10.75.205.13'
 alias 14='ssh -X root@10.75.205.14'
 alias i1='ssh -X root@10.130.41.1'
 alias i2='ssh -X root@10.130.42.1'
+alias i3='ssh -X root@10.130.43.1'
 
 alias 15='ssh root@10.75.205.15'
 alias vm1=15
