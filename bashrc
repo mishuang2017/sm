@@ -28,10 +28,10 @@ alias rc='. ~/.bashrc'
 
 if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
-	numvfs=97
 	numvfs=49
-	numvfs=17
 	numvfs=3
+	numvfs=17
+	numvfs=97
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -10416,6 +10416,11 @@ function wrk_setup
 	sleep 5
 	smfs
 	restart
+
+# 	ovs-vsctl set open_vswitch . other_config:max-idle="30000"
+	ovs-vsctl set open_vswitch . other_config:n-handler-threads="8"
+	ovs-vsctl set open_vswitch . other_config:n-revalidator-threads="8"
+
 	/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))
 	set_channels_all_reps 1 63
 	affinity_vf
