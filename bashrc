@@ -28,10 +28,10 @@ alias rc='. ~/.bashrc'
 
 if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
-	numvfs=49
-	numvfs=17
 	numvfs=3
 	numvfs=97
+	numvfs=17
+	numvfs=49
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -4826,25 +4826,11 @@ function up_all_reps
 
 function set_channels_all_reps
 {
-	local port=$1
-	local l
+	local l=$link
 	local rep
 
-	if [[ $# != 2 ]]; then
-		echo "Usage: set_channels_all_reps 1 1"
-		return
-	fi
 	local n=1
-	[[ $# == 2 ]] && n=$2
-
-	if (( $port == 1 )); then
-		l=$link
-	elif (( $port == 2 )); then
-		l=$link2
-	else
-		echo "up_all_reps error"
-		return
-	fi
+	[[ $# == 1 ]] && n=$1
 
 	echo
 	echo "start set_channels_all_reps"
@@ -4981,6 +4967,95 @@ alias n3='exe n13'
 alias n20='exe n20'
 alias n21='exe n21'
 
+#  1062  echo 08000000,00000000,00000000 > /proc/irq/281/smp_affinity
+#  1063  echo 10000000,00000000,00000000 > /proc/irq/282/smp_affinity
+#  1064* echo 20000000,00000000,00000000 > /proc/irq/283/smp_affinity
+#  1065  echo 40000000,00000000,00000000 > /proc/irq/284/smp_affinity
+#  1066  echo 80000000,00000000,00000000 > /proc/irq/285/smp_affinity
+
+function cpu32
+{
+	[[ $# != 1 ]] && return
+	local i=$1
+
+	printf "%08x" $((1<<$((i-1))))
+}
+
+function cpu
+{
+	[[ $# != 1 ]] && return
+	local i=$1
+
+	if (( i >= 1 && i <= 32 )); then
+		echo "00000000,00000000,$(cpu32 $i)"
+	fi
+	if (( i >= 33 && i <= 64 )); then
+		echo "00000000,$(cpu32 $((i-32))),00000000"
+	fi
+	if (( i >= 65 && i <= 96 )); then
+		echo "$(cpu32 $((i-64))),00000000,00000000"
+	fi
+}
+
+function set_all_vf_affinity
+{
+	local vf
+	local n
+
+	cpu_num=$numvfs
+	[[ $# == 1 ]] && cpu_num=$1
+
+	curr_cpu=1
+	for (( i = 1; i < numvfs; i++ )); do
+		vf=$(get_vf_ns $((i)))
+		echo "vf=$vf"
+		for n in $(grep -w $vf /proc/interrupts | cut -f 1 -d":"); do
+			echo "$n"
+			echo "$(cpu $curr_cpu)" > /proc/irq/$n/smp_affinity
+			if (( curr_cpu == cpu_num )); then
+				curr_cpu=1
+			else
+				curr_cpu=$((curr_cpu+1))
+			fi
+		done
+	done
+}
+
+function affinity_pf
+{
+	local pf
+	local cpu_num=63
+
+	[[ $# != 2 ]] && return
+	[[ $# == 1 ]] && pf=$1
+	[[ $# == 1 ]] && cpu_num=$1
+
+	curr_cpu=1
+	for n in $(grep -w mlx5_comp /proc/interrupts | cut -f 1 -d":"); do
+		echo "$n"
+		echo "$(cpu $curr_cpu)" > /proc/irq/$n/smp_affinity
+		if (( curr_cpu == cpu_num )); then
+			curr_cpu=1
+		else
+			curr_cpu=$((curr_cpu+1))
+		fi
+	done
+}
+
+function set_all_vf_channel_ns
+{
+	local c=1
+	[[ $# == 1 ]] && c=$1
+	p=1
+	for (( i = 1; i < numvfs; i++)); do
+		vfn=$(get_vf_ns $i)
+		echo $vfn
+set -x
+		ip netns exec n1$i ethtool -L $vfn combined $c
+set +x
+	done
+}
+
 function set_all_vf_channel
 {
 	p=1
@@ -5055,7 +5130,7 @@ function start-switchdev
 	time bind_all $l
 	sleep 1
 
-	set_all_vf_channel
+# 	set_all_vf_channel
 
 	ip1
 
@@ -5078,6 +5153,15 @@ function start-switchdev
 # 	affinity_set
 
 	return
+}
+
+function init_vf_ns
+{
+	for (( i = 1; i < numvfs; i++ )); do
+set -x
+		eval vf$((i+1))=$(get_vf_ns $i)
+set +x
+	done
 }
 
 function echo_test
@@ -5829,9 +5913,9 @@ function skip_sw
 	vsconfig
 }
 
-alias idle0='ovs-vsctl set Open_vSwitch . other_config:max-idle=0'
-alias idle10000='ovs-vsctl set Open_vSwitch . other_config:max-idle=10000'
-alias idle10='ovs-vsctl set Open_vSwitch . other_config:max-idle=10'
+alias idle2='ovs-vsctl set Open_vSwitch . other_config:max-idle=2'
+alias idle10='ovs-vsctl set Open_vSwitch . other_config:max-idle=10000'
+alias idle600='ovs-vsctl set Open_vSwitch . other_config:max-idle=600000'
 
 function none1
 {
@@ -9148,6 +9232,14 @@ function counters_tc_ct
 }
 alias co=counters_tc_ct
 
+function co1
+{
+	idle2
+	sleep 1
+	idle10
+	co
+}
+
 function counters_tc_ct10
 {
 	while :; do
@@ -10089,81 +10181,6 @@ function irq
 	done
 }
 
-#  1062  echo 08000000,00000000,00000000 > /proc/irq/281/smp_affinity
-#  1063  echo 10000000,00000000,00000000 > /proc/irq/282/smp_affinity
-#  1064* echo 20000000,00000000,00000000 > /proc/irq/283/smp_affinity
-#  1065  echo 40000000,00000000,00000000 > /proc/irq/284/smp_affinity
-#  1066  echo 80000000,00000000,00000000 > /proc/irq/285/smp_affinity
-
-function cpu32
-{
-	[[ $# != 1 ]] && return
-	local i=$1
-
-	printf "%08x" $((1<<$((i-1))))
-}
-
-function cpu
-{
-	[[ $# != 1 ]] && return
-	local i=$1
-	
-	if (( i >= 1 && i <= 32 )); then
-		echo "00000000,00000000,$(cpu32 $i)"
-	fi
-	if (( i >= 33 && i <= 64 )); then
-		echo "00000000,$(cpu32 $((i-32))),00000000"
-	fi
-	if (( i >= 65 && i <= 96 )); then
-		echo "$(cpu32 $((i-64))),00000000,00000000"
-	fi
-}
-
-# set vf affinity to the last 24 cpus
-function affinity_vf
-{
-	local vf
-	local n
-
-	cpu_num=$numvfs
-	[[ $# == 1 ]] && cpu_num=$1
-
-	curr_cpu=1
-	for (( i = 1; i < numvfs; i++ )); do
-		vf=$(get_vf_ns $((i)))
-		echo "vf=$vf"
-		for n in $(grep -w $vf /proc/interrupts | cut -f 1 -d":"); do
-			echo "$n"
-			echo "$(cpu $curr_cpu)" > /proc/irq/$n/smp_affinity
-			if (( curr_cpu == cpu_num )); then
-				curr_cpu=1
-			else
-				curr_cpu=$((curr_cpu+1))
-			fi
-		done
-	done
-}
-
-function affinity_pf
-{
-	local pf
-	local cpu_num=63
-
-	[[ $# != 2 ]] && return
-	[[ $# == 1 ]] && pf=$1
-	[[ $# == 1 ]] && cpu_num=$1
-
-	curr_cpu=1
-	for n in $(grep -w mlx5_comp /proc/interrupts | cut -f 1 -d":"); do
-		echo "$n"
-		echo "$(cpu $curr_cpu)" > /proc/irq/$n/smp_affinity
-		if (( curr_cpu == cpu_num )); then
-			curr_cpu=1
-		else
-			curr_cpu=$((curr_cpu+1))
-		fi
-	done
-}
 
 alias numa="cat /sys/class/net/$link/device/numa_node"
 
@@ -10443,8 +10460,11 @@ function wrk_setup
 	ovs-vsctl set open_vswitch . other_config:n-revalidator-threads="8"
 	/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))
 
-	set_channels_all_reps 1 63
-	affinity_vf
+	init_vf_ns
+
+	set_all_vf_channel_ns 1
+	set_all_vf_affinity 12
+	set_channels_all_reps 12
 }
 
 # best performance, conneciton=60, set all VFs affinity to cpu 0-11
@@ -10540,6 +10560,22 @@ set +x
 function taskset_ovs
 {
 	taskset -pac 0-11,48-59 `pidof ovs-vswitchd`
+}
+
+function show_irq_affinity_vf
+{
+	local vf
+	local n
+
+	cpu_num=$numvfs
+	[[ $# == 1 ]] && cpu_num=$1
+
+	curr_cpu=1
+	for (( i = 1; i < numvfs; i++ )); do
+		vf=$(get_vf_ns $((i)))
+		echo "vf=$vf"
+		show_irq_affinity.sh $vf
+	done
 }
 
 function run-wrk1
