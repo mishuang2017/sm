@@ -39,9 +39,7 @@ sudo apt install -y libncurses5-dev zlib1g-dev
 # For drgn
 # must install libreadline-dev before install python 3.6
 # https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
-sudo apt install -y python3-setuptools
-sudo apt install -y python3-dev
-sudo apt install -y liblzma-dev
+sudo apt install -y python3-dev liblzma-dev elfutils
 
 # git clone https://github.com/ptesarik/libkdumpfile.git
 # error: possibly undefined macro: AC_CHECK_HEADERS #2
@@ -66,8 +64,6 @@ sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils 
 sudo apt-get install -y lsb-core
 
 sudo apt install -y python3-venv python3-pip
-<<<<<<< HEAD
-=======
+
 # fix: ImportError: No module named pip
->>>>>>> 4c5efb9e7cd84ac600c53b6465b51487073eadde
 sudo python3 -m ensurepip
