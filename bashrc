@@ -7740,8 +7740,8 @@ set -x
 	del-br
 	clear-nat
 
-	iptables -t nat -A POSTROUTING -s 1.1.1.$host_num/32 -j SNAT --to-source 8.9.10.13
-	ifconfig $link 8.9.10.13/24 up
+	iptables -t nat -A POSTROUTING -s 1.1.1.$host_num/32 -j SNAT --to-source 8.9.10.$host_num
+	ifconfig $link 8.9.10.$host_num/24 up
 # 	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
 }
@@ -7750,7 +7750,6 @@ function veth2
 {
 set -x
 	local n=1
-	[[ $# != 1 ]] && return
 	[[ $# == 1 ]] && n=$1
 
 	local ns=n1$n
@@ -7775,14 +7774,9 @@ function veths_nat
 {
 set -x
 	local n=1
-	[[ $# != 1 ]] && return
 	[[ $# == 1 ]] && n=$1
 
 	echo 1 > /proc/sys/net/ipv4/ip_forward
-
-	local n=1
-	[[ $# != 1 ]] && return
-	[[ $# == 1 ]] && n=$1
 
 	for (( i = 1; i <= n; i++ )); do
 		veth2 $i
@@ -7791,8 +7785,9 @@ set -x
 	del-br
 	clear-nat
 
-	iptables -t nat -A POSTROUTING -s 1.1.0.0/16 -j SNAT --to-source 8.9.10.13
-	ifconfig $link 8.9.10.13/24 up
+	# if --to-source is the default router, veths can access internet
+	iptables -t nat -A POSTROUTING -s 1.1.0.0/16 -j SNAT --to-source 8.9.10.$host_num
+	ifconfig $link 8.9.10.$host_num/24 up
 # 	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
 }
