@@ -7,9 +7,7 @@ sudo apt-get install libcap-ng-dev openvswitch-switch dh-autoreconf
 
 # For bionic bcc
 sudo apt-get -y install bpfcc-tools linux-headers-$(uname -r)
-# sudo apt-get -y install bison build-essential cmake flex git libedit-dev	\
-# 	llvm python zlib1g-dev libelf-dev
-# sudo apt-get -y install libclang-6.0-dev
+sudo apt-get -y install bison build-essential cmake flex git libedit-dev llvm python zlib1g-dev libelf-dev libclang-dev
 
 # For Lua support
 sudo apt-get -y install luajit luajit-5.1-dev 
