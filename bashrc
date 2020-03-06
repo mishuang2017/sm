@@ -8417,17 +8417,36 @@ set +x
 function veth
 {
 set -x
-	local n=ns1
-	ip link del veth0
-	ip link add veth0 type veth peer name veth1
-	ip link set dev veth0 up
-	ip addr add 1.1.1.100/24 brd + dev veth0
-	ip netns del $n 2>/dev/null
-	ip netns add $n
-	ip link set dev veth1 netns $n
-	ip netns exec $n ip addr add 1.1.1.$host_num/24 brd + dev veth1
-	ip netns exec $n ip link set dev veth1 up
+	local n=1
+	[[ $# != 1 ]] && return
+	[[ $# == 1 ]] && n=$1
+
+	local ns=n1$n
+	local veth=veth$n
+	local rep=veth_rep$n
+	ip link del $rep 2> /dev/null
+	ip link add $rep type veth peer name $veth
+	ip link set dev $rep up
+# 	ip addr add 1.1.1.$n/24 brd + dev $rep
+
+	ip link set dev $veth address 02:25:d0:$host_num:01:$i
+	ip netns del $ns > /dev/null 2>&1
+	ip netns add $ns
+	ip link set dev $veth netns $ns
+	ip netns exec $ns ip addr add 1.1.1.$n/24 brd + dev $veth
+	ip netns exec $ns ip link set dev $veth up
 set +x
+}
+
+function veths
+{
+	local n=1
+	[[ $# != 1 ]] && return
+	[[ $# == 1 ]] && n=$1
+
+	for (( i = 1; i <= n; i++ )); do
+		veth $i
+	done
 }
 
 function veth-vm1
