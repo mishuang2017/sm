@@ -39,7 +39,7 @@ sudo apt install -y libncurses5-dev zlib1g-dev
 # For drgn
 # must install libreadline-dev before install python 3.6
 # https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
-sudo apt install -y python3-dev liblzma-dev elfutils
+sudo apt install -y python3-dev liblzma-dev elfutils libbz2-dev
 
 # git clone https://github.com/ptesarik/libkdumpfile.git
 # error: possibly undefined macro: AC_CHECK_HEADERS #2
