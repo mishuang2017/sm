@@ -7690,8 +7690,7 @@ function nat
 
 set -x
 	clear-nat
-	iptables -t nat -A POSTROUTING -s 192.168.0.2/32 -j SNAT --to-source 192.168.1.13
-# 	iptables -t nat -A POSTROUTING -s 100.64.0.10/32 -j SNAT --to-source 8.9.10.1
+	iptables -t nat -A POSTROUTING -s 1.1.1.1/32 -j SNAT --to-source 8.9.10.1
 	iptables -t nat -L
 set +x
 }
@@ -7721,10 +7720,12 @@ set -x
 set +x
 }
 
-function nat-veth
+function veth_nat
 {
 set -x
-	local n=ns1
+	echo 1 > /proc/sys/net/ipv4/ip_forward
+
+	local n=n11
 	ip link del veth0
 	ip link add veth0 type veth peer name veth1
 	ip link set dev veth0 up
@@ -7743,7 +7744,7 @@ set -x
 
 	iptables -t nat -A POSTROUTING -s 1.1.1.$host_num/32 -j SNAT --to-source 8.9.10.13
 	ifconfig $link 8.9.10.13/24 up
-	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
+# 	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
 }
 
@@ -8446,6 +8447,23 @@ function veths
 
 	for (( i = 1; i <= n; i++ )); do
 		veth $i
+	done
+}
+
+function veths_delete
+{
+	local n=1
+	[[ $# != 1 ]] && return
+	[[ $# == 1 ]] && n=$1
+	
+	for (( i = 1; i <= n; i++ )); do
+		local rep=veth_rep$i
+		local ns=n1$i
+
+set -x
+		ip link del $rep 2> /dev/null
+		ip netns del $ns > /dev/null 2>&1
+set +x
 	done
 }
 
