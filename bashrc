@@ -950,7 +950,6 @@ alias cu='time cscope -R -b -k'
 function greps
 {
 	[[ $# != 1 ]] && return
-	sml
 #	grep include -Rn -e "struct $1 {" | sed 's/:/\t/'
 	grep include -Rn -e "struct $1 {"
 }
@@ -7735,14 +7734,64 @@ set -x
 	ip link set dev veth1 netns $n
 	ip netns exec $n ip addr add 1.1.1.$host_num/24 brd + dev veth1
 	ip netns exec $n ip link set dev veth1 up
-
 	# run the following command after login to namespace
-# 	ip route add default via 1.1.1.100
+	ip netns exec $n ip route add default via 1.1.1.100
 
 	del-br
 	clear-nat
 
 	iptables -t nat -A POSTROUTING -s 1.1.1.$host_num/32 -j SNAT --to-source 8.9.10.13
+	ifconfig $link 8.9.10.13/24 up
+# 	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
+set +x
+}
+
+function veth2
+{
+set -x
+	local n=1
+	[[ $# != 1 ]] && return
+	[[ $# == 1 ]] && n=$1
+
+	local ns=n1$n
+	local veth=veth$n
+	local rep=veth_rep$n
+	ip link del $rep 2> /dev/null
+	ip link add $rep type veth peer name $veth
+	ip link set dev $rep up
+	ip addr add 1.1.$n.100/24 brd + dev $rep
+
+	ip link set dev $veth address 02:25:d0:$host_num:01:$i
+	ip netns del $ns > /dev/null 2>&1
+	ip netns add $ns
+	ip link set dev $veth netns $ns
+	ip netns exec $ns ip addr add 1.1.$n.1/24 brd + dev $veth
+	ip netns exec $ns ip link set dev $veth up
+	ip netns exec $ns ip route add default via 1.1.$n.100
+set +x
+}
+
+function veths_nat
+{
+set -x
+	local n=1
+	[[ $# != 1 ]] && return
+	[[ $# == 1 ]] && n=$1
+
+	echo 1 > /proc/sys/net/ipv4/ip_forward
+
+	local n=1
+	[[ $# != 1 ]] && return
+	[[ $# == 1 ]] && n=$1
+
+	for (( i = 1; i <= n; i++ )); do
+		veth2 $i
+	done
+
+	del-br
+	clear-nat
+
+	iptables -t nat -A POSTROUTING -s 1.1.0.0/16 -j SNAT --to-source 8.9.10.13
 	ifconfig $link 8.9.10.13/24 up
 # 	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
@@ -10501,10 +10550,10 @@ function wrk_setup
 
 	init_vf_ns
 
-	ethtool -L $link combined 12
-	set_all_vf_channel_ns 1
-	set_all_vf_affinity 12
-	set_channels_all_reps 12
+# 	ethtool -L $link combined 12
+# 	set_all_vf_channel_ns 1
+# 	set_all_vf_affinity 12
+# 	set_channels_all_reps 12
 }
 
 # best performance, conneciton=60, set all VFs affinity to cpu 0-11
