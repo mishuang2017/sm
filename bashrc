@@ -10463,9 +10463,10 @@ function wrk_setup
 
 	init_vf_ns
 
+	ethtool -L $link combined 24
 	set_all_vf_channel_ns 1
-	set_all_vf_affinity 12
-	set_channels_all_reps 12
+	set_all_vf_affinity 24
+	set_channels_all_reps 24
 }
 
 # best performance, conneciton=60, set all VFs affinity to cpu 0-11
@@ -10574,7 +10575,7 @@ function show_irq_affinity_vf
 	curr_cpu=1
 	for (( i = 1; i < numvfs; i++ )); do
 		vf=$(get_vf_ns $((i)))
-		echo "vf=$vf"
+		echo "vf$i=$vf"
 		show_irq_affinity.sh $vf
 	done
 }
