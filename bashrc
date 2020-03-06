@@ -4825,7 +4825,7 @@ function up_all_reps
 	echo "end up_all_reps"
 }
 
-function set_channels_all_reps
+function set_all_rep_channel
 {
 	local l=$link
 	local rep
@@ -4834,14 +4834,14 @@ function set_channels_all_reps
 	[[ $# == 1 ]] && n=$1
 
 	echo
-	echo "start set_channels_all_reps"
+	echo "start set_all_rep_channel"
 	for (( i = 0; i < numvfs; i++)); do
 		rep=${l}_$i
 set -x
 		ethtool -L $rep combined $n
 set +x
 	done
-	echo "end set_channels_all_reps"
+	echo "end set_all_rep_channel"
 }
 
 function hw_tc_all
@@ -10531,6 +10531,14 @@ function isolcpus
         done
 }
 
+function wrk_tune
+{
+	ethtool -L $link combined 12
+# 	set_all_vf_channel_ns 1
+	set_all_vf_affinity 12
+	set_all_rep_channel 12
+}
+
 function wrk_setup
 {
 	off
@@ -10545,10 +10553,7 @@ function wrk_setup
 
 	init_vf_ns
 
-# 	ethtool -L $link combined 12
-# 	set_all_vf_channel_ns 1
-# 	set_all_vf_affinity 12
-# 	set_channels_all_reps 12
+# 	wrk_tune
 }
 
 # best performance, conneciton=60, set all VFs affinity to cpu 0-11
