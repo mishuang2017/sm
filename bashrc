@@ -29,9 +29,9 @@ alias rc='. ~/.bashrc'
 if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
 	numvfs=3
-	numvfs=97
 	numvfs=17
 	numvfs=49
+	numvfs=97
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -702,6 +702,7 @@ alias vi2='vi ~/Documents/mirror.txt'
 alias vib='vi ~/Documents/bug.txt'
 alias vip='vi ~/Documents/private.txt'
 alias viperf='vi ~/Documents/perf.txt'
+alias vime='sudo vim /boot/grub/menu.lst'
 alias vig='sudo vim /boot/grub2/grub.cfg'
 alias vig1='sudo vim /boot/grub/grub.conf'
 alias vig2='sudo vim /etc/default/grub'
@@ -9233,10 +9234,10 @@ function counters_tc_ct
 }
 alias co=counters_tc_ct
 
-function co1
+function co2
 {
 	idle2
-	sleep 1
+	sleep 2
 	idle10
 	co
 }
@@ -10463,10 +10464,10 @@ function wrk_setup
 
 	init_vf_ns
 
-	ethtool -L $link combined 24
+	ethtool -L $link combined 12
 	set_all_vf_channel_ns 1
-	set_all_vf_affinity 24
-	set_channels_all_reps 24
+	set_all_vf_affinity 12
+	set_channels_all_reps 12
 }
 
 # best performance, conneciton=60, set all VFs affinity to cpu 0-11
@@ -10493,6 +10494,11 @@ function wrk_run
 		n=$1
 		start=$2
 		time=$3
+	elif [[ $# == 4 ]]; then
+		n=$1
+		start=$2
+		time=$3
+		connection=$4
 	fi
 	total=0
 
@@ -10583,10 +10589,10 @@ function show_irq_affinity_vf
 function run-wrk1
 {
 set -x
-	cd wrk-nginx-container
+	cd /root/wrk-nginx-container
 	WRK=/images/chrism/wrk/wrk
 # 	$WRK -d 60 -t 1 -c 1  --latency --script=counter.lua http://[8.9.10.11]:80
-	$WRK -d 60 -t 1 -c 1 --latency --script=counter.lua http://[1.1.1.200]:80
+	$WRK -d 30 -t 200 -c 800  --latency --script=counter.lua http://[192.168.1.2]:80
 set +x
 }
 
