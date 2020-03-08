@@ -760,6 +760,8 @@ alias tune1="ethtool -C $link adaptive-rx off rx-usecs 64 rx-frames 128 tx-usecs
 alias tune2="ethtool -C $link adaptive-rx on"
 alias tune3="ethtool -c $link"
 
+alias lsblk_all='lsblk -o name,label,partlabel,mountpoint,size,uuid'
+
 ETHTOOL=/images/chrism/ethtool/ethtool
 function ethtool-rxvlan-off
 {
