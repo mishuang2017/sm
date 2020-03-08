@@ -11597,6 +11597,11 @@ TIME     PID     TID     COMM            FUNC
 
 ===tcp===
 
+struct inet_hashinfo tcp_hashinfo;
+
+tcp_v4_early_demux
+__inet_lookup_established
+
 server:
 inet_csk_accept
 
@@ -11621,6 +11626,18 @@ tcp4_seq_show
         b'__vfs_read+0x36 [kernel]'
         b'vfs_read+0x91 [kernel]'
         b'ksys_read+0x52 [kernel]'
+        b'do_syscall_64+0x5b [kernel]'
+        b'entry_SYSCALL_64_after_hwframe+0x44 [kernel]'
+
+seq_open_net
+
+1.162900 28495   28495   cat             seq_open_net
+        b'seq_open_net+0x1 [kernel]'
+        b'proc_reg_open+0x72 [kernel]'
+        b'do_dentry_open+0x230 [kernel]'
+        b'path_openat+0x745 [kernel]'
+        b'do_filp_open+0x99 [kernel]'
+        b'do_sys_open+0x12e [kernel]'
         b'do_syscall_64+0x5b [kernel]'
         b'entry_SYSCALL_64_after_hwframe+0x44 [kernel]'
 
