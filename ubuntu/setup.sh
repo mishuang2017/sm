@@ -2,6 +2,9 @@ sudo apt-get -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 	git make build-essential flex bison libssl-dev libelf-dev		\
 	ethtool tree bc sysstat
 
+# misc, mkfs.vat, brctl
+sudo apt-get install dosfstools bridge-utils
+
 # For ovs
 sudo apt-get install libcap-ng-dev openvswitch-switch dh-autoreconf
 
