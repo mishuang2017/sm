@@ -1,30 +1,33 @@
-sudo apt-get -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
+sudo apt -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 	git make build-essential flex bison libssl-dev libelf-dev		\
 	ethtool tree bc sysstat
 
 # misc, mkfs.vat, brctl
-sudo apt-get install dosfstools bridge-utils
+sudo apt -y install dosfstools bridge-utils
 
 # For ovs
-sudo apt-get install libcap-ng-dev openvswitch-switch dh-autoreconf
+sudo apt -y install libcap-ng-dev openvswitch-switch dh-autoreconf
+
+# For iproute2
+sudo apt -y install libmnl0 libmnl-dev
 
 # For bionic bcc
-sudo apt-get -y install bpfcc-tools linux-headers-$(uname -r)
-sudo apt-get -y install bison build-essential cmake flex git libedit-dev llvm python zlib1g-dev libelf-dev libclang-dev
+sudo apt -y install bpfcc-tools linux-headers-$(uname -r)
+sudo apt -y install bison build-essential cmake flex git libedit-dev llvm python zlib1g-dev libelf-dev libclang-dev
 
 # For Lua support
-sudo apt-get -y install luajit luajit-5.1-dev 
+sudo apt -y install luajit luajit-5.1-dev 
 
-sudo apt-get -y install netperf iperf iperf3
+sudo apt -y install netperf iperf iperf3
 
 # For systemtap
-sudo apt-get -y install libdw-dev
+sudo apt -y install libdw-dev
 
 # For binutils-gdb
-sudo apt-get -y install texinfo
+sudo apt -y install texinfo
 
 # For perf
-sudo apt-get -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev libbabeltrace-ctf-dev libiberty-dev libperl-dev libreadline-dev 
+sudo apt -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev libbabeltrace-ctf-dev libiberty-dev libperl-dev libreadline-dev 
 # sudo apt install openjdk-8-jdk
 
 # apt install linux-crashdump
@@ -64,7 +67,7 @@ sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils 
 # apt install -y *pinyin*
 
 # No LSB modules are available.
-sudo apt-get install -y lsb-core
+sudo apt install -y lsb-core
 
 sudo apt install -y python3-venv
 
