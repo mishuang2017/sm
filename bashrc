@@ -60,9 +60,13 @@ elif (( host_num == 13 )); then
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
 	link_remote_ipv6=1::$rhost_num
-	link_mac=24:8a:07:88:27:9a
-	link_mac2=24:8a:07:88:27:9b
-	remote_mac=24:8a:07:88:27:ca
+
+	link_mac=b8:59:9f:bb:31:66
+	remote_mac=b8:59:9f:bb:31:82
+
+# 	link_mac=24:8a:07:88:27:9a
+# 	link_mac2=24:8a:07:88:27:9b
+# 	remote_mac=24:8a:07:88:27:ca
 
 	vf1=enp4s0f2
 	vf2=enp4s0f3
@@ -85,9 +89,13 @@ elif (( host_num == 14 )); then
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
 	link_remote_ipv6=1::$rhost_num
-	link_mac=24:8a:07:88:27:ca
-	link_mac2=24:8a:07:88:27:cb
-	remote_mac=24:8a:07:88:27:9a
+
+# 	link_mac=24:8a:07:88:27:ca
+# 	link_mac2=24:8a:07:88:27:cb
+# 	remote_mac=24:8a:07:88:27:9a
+
+	link_mac=b8:59:9f:bb:31:82
+	remote_mac=b8:59:9f:bb:31:66
 
 	vf1=enp4s0f2
 	vf2=enp4s0f3
@@ -265,6 +273,7 @@ function get_pci
 		pci=$(basename $(readlink /sys/class/net/$link/device))
 		pci_id=$(echo $pci | cut -b 6-)
 		lspci -d 15b3: -nn | grep $pci_id | grep 1019 > /dev/null && cx5=1
+		lspci -d 15b3: -nn | grep $pci_id | grep 1017 > /dev/null && cx5=1
 		pci2=$(basename $(readlink /sys/class/net/$link2/device) 2> /dev/null)
 	fi
 }
