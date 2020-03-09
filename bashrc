@@ -2050,8 +2050,8 @@ function make-all
 	make olddefconfig
 	make -j $cpu_num2
 	sudo time make modules_install -j $cpu_num2
-# 	sudo make install
-# 	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
+	sudo make install
+	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
 
 	/bin/rm -rf ~/.ccache
 }
