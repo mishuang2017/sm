@@ -6,8 +6,8 @@ fi
 debian=0
 [[ -f /usr/bin/lsb_release ]] && debian=1
 
-numvfs=12
 numvfs=3
+numvfs=17
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -434,6 +434,7 @@ alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
 alias clone-crash-upstream='git clone git@github.com:crash-utility/crash.git'
 alias clone-crash='git clone https://github.com/mishuang2017/crash.git'
 alias clone-sm='git clone https://github.com/mishuang2017/sm'
+alias clone-bin='git clone https://github.com/mishuang2017/bin.git'
 alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
@@ -766,7 +767,7 @@ alias simx='/opt/simx/bin/manage_vm_simx_support.py -n vm2'
 alias vfs99="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=99"
 alias vfs127="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=127"
 alias vfs63="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=63"
-alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=16"
+alias vfs="mlxconfig -d $pci set SRIOV_EN=1 NUM_OF_VFS=32"
 alias vfs2="mlxconfig -d $pci2 set SRIOV_EN=1 NUM_OF_VFS=4"
 alias vfq="mlxconfig -d $pci q"
 alias vfq2="mlxconfig -d $pci2 q"
