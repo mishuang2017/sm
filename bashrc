@@ -72,6 +72,13 @@ elif (( host_num == 13 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
+	if (( host_num == 1 )); then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link}_$i
+		done
+	fi
+
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
@@ -415,6 +422,7 @@ alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
 alias clone-ofed5='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0'
+alias clone-ofed5_0_2='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0_2'
 alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
 alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_7_3'
 alias clone-ofed-4.6='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3'
@@ -4275,6 +4283,7 @@ function bru0
 {
 set -x
 	del-br
+	idle10
 	vs add-br $br
 	vs add-port $br $link -- set Interface $link ofport_request=5
 	#for (( i = 1; i < 2; i++)); do
@@ -5150,9 +5159,11 @@ function start-switchdev
 	time up_all_reps $port
 	hw_tc_all $port
 
-# 	ip link set dev $vf1 address 02:25:d0:$host_num:01:01
-# 	ip link set dev $vf2 address 02:25:d0:$host_num:01:02
-# 	ip link set dev $vf3 address 02:25:d0:$host_num:01:03
+# 	if (( host_num == 13 )); then
+# 		ip link set dev $vf1 address 02:25:d0:$host_num:01:01
+# 		ip link set dev $vf2 address 02:25:d0:$host_num:01:02
+# 		ip link set dev $vf3 address 02:25:d0:$host_num:01:03
+# 	fi
 
 	time set_netns_all $port
 
@@ -6140,7 +6151,7 @@ function git-ofed-reset
 	git show --stat
 }
 
-function git-ofed-reset2
+function git_ofed_reset
 {
 	[[ $# != 1 ]] && return
 	local file=$1
@@ -6148,6 +6159,17 @@ function git-ofed-reset2
 	git reset HEAD~ $file
 	git commit --amend
 	git show --stat
+}
+
+function git_ofed_reset_all
+{
+	for i in backports/*; do
+		if echo $i | egrep "0174-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch|0192-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
+			echo $i
+			continue
+		fi
+		git reset HEAD~ $i
+	done
 }
 
 function git-am
@@ -8100,6 +8122,7 @@ function addflow-port
 	local file=/tmp/of.txt
 	rm -f $file
 
+	bru0
 	restart-ovs
 	for(( ip = 2; ip < 3; ip++)); do
 		for(( src = 1; src < 65535; src++)); do
