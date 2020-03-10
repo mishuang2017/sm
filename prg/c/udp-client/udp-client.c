@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	servaddr.sin_addr.s_addr = inet_addr(server_name);
 
 	int n, len; 
-	
+
 	for (i = 0; i < t; i++) {
 		char str[100];
 		snprintf(str, 100, "%s %d\0", hello, i);
@@ -66,12 +66,14 @@ int main(int argc, char *argv[])
 		if (verbose)
 			printf("Hello message sent %d.\n", i + 1); 
 			
+#if 0
 		n = recvfrom(sockfd, (char *)buffer, MAXLINE, 
 					MSG_WAITALL, (struct sockaddr *) &servaddr, 
 					&len); 
 		buffer[n] = '\0'; 
 		if (verbose)
 			printf("Server : %s\n", buffer); 
+#endif
 		sleep(interval);
 	}
 
