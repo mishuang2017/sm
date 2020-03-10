@@ -1655,6 +1655,8 @@ git push origin HEAD:refs/for/mlnx_ofed_5_0_2/kernel-5.4-perf-issue_5_0_2
 
 ===git===
 
+git ls-remote --tags origin
+
 git remote update # update all branches
 
 git checkout -b branch_name remote_name/branch_name

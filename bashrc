@@ -10565,6 +10565,9 @@ function isolcpus
         done
 }
 
+alias vi_nginx='vi /usr/local/nginx/conf/nginx.conf'
+alias nginx_reload='/usr/local/nginx/sbin/nginx -s reload'
+
 function wrk_tune
 {
 	ethtool -L $link combined 12
