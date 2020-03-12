@@ -127,3 +127,10 @@ Add locale:
 2. locale-gen
 3. reboot
 
+
+iptables v1.8.2 (nf_tables):  CHAIN_ADD failed (No such file or directory): chain PREROUTING
+
+The docker installer uses iptables for nat. Unfortunately Debian uses nftables. You can convert the entries over to nftables or just setup Debian to use the legacy iptables.
+
+sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy

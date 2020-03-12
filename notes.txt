@@ -11601,6 +11601,85 @@ TIME     PID     TID     COMM            FUNC
 
 ===tcp===
 
+%s/\(b'\)\(.*\)\(+0x.*\)/\2/
+
+3.464398 921     15588   handler146      nf_nat_used_tuple
+        nf_nat_used_tuple
+        nf_nat_l4proto_unique_tuple
+        get_unique_tuple
+        nf_nat_setup_info  
+        __ovs_ct_lookup  
+        ovs_ct_execute  
+        do_execute_actions  
+        ovs_execute_actions  
+        ovs_packet_cmd_execute  
+        genl_family_rcv_msg  
+        genl_rcv_msg  
+        netlink_rcv_skb  
+        genl_rcv  
+        netlink_unicast  
+        netlink_sendmsg  
+        sock_sendmsg  
+        ___sys_sendmsg  
+        __sys_sendmsg  
+        do_syscall_64  
+        entry_SYSCALL_64_after_hwframe  
+
+tcp_unique_tuple		<====
+
+TIME     PID     TID     COMM            FUNC
+27.22530 921     15585   handler147      tcp_unique_tuple
+        tcp_unique_tuple  
+        get_unique_tuple  
+        nf_nat_setup_info  
+        __ovs_ct_lookup  
+        ovs_ct_execute  
+        do_execute_actions  
+        ovs_execute_actions  
+        ovs_packet_cmd_execute  
+        genl_family_rcv_msg  
+        genl_rcv_msg  
+        netlink_rcv_skb  
+        genl_rcv  
+        netlink_unicast  
+        netlink_sendmsg  
+        sock_sendmsg  
+        ___sys_sendmsg  
+        __sys_sendmsg  
+        do_syscall_64  
+        entry_SYSCALL_64_after_hwframe  
+
+net/netfilter/nf_nat_core.c
+
+3.885407 10      10      ksoftirqd/0     tcp_manip_pkt
+        tcp_manip_pkt  
+        nf_nat_ipv4_manip_pkt  
+        nf_nat_manip_pkt  
+        tcf_conntrack  
+        tcf_action_exec  
+        fl_classify  
+        tcf_classify  
+        __netif_receive_skb_core  
+        __netif_receive_skb_one_core  
+        netif_receive_skb_internal  
+        napi_gro_flush  
+        napi_complete_done  
+        mlx5e_napi_poll  
+        net_rx_action  
+        __do_softirq  
+        run_ksoftirqd  
+        smpboot_thread_fn  
+        kthread  
+        ret_from_fork  
+
+nf_nat_ipv4_manip_pkt
+	tcp_manip_pkt
+
+handle_response
+
+tcp_snat_handler is not called
+	tcph->source = cp->vport;
+
 struct inet_hashinfo tcp_hashinfo;
 
 tcp_v4_early_demux
@@ -11611,6 +11690,10 @@ inet_csk_accept
 
 client:
 tcp_v4_connect
+
+inet_sport
+
+             .get_port = inet_csk_get_port, is not called
 
 16.14315 1138    1140    wrk             tcp_v4_connect
         tcp_v4_connect +0x1 [kernel]
@@ -11624,25 +11707,30 @@ tcp_v4_connect
 tcp4_seq_show
 
 9.553720 15490   15490   cat             tcp4_seq_show
-        b'tcp4_seq_show+0x1 [kernel]'
-        b'seq_read+0x2cb [kernel]'
-        b'proc_reg_read+0x39 [kernel]'
-        b'__vfs_read+0x36 [kernel]'
-        b'vfs_read+0x91 [kernel]'
-        b'ksys_read+0x52 [kernel]'
-        b'do_syscall_64+0x5b [kernel]'
-        b'entry_SYSCALL_64_after_hwframe+0x44 [kernel]'
+        tcp4_seq_show  
+        seq_read  
+        proc_reg_read  
+        __vfs_read  
+        vfs_read  
+        ksys_read  
+        do_syscall_64  
+        entry_SYSCALL_64_after_hwframe  
 
 seq_open_net
 
 1.162900 28495   28495   cat             seq_open_net
-        b'seq_open_net+0x1 [kernel]'
-        b'proc_reg_open+0x72 [kernel]'
-        b'do_dentry_open+0x230 [kernel]'
-        b'path_openat+0x745 [kernel]'
-        b'do_filp_open+0x99 [kernel]'
-        b'do_sys_open+0x12e [kernel]'
-        b'do_syscall_64+0x5b [kernel]'
-        b'entry_SYSCALL_64_after_hwframe+0x44 [kernel]'
+        seq_open_net  
+        proc_reg_open  
+        do_dentry_open  
+        path_openat  
+        do_filp_open  
+        do_sys_open  
+        do_syscall_64  
+        entry_SYSCALL_64_after_hwframe  
+
+[root@dev-r630-03 kernel]# cat /proc/sys/net/ipv4/ip_local_port_range
+32768   60999
+
+ change tcp_fin_timeout or tcp_keepalive values. 
 
 ===end===

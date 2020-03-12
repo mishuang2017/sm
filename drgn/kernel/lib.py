@@ -102,18 +102,19 @@ def print_action_stats(a):
 
     bytes = 0
     packets = 0
-    if a.cpu_bstats_hw.value_():
-        for cpu in for_each_online_cpu(prog):
-            bstats = per_cpu_ptr(a.cpu_bstats_hw, cpu).bstats
-            bytes += bstats.bytes
-            packets += bstats.packets
-        print("hw percpu bytes: %d, packets: %d" % (bytes, packets))
-    else:
-        bstats = a.tcfa_bstats_hw
-        bytes += bstats.bytes
-        packets += bstats.packets
-        print("hw bytes: %d, packets: %d" % (bytes, packets))
 
+#     if a.cpu_bstats_hw.value_():
+#         for cpu in for_each_online_cpu(prog):
+#             bstats = per_cpu_ptr(a.cpu_bstats_hw, cpu).bstats
+#             bytes += bstats.bytes
+#             packets += bstats.packets
+#         print("hw percpu bytes: %d, packets: %d" % (bytes, packets))
+#     else:
+#         bstats = a.tcfa_bstats_hw
+#         bytes += bstats.bytes
+#         packets += bstats.packets
+#         print("hw bytes: %d, packets: %d" % (bytes, packets))
+ 
 def print_exts(e):
     print("\nnr_actions: %d" % e.nr_actions)
     for i in range(e.nr_actions):
