@@ -156,6 +156,18 @@ set term=screen
 
 " set csprg=/usr/bin/cscope
 
-if exists("cscope.out")
-	cs add cscope.out
-endif
+" cs add cscope.out
+
+" For debian, add the following lines in /etc/vim/vimrc
+" if has("cscope") && filereadable("/usr/bin/cscope")
+"    set csprg=/usr/bin/cscope
+"    set csto=0
+"    set cst
+"    set nocsverb
+"    if filereadable("cscope.out")
+"       cs add $PWD/cscope.out
+"    elseif $CSCOPE_DB != ""
+"       cs add $CSCOPE_DB
+"    endif
+"    set csverb
+" endif
