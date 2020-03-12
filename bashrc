@@ -6,8 +6,8 @@ fi
 debian=0
 [[ -f /usr/bin/lsb_release ]] && debian=1
 
-numvfs=17
 numvfs=3
+numvfs=17
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
