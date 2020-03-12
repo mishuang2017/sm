@@ -10676,8 +10676,9 @@ set -x
 set +x
 }
 
-alias est='conntrack -L | grep EST | wc'
-alias ct1='conntrack -L | wc'
+alias est='conntrack -L | grep EST'
+alias ct1='conntrack -L'
+alias ct8='conntrack -L | grep 8.9.10'
 alias tcp_timeout="sysctl -a | grep conntrack | grep tcp_timeout"
 
 function wrk_tune
@@ -10759,7 +10760,14 @@ set +x
 		total=$((total+1))
 		(( total == n )) && break
 	done
-	sleep $((time+3))
+	i=1
+	while :; do
+		echo $i
+		i=$((i+1))
+		sleep 1
+		(( i == time )) && break
+	done
+	sleep 3
 	cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 }
 
