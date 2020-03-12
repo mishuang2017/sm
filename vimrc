@@ -156,4 +156,6 @@ set term=screen
 
 " set csprg=/usr/bin/cscope
 
-cs add cscope.out
+if exists("cscope.out")
+	cs add cscope.out
+endif
