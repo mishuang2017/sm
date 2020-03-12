@@ -10569,6 +10569,87 @@ function isolcpus
 alias vi_nginx='vi /usr/local/nginx/conf/nginx.conf'
 alias nginx_reload='/usr/local/nginx/sbin/nginx -s reload'
 
+# net.netfilter.nf_conntrack_generic_timeout = 600
+# net.netfilter.nf_conntrack_icmp_timeout = 30
+# net.netfilter.nf_conntrack_tcp_timeout_close = 10
+# net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60
+# net.netfilter.nf_conntrack_tcp_timeout_established = 432000
+# net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120
+# net.netfilter.nf_conntrack_tcp_timeout_last_ack = 30
+# net.netfilter.nf_conntrack_tcp_timeout_max_retrans = 300
+# net.netfilter.nf_conntrack_tcp_timeout_syn_recv = 60
+# net.netfilter.nf_conntrack_tcp_timeout_syn_sent = 120
+# net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120
+# net.netfilter.nf_conntrack_tcp_timeout_unacknowledged = 300
+# net.netfilter.nf_conntrack_udp_timeout = 30
+# net.netfilter.nf_conntrack_udp_timeout_stream = 180
+
+# net.netfilter.nf_conntrack_generic_timeout=60
+# net.netfilter.nf_conntrack_icmp_timeout=10
+#net.netfilter.nf_conntrack_tcp_timeout_close=10
+# net.netfilter.nf_conntrack_tcp_timeout_close_wait=20
+# net.netfilter.nf_conntrack_tcp_timeout_established=1800
+# net.netfilter.nf_conntrack_tcp_timeout_fin_wait=30
+#net.netfilter.nf_conntrack_tcp_timeout_last_ack=30
+#net.netfilter.nf_conntrack_tcp_timeout_max_retrans=300
+# net.netfilter.nf_conntrack_tcp_timeout_syn_recv=30
+# net.netfilter.nf_conntrack_tcp_timeout_syn_sent=60
+# net.netfilter.nf_conntrack_tcp_timeout_time_wait=60
+#net.netfilter.nf_conntrack_tcp_timeout_unacknowledged=300
+#net.netfilter.nf_conntrack_udp_timeout=30
+# net.netfilter.nf_conntrack_udp_timeout_stream=60
+
+function sysctl_get_nf
+{
+# 	for i in	\
+# 			net.netfilter.nf_conntrack_generic_timeout	\
+# 			net.netfilter.nf_conntrack_icmp_timeout	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_close	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_close_wait	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_established	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_fin_wait	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_last_ack	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_max_retrans	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_syn_recv	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_syn_sent	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_time_wait	\
+# 			net.netfilter.nf_conntrack_tcp_timeout_unacknowledged	\
+# 			net.netfilter.nf_conntrack_udp_timeout	\
+# 			net.netfilter.nf_conntrack_udp_timeout_stream; do
+# 		sysctl $i
+# 	done
+
+	sysctl -a | grep conntrack | grep timeout
+}
+
+function sysctl_set_nf
+{
+set -x
+	sysctl -w net.netfilter.nf_conntrack_generic_timeout=60
+	sysctl -w net.netfilter.nf_conntrack_icmp_timeout=10
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_close_wait=20
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=1800
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_fin_wait=30
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_syn_recv=30
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_syn_sent=60
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=60
+	sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=60
+
+	[[ $# == 0 ]] && return
+
+	sysctl -w net.netfilter.nf_conntrack_generic_timeout=600
+	sysctl -w net.netfilter.nf_conntrack_icmp_timeout=30
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_close_wait=60
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=432000
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_fin_wait=120
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_syn_recv=60
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_syn_sent=120
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=120
+	sysctl -w net.netfilter.nf_conntrack_udp_timeout_stream=180
+
+set +x
+}
+
 function wrk_tune
 {
 	ethtool -L $link combined 12
