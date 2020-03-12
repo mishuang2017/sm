@@ -5078,6 +5078,20 @@ set +x
 	done
 }
 
+function set_ns_nf
+{
+	local file=/tmp/nf.sh
+	cat << EOF > $file
+echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
+echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+EOF
+	for (( i = 1; i < numvfs; i++)); do
+set -x
+		ip netns exec n1$i bash $file
+set +x
+	done
+}
+
 function set_all_vf_channel
 {
 	p=1
@@ -10656,6 +10670,7 @@ function wrk_tune
 # 	set_all_vf_channel_ns 1
 	set_all_vf_affinity 12
 	set_all_rep_channel 12
+	set_ns_nf
 }
 
 function wrk_setup
