@@ -5078,6 +5078,18 @@ set +x
 	done
 }
 
+function sysctl_time_wait
+{
+	local t=10
+	[[ $# == 1 ]] && t=$1
+	for (( i = 1; i < numvfs; i++)); do
+set -x
+		ip netns exec n1$i sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=$t
+set +x
+	done
+	sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=$t
+}
+
 function set_ns_nf
 {
 	local file=/tmp/nf.sh
@@ -10663,6 +10675,10 @@ set -x
 
 set +x
 }
+
+alias est='conntrack -L | grep EST | wc'
+alias ct1='conntrack -L | wc'
+alias tcp_timeout="sysctl -a | grep conntrack | grep tcp_timeout"
 
 function wrk_tune
 {
