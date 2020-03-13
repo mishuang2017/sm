@@ -6,8 +6,8 @@ fi
 debian=0
 [[ -f /usr/bin/lsb_release ]] && debian=1
 
-numvfs=3
 numvfs=17
+numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -572,6 +572,7 @@ fi
 
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
+alias sm5="cd /$images/chrism/5.4"
 alias sm-build="cdr; cd build"
 alias smu="cd /$images/chrism/upstream"
 alias smm="cd /$images/chrism/mlnx-ofa_kernel-4.0"
@@ -4280,7 +4281,11 @@ set -x
 set +x
 }
 
-function bru0
+alias idle2='ovs-vsctl set Open_vSwitch . other_config:max-idle=2'
+alias idle10='ovs-vsctl set Open_vSwitch . other_config:max-idle=10000'
+alias idle600='ovs-vsctl set Open_vSwitch . other_config:max-idle=600000'
+
+function bru
 {
 set -x
 	del-br
@@ -4323,7 +4328,7 @@ set -x
 set +x
 }
 
-function bru
+function bru_bd
 {
 set -x
 	del-br
@@ -5962,10 +5967,6 @@ function skip_sw
 	restart-ovs
 	vsconfig
 }
-
-alias idle2='ovs-vsctl set Open_vSwitch . other_config:max-idle=2'
-alias idle10='ovs-vsctl set Open_vSwitch . other_config:max-idle=10000'
-alias idle600='ovs-vsctl set Open_vSwitch . other_config:max-idle=600000'
 
 function none1
 {
