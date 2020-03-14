@@ -8,6 +8,8 @@ import os
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 
+from lib import *
+
 size = prog['nf_conntrack_htable_size']
 hash = prog['nf_conntrack_hash']
 print("nf_conntrack_htable_size: %d" % size)
@@ -16,5 +18,8 @@ for i in range(size):
     head = hash[i]
     if head.first.value_() & 0x1:
         continue;
-    for ct in hlist_nulls_for_each_entry("struct nf_conn", head.address_of_(), "tuplehash[0].hnnode"):
-        print("%x" % ct.value_())
+    for tuple in hlist_nulls_for_each_entry("struct nf_conntrack_tuple_hash", head.address_of_(), "hnnode"):
+        print("src ip: %20s" % ipv4(socket.ntohl(tuple.tuple.src.u3.ip.value_())), end=' ')
+        print("dst ip: %20s" % ipv4(socket.ntohl(tuple.tuple.dst.u3.ip.value_())), end=' ')
+        print("proto: %3d" % tuple.tuple.dst.protonum.value_(), end=' ')
+        print("dir: %3d" % tuple.tuple.dst.dir.value_())
