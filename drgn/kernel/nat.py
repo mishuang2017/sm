@@ -14,6 +14,8 @@ size = prog['nf_nat_htable_size']
 hash = prog['nf_nat_bysource']
 print("nf_nat_htable_size: %d" % size)
 
+IP_CT_DIR_ORIGINAL = prog['IP_CT_DIR_ORIGINAL'].value_()
+
 for i in range(size):
     head = hash[i]
     for ct in hlist_for_each_entry("struct nf_conn", head.address_of_(), "nat_bysource"):
