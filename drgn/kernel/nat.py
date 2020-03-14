@@ -20,4 +20,5 @@ for i in range(size):
     head = hash[i]
     for ct in hlist_for_each_entry("struct nf_conn", head.address_of_(), "nat_bysource"):
         tuple = ct.tuplehash[IP_CT_DIR_ORIGINAL]
-        print_tuple(tuple)
+#         parse_ct_status(ct.status)
+        print_tuple(tuple, ct)

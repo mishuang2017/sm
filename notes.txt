@@ -11605,11 +11605,38 @@ TIME     PID     TID     COMM            FUNC
 
 nf_nat_bysource
 
+tcp_timeouts
+
+nf_conntrack_in
+	tcp_packet
+		case TCP_CONNTRACK_SYN_RECV:
+			new_state = TCP_CONNTRACK_ESTABLISHED;
+
+3.013720 6669    6669    sshd            tcp_packet
+        tcp_packet+0x1 [nf_conntrack]
+        nf_conntrack_in+0x139 [nf_conntrack]
+        nf_hook_slow+0x43 [kernel]
+        __ip_local_out+0xd6 [kernel]
+        ip_local_out+0x17 [kernel]
+        __tcp_transmit_skb+0x58b [kernel]
+        tcp_write_xmit+0x2a2 [kernel]
+        __tcp_push_pending_frames+0x2d [kernel]
+        tcp_sendmsg_locked+0x33d [kernel]
+        tcp_sendmsg+0x27 [kernel]
+        sock_sendmsg+0x36 [kernel]
+        sock_write_iter+0x87 [kernel]
+        __vfs_write+0x114 [kernel]
+        vfs_write+0xb0 [kernel]
+        ksys_write+0x52 [kernel]
+        do_syscall_64+0x55 [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
+
 3.464398 921     15588   handler146      nf_nat_used_tuple
         nf_nat_used_tuple
         nf_nat_l4proto_unique_tuple
         get_unique_tuple
-        nf_nat_setup_info  
+		nf_nat_setup_info  
         __ovs_ct_lookup  
         ovs_ct_execute  
         do_execute_actions  

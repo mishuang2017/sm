@@ -431,7 +431,58 @@ def get_mlx5_core_dev(index):
     devs = get_mlx5_core_devs()
     return devs[index]
 
-def print_tuple(tuple):
+def parse_ct_status(status):
+    IPS_EXPECTED = prog['IPS_EXPECTED'].value_()
+    IPS_SEEN_REPLY = prog['IPS_SEEN_REPLY'].value_()
+    IPS_ASSURED = prog['IPS_ASSURED'].value_()
+    IPS_CONFIRMED = prog['IPS_CONFIRMED'].value_()
+    IPS_SRC_NAT = prog['IPS_SRC_NAT'].value_()
+    IPS_DST_NAT = prog['IPS_DST_NAT'].value_()
+    IPS_SEQ_ADJUST = prog['IPS_SEQ_ADJUST'].value_()
+    IPS_SRC_NAT_DONE = prog['IPS_SRC_NAT_DONE'].value_()
+    IPS_DST_NAT_DONE = prog['IPS_DST_NAT_DONE'].value_()
+    IPS_DYING = prog['IPS_DYING'].value_()
+    IPS_FIXED_TIMEOUT = prog['IPS_FIXED_TIMEOUT'].value_()
+    IPS_TEMPLATE = prog['IPS_TEMPLATE'].value_()
+    IPS_UNTRACKED = prog['IPS_UNTRACKED'].value_()
+    IPS_HELPER = prog['IPS_HELPER'].value_()
+    IPS_OFFLOAD = prog['IPS_OFFLOAD'].value_()
+
+    print("status: %x" % status, end=' ')
+    if status & IPS_EXPECTED:
+        print("IPS_EXPECTED", end=" | ")
+    if status & IPS_SEEN_REPLY:
+        print("IPS_SEEN_REPLY", end=" | ")
+    if status & IPS_ASSURED:
+        print("IPS_ASSURED", end=" | ")
+    if status & IPS_CONFIRMED:
+        print("IPS_CONFIRMED", end=" | ")
+    if status & IPS_SRC_NAT:
+        print("IPS_SRC_NAT", end=" | ")
+    if status & IPS_DST_NAT:
+        print("IPS_DST_NAT", end=" | ")
+    if status & IPS_SEQ_ADJUST:
+        print("IPS_SEQ_ADJUST", end=" | ")
+    if status & IPS_SRC_NAT_DONE:
+        print("IPS_SRC_NAT_DONE", end=" | ")
+    if status & IPS_DST_NAT_DONE:
+        print("IPS_DST_NAT_DONE", end=" | ")
+    if status & IPS_DYING:
+        print("IPS_DYING", end=" | ")
+    if status & IPS_FIXED_TIMEOUT:
+        print("IPS_FIXED_TIMEOUT", end=" | ")
+    if status & IPS_TEMPLATE:
+        print("IPS_TEMPLATE", end=" | ")
+    if status & IPS_UNTRACKED:
+        print("IPS_UNTRACKED", end=" | ")
+    if status & IPS_HELPER:
+        print("IPS_HELPER", end=" | ")
+    if status & IPS_OFFLOAD:
+        print("IPS_OFFLOAD", end=" | ")
+
+    print("")
+
+def print_tuple(tuple, ct):
     IP_CT_DIR_ORIGINAL = prog['IP_CT_DIR_ORIGINAL'].value_()
     IPPROTO_UDP = prog['IPPROTO_UDP'].value_()
     IPPROTO_TCP = prog['IPPROTO_TCP'].value_()
@@ -450,4 +501,8 @@ def print_tuple(tuple):
         print("src ip: %20s:%6d" % (ipv4(socket.ntohl(tuple.tuple.src.u3.ip.value_())), sport), end=' ')
         print("dst ip: %20s:%6d" % (ipv4(socket.ntohl(tuple.tuple.dst.u3.ip.value_())), dport), end=' ')
         print("protonum: %3d" % protonum, end=' ')
-        print("dir: %3d" % dir)
+        print("dir: %3d" % dir, end=' ')
+        TCP_CONNTRACK_ESTABLISHED = prog['TCP_CONNTRACK_ESTABLISHED']
+        TCP_CONNTRACK_TIME_WAIT = prog['TCP_CONNTRACK_TIME_WAIT']
+        state = ct.proto.tcp.state
+        print("state: %x, est: %x, timed_wait" % (state, TCP_CONNTRACK_ESTABLISHED, TCP_CONNTRACK_TIME_WAIT))
