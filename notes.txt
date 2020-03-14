@@ -11603,6 +11603,8 @@ TIME     PID     TID     COMM            FUNC
 
 %s/\(b'\)\(.*\)\(+0x.*\)/\2/
 
+nf_nat_bysource
+
 3.464398 921     15588   handler146      nf_nat_used_tuple
         nf_nat_used_tuple
         nf_nat_l4proto_unique_tuple

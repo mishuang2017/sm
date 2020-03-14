@@ -4469,9 +4469,9 @@ set -x
 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
 
-# 	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
-# 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
-# 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
 
 # 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
 
