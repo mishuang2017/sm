@@ -31,9 +31,9 @@ for i in range(size):
         if protonum == IPPROTO_UDP:
             dport = socket.ntohs(tuple.tuple.dst.u.udp.port.value_())
             sport = socket.ntohs(tuple.tuple.src.u.udp.port.value_())
-#         if protonum == IPPROTO_TCP and dir == IP_CT_DIR_ORIGINAL:
-        if dir == IP_CT_DIR_ORIGINAL:
-            print("src ip: %20s:%6d" % (ipv4(socket.ntohl(tuple.tuple.src.u3.ip.value_())), sport), end=' ')
-            print("dst ip: %20s:%6d" % (ipv4(socket.ntohl(tuple.tuple.dst.u3.ip.value_())), dport), end=' ')
+        if protonum == IPPROTO_TCP and dir == IP_CT_DIR_ORIGINAL:
+#         if dir == IP_CT_DIR_ORIGINAL:
+            print("src ip: %20s:%-6d" % (ipv4(socket.ntohl(tuple.tuple.src.u3.ip.value_())), sport), end=' ')
+            print("dst ip: %20s:%-6d" % (ipv4(socket.ntohl(tuple.tuple.dst.u3.ip.value_())), dport), end=' ')
             print("protonum: %3d" % protonum, end=' ')
             print("dir: %3d" % dir)
