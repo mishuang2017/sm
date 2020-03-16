@@ -4447,21 +4447,21 @@ prev = 0xffffffffa0a6b218 <ovs_internal_vport_ops+56>
 [root@dev-r630-03 ~]# trace netdev_create -K
 TIME     PID     TID     COMM            FUNC
 7.842253 16771   16771   ovs-vswitchd    netdev_create
-        netdev_create +0x1 [kernel]
-        new_vport +0x12 [kernel]
-        ovs_vport_cmd_new +0x1c0 [kernel]
-        genl_family_rcv_msg +0x1fe [kernel]
-        genl_rcv_msg +0x4c [kernel]
-        netlink_rcv_skb +0x54 [kernel]
-        genl_rcv +0x28 [kernel]
-        netlink_unicast +0x19c [kernel]
-        netlink_sendmsg +0x2d1 [kernel]
-        sock_sendmsg +0x3e [kernel]
-        ___sys_sendmsg +0x283 [kernel]
-        __sys_sendmsg +0x63 [kernel]
-        __x64_sys_sendmsg +0x1f [kernel]
-        do_syscall_64 +0x60 [kernel]
-        entry_SYSCALL_64_after_hwframe +0x44 [kernel]
+        netdev_create  +0x1 [kernel]
+        new_vport  +0x12 [kernel]
+        ovs_vport_cmd_new  +0x1c0 [kernel]
+        genl_family_rcv_msg  +0x1fe [kernel]
+        genl_rcv_msg  +0x4c [kernel]
+        netlink_rcv_skb  +0x54 [kernel]
+        genl_rcv  +0x28 [kernel]
+        netlink_unicast  +0x19c [kernel]
+        netlink_sendmsg  +0x2d1 [kernel]
+        sock_sendmsg  +0x3e [kernel]
+        ___sys_sendmsg  +0x283 [kernel]
+        __sys_sendmsg  +0x63 [kernel]
+        __x64_sys_sendmsg  +0x1f [kernel]
+        do_syscall_64  +0x60 [kernel]
+        entry_SYSCALL_64_after_hwframe  +0x44 [kernel]
 
 
 }
@@ -5191,31 +5191,31 @@ mlx5e_rep_update_flows
 neigh_timer_handler
 
 9.866882 0       0       swapper/15      mlx5e_rep_netevent_event
-        mlx5e_rep_netevent_event +0x1 [kernel]
-        atomic_notifier_call_chain +0x1a [kernel]
-        call_netevent_notifiers +0x1b [kernel]
-        neigh_update +0x476 [kernel]
-        arp_process +0x38b [kernel]
-        arp_rcv +0x12b [kernel]
-        __netif_receive_skb_one_core +0x57 [kernel]
-        __netif_receive_skb +0x18 [kernel]
-        netif_receive_skb_internal +0x45 [kernel]
-        napi_gro_receive +0xc5 [kernel]
-        mlx5e_handle_rx_cqe_mpwrq +0xd3 [kernel]
-        mlx5e_poll_rx_cq +0xe2 [kernel]
-        mlx5e_napi_poll +0xfc [kernel]
-        net_rx_action +0x159 [kernel]
-        __do_softirq +0xe4 [kernel]
-        irq_exit +0xf8 [kernel]
-        do_IRQ +0x8a [kernel]
-        ret_from_intr +0x0 [kernel]
-        cpuidle_enter_state +0xa8 [kernel]
-        cpuidle_enter +0x17 [kernel]
-        call_cpuidle +0x23 [kernel]
-        do_idle +0x1f8 [kernel]
-        cpu_startup_entry +0x73 [kernel]
-        start_secondary +0x1ab [kernel]
-        secondary_startup_64 +0xa4 [kernel]
+        mlx5e_rep_netevent_event  +0x1 [kernel]
+        atomic_notifier_call_chain  +0x1a [kernel]
+        call_netevent_notifiers  +0x1b [kernel]
+        neigh_update  +0x476 [kernel]
+        arp_process  +0x38b [kernel]
+        arp_rcv  +0x12b [kernel]
+        __netif_receive_skb_one_core  +0x57 [kernel]
+        __netif_receive_skb  +0x18 [kernel]
+        netif_receive_skb_internal  +0x45 [kernel]
+        napi_gro_receive  +0xc5 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq  +0xd3 [kernel]
+        mlx5e_poll_rx_cq  +0xe2 [kernel]
+        mlx5e_napi_poll  +0xfc [kernel]
+        net_rx_action  +0x159 [kernel]
+        __do_softirq  +0xe4 [kernel]
+        irq_exit  +0xf8 [kernel]
+        do_IRQ  +0x8a [kernel]
+        ret_from_intr  +0x0 [kernel]
+        cpuidle_enter_state  +0xa8 [kernel]
+        cpuidle_enter  +0x17 [kernel]
+        call_cpuidle  +0x23 [kernel]
+        do_idle  +0x1f8 [kernel]
+        cpu_startup_entry  +0x73 [kernel]
+        start_secondary  +0x1ab [kernel]
+        secondary_startup_64  +0xa4 [kernel]
 
 mlx5e_route_lookup_ipv4
 
@@ -6740,25 +6740,25 @@ mlx5e_enable_cq
 ===gro===
 
 6.784563 0       0       swapper/7       tcp4_gro_complete
-        tcp4_gro_complete +0x1 [kernel]
-        napi_gro_complete +0x47 [kernel]
-        dev_gro_receive +0x38b [kernel]
-        napi_gro_receive +0x38 [kernel]
-        mlx5e_handle_rx_cqe_mpwrq +0x1cb [kernel]
-        mlx5e_poll_rx_cq +0xe2 [kernel]
-        mlx5e_napi_poll +0xfc [kernel]
-        net_rx_action +0x159 [kernel]
-        __do_softirq +0xe4 [kernel]
-        irq_exit +0xf8 [kernel]
-        do_IRQ +0x8a [kernel]
-        ret_from_intr +0x0 [kernel]
-        cpuidle_enter_state +0xa8 [kernel]
-        cpuidle_enter +0x17 [kernel]
-        call_cpuidle +0x23 [kernel]
-        do_idle +0x1f8 [kernel]
-        cpu_startup_entry +0x73 [kernel]
-        start_secondary +0x1ab [kernel]
-        secondary_startup_64 +0xa4 [kernel]
+        tcp4_gro_complete  +0x1 [kernel]
+        napi_gro_complete  +0x47 [kernel]
+        dev_gro_receive  +0x38b [kernel]
+        napi_gro_receive  +0x38 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq  +0x1cb [kernel]
+        mlx5e_poll_rx_cq  +0xe2 [kernel]
+        mlx5e_napi_poll  +0xfc [kernel]
+        net_rx_action  +0x159 [kernel]
+        __do_softirq  +0xe4 [kernel]
+        irq_exit  +0xf8 [kernel]
+        do_IRQ  +0x8a [kernel]
+        ret_from_intr  +0x0 [kernel]
+        cpuidle_enter_state  +0xa8 [kernel]
+        cpuidle_enter  +0x17 [kernel]
+        call_cpuidle  +0x23 [kernel]
+        do_idle  +0x1f8 [kernel]
+        cpu_startup_entry  +0x73 [kernel]
+        start_secondary  +0x1ab [kernel]
+        secondary_startup_64  +0xa4 [kernel]
 
 dev_gro_receive
 
@@ -6783,17 +6783,17 @@ rx tx checksum off
         mlx5e_poll_rx_cq
         mlx5e_napi_poll
         net_rx_action
-        __softirqentry_text_start +0xe4 [kernel]
-        irq_exit +0xf8 [kernel]
-        do_IRQ +0x8a [kernel]
-        ret_from_intr +0x0 [kernel]
-        cpuidle_enter_state +0xa8 [kernel]
-        cpuidle_enter +0x17 [kernel]
-        call_cpuidle +0x23 [kernel]
-        do_idle +0x1f8 [kernel]
-        cpu_startup_entry +0x73 [kernel]
-        start_secondary +0x1ab [kernel]
-        secondary_startup_64 +0xa4 [kernel]
+        __softirqentry_text_start  +0xe4 [kernel]
+        irq_exit  +0xf8 [kernel]
+        do_IRQ  +0x8a [kernel]
+        ret_from_intr  +0x0 [kernel]
+        cpuidle_enter_state  +0xa8 [kernel]
+        cpuidle_enter  +0x17 [kernel]
+        call_cpuidle  +0x23 [kernel]
+        do_idle  +0x1f8 [kernel]
+        cpu_startup_entry  +0x73 [kernel]
+        start_secondary  +0x1ab [kernel]
+        secondary_startup_64  +0xa4 [kernel]
 
 napi_gro_receive
 dev_gro_receive
@@ -6913,22 +6913,22 @@ mlx5e_handle_rx_cqe
         mlx5e_poll_rx_cq
         mlx5e_napi_poll
         net_rx_action
-        __softirqentry_text_start +0xde [kernel]
-        run_ksoftirqd +0x1f [kernel]
-        smpboot_thread_fn +0xfc [kernel]
-        kthread +0x121 [kernel]
-        ret_from_fork +0x35 [kernel]
+        __softirqentry_text_start  +0xde [kernel]
+        run_ksoftirqd  +0x1f [kernel]
+        smpboot_thread_fn  +0xfc [kernel]
+        kthread  +0x121 [kernel]
+        ret_from_fork  +0x35 [kernel]
 
         mlx5e_page_release
         mlx5e_handle_rx_cqe_mpwrq
         mlx5e_poll_rx_cq
         mlx5e_napi_poll
         net_rx_action
-        __softirqentry_text_start +0xde [kernel]
-        run_ksoftirqd +0x1f [kernel]
-        smpboot_thread_fn +0xfc [kernel]
-        kthread +0x121 [kernel]
-        ret_from_fork +0x35 [kernel]
+        __softirqentry_text_start  +0xde [kernel]
+        run_ksoftirqd  +0x1f [kernel]
+        smpboot_thread_fn  +0xfc [kernel]
+        kthread  +0x121 [kernel]
+        ret_from_fork  +0x35 [kernel]
 
 mlx5e_handle_rx_cqe_mpwrq
     mlx5e_skb_from_cqe_mpwrq_linear
@@ -6948,17 +6948,17 @@ mlx5e_post_rx_mpwqe
 0       0       swapper/14      mlx5e_post_rx_mpwqes
         mlx5e_post_rx_mpwqes
         net_rx_action
-        __softirqentry_text_start +0xde [kernel]
-        irq_exit +0xf2 [kernel]
-        do_IRQ +0x8a [kernel]
-        ret_from_intr +0x0 [kernel]
-        cpuidle_enter_state +0xb0 [kernel]
-        cpuidle_enter +0x17 [kernel]
-        call_cpuidle +0x23 [kernel]
-        do_idle +0x1e1 [kernel]
-        cpu_startup_entry +0x1d [kernel]
-        start_secondary +0x199 [kernel]
-        secondary_startup_64 +0xa4 [kernel]
+        __softirqentry_text_start  +0xde [kernel]
+        irq_exit  +0xf2 [kernel]
+        do_IRQ  +0x8a [kernel]
+        ret_from_intr  +0x0 [kernel]
+        cpuidle_enter_state  +0xb0 [kernel]
+        cpuidle_enter  +0x17 [kernel]
+        call_cpuidle  +0x23 [kernel]
+        do_idle  +0x1e1 [kernel]
+        cpu_startup_entry  +0x1d [kernel]
+        start_secondary  +0x199 [kernel]
+        secondary_startup_64  +0xa4 [kernel]
 
 8.9.4.5Shared Receive WQE Format
 
@@ -7370,37 +7370,37 @@ enum {
 
 ===pci===
 
- 0xffffffffc083d5d0 : mlx5_satisfy_startup_pages                     +0x0/0x130 [mlx5_core]
- 0xffffffffc08336c3 : mlx5_load_one.isra.20                     +0x263/0xed0 [mlx5_core]
- 0xffffffffc0834791 : init_one                     +0x3d1/0x5f0 [mlx5_core]
- 0xffffffff813717ba : local_pci_probe                     +0x4a/0xb0 [kernel]
- 0xffffffff810a8bca : work_for_cpu_fn                     +0x1a/0x30 [kernel]
- 0xffffffff810abebf : process_one_work                     +0x17f/0x440 [kernel]
- 0xffffffff810ad0a8 : worker_thread                     +0x278/0x3c0 [kernel]
- 0xffffffff810b40e1 : kthread                     +0xd1/0xe0 [kernel]
- 0xffffffff810b4010 : kthread                     +0x0/0xe0 [kernel] (inexact)
- 0xffffffff816c6537 : ret_from_fork                     +0x77/0xb0 [kernel] (inexact)
- 0xffffffff810b4010 : kthread                     +0x0/0xe0 [kernel] (inexact)
+ 0xffffffffc083d5d0 : mlx5_satisfy_startup_pages                      +0x0/0x130 [mlx5_core]
+ 0xffffffffc08336c3 : mlx5_load_one.isra.20                      +0x263/0xed0 [mlx5_core]
+ 0xffffffffc0834791 : init_one                      +0x3d1/0x5f0 [mlx5_core]
+ 0xffffffff813717ba : local_pci_probe                      +0x4a/0xb0 [kernel]
+ 0xffffffff810a8bca : work_for_cpu_fn                      +0x1a/0x30 [kernel]
+ 0xffffffff810abebf : process_one_work                      +0x17f/0x440 [kernel]
+ 0xffffffff810ad0a8 : worker_thread                      +0x278/0x3c0 [kernel]
+ 0xffffffff810b40e1 : kthread                      +0xd1/0xe0 [kernel]
+ 0xffffffff810b4010 : kthread                      +0x0/0xe0 [kernel] (inexact)
+ 0xffffffff816c6537 : ret_from_fork                      +0x77/0xb0 [kernel] (inexact)
+ 0xffffffff810b4010 : kthread                      +0x0/0xe0 [kernel] (inexact)
 parms: dev=0xffff880851fc0060 boot=0x1
 
 12.17002 14636   14636   modprobe        pci_device_probe
-        pci_device_probe +0x1 [kernel]
-        driver_probe_device +0x11b [kernel]
-        device_driver_attach +0x58 [kernel]
-        __driver_attach +0xa5 [kernel]
-        bus_for_each_dev +0x7b [kernel]
-        driver_attach +0x1e [kernel]
-        bus_add_driver +0x14d [kernel]
-        driver_register +0x60 [kernel]
-        __pci_register_driver +0x6b [kernel]
-        init +0x82 [kernel]
-        do_one_initcall +0x64 [kernel]
-        do_init_module +0x5f [kernel]
-        load_module +0x1977 [kernel]
-        __do_sys_finit_module +0xfc [kernel]
-        __x64_sys_finit_module +0x1a [kernel]
-        do_syscall_64 +0x5a [kernel]
-        entry_SYSCALL_64_after_hwframe +0x44 [kernel]
+        pci_device_probe  +0x1 [kernel]
+        driver_probe_device  +0x11b [kernel]
+        device_driver_attach  +0x58 [kernel]
+        __driver_attach  +0xa5 [kernel]
+        bus_for_each_dev  +0x7b [kernel]
+        driver_attach  +0x1e [kernel]
+        bus_add_driver  +0x14d [kernel]
+        driver_register  +0x60 [kernel]
+        __pci_register_driver  +0x6b [kernel]
+        init  +0x82 [kernel]
+        do_one_initcall  +0x64 [kernel]
+        do_init_module  +0x5f [kernel]
+        load_module  +0x1977 [kernel]
+        __do_sys_finit_module  +0xfc [kernel]
+        __x64_sys_finit_module  +0x1a [kernel]
+        do_syscall_64  +0x5a [kernel]
+        entry_SYSCALL_64_after_hwframe  +0x44 [kernel]
 
 [88] bus_type.p  pci_bus_type
 [89] subsys_private.klist_devices 0xffff9bb11a545800
@@ -10192,25 +10192,25 @@ iptables -t nat -A POSTROUTING -o $link -j MASQUERADE
         ip_forward
         ip_rcv_finish
         ip_rcv
-        __netif_receive_skb_one_core +0x57 [kernel]
-        __netif_receive_skb +0x18 [kernel]
-        netif_receive_skb_internal +0x45 [kernel]
-        napi_gro_receive +0xc5 [kernel]
-        mlx5e_handle_rx_cqe_mpwrq +0x2ff [kernel]
-        mlx5e_poll_rx_cq +0xd5 [kernel]
-        mlx5e_napi_poll +0xb9 [kernel]
-        net_rx_action +0x13c [kernel]
-        __softirqentry_text_start +0xde [kernel]
-        irq_exit +0xf2 [kernel]
-        do_IRQ +0x8a [kernel]
-        ret_from_intr +0x0 [kernel]
-        cpuidle_enter_state +0xb0 [kernel]
-        cpuidle_enter +0x17 [kernel]
-        call_cpuidle +0x23 [kernel]
-        do_idle +0x1e1 [kernel]
-        cpu_startup_entry +0x1d [kernel]
-        start_secondary +0x199 [kernel]
-        secondary_startup_64 +0xa4 [kernel]
+        __netif_receive_skb_one_core  +0x57 [kernel]
+        __netif_receive_skb  +0x18 [kernel]
+        netif_receive_skb_internal  +0x45 [kernel]
+        napi_gro_receive  +0xc5 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq  +0x2ff [kernel]
+        mlx5e_poll_rx_cq  +0xd5 [kernel]
+        mlx5e_napi_poll  +0xb9 [kernel]
+        net_rx_action  +0x13c [kernel]
+        __softirqentry_text_start  +0xde [kernel]
+        irq_exit  +0xf2 [kernel]
+        do_IRQ  +0x8a [kernel]
+        ret_from_intr  +0x0 [kernel]
+        cpuidle_enter_state  +0xb0 [kernel]
+        cpuidle_enter  +0x17 [kernel]
+        call_cpuidle  +0x23 [kernel]
+        do_idle  +0x1e1 [kernel]
+        cpu_startup_entry  +0x1d [kernel]
+        start_secondary  +0x199 [kernel]
+        secondary_startup_64  +0xa4 [kernel]
 
 ===ovs_ct===
 
@@ -10724,29 +10724,29 @@ tcp_hdr
 ===ct===
 
 44.13436 23258   23258   sshd            tcp_in_window
-        tcp_in_window +0x1 [kernel]
-        nf_conntrack_in +0x1c2 [kernel]
-        ipv4_conntrack_local +0x48 [kernel]
-        nf_hook_slow +0x48 [kernel]
-        __ip_local_out +0xf3 [kernel]
-        ip_local_out +0x1c [kernel]
-        __ip_queue_xmit +0x160 [kernel]
-        ip_queue_xmit +0x10 [kernel]
-        __tcp_transmit_skb +0x5a8 [kernel]
-        tcp_write_xmit +0x248 [kernel]
-        __tcp_push_pending_frames +0x35 [kernel]
-        tcp_push +0xdb [kernel]
-        tcp_sendmsg_locked +0x413 [kernel]
-        tcp_sendmsg +0x2c [kernel]
-        inet_sendmsg +0x2e [kernel]
-        sock_sendmsg +0x3e [kernel]
-        sock_write_iter +0x8c [kernel]
-        __vfs_write +0x10c [kernel]
-        vfs_write +0xb1 [kernel]
-        ksys_write +0x55 [kernel]
-        __x64_sys_write +0x1a [kernel]
-        do_syscall_64 +0x60 [kernel]
-        entry_SYSCALL_64_after_hwframe +0x44 [kernel]
+        tcp_in_window  +0x1 [kernel]
+        nf_conntrack_in  +0x1c2 [kernel]
+        ipv4_conntrack_local  +0x48 [kernel]
+        nf_hook_slow  +0x48 [kernel]
+        __ip_local_out  +0xf3 [kernel]
+        ip_local_out  +0x1c [kernel]
+        __ip_queue_xmit  +0x160 [kernel]
+        ip_queue_xmit  +0x10 [kernel]
+        __tcp_transmit_skb  +0x5a8 [kernel]
+        tcp_write_xmit  +0x248 [kernel]
+        __tcp_push_pending_frames  +0x35 [kernel]
+        tcp_push  +0xdb [kernel]
+        tcp_sendmsg_locked  +0x413 [kernel]
+        tcp_sendmsg  +0x2c [kernel]
+        inet_sendmsg  +0x2e [kernel]
+        sock_sendmsg  +0x3e [kernel]
+        sock_write_iter  +0x8c [kernel]
+        __vfs_write  +0x10c [kernel]
+        vfs_write  +0xb1 [kernel]
+        ksys_write  +0x55 [kernel]
+        __x64_sys_write  +0x1a [kernel]
+        do_syscall_64  +0x60 [kernel]
+        entry_SYSCALL_64_after_hwframe  +0x44 [kernel]
 
 ct_list
 
@@ -11337,33 +11337,33 @@ mlx5e_netdev_ops_uplink_rep
 ===br===
 
 12.01276 0       0       swapper/2       br_fdb_update
-        br_fdb_update +0x1 [kernel]
-        br_nf_hook_thresh +0x50 [kernel]
-        br_nf_pre_routing_finish_ipv6 +0x14c [kernel]
-        br_nf_pre_routing_ipv6 +0xf7 [kernel]
-        br_nf_pre_routing +0x395 [kernel]
-        nf_hook_slow +0x48 [kernel]
-        br_handle_frame +0x213 [kernel]
-        __netif_receive_skb_core +0x2db [kernel]
-        __netif_receive_skb_one_core +0x3b [kernel]
-        __netif_receive_skb +0x18 [kernel]
-        netif_receive_skb_internal +0x6b [kernel]
-        napi_gro_receive +0xeb [kernel]
-        mlx5e_handle_rx_cqe_mpwrq +0xd3 [kernel]
-        mlx5e_poll_rx_cq +0x90 [kernel]
-        mlx5e_napi_poll +0xfe [kernel]
-        net_rx_action +0x14f [kernel]
-        __do_softirq +0xf9 [kernel]
-        irq_exit +0xf8 [kernel]
-        do_IRQ +0x8a [kernel]
-        ret_from_intr +0x0 [kernel]
-        mwait_idle +0x7f [kernel]
-        arch_cpu_idle +0x15 [kernel]
-        default_idle_call +0x23 [kernel]
-        do_idle +0x1bf [kernel]
-        cpu_startup_entry +0x73 [kernel]
-        start_secondary +0x1ab [kernel]
-        secondary_startup_64 +0xa4 [kernel]
+        br_fdb_update  +0x1 [kernel]
+        br_nf_hook_thresh  +0x50 [kernel]
+        br_nf_pre_routing_finish_ipv6  +0x14c [kernel]
+        br_nf_pre_routing_ipv6  +0xf7 [kernel]
+        br_nf_pre_routing  +0x395 [kernel]
+        nf_hook_slow  +0x48 [kernel]
+        br_handle_frame  +0x213 [kernel]
+        __netif_receive_skb_core  +0x2db [kernel]
+        __netif_receive_skb_one_core  +0x3b [kernel]
+        __netif_receive_skb  +0x18 [kernel]
+        netif_receive_skb_internal  +0x6b [kernel]
+        napi_gro_receive  +0xeb [kernel]
+        mlx5e_handle_rx_cqe_mpwrq  +0xd3 [kernel]
+        mlx5e_poll_rx_cq  +0x90 [kernel]
+        mlx5e_napi_poll  +0xfe [kernel]
+        net_rx_action  +0x14f [kernel]
+        __do_softirq  +0xf9 [kernel]
+        irq_exit  +0xf8 [kernel]
+        do_IRQ  +0x8a [kernel]
+        ret_from_intr  +0x0 [kernel]
+        mwait_idle  +0x7f [kernel]
+        arch_cpu_idle  +0x15 [kernel]
+        default_idle_call  +0x23 [kernel]
+        do_idle  +0x1bf [kernel]
+        cpu_startup_entry  +0x73 [kernel]
+        start_secondary  +0x1ab [kernel]
+        secondary_startup_64  +0xa4 [kernel]
 
 ===ip_veth===
 
@@ -11588,22 +11588,108 @@ TIME     PID     TID     COMM            FUNC
         veth_newlink
 	rtnl_newlink	ops->newlink
         rtnetlink_rcv_msg	doit
-        netlink_rcv_skb +0x54 [kernel]
-        rtnetlink_rcv +0x15 [kernel]
-        netlink_unicast +0x19c [kernel]
-        netlink_sendmsg +0x2d1 [kernel]
-        sock_sendmsg +0x3e [kernel]
-        ___sys_sendmsg +0x283 [kernel]
-        __sys_sendmsg +0x63 [kernel]
-        __x64_sys_sendmsg +0x1f [kernel]
-        do_syscall_64 +0x60 [kernel]
-        entry_SYSCALL_64_after_hwframe +0x44 [kernel]
+        netlink_rcv_skb  +0x54 [kernel]
+        rtnetlink_rcv  +0x15 [kernel]
+        netlink_unicast  +0x19c [kernel]
+        netlink_sendmsg  +0x2d1 [kernel]
+        sock_sendmsg  +0x3e [kernel]
+        ___sys_sendmsg  +0x283 [kernel]
+        __sys_sendmsg  +0x63 [kernel]
+        __x64_sys_sendmsg  +0x1f [kernel]
+        do_syscall_64  +0x60 [kernel]
+        entry_SYSCALL_64_after_hwframe  +0x44 [kernel]
 
 ===tcp===
 
-%s/\(b'\)\(.*\)\(+0x.*\)/\2/
+%s/\(b'\)\(.*\)\( +0x.*\)/\2/
+
+The reply packet:
+
+[root@dev-r630-04 ~]# trace get_unique_tuple -K
+TIME     PID     TID     COMM            FUNC
+2.759189 0       0       swapper/0       get_unique_tuple
+        get_unique_tuple +0x1 [nf_nat]
+        nf_nat_setup_info +0x8a [nf_nat]
+        tcf_conntrack.part.16 +0xa01 [act_ct]
+        tcf_action_exec +0x71 [kernel]
+        fl_classify +0x351 [cls_flower]
+        tcf_classify +0x73 [kernel]
+        __netif_receive_skb_core +0x525 [kernel]
+        __netif_receive_skb_one_core +0x36 [kernel]
+        netif_receive_skb_internal +0x34 [kernel]
+        napi_gro_receive +0xb8 [kernel]
+        mlx5e_handle_rx_cqe_mpwrq +0xc5 [mlx5_core]
+        mlx5e_poll_rx_cq +0x70 [mlx5_core]
+        mlx5e_napi_poll +0xb4 [mlx5_core]
+        net_rx_action +0x297 [kernel]
+        __do_softirq +0x10d [kernel]
+        irq_exit +0xc2 [kernel]
+        do_IRQ +0x52 [kernel]
+        ret_from_intr +0x0 [kernel]
+        cpuidle_enter_state +0xb2 [kernel]
+        do_idle +0x204 [kernel]
+        cpu_startup_entry +0x6f [kernel]
+        start_kernel +0x520 [kernel]
+        secondary_startup_64 +0xa4 [kernel]
+
+
+veth:
+11.24232 0       0       swapper/6       get_unique_tuple
+        get_unique_tuple +0x1 [nf_nat]
+        nf_nat_setup_info +0x8a [nf_nat]
+        __nf_nat_alloc_null_binding +0x68 [nf_nat]
+        nf_nat_inet_fn +0x21c [nf_nat]
+        nf_nat_ipv4_in +0x25 [nf_nat_ipv4]
+        nf_hook_slow +0x43 [kernel]
+        ip_rcv +0x9e [kernel]
+        __netif_receive_skb_one_core +0x52 [kernel]
+        netif_receive_skb_internal +0x34 [kernel]
+        br_pass_frame_up +0xc4 [bridge]
+        br_handle_frame_finish +0x21c [bridge]
+        br_handle_frame +0x198 [bridge]
+        __netif_receive_skb_core +0x3c2 [kernel]
+        __netif_receive_skb_one_core +0x36 [kernel]
+        netif_receive_skb_internal +0x34 [kernel]
+        napi_gro_receive +0xb8 [kernel]
+        tg3_poll_work +0xe32 [tg3]
+        tg3_poll_msix +0x3b [tg3]
+        net_rx_action +0x297 [kernel]
+        __do_softirq +0x10d [kernel]
+        irq_exit +0xc2 [kernel]
+        do_IRQ +0x52 [kernel]
+        ret_from_intr +0x0 [kernel]
+        cpuidle_enter_state +0xb2 [kernel]
+        do_idle +0x204 [kernel]
+        cpu_startup_entry +0x6f [kernel]
+        start_secondary +0x1a4 [kernel]
+        secondary_startup_64 +0xa4 [kernel]
 
 nf_nat_bysource
+__nf_nat_cleanup_conntrack
+
+[root@dev-r630-04 ~]# trace __nf_nat_cleanup_conntrack -K
+TIME     PID     TID     COMM            FUNC
+125.4426 7743    7743    conntrack       __nf_nat_cleanup_conntrack
+        __nf_nat_cleanup_conntrack +0x1 [nf_nat]
+        nf_ct_ext_destroy +0x32 [nf_conntrack]
+        nf_conntrack_free +0x1f [nf_conntrack]
+        ctnetlink_dump_table +0x182 [nf_conntrack_netlink]
+        netlink_dump +0x222 [kernel]
+        __netlink_dump_start +0x160 [kernel]
+        ctnetlink_get_conntrack  +0x1fc [nf_conntrack_netlink]
+        nfnetlink_rcv_msg +0x217 [nfnetlink]
+        netlink_rcv_skb +0xde [kernel]
+        nfnetlink_rcv +0x64 [nfnetlink]
+        netlink_unicast +0x190 [kernel]
+        netlink_sendmsg +0x2d0 [kernel]
+        sock_sendmsg +0x36 [kernel]
+        __sys_sendto +0xd8 [kernel]
+        __x64_sys_sendto +0x24 [kernel]
+        do_syscall_64 +0x55 [kernel]
+        entry_SYSCALL_64_after_hwframe +0x44 [kernel]
+
+get_unique_tuple
+	find_appropriate_src
 
 tcp_timeouts
 
@@ -11613,23 +11699,23 @@ nf_conntrack_in
 			new_state = TCP_CONNTRACK_ESTABLISHED;
 
 3.013720 6669    6669    sshd            tcp_packet
-        tcp_packet+0x1 [nf_conntrack]
-        nf_conntrack_in+0x139 [nf_conntrack]
-        nf_hook_slow+0x43 [kernel]
-        __ip_local_out+0xd6 [kernel]
-        ip_local_out+0x17 [kernel]
-        __tcp_transmit_skb+0x58b [kernel]
-        tcp_write_xmit+0x2a2 [kernel]
-        __tcp_push_pending_frames+0x2d [kernel]
-        tcp_sendmsg_locked+0x33d [kernel]
-        tcp_sendmsg+0x27 [kernel]
-        sock_sendmsg+0x36 [kernel]
-        sock_write_iter+0x87 [kernel]
-        __vfs_write+0x114 [kernel]
-        vfs_write+0xb0 [kernel]
-        ksys_write+0x52 [kernel]
-        do_syscall_64+0x55 [kernel]
-        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+        tcp_packet +0x1 [nf_conntrack]
+        nf_conntrack_in +0x139 [nf_conntrack]
+        nf_hook_slow +0x43 [kernel]
+        __ip_local_out +0xd6 [kernel]
+        ip_local_out +0x17 [kernel]
+        __tcp_transmit_skb +0x58b [kernel]
+        tcp_write_xmit +0x2a2 [kernel]
+        __tcp_push_pending_frames +0x2d [kernel]
+        tcp_sendmsg_locked +0x33d [kernel]
+        tcp_sendmsg +0x27 [kernel]
+        sock_sendmsg +0x36 [kernel]
+        sock_write_iter +0x87 [kernel]
+        __vfs_write +0x114 [kernel]
+        vfs_write +0xb0 [kernel]
+        ksys_write +0x52 [kernel]
+        do_syscall_64 +0x55 [kernel]
+        entry_SYSCALL_64_after_hwframe +0x44 [kernel]
 
 
 3.464398 921     15588   handler146      nf_nat_used_tuple
@@ -11637,6 +11723,8 @@ nf_conntrack_in
         nf_nat_l4proto_unique_tuple
         get_unique_tuple
 		nf_nat_setup_info  
+ovs_ct_nat_execute
+ovs_ct_nat
         __ovs_ct_lookup  
         ovs_ct_execute  
         do_execute_actions  
@@ -11725,13 +11813,13 @@ inet_sport
              .get_port = inet_csk_get_port, is not called
 
 16.14315 1138    1140    wrk             tcp_v4_connect
-        tcp_v4_connect +0x1 [kernel]
-        __inet_stream_connect +0xc2 [kernel]
-        inet_stream_connect +0x36 [kernel]
-        __sys_connect +0xc5 [kernel]
-        __x64_sys_connect +0x16 [kernel]
-        do_syscall_64 +0x55 [kernel]
-        entry_SYSCALL_64_after_hwframe +0x44 [kernel]
+        tcp_v4_connect  +0x1 [kernel]
+        __inet_stream_connect  +0xc2 [kernel]
+        inet_stream_connect  +0x36 [kernel]
+        __sys_connect  +0xc5 [kernel]
+        __x64_sys_connect  +0x16 [kernel]
+        do_syscall_64  +0x55 [kernel]
+        entry_SYSCALL_64_after_hwframe  +0x44 [kernel]
 
 tcp4_seq_show
 

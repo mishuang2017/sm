@@ -573,6 +573,7 @@ fi
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
 alias sm5="cd /$images/chrism/5.4"
+alias sm5c="cd /$images/chrism/5.4-ct"
 alias sm-build="cdr; cd build"
 alias smu="cd /$images/chrism/upstream"
 alias smm="cd /$images/chrism/mlnx-ofa_kernel-4.0"
@@ -2066,10 +2067,10 @@ function make-all
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
-alias mm='sudo make modules_install -j; sudo make install'
+alias mm='sudo make modules_install -j; sudo make install; headers_install'
 alias mi='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
 alias mi2='make -j; sudo make install_kernel -j'
-alias m32='make -j'
+alias m32='make -j 32'
 
 function mi2
 {
@@ -8372,7 +8373,8 @@ function vr
 	[[ $# != 1 ]] && return
 	local file=$(echo ${1%.*})
 #	vimdiff ${file}*
-	vim -O ${file}*
+	echo $file
+	vim -O ${file} $1
 }
 
 function v
