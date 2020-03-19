@@ -1651,7 +1651,10 @@ If commit was abandoned, don't reuse the change-id. Otherwise, will fail to push
 
 git push origin HEAD:refs/for/mlnx_ofed_5_0/kernel-5.4-perf-issue
 
-git push origin HEAD:refs/for/mlnx_ofed_5_0_2/kernel-5.4-perf-issue_5_0_2
+git push origin HEAD:refs/for/mlnx_ofed_5_0_2/nf_ct_l4proto_find
+git push origin HEAD:refs/for/mlnx_ofed_5_0_2/PRIO_CHAIN_SUPPORT
+
+tc_cls_flower_offload_common
 
 ===git===
 

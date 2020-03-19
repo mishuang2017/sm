@@ -573,7 +573,7 @@ fi
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
 alias sm5="cd /$images/chrism/5.4"
-alias sm5c="cd /$images/chrism/5.4-ct"
+alias 5c="cd /$images/chrism/5.4-ct"
 alias sm-build="cdr; cd build"
 alias smu="cd /$images/chrism/upstream"
 alias smm="cd /$images/chrism/mlnx-ofa_kernel-4.0"
@@ -2062,12 +2062,12 @@ function make-all
 	make -j $cpu_num2
 	sudo time make modules_install -j $cpu_num2
 	sudo make install
-	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
+# 	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
 
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
-alias mm='sudo make modules_install -j; sudo make install; headers_install'
+alias mm='sudo make modules_install -j; sudo make install; # headers_install'
 alias mi='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
 alias mi2='make -j; sudo make install_kernel -j'
 alias m32='make -j 32'
@@ -5199,6 +5199,7 @@ function start-switchdev
 # 	fi
 
 	time set_netns_all $port
+	set_ns_nf
 
 # 	ethtool -K $link tx-vlan-stag-hw-insert off
 
@@ -6193,7 +6194,7 @@ function git_ofed_reset
 function git_ofed_reset_all
 {
 	for i in backports/*; do
-		if echo $i | egrep "0174-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch|0192-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
+		if echo $i | egrep "0199-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
 			echo $i
 			continue
 		fi
@@ -10902,6 +10903,13 @@ function tc-5t
 	./test-tc-perf-update.sh 5t 100000 2
 }
 
+function github_push
+{
+	git remote rm origin
+	git remote add origin git@github.com:mishuang2017/sm.git
+	git push -u origin master
+}
+
 ######## ubuntu #######
 
 [[ -f /usr/bin/lsb_release ]] || return
@@ -11052,11 +11060,4 @@ function chrome
 function sound
 {
 	sudo modprobe -v snd_hda_intel
-}
-
-function github-push
-{
-	git remote rm origin
-	git remote add origin git@github.com:mishuang2017/sm.git
-	git push -u origin master
 }
