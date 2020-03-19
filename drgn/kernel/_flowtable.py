@@ -9,7 +9,7 @@ import os
 
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
-import lib
+from lib import *
 
 try:
     table_addr = prog['_flowtable']
@@ -35,6 +35,11 @@ def hash1(rhashtable):
 
     for i in range(size):
         rhash_head = buckets[i]
+        if struct_exist("struct rhash_lock_head"):
+            rhash_head = cast("struct rhash_head *", rhash_head)
+            if rhash_head.value_() == 0:
+                continue
+
         while True:
             if rhash_head.value_() & 1:
                 break;
