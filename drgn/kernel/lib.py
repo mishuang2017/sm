@@ -507,3 +507,9 @@ def print_tuple(tuple, ct):
         TCP_CONNTRACK_TIME_WAIT = prog['TCP_CONNTRACK_TIME_WAIT']
         state = ct.proto.tcp.state
         print("state: %x, est: %x, timed_wait" % (state, TCP_CONNTRACK_ESTABLISHED, TCP_CONNTRACK_TIME_WAIT))
+
+
+def print_tun(tun):
+    print("\ttun_info: id: %x, dst ip: %s, dst port: %d" % \
+        (tun.key.tun_id, ipv4(socket.ntohl(tun.key.u.ipv4.dst.value_())), \
+        socket.ntohs(tun.key.tp_dst.value_())))

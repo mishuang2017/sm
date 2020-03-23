@@ -20,11 +20,6 @@ mlx5e_rep_priv = get_mlx5e_rep_priv()
 print("MLX5E_TC_FLOW_FLAG_SIMPLE %x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SIMPLE'].value_()))
 # print("MLX5E_TC_FLOW_FLAG_ESWITCH %x" % 1 << prog['MLX5E_TC_FLOW_FLAG_ESWITCH'].value_())
 
-def print_tun(tun):
-    print("\ttun_info: id: %x, dst ip: %s, dst port: %d" % \
-        (tun.key.tun_id, ipv4(socket.ntohl(tun.key.u.ipv4.dst.value_())), \
-        socket.ntohs(tun.key.tp_dst.value_())))
-
 try:
     prog.type('struct mlx5_rep_uplink_priv')
     tc_ht = mlx5e_rep_priv.uplink_priv.tc_ht
