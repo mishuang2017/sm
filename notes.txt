@@ -11853,4 +11853,30 @@ seq_open_net
 
  change tcp_fin_timeout or tcp_keepalive values. 
 
+===indir_block===
+
+vxlan_tunnel
+
+[root@dev-r630-03 kernel]# trace __flow_indr_block_cb_register -K
+TIME     PID     TID     COMM            FUNC
+5.443404 4887    4887    ovs-vswitchd    __flow_indr_block_cb_register
+        __flow_indr_block_cb_register
+        mlx5e_nic_rep_netdevice_event
+        notifier_call_chain+0x4c [kernel]
+        register_netdevice+0x427 [kernel]
+        __vxlan_dev_create+0x124 [vxlan]
+        vxlan_newlink+0x53 [vxlan]
+        __rtnl_newlink+0x6b1 [kernel]
+        rtnl_newlink+0x44 [kernel]
+        rtnetlink_rcv_msg+0x2b0 [kernel]
+        netlink_rcv_skb+0x49 [kernel]
+        netlink_unicast+0x171 [kernel]
+        netlink_sendmsg+0x21e [kernel]
+        sock_sendmsg+0x5e [kernel]
+        ____sys_sendmsg+0x1ef [kernel]
+        ___sys_sendmsg+0x88 [kernel]
+        __sys_sendmsg+0x59 [kernel]
+        do_syscall_64+0x5b [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
 ===end===

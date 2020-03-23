@@ -160,6 +160,7 @@ def print_exts(e):
                 print("tun_id: 0x%x" % ip_tunnel_key.tun_id.value_())
                 print("src ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
                 print("dst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
+                print("tp_dst: %d" % socket.ntohs(ip_tunnel_key.tp_dst.value_()))
 
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
