@@ -8152,9 +8152,9 @@ function addflow-port
 	local file=/tmp/of.txt
 	rm -f $file
 
-	bru0
+	bru
 	restart-ovs
-	for(( ip = 2; ip < 3; ip++)); do
+	for(( ip = 200; ip < 201; ip++)); do
 		for(( src = 1; src < 65535; src++)); do
 
 			# on kernel 5.4, remove priority
@@ -10693,6 +10693,8 @@ function wrk_tune
 	set_all_rep_channel 12
 	set_ns_nf
 }
+
+alias wrk_rule="/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))"
 
 function wrk_setup
 {

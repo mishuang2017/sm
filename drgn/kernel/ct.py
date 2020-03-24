@@ -19,5 +19,9 @@ for i in range(size):
     if head.first.value_() & 0x1:
         continue;
     for tuple in hlist_nulls_for_each_entry("struct nf_conntrack_tuple_hash", head.address_of_(), "hnnode"):
-        print_tuple(tuple)
+        ct = container_of(tuple, "struct nf_conn", "tuplehash")
+#         print("nf_conn %lx" % ct.value_())
+#         print("nf_conntrack_tuple %lx" % tuple.value_())
+#         print("")
+        print_tuple(tuple, ct)
 #         print(tuple)

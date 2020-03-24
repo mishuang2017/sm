@@ -1659,6 +1659,9 @@ tc_cls_flower_offload_common
 
 ===git===
 
+# remove a branch on github
+git push origin --delete 5.4
+
 git ls-remote --tags origin
 
 git remote update # update all branches
