@@ -6,9 +6,9 @@ import socket
 
 import subprocess
 import drgn
-# prog = drgn.program_from_kernel()
 
-prog = drgn.program_from_core_dump("/var/crash/vmcore.0")
+prog = drgn.program_from_kernel()
+# prog = drgn.program_from_core_dump("/var/crash/vmcore.0")
 
 pf0_name = "ens1f0"
 pf1_name = "ens1f1"
