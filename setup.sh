@@ -56,7 +56,7 @@ set -x
 	yum -y instal texinfo
 
 	# drgn, xz-devel for lzma
-	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel
+	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel
 
 	sleep 1
 	systemctl disable gdm

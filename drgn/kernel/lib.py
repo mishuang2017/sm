@@ -6,9 +6,9 @@ import socket
 
 import subprocess
 import drgn
-prog = drgn.program_from_kernel()
+# prog = drgn.program_from_kernel()
 
-# prog = drgn.program_from_core_dump("/var/crash/vmcore.0")
+prog = drgn.program_from_core_dump("/var/crash/vmcore.0")
 
 pf0_name = "ens1f0"
 pf1_name = "ens1f1"
@@ -157,6 +157,7 @@ def print_exts(e):
             if tun.params.tcft_action == 1:
                 ip_tunnel_key = tun.params.tcft_enc_metadata.u.tun_info.key
                 print("TCA_TUNNEL_KEY_ACT_SET")
+                print("ip_tunnel_info: %x" % tun.params.tcft_enc_metadata.u.tun_info.address_of_().value_())
                 print("tun_id: 0x%x" % ip_tunnel_key.tun_id.value_())
                 print("src ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
                 print("dst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))

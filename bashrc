@@ -6194,7 +6194,7 @@ function git_ofed_reset
 function git_ofed_reset_all
 {
 	for i in backports/*; do
-		if echo $i | egrep "0199-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
+		if echo $i | egrep "0199-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch|0200-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
 			echo $i
 			continue
 		fi
