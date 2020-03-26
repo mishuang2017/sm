@@ -39,15 +39,15 @@ for x, dev in enumerate(lib.get_netdevs()):
 
             func = cb.cb.value_()
             func = lib.address_to_name(hex(func))
-            print("flow_block_cb cb     : %s" % func)
+#             print("flow_block_cb cb     : %s" % func)
 
             release = cb.release.value_()
             release = lib.address_to_name(hex(release))
-            print("flow_block_cb release: %s" % release)
+#             print("flow_block_cb release: %s" % release)
 
             cb_priv = Object(prog, 'struct mlx5e_rep_indr_block_priv', address=cb.cb_priv.value_())
-            print("mlx5e_rep_indr_block_priv %lx" % cb_priv.address_of_())
-            print(cb_priv)
+#             print("mlx5e_rep_indr_block_priv %lx" % cb_priv.address_of_())
+#             print(cb_priv)
     else:
         for cb in list_for_each_entry('struct tcf_block_cb', block.cb_list.address_of_(), 'list'):
             print(cb)
@@ -58,7 +58,7 @@ for x, dev in enumerate(lib.get_netdevs()):
             # ofed 4.7, cb is mlx5e_rep_indr_setup_block_cb
             priv = cb.cb_priv
             priv = Object(prog, 'struct mlx5e_rep_indr_block_priv', address=priv.value_())
-            print(priv)
+#             print(priv)
 
             # on ofed 4.6, priv is the pointer of struct mlx5e_priv
 
@@ -76,7 +76,7 @@ for x, dev in enumerate(lib.get_netdevs()):
         print("chain action_refcnt: %d" % (chain.action_refcnt))
         tcf_proto = chain.filter_chain
         while True:
-            print("==========================================\n")
+            print("------------------------------------------")
             print("tcf_proto %lx\n    protocol %x, prio %x" %       \
                 (tcf_proto.value_(), socket.ntohs(tcf_proto.protocol.value_()),   \
                 tcf_proto.prio.value_() >> 16))

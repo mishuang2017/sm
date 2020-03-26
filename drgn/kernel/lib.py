@@ -120,16 +120,15 @@ def print_exts(e):
     for i in range(e.nr_actions):
         a = e.actions[i]
         kind = a.ops.kind.string_().decode()
-        print('')
-        print("action %d: %s" % (i+1, kind))
+        print("action %d: %10s: tc_action %lx" % (i+1, kind, a.value_()), end='')
 #         print(a.cpu_bstats_hw)
         if kind == "ct":
 #             print(a)
             tcf_conntrack_info = Object(prog, 'struct tcf_conntrack_info', address=a.value_())
-            print("\tzone: %d" % tcf_conntrack_info.zone.value_())
-            print("\tgmark: 0x%x" % tcf_conntrack_info.mark.value_())
-            print("\tlabels[0]: 0x%x" % tcf_conntrack_info.labels[0].value_())
-            print("\tcommit: %d" % tcf_conntrack_info.commit.value_())
+            print("\tzone: %d" % tcf_conntrack_info.zone.value_(), end='')
+            print("\tmark: 0x%x" % tcf_conntrack_info.mark.value_(), end='')
+            print("\tlabels[0]: 0x%x" % tcf_conntrack_info.labels[0].value_(), end='')
+            print("\tcommit: %d" % tcf_conntrack_info.commit.value_(), end='')
             print("\tnat: 0x%x" % tcf_conntrack_info.nat.value_())
             if tcf_conntrack_info.range.min_addr.ip:
                 print("snat ip: %s" % ipv4(socket.ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
@@ -144,14 +143,12 @@ def print_exts(e):
                 print("\tmask:   %08x" % tcf_pedit.tcfp_keys[i].mask)
                 print("\tvalue:  %08x" % tcf_pedit.tcfp_keys[i].val)
         if kind == "mirred":
-            print("\ttc_action %lx" % a.value_())
-            print_action_stats(a)
             tcf_mirred = Object(prog, 'struct tcf_mirred', address=a.value_())
             print("\toutput: %s" % tcf_mirred.tcfm_dev.name.string_().decode())
+            print_action_stats(a)
         if kind == "gact":
-            print("\ttc_action %lx" % a.value_())
-            print("\tgtcf_chain %lx" % a.goto_chain.value_())
-            print("\trecirc_id: 0x%x, %d" % (a.goto_chain.index, a.goto_chain.index))
+            print("\tgtcf_chain %lx" % a.goto_chain.value_(), end='')
+            print("\trecirc_id: %d, 0x%x" % (a.goto_chain.index, a.goto_chain.index))
         if kind == "tunnel_key":
             tun = Object(prog, 'struct tcf_tunnel_key', address=a.value_())
             if tun.params.tcft_action == 1:
@@ -171,7 +168,7 @@ def print_cls_fl_filter(f):
     # 1 means nofirstfrag
     # 3 means firstfrag
 #     print("ip_flags: 0x%x" % k.control.flags)
-#     print("ct_state: 0x%x" % k.ct_state.value_())
+    print("ct_state: 0x%x" % k.ct_state.value_())
 #     print("ct_zone: %d" % k.ct_zone.value_())
 #     print("ct_mark: 0x%x" % k.ct_mark.value_())
 #     print("ct_labels[0]: %x" % k.ct_labels[0].value_())
