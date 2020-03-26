@@ -12,7 +12,8 @@ import lib
 
 for x, dev in enumerate(lib.get_netdevs()):
     name = dev.name.string_().decode()
-    if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
+#     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
+    if "enp4s0f0_1" != name:
         continue
 #     if "vxlan_sys_4789" != name:
 #         continue

@@ -93,12 +93,12 @@ def print_action_stats(a):
             bstats = per_cpu_ptr(a.cpu_bstats, cpu).bstats
             bytes += bstats.bytes
             packets += bstats.packets
-        print("   percpu bytes: %d, packets: %d" % (bytes, packets))
+        print("\tpercpu bytes: %d, packets: %d" % (bytes, packets))
     else:
         bstats = a.tcfa_bstats
         bytes += bstats.bytes
         packets += bstats.packets
-        print("   bytes: %d, packets: %d" % (bytes, packets))
+        print("\tbytes: %d, packets: %d" % (bytes, packets))
 
     bytes = 0
     packets = 0
@@ -121,16 +121,16 @@ def print_exts(e):
         a = e.actions[i]
         kind = a.ops.kind.string_().decode()
         print('')
-        print(kind)
+        print("action %d: %s" % (i+1, kind))
 #         print(a.cpu_bstats_hw)
         if kind == "ct":
 #             print(a)
             tcf_conntrack_info = Object(prog, 'struct tcf_conntrack_info', address=a.value_())
-            print("zone: %d" % tcf_conntrack_info.zone.value_())
-            print("mark: 0x%x" % tcf_conntrack_info.mark.value_())
-            print("labels[0]: 0x%x" % tcf_conntrack_info.labels[0].value_())
-            print("commit: %d" % tcf_conntrack_info.commit.value_())
-            print("nat: 0x%x" % tcf_conntrack_info.nat.value_())
+            print("\tzone: %d" % tcf_conntrack_info.zone.value_())
+            print("\tgmark: 0x%x" % tcf_conntrack_info.mark.value_())
+            print("\tlabels[0]: 0x%x" % tcf_conntrack_info.labels[0].value_())
+            print("\tcommit: %d" % tcf_conntrack_info.commit.value_())
+            print("\tnat: 0x%x" % tcf_conntrack_info.nat.value_())
             if tcf_conntrack_info.range.min_addr.ip:
                 print("snat ip: %s" % ipv4(socket.ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
         if kind == "pedit":
@@ -140,28 +140,28 @@ def print_exts(e):
             print("tcf_pedit.tcfp_nkeys: %d" % n)
             for i in range(n):
                 print(tcf_pedit.tcfp_keys_ex[i].htype)
-                print("offset: %x" % tcf_pedit.tcfp_keys[i].off)
-                print("mask:   %08x" % tcf_pedit.tcfp_keys[i].mask)
-                print("value:  %08x" % tcf_pedit.tcfp_keys[i].val)
+                print("\toffset: %x" % tcf_pedit.tcfp_keys[i].off)
+                print("\tmask:   %08x" % tcf_pedit.tcfp_keys[i].mask)
+                print("\tvalue:  %08x" % tcf_pedit.tcfp_keys[i].val)
         if kind == "mirred":
-            print("tc_action %lx" % a.value_())
+            print("\ttc_action %lx" % a.value_())
             print_action_stats(a)
             tcf_mirred = Object(prog, 'struct tcf_mirred', address=a.value_())
-            print("output: %s" % tcf_mirred.tcfm_dev.name.string_().decode())
+            print("\toutput: %s" % tcf_mirred.tcfm_dev.name.string_().decode())
         if kind == "gact":
-            print("tc_action %lx" % a.value_())
-            print("tcf_chain %lx" % a.goto_chain.value_())
-            print("recirc_id: 0x%x, %d" % (a.goto_chain.index, a.goto_chain.index))
+            print("\ttc_action %lx" % a.value_())
+            print("\tgtcf_chain %lx" % a.goto_chain.value_())
+            print("\trecirc_id: 0x%x, %d" % (a.goto_chain.index, a.goto_chain.index))
         if kind == "tunnel_key":
             tun = Object(prog, 'struct tcf_tunnel_key', address=a.value_())
             if tun.params.tcft_action == 1:
                 ip_tunnel_key = tun.params.tcft_enc_metadata.u.tun_info.key
-                print("TCA_TUNNEL_KEY_ACT_SET")
-                print("ip_tunnel_info: %x" % tun.params.tcft_enc_metadata.u.tun_info.address_of_().value_())
-                print("tun_id: 0x%x" % ip_tunnel_key.tun_id.value_())
-                print("src ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
-                print("dst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
-                print("tp_dst: %d" % socket.ntohs(ip_tunnel_key.tp_dst.value_()))
+                print("\tTCA_TUNNEL_KEY_ACT_SET")
+                print("\tip_tunnel_info: %x" % tun.params.tcft_enc_metadata.u.tun_info.address_of_().value_())
+                print("\ttun_id: 0x%x" % ip_tunnel_key.tun_id.value_())
+                print("\tsrc ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
+                print("\tdst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
+                print("\ttp_dst: %d" % socket.ntohs(ip_tunnel_key.tp_dst.value_()))
 
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)

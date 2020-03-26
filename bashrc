@@ -672,6 +672,7 @@ alias tcs-rep="tc filter show dev $rep1 protocol ip parent ffff:"
 alias tcs-arp-rep="tc filter show dev $rep1 protocol arp parent ffff:"
 
 alias s='[[ $UID == 0 ]] && su - chrism'
+alias susu='sudo su'
 alias s2='su - mi'
 alias s0='[[ $UID == 0 ]] && su chrism'
 alias e=exit
@@ -5141,6 +5142,8 @@ function start-switchdev
 		echo "numvfs = $numvfs, return to confirm"
 		read
 	fi
+
+	smfs
 
 	get_pci
 	if [[ -z $pci ]]; then
