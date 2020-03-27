@@ -447,7 +447,7 @@ def parse_ct_status(status):
     IPS_HELPER = prog['IPS_HELPER'].value_()
     IPS_OFFLOAD = prog['IPS_OFFLOAD'].value_()
 
-    print("status: %x" % status, end=' ')
+    print("status: %4x" % status, end=' ')
     if status & IPS_EXPECTED:
         print("IPS_EXPECTED", end=" | ")
     if status & IPS_SEEN_REPLY:
@@ -511,13 +511,15 @@ def print_tuple(tuple, ct):
         TCP_CONNTRACK_TIME_WAIT = prog['TCP_CONNTRACK_TIME_WAIT'].value_()
         TCP_CONNTRACK_FIN_WAIT = prog['TCP_CONNTRACK_FIN_WAIT'].value_()
         TCP_CONNTRACK_CLOSE_WAIT = prog['TCP_CONNTRACK_CLOSE_WAIT'].value_()
+        TCP_CONNTRACK_CLOSE = prog['TCP_CONNTRACK_CLOSE'].value_()
         state = ct.proto.tcp.state
-        print("state: %x, tcp_state: %x, est: %x, fin_wait: %x, close_wait: %x, timed_wait: %x" % \
+        print("state: %x, tcp_state: %x, est: %x, fin_wait: %x, close_wait: %x, timed_wait: %x, close: %x" % \
             (state, ct.proto.tcp.state,
             TCP_CONNTRACK_ESTABLISHED,
             TCP_CONNTRACK_FIN_WAIT,
             TCP_CONNTRACK_CLOSE_WAIT,
-            TCP_CONNTRACK_TIME_WAIT))
+            TCP_CONNTRACK_TIME_WAIT,
+            TCP_CONNTRACK_CLOSE))
 #         print("timeout: %d" % ct.timeout);
         parse_ct_status(ct.status)
 
