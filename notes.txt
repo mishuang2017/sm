@@ -8964,6 +8964,8 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+/usr/lib/dracut/skipcpio /boot/initramfs-$(uname -r).img | zcat | cpio -idmv
+
 lspci -vnn
 lspci -vnn | grep VGA -A 12
 
