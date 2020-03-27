@@ -8964,6 +8964,11 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+lspci -vnn
+lspci -vnn | grep VGA -A 12
+
+hostnamectl
+
 linux16 /vmlinuz-5.5.0-rc4+ root=/dev/mapper/fedora-root
 initrd16 /initramfs-5.5.0-rc4+.img
 
@@ -11856,6 +11861,12 @@ seq_open_net
 32768   60999
 
  change tcp_fin_timeout or tcp_keepalive values. 
+
+===config===
+
+Sound card support
+SoundWire support
+SPI support
 
 ===indir_block===
 

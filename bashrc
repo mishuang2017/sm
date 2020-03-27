@@ -416,6 +416,7 @@ alias stop-all3='stop1; stop2; stop3'
 alias restart-all='stop-all; start-all'
 
 alias dud='du -h -d 1'
+alias du_sort='du -sh * | sort -hr'
 
 alias clone-git='git clone git@github.com:git/git.git'
 alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
@@ -10913,6 +10914,17 @@ function github_push
 	git remote rm origin
 	git remote add origin git@github.com:mishuang2017/sm.git
 	git push -u origin master
+}
+
+function modules
+{
+	modules=$(lsmod | awk '{print $1}')
+	for i in $modules; do
+		cd /lib/modules/5.4.19+
+set -x
+		find . -name $i.ko.xz
+set +x
+	done
 }
 
 ######## ubuntu #######
