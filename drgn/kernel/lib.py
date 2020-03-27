@@ -509,8 +509,18 @@ def print_tuple(tuple, ct):
         print("dir: %3d" % dir, end=' ')
         TCP_CONNTRACK_ESTABLISHED = prog['TCP_CONNTRACK_ESTABLISHED'].value_()
         TCP_CONNTRACK_TIME_WAIT = prog['TCP_CONNTRACK_TIME_WAIT'].value_()
+        TCP_CONNTRACK_FIN_WAIT = prog['TCP_CONNTRACK_FIN_WAIT'].value_()
+        TCP_CONNTRACK_CLOSE_WAIT = prog['TCP_CONNTRACK_CLOSE_WAIT'].value_()
         state = ct.proto.tcp.state
-        print("state: %x, est: %x, timed_wait: %x" % (state, TCP_CONNTRACK_ESTABLISHED, TCP_CONNTRACK_TIME_WAIT))
+        print("state: %x, tcp_state: %x, est: %x, fin_wait: %x, close_wait: %x, timed_wait: %x" % \
+            (state, ct.proto.tcp.state,
+            TCP_CONNTRACK_ESTABLISHED,
+            TCP_CONNTRACK_FIN_WAIT,
+            TCP_CONNTRACK_CLOSE_WAIT,
+            TCP_CONNTRACK_TIME_WAIT))
+#         print("timeout: %d" % ct.timeout);
+        parse_ct_status(ct.status)
+
 
 def print_tun(tun):
     print("\ttun_info: id: %x, dst ip: %s, dst port: %d" % \

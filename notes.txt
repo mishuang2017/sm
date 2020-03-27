@@ -11615,6 +11615,34 @@ TIME     PID     TID     COMM            FUNC
 
 ===tcp===
 
+618.3742 64      64      kworker/10:0    nf_ct_delete
+        nf_ct_delete+0x1 [nf_conntrack]
+        gc_worker+0x2fd [nf_conntrack]
+        process_one_work+0x241 [kernel]
+        worker_thread+0x50 [kernel]
+        kthread+0x109 [kernel]
+        ret_from_fork+0x35 [kernel]
+
+10.13257 12347   12347   conntrack       nf_ct_delete
+        nf_ct_delete+0x1 [nf_conntrack]
+        netlink_dump+0x18d [kernel]
+        __netlink_dump_start+0x191 [kernel]
+        ctnetlink_get_conntrack+0x231 [nf_conntrack_netlink]
+        nfnetlink_rcv_msg+0x337 [nfnetlink]
+        netlink_rcv_skb+0x50 [kernel]
+        nfnetlink_rcv+0x6c [nfnetlink]
+        netlink_unicast+0x187 [kernel]
+        netlink_sendmsg+0x222 [kernel]
+        sock_sendmsg+0x65 [kernel]
+        __sys_sendto+0x116 [kernel]
+        __x64_sys_sendto+0x29 [kernel]
+        do_syscall_64+0x5a [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
+nf_ct_delete
+nf_ct_delete_from_lists
+clean_from_lists
+
 %s/\(b'\)\(.*\)\( +0x.*\)/\2/
 
 The reply packet:
@@ -11863,12 +11891,6 @@ seq_open_net
 32768   60999
 
  change tcp_fin_timeout or tcp_keepalive values. 
-
-===config===
-
-Sound card support
-SoundWire support
-SPI support
 
 ===indir_block===
 

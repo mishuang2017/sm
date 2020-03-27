@@ -416,7 +416,7 @@ alias stop-all3='stop1; stop2; stop3'
 alias restart-all='stop-all; start-all'
 
 alias dud='du -h -d 1'
-alias du_sort='du -sh * | sort -hr'
+alias dus='du -sh * | sort -h'
 
 alias clone-git='git clone git@github.com:git/git.git'
 alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
