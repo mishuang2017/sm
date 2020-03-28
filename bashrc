@@ -91,7 +91,6 @@ elif (( host_num == 14 )); then
 	export DISPLAY=localhost:10.0
 
 	link=enp4s0f0
-	link=enp4s0f0np0
 	link2=enp4s0f1
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
