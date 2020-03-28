@@ -15,14 +15,6 @@ set -x
 	yum -y install vim-enhanced
 	sleep 1
 
-	for i in nis sudo yp-tools ypbind ypserv autofs; do
-		yum -y install $i
-	done
-
-	for i in nfs-utils nfs-utils-lib; do
-		yum -y install $i
-	done
-
 	# 'libvirt_driver_storage.so' fails to load due to "undefined symbol: rbd_diff_iterate2"
 # 	yum install librbd1-devel
 	# pip install requests urllib3 pyOpenSSL --upgrade
