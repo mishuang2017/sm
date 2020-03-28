@@ -19,7 +19,7 @@ set -x
 # 	yum install librbd1-devel
 	# pip install requests urllib3 pyOpenSSL --upgrade
 
-	yum -y install virt-manager
+	yum -y install virt-manager fence-agents-virsh
 	sleep 1
 	yum -y install ctags tmux screen ncurses-devel openssl-devel readline-devel snappy-devel wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx gcc-c++ bison flex make
 	# lzo elf ?
