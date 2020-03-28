@@ -17,7 +17,7 @@ mlx5e_rep_priv = get_mlx5e_rep_priv()
 # else:
 #     tc_ht = mlx5e_rep_priv.tc_ht
 
-print("MLX5E_TC_FLOW_FLAG_SIMPLE %x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SIMPLE'].value_()))
+# print("MLX5E_TC_FLOW_FLAG_SIMPLE %x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SIMPLE'].value_()))
 # print("MLX5E_TC_FLOW_FLAG_ESWITCH %x" % 1 << prog['MLX5E_TC_FLOW_FLAG_ESWITCH'].value_())
 
 try:
@@ -37,8 +37,9 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
 
 #     continue
 #     print(flow.miniflow_list)
-    j = 0
-    for mlx5e_miniflow_node in list_for_each_entry('struct mlx5e_miniflow_node', flow.miniflow_list.address_of_(), 'node'):
+
+#     j = 0
+#     for mlx5e_miniflow_node in list_for_each_entry('struct mlx5e_miniflow_node', flow.miniflow_list.address_of_(), 'node'):
 #         print(mlx5e_miniflow_node)
-        print("%d: mlx5e_miniflow %lx" % (j, mlx5e_miniflow_node.miniflow.value_()))
-        j = j + 1
+#         print("%d: mlx5e_miniflow %lx" % (j, mlx5e_miniflow_node.miniflow.value_()))
+#         j = j + 1
