@@ -53,6 +53,9 @@ set -x
 	sleep 1
 	systemctl disable gdm
 	systemctl stop gdm
+
+	# libnsl.so.1
+	yum -y instal libnsl
 	sleep 1
 set +x
 }
