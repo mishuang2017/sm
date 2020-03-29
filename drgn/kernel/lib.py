@@ -484,6 +484,42 @@ def parse_ct_status(status):
 
     print("")
 
+# enum tcp_conntrack {
+#         TCP_CONNTRACK_NONE,
+#         TCP_CONNTRACK_SYN_SENT,
+#         TCP_CONNTRACK_SYN_RECV,
+#         TCP_CONNTRACK_ESTABLISHED,
+#         TCP_CONNTRACK_FIN_WAIT,
+#         TCP_CONNTRACK_CLOSE_WAIT,
+#         TCP_CONNTRACK_LAST_ACK,
+#         TCP_CONNTRACK_TIME_WAIT,
+#         TCP_CONNTRACK_CLOSE,
+#         TCP_CONNTRACK_LISTEN,   /* obsolete */
+#         TCP_CONNTRACK_MAX,
+#         TCP_CONNTRACK_IGNORE,
+#         TCP_CONNTRACK_RETRANS,
+#         TCP_CONNTRACK_UNACK,
+#         TCP_CONNTRACK_TIMEOUT_MAX
+# };
+
+def get_tcp_state(state):
+    TCP_CONNTRACK_ESTABLISHED = prog['TCP_CONNTRACK_ESTABLISHED'].value_()
+    TCP_CONNTRACK_TIME_WAIT = prog['TCP_CONNTRACK_TIME_WAIT'].value_()
+    TCP_CONNTRACK_FIN_WAIT = prog['TCP_CONNTRACK_FIN_WAIT'].value_()
+    TCP_CONNTRACK_CLOSE_WAIT = prog['TCP_CONNTRACK_CLOSE_WAIT'].value_()
+    TCP_CONNTRACK_CLOSE = prog['TCP_CONNTRACK_CLOSE'].value_()
+
+    if state == TCP_CONNTRACK_ESTABLISHED:
+        return "TCP_CONNTRACK_ESTABLISHED"
+    elif state == TCP_CONNTRACK_TIME_WAIT:
+        return "TCP_CONNTRACK_TIME_WAIT"
+    elif state == TCP_CONNTRACK_FIN_WAIT:
+        return "TCP_CONNTRACK_FIN_WAIT"
+    elif state == TCP_CONNTRACK_CLOSE_WAIT:
+        return "TCP_CONNTRACK_CLOSE_WAIT"
+    elif state == TCP_CONNTRACK_CLOSE:
+        return "TCP_CONNTRACK_CLOSE"
+
 def print_tuple(tuple, ct):
     IP_CT_DIR_ORIGINAL = prog['IP_CT_DIR_ORIGINAL'].value_()
     IPPROTO_UDP = prog['IPPROTO_UDP'].value_()
@@ -510,19 +546,8 @@ def print_tuple(tuple, ct):
         print("dst ip: %20s:%6d" % (ipv4(socket.ntohl(tuple.tuple.dst.u3.ip.value_())), dport), end=' ')
         print("protonum: %3d" % protonum, end=' ')
         print("dir: %3d" % dir, end=' ')
-        TCP_CONNTRACK_ESTABLISHED = prog['TCP_CONNTRACK_ESTABLISHED'].value_()
-        TCP_CONNTRACK_TIME_WAIT = prog['TCP_CONNTRACK_TIME_WAIT'].value_()
-        TCP_CONNTRACK_FIN_WAIT = prog['TCP_CONNTRACK_FIN_WAIT'].value_()
-        TCP_CONNTRACK_CLOSE_WAIT = prog['TCP_CONNTRACK_CLOSE_WAIT'].value_()
-        TCP_CONNTRACK_CLOSE = prog['TCP_CONNTRACK_CLOSE'].value_()
         state = ct.proto.tcp.state
-        print("state: %x, tcp_state: %x, est: %x, fin_wait: %x, close_wait: %x, timed_wait: %x, close: %x" % \
-            (state, ct.proto.tcp.state,
-            TCP_CONNTRACK_ESTABLISHED,
-            TCP_CONNTRACK_FIN_WAIT,
-            TCP_CONNTRACK_CLOSE_WAIT,
-            TCP_CONNTRACK_TIME_WAIT,
-            TCP_CONNTRACK_CLOSE))
+        print("state: %x, tcp_state: %s" % (state, get_tcp_state(state)))
 #         print("timeout: %d" % ct.timeout);
         parse_ct_status(ct.status)
 
