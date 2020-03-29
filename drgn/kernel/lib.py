@@ -3,6 +3,7 @@ from drgn import container_of
 from drgn import Object
 from drgn import cast
 import socket
+import os
 
 import subprocess
 import drgn
@@ -13,7 +14,21 @@ prog = drgn.program_from_kernel()
 pf0_name = "ens1f0"
 pf1_name = "ens1f1"
 
+def kernel(name):
+    b = os.popen('uname -r')
+    text = b.read()
+    b.close()
+
+#     print("uname -r: %s" % text)
+
+    if name in text:
+        return True
+    else:
+        return False
+
 pf0_name = "enp4s0f0"
+if kernel("5.6.0-rc7+"):
+    pf0_name = "enp4s0f0np0"
 pf1_name = "enp4s0f1"
 
 import os
@@ -255,18 +270,6 @@ def get_pf0_netdev():
         name = dev.name.string_().decode()
         if name == pf0_name:
             return dev
-
-def kernel(name):
-    b = os.popen('uname -r')
-    text = b.read()
-    b.close()
-
-#     print("uname -r: %s" % text)
-
-    if name in text:
-        return True
-    else:
-        return False
 
 def get_mlx5e_rep_priv():
     mlx5e_priv = get_mlx5_pf0()

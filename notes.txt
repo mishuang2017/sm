@@ -137,7 +137,7 @@ so offload will never happen for us but should work with tc sw
 mlx5e_rep_get_phys_port_name
 phys_switch_id_show
 
-udevadm test /sys/class/net/eth0
+udevadm test /sys/class/net/enp4s0f0
 
 net_class_attrs
 

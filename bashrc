@@ -90,7 +90,7 @@ elif (( host_num == 14 )); then
 # 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0
 
-	link=enp4s0f0
+	link=enp4s0f0np0
 	link2=enp4s0f1
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
@@ -107,6 +107,11 @@ elif (( host_num == 14 )); then
 	vf1=enp4s0f2
 	vf2=enp4s0f3
 	vf3=enp4s0f4
+
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link}_$i
+	done
 
 # 	modprobe aer-inject
 
