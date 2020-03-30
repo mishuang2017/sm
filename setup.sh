@@ -57,6 +57,9 @@ set -x
 	# libnsl.so.1
 	yum -y instal libnsl
 	sleep 1
+
+	# nginx
+	yum -y instal pcre-devel
 set +x
 }
 

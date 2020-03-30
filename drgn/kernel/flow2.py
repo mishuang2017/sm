@@ -215,12 +215,18 @@ chains_ht = esw_chains_priv.chains_ht
 prios_ht = esw_chains_priv.prios_ht
 # print(esw_chains_priv)
 
-# for i, chain in enumerate(lib.hash(chains_ht, 'struct fdb_chain', 'node')):
-#     print(i)
+for i, chain in enumerate(lib.hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print(chain)
+#     print("chain id: %x" % chain.chain)
+    for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
+#         print(prio)
+        print("\n=== chain: %x, prio: %x, level: %x ===" % \
+            (prio.key.chain, prio.key.prio, prio.key.level))
+        table = prio.fdb
+        flow_table("", table)
 
-for i, prio in enumerate(lib.hash(prios_ht, 'struct fdb_prio', 'node')):
-    print(i)
+# for i, prio in enumerate(lib.hash(prios_ht, 'struct fdb_prio', 'node')):
+#     print(i)
 #     print(prio)
-    table = prio.fdb
-    flow_table("", table)
+#     table = prio.fdb
+#     flow_table("", table)
