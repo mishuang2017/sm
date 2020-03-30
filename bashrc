@@ -32,9 +32,9 @@ alias rc='. ~/.bashrc'
 if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
 	numvfs=3
-	numvfs=17
 	numvfs=49
 	numvfs=97
+	numvfs=17
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -10693,7 +10693,7 @@ function wrk_setup
 {
 	off
 	sleep 1
-# 	smfs
+	smfs
 	restart
 
 # 	ovs-vsctl set open_vswitch . other_config:max-idle="300000"
