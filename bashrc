@@ -9364,18 +9364,7 @@ alias cc122='corrupt -c 1.1.1.122 -t 100000'
 
 alias msg='tail -f /var/log/messages'
 
-alias rc23='scp ~chrism/.bashrc root@10.196.23.1:~/'
-alias rc24='scp ~chrism/.bashrc root@10.196.24.1:~'
-alias rc25='scp ~chrism/.bashrc root@10.196.23.5:~'
-alias rc26='scp ~chrism/.bashrc root@10.196.24.5:~'
 alias rc0='scp ~chrism/.bashrc chrism@10.7.2.14:~'
-alias rc1='scp ~chrism/.bashrc chrism@10.12.205.13:~'
-
-function rca
-{
-	rc23
-	rc24
-}
 
 alias hping='hping3 -S -s 10001 -p 12345 1.1.1.122'
 alias f1="sudo flint -d $pci q"
