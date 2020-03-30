@@ -4,10 +4,13 @@ if [ -f /etc/bashrc ]; then
 fi
 
 debian=0
-[[ -f /usr/bin/lsb_release ]] && debian=1
+test -f /usr/bin/lsb_release && debian=1
 
-numvfs=17
+ofed_mlx5=0
+modinfo mlx5_core -n | grep extra > /dev/null 2>&1 && ofed_mlx5=1
+
 numvfs=3
+numvfs=17
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -2068,9 +2071,9 @@ function make-all
 	unset CONFIG_LOCALVERSION_AUTO
 	make olddefconfig
 	make -j $cpu_num2
-	sudo time make modules_install -j $cpu_num2
+	sudo make modules_install -j $cpu_num2
 	sudo make install
-# 	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
+	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
 
 	/bin/rm -rf ~/.ccache
 }
@@ -10538,44 +10541,36 @@ set +x
 function dmfs
 {
 set -x
-	echo dmfs > /sys/class/net/$link/compat/devlink/steering_mode 
+	if (( ofed_mlx5 == 1 )); then
+		echo dmfs > /sys/class/net/$link/compat/devlink/steering_mode 
+	else
+		devlink dev param set pci/$pci name flow_steering_mode value "dmfs" \
+			cmode runtime || err "Failed to set steering sw"
+	fi
+
 set +x
 }
 
 function smfs
 {
 set -x
-	echo smfs > /sys/class/net/$link/compat/devlink/steering_mode
+	if (( ofed_mlx5 == 1 )); then
+		echo smfs > /sys/class/net/$link/compat/devlink/steering_mode
+	else
+		devlink dev param set pci/$pci name flow_steering_mode value "smfs" \
+			cmode runtime || err "Failed to set steering sw"
+	fi
 set +x
 }
 
 function get-fs
 {
 set -x
-	cat /sys/class/net/$link/compat/devlink/steering_mode
-set +x
-}
-
-function dmfs2
-{
-set -x
-	devlink dev param set pci/$pci name flow_steering_mode value "dmfs" \
-		cmode runtime || err "Failed to set steering sw"
-set +x
-}
-
-function smfs2
-{
-set -x
-	devlink dev param set pci/$pci name flow_steering_mode value "smfs" \
-		cmode runtime || err "Failed to set steering sw"
-set +x
-}
-
-function get-fs2
-{
-set -x
-	devlink dev  param show  pci/0000:04:00.0 name flow_steering_mode
+	if (( ofed_mlx5 == 1 )); then
+		cat /sys/class/net/$link/compat/devlink/steering_mode
+	else
+		devlink dev  param show  pci/0000:04:00.0 name flow_steering_mode
+	fi
 set +x
 }
 
@@ -10709,7 +10704,7 @@ function wrk_setup
 {
 	off
 	sleep 1
-	smfs
+# 	smfs
 	restart
 
 # 	ovs-vsctl set open_vswitch . other_config:max-idle="300000"
