@@ -7,7 +7,7 @@ debian=0
 test -f /usr/bin/lsb_release && debian=1
 
 ofed_mlx5=0
-modinfo mlx5_core -n | grep extra > /dev/null 2>&1 && ofed_mlx5=1
+/sbin/modinfo mlx5_core -n | egrep "extra|updates" > /dev/null 2>&1 && ofed_mlx5=1
 
 numvfs=3
 numvfs=17
