@@ -9,8 +9,8 @@ test -f /usr/bin/lsb_release && debian=1
 ofed_mlx5=0
 /sbin/modinfo mlx5_core -n | egrep "extra|updates" > /dev/null 2>&1 && ofed_mlx5=1
 
-numvfs=3
 numvfs=17
+numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -94,6 +94,7 @@ elif (( host_num == 14 )); then
 	export DISPLAY=localhost:10.0
 
 	link=enp4s0f0np0
+	link=enp4s0f0
 	link2=enp4s0f1
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
@@ -730,7 +731,7 @@ alias vin='vi ~/sm/notes.txt'
 alias vij='vi ~/Documents/jd.txt'
 alias vi1='vi ~/Documents/ovs.txt'
 alias vi2='vi ~/Documents/mirror.txt'
-alias vib='vi ~/Documents/bug.txt'
+alias vi-sflow='vi ~/sm/sflow/note.txt'
 alias vip='vi ~/Documents/private.txt'
 alias viperf='vi ~/Documents/perf.txt'
 alias vime='sudo vim /boot/grub/menu.lst'
@@ -5153,6 +5154,7 @@ function start-switchdev
 		read
 	fi
 
+	smfs
 	get_pci
 	if [[ -z $pci ]]; then
 		echo "pci is null"
@@ -8166,7 +8168,8 @@ function addflow-port
 
 	bru
 	restart-ovs
-	for(( ip = 200; ip < 201; ip++)); do
+	max_ip=2
+	for(( ip = 200; ip < $((200+max_ip)); ip++)); do
 		for(( src = 1; src < 65535; src++)); do
 
 			# on kernel 5.4, remove priority
@@ -10335,17 +10338,19 @@ alias numa="cat /sys/class/net/$link/device/numa_node"
 
 # ip a | grep 10.12.205.15 && hostname dev-chrism-vm1
 
-function trex-arp
+function trex_arp
 {
 set -x
 	if (( host_num == 13 )); then
 		arp -d 192.168.1.14
-		arp -s 192.168.1.14 24:8a:07:88:27:ca
+# 		arp -s 192.168.1.14 24:8a:07:88:27:ca
+		arp -s 192.168.1.14 b8:59:9f:bb:31:82
 	fi
 
 	if (( host_num == 14 )); then
 		arp -d 192.168.1.13
-		arp -s 192.168.1.13 24:8a:07:88:27:9a
+# 		arp -s 192.168.1.13 24:8a:07:88:27:9a
+		arp -s 192.168.1.13 b8:59:9f:bb:31:66
 	fi
 set +x
 }
