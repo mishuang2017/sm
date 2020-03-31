@@ -70,12 +70,38 @@ def print_flow_key(key):
     print("tp_dst: %d" % socket.ntohs(tp_dst))
 
 def print_flow_act(acts):
+    print(acts)
     nlattr = acts.actions[0]
     nla_type = nlattr.nla_type
-    if nla_type == prog['OVS_ACTION_ATTR_OUTPUT']:
-        addr = nlattr.address_of_().value_() + prog.type('struct nlattr').size
-        port = Object(prog, 'int', address=addr)
-        print("\toutput port: %d" % port.value_())
+    actions_len = acts.actions_len
+    print("actions_len: %d\n" % actions_len)
+    if nla_type == prog['OVS_ACTION_ATTR_SAMPLE']:  # 6
+        sample_len = nlattr.nla_len
+        print("sample_len: %d\n" % sample_len)
+        act_addr = acts.actions.address_of_().value_() + 4
+        nlattr = Object(prog, 'struct nlattr', address=act_addr)
+
+    if nlattr.nla_type == prog['OVS_SAMPLE_ATTR_ARG']: # 4
+        act_addr = act_addr + 8 # 4 for bool exec
+        probability = Object(prog, 'u32', address=act_addr)
+        print("probability: %x, %.2f" % (probability, probability.value_() / 4294967295))
+
+    act_addr = act_addr + 4
+    nlattr = Object(prog, 'struct nlattr', address=act_addr)
+    print(nlattr)
+    act_addr = act_addr + 4
+    nlattr = Object(prog, 'struct nlattr', address=act_addr)
+    print(nlattr)
+
+    if nlattr.nla_type == prog['OVS_USERSPACE_ATTR_PID']:  # 1
+        act_addr = act_addr + 4
+        pid = Object(prog, 'u32', address=act_addr)
+        print("PID: %x" % pid)
+
+    addr = acts.actions.address_of_().value_() + prog.type('struct nlattr').size
+    print("addr: %lx" % addr)
+    port = Object(prog, 'int', address=addr)
+    print("\toutput port: %d" % port.value_())
 
 def print_flow_stat(stat):
     print("\tpacket_count: %d" % stat[0].packet_count)
@@ -83,3 +109,5 @@ def print_flow_stat(stat):
 for i in range(n_buckets):
     for flow in hlist_for_each_entry('struct sw_flow', ufid_ti.buckets[i].address_of_(), 'ufid_table'):
         print_flow_key(flow.key)
+        print_flow_act(flow.sf_acts)
+        print_flow_stat(flow.stats)

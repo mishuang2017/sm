@@ -17,3 +17,81 @@ ovs-vsctl -- clear Bridge br sflow
 sudo ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:8087\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
 
 ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+
+
+crash> rd -8 0xffff8c4d81cac29c 0x54
+ffff8c4d81cac29c:  54 00 06 00 0c 00 04 00 01 58 25 93 99 99 99 19   T........X%.....
+ffff8c4d81cac2ac:  44 00 02 00 08 00 01 00 09 d1 07 aa 34 00 02 00   D...........4...
+ffff8c4d81cac2bc:  01 00 00 00 03 00 00 00 02 f2 cd 6b e5 4c f6 99   ...........k.L..
+ffff8c4d81cac2cc:  30 38 63 bf 2e 63 eb d1 00 00 00 00 48 00 00 00   08c..c......H...
+ffff8c4d81cac2dc:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+ffff8c4d81cac2ec:  04 00 04 00                                       ....
+crash>
+
+
+enum ovs_userspace_attr {
+        OVS_USERSPACE_ATTR_UNSPEC,
+1        OVS_USERSPACE_ATTR_PID,       /* u32 Netlink PID to receive upcalls. */
+2        OVS_USERSPACE_ATTR_USERDATA,  /* Optional user-specified cookie. */
+3        OVS_USERSPACE_ATTR_EGRESS_TUN_PORT,  /* Optional, u32 output port
+                                              * to get tunnel info. */
+4        OVS_USERSPACE_ATTR_ACTIONS,   /* Optional flag to get actions. */
+        __OVS_USERSPACE_ATTR_MAX
+};
+
+         0x54    0xc                 0x44
+crash> # actions:sample(sample=10.0%,actions(      userspace(pid=2852638985,  sFlow(vid=0,pcp=0,output=72),  actions)    )),enp4s0f0_1
+
+/* user_action_cookie is passed as argument to OVS_ACTION_ATTR_USERSPACE. */
+struct user_action_cookie {
+    uint16_t type;              /* enum user_action_cookie_type. */
+    ofp_port_t ofp_in_port;     /* OpenFlow in port, or OFPP_NONE. */
+    struct uuid ofproto_uuid;   /* UUID of ofproto-dpif. */
+
+    union {
+        struct {
+            /* USER_ACTION_COOKIE_SFLOW. */
+            ovs_be16 vlan_tci;      /* Destination VLAN TCI. */
+            uint32_t output;        /* SFL_FLOW_SAMPLE_TYPE 'output' value. */
+        } sflow;
+    };
+};
+
+
+/* The first action is always 'OVS_SAMPLE_ATTR_ARG'. */
+
+                          OVS_ACTION_ATTR_SAMPLE
+ffff8c4d81cac29c:  (54 00 06 00 (0c 00 04 00 01 58 25 93 99 99 99 19)   T........X%.....
+                                     OVS_SAMPLE_ATTR_ARG
+
+                                     OVS_USERSPACE_ATTR_PID(aa07d109)  
+ffff8c4d81cac2ac:  (44 00 02 00 (08 00 01 00 09 d1 07 aa)           (34 00 02 00   D...........4...
+                          OVS_ACTION_ATTR_USERSPACE                        OVS_ACTION_ATTR_USERSPACE
+
+                               port=3      uuid 16 bytes
+ffff8c4d81cac2bc:  01 00 00 00 03 00 00 00 02 f2 cd 6b e5 4c f6 99   ...........k.L..
+                   USER_ACTION_COOKIE_SFLOW
+
+                                           vlan_tci
+ffff8c4d81cac2cc:  30 38 63 bf 2e 63 eb d1 00 00 00 00 48 00 00 00   08c..c......H...
+                                                       output=72
+
+
+ffff8c4d81cac2dc:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00)   ................
+
+ffff8c4d81cac2ec:  04 00 04 00))
+                         OVS_USERSPACE_ATTR_ACTIONS
+
+
+
+
+crash> rd -8 0xffff8c4d7c6fd71c 0x5c
+ffff8c4d7c6fd71c:  54 00 06 00 0c 00 04 00 01 58 25 93 99 99 99 19   T........X%.....
+ffff8c4d7c6fd72c:  44 00 02 00 08 00 01 00 83 2d 23 d0 34 00 02 00   D........-#.4...
+ffff8c4d7c6fd73c:  01 00 00 00 02 00 00 00 02 f2 cd 6b e5 4c f6 99   ...........k.L..
+ffff8c4d7c6fd74c:  30 38 63 bf 2e 63 eb d1 00 00 00 00 49 00 00 00   08c..c......I...
+ffff8c4d7c6fd75c:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+ffff8c4d7c6fd76c:  04 00 04 00 08 00 01 00 03 00 00 00               ............
+
+
+

@@ -597,6 +597,7 @@ alias vi-action="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/actio
 alias vi-filter="vi $linux_dir/tools/testing/selftests/tc-testing/tc-tests/filters//tests.json"
 alias smo="cd /$images/chrism/openvswitch"
 alias smo2="cd /$images/chrism/ovs"
+alias smo3="cd /$images/chrism/ovs_2.13"
 alias smt="cd /$images/chrism/ovs-tests"
 alias cfo="cd /$images/chrism/openvswitch; cscope -d"
 alias ipa='ip a'

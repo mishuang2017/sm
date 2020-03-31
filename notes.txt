@@ -877,7 +877,7 @@ set height 0
 b find_match_wc
 print/x *flow
 
-ptype struct shash_node
+ptype /o struct shash_node
 
 explore all_ofproto_dpifs
 

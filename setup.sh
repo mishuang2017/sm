@@ -115,3 +115,6 @@ function install-trex
 	yum -y install tkinter
 	pip install matplotlib
 }
+
+# qalc
+yum install -y qalculate
