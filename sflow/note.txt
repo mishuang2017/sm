@@ -64,7 +64,7 @@ struct user_action_cookie {
 ffff8c4d81cac29c:  (54 00 06 00 (0c 00 04 00 01 58 25 93 99 99 99 19)   T........X%.....
                                      OVS_SAMPLE_ATTR_ARG
 
-                                     OVS_USERSPACE_ATTR_PID(aa07d109)  
+                                       OVS_USERSPACE_ATTR_PID(aa07d109)  
 ffff8c4d81cac2ac:  (44 00 02 00 (08 00 01 00 09 d1 07 aa)           (34 00 02 00   D...........4...
                           OVS_ACTION_ATTR_USERSPACE                        OVS_ACTION_ATTR_USERSPACE
 

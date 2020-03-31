@@ -70,36 +70,37 @@ def print_flow_key(key):
     print("tp_dst: %d" % socket.ntohs(tp_dst))
 
 def print_flow_act(acts):
-    print(acts)
+#     print(acts)
     nlattr = acts.actions[0]
     nla_type = nlattr.nla_type
     actions_len = acts.actions_len
-    print("actions_len: %d\n" % actions_len)
+    actions_addr = acts.actions.address_of_()
+    nlattr_size = prog.type('struct nlattr').size
+    print("\tactions_len: %d, actions: %lx" % (actions_len, actions_addr))
     if nla_type == prog['OVS_ACTION_ATTR_SAMPLE']:  # 6
-        sample_len = nlattr.nla_len
-        print("sample_len: %d\n" % sample_len)
+        sample_len = nlattr.nla_len.value_()
+        print("\tsample_len: %d" % sample_len)
         act_addr = acts.actions.address_of_().value_() + 4
         nlattr = Object(prog, 'struct nlattr', address=act_addr)
+        arg_len = nlattr.nla_len.value_()
+        print("\targ_len: %d" % arg_len)
 
     if nlattr.nla_type == prog['OVS_SAMPLE_ATTR_ARG']: # 4
-        act_addr = act_addr + 8 # 4 for bool exec
+        act_addr = act_addr + nlattr_size + 4 # 4 for bool exec
         probability = Object(prog, 'u32', address=act_addr)
-        print("probability: %x, %.2f" % (probability, probability.value_() / 4294967295))
+        print("\tprobability: %x, %.2f" % (probability, probability.value_() / 4294967295))
 
-    act_addr = act_addr + 4
+    act_addr = act_addr + nlattr_size
     nlattr = Object(prog, 'struct nlattr', address=act_addr)
-    print(nlattr)
-    act_addr = act_addr + 4
+    act_addr = act_addr + nlattr_size
     nlattr = Object(prog, 'struct nlattr', address=act_addr)
-    print(nlattr)
 
     if nlattr.nla_type == prog['OVS_USERSPACE_ATTR_PID']:  # 1
-        act_addr = act_addr + 4
+        act_addr = act_addr + nlattr_size
         pid = Object(prog, 'u32', address=act_addr)
-        print("PID: %x" % pid)
+        print("\tPID: %x" % pid)
 
-    addr = acts.actions.address_of_().value_() + prog.type('struct nlattr').size
-    print("addr: %lx" % addr)
+    addr = acts.actions.address_of_().value_() + sample_len + nlattr_size
     port = Object(prog, 'int', address=addr)
     print("\toutput port: %d" % port.value_())
 
@@ -111,3 +112,4 @@ for i in range(n_buckets):
         print_flow_key(flow.key)
         print_flow_act(flow.sf_acts)
         print_flow_stat(flow.stats)
+        print("")
