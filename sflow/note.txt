@@ -12,8 +12,8 @@ tcpdump -ni eno1 udp port 8087
 [root@dev-r630-03 ~]# sudo ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:8087\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
 1a79913e-670d-4cf8-982e-e4e96621cc25
 
-ovs-vsctl -- clear Bridge br0 sflow
+ovs-vsctl -- clear Bridge br sflow
 
 sudo ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:8087\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
 
-
+ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow

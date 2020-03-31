@@ -17,7 +17,7 @@ netlink_ops = prog['netlink_ops'].address_of_().value_()
 
 def print_netlink_sock(sock):
     print("sock.sk_protocol: %d" % sock.sk.sk_protocol, end='')
-    print("\tportid: %10x" % sock.portid, end='')
+    print("\tportid: %10x, %20d" % (sock.portid, sock.portid), end='')
     print("\tdst_portid: %x" % sock.dst_portid, end='')
     print("\tflags: %x" % sock.flags)
 

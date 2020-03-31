@@ -731,7 +731,6 @@ alias vin='vi ~/sm/notes.txt'
 alias vij='vi ~/Documents/jd.txt'
 alias vi1='vi ~/Documents/ovs.txt'
 alias vi2='vi ~/Documents/mirror.txt'
-alias vi-sflow='vi ~/sm/sflow/note.txt'
 alias vip='vi ~/Documents/private.txt'
 alias viperf='vi ~/Documents/perf.txt'
 alias vime='sudo vim /boot/grub/menu.lst'
@@ -4359,7 +4358,7 @@ function br
 set -x
 	del-br
 	vs add-br $br
-	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
@@ -10921,7 +10920,31 @@ set +x
 	done
 }
 
-######## ubuntu #######
+# sflow
+
+alias vi-sflow='vi ~/sm/sflow/note.txt'
+
+function sflow_clear
+{
+	ovs-vsctl -- clear Bridge $br sflow
+}
+
+function sflow_list
+{
+	ovs-vsctl list sflow
+}
+
+function sflow_create
+{
+	ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+}
+
+function sflowtool1
+{
+	sflowtool -p 6343 -L localtime,srcIP,dstIP
+}
+
+######## uuu #######
 
 [[ -f /usr/bin/lsb_release ]] || return
 

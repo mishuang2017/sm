@@ -8966,6 +8966,12 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+3 Ways to Find Out Which Process Listening on a Particular Port
+netstat -lunp
+netstat -ltnp
+
+lsof -i :79
+
 /usr/lib/dracut/skipcpio /boot/initramfs-$(uname -r).img | zcat | cpio -idmv
 
 lspci -vnn
