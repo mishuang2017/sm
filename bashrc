@@ -9,8 +9,8 @@ test -f /usr/bin/lsb_release && debian=1
 ofed_mlx5=0
 /sbin/modinfo mlx5_core -n | egrep "extra|updates" > /dev/null 2>&1 && ofed_mlx5=1
 
-numvfs=17
 numvfs=3
+numvfs=17
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -33,8 +33,8 @@ if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
 	numvfs=3
 	numvfs=49
-	numvfs=97
 	numvfs=17
+	numvfs=97
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
