@@ -55,11 +55,11 @@ set -x
 	systemctl stop gdm
 
 	# libnsl.so.1
-	yum -y instal libnsl
+	yum -y install libnsl
 	sleep 1
 
 	# nginx
-	yum -y instal pcre-devel
+	yum -y install pcre-devel
 set +x
 }
 

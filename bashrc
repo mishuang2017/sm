@@ -9,8 +9,8 @@ test -f /usr/bin/lsb_release && debian=1
 ofed_mlx5=0
 /sbin/modinfo mlx5_core -n | egrep "extra|updates" > /dev/null 2>&1 && ofed_mlx5=1
 
-numvfs=3
 numvfs=17
+numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
 # alias rc='. /images/chrism/sm/bashrc'
@@ -93,8 +93,8 @@ elif (( host_num == 14 )); then
 # 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0
 
-	link=enp4s0f0np0
 	link=enp4s0f0
+	[[ "$(uname -r)" == "5.6.0-rc7+" ]] && link=enp4s0f0np0
 	link2=enp4s0f1
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
