@@ -2918,6 +2918,7 @@ tcpdump -i $link src 192.168.1.14 and port 4000 and greater 100 -v -nn
 
 FIN
 tcpdump -i $rep2 "tcp[tcpflags] & (tcp-fin) != 0" -nn
+tcpdump -i $link "tcp[tcpflags] & (tcp-fin) != 0" -nn
 
 tcpdump -i eth1 ether src 6c:41:6a:ac:11:42 -c 10
 

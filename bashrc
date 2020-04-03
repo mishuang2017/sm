@@ -5114,10 +5114,20 @@ function set_ns_nf
 	cat << EOF > $file
 echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
 echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+# sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=60
 EOF
 	for (( i = 1; i < numvfs; i++)); do
 set -x
 		ip netns exec n1$i bash $file
+set +x
+	done
+}
+
+function ns_run
+{
+	for (( i = 1; i < numvfs; i++)); do
+set -x
+		ip netns exec n1$i ip route delete 8.9.10.0/24 via 192.168.0.254
 set +x
 	done
 }
@@ -6102,6 +6112,10 @@ alias syn='syndrome 16.25.6000'
 function burn5
 {
 set -x
+	mlxfwup -d $pci -f 16.27.1016
+
+	return
+
 	pci=0000:04:00.0
 	version=fw-4119-rel-16_25_1000
 	version=fw-4119-rel-16_25_0328
@@ -8168,7 +8182,7 @@ function addflow-port
 
 	bru
 	restart-ovs
-	max_ip=2
+	max_ip=1
 	for(( ip = 200; ip < $((200+max_ip)); ip++)); do
 		for(( src = 1; src < 65535; src++)); do
 
@@ -10711,6 +10725,51 @@ function wrk_setup
 # 	wrk_tune
 }
 
+function wrk_loop
+{
+        n=0
+        for (( i = 0; i < 1000; i++ )); do
+                wrk_run0 $(((n%15)+1))
+                n=$((n+1))
+        done
+}
+
+function wrk_run0
+{
+        local port=0
+        local time=30
+        num_ns=1
+        [[ $# == 1 ]] && num_ns=$1
+
+        cd /root/wrk-nginx-container
+        for (( cpu = 0; cpu < 96; cpu++ )); do
+                n=$((n%num_ns))
+                local ns=n1$((n+1))
+                n=$((n+1))
+set -x
+                ip=1.1.1.200
+                ip=8.9.10.11
+                ip netns exec $ns taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
+set +x
+
+                port=$((port+1))
+                if (( $port >= 9 )); then
+                        port=0
+                fi
+        done
+
+        i=1
+        while :; do
+                echo $i
+                i=$((i+1))
+                sleep 1
+                (( i == time )) && break
+        done
+        sleep 5
+        cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+
+}
+
 # best performance, conneciton=60, set all VFs affinity to cpu 0-11
 # wrk_run 84 12
 # 3157681
@@ -10840,7 +10899,7 @@ set -x
 	cd /root/wrk-nginx-container
 	WRK=/images/chrism/wrk/wrk
 # 	$WRK -d 60 -t 1 -c 1  --latency --script=counter.lua http://[8.9.10.11]:80
-	$WRK -d 30 -t 200 -c 800  --latency --script=counter.lua http://[192.168.1.2]:80
+	$WRK -d 1 -t 1 -c 1  --latency --script=counter.lua http://[1.1.1.200]:80
 set +x
 }
 
@@ -10924,6 +10983,14 @@ set +x
 # sflow
 
 alias vi-sflow='vi ~/sm/sflow/note.txt'
+
+
+function sample1
+{
+	tc qdisc del dev $link ingress
+	tc qdisc add dev $link handle ffff: ingress
+	tc filter add dev $link parent ffff: matchall action sample rate 12 group 4
+}
 
 function sflow_clear
 {

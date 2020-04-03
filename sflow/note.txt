@@ -64,7 +64,7 @@ struct user_action_cookie {
 ffff8c4d81cac29c:  (54 00 06 00 (0c 00 04 00 01 58 25 93 99 99 99 19)   T........X%.....
                                      OVS_SAMPLE_ATTR_ARG
 
-                                       OVS_USERSPACE_ATTR_PID(aa07d109)  
+                                     OVS_USERSPACE_ATTR_PID(aa07d109)  
 ffff8c4d81cac2ac:  (44 00 02 00 (08 00 01 00 09 d1 07 aa)           (34 00 02 00   D...........4...
                           OVS_ACTION_ATTR_USERSPACE                        OVS_ACTION_ATTR_USERSPACE
 
@@ -93,5 +93,27 @@ ffff8c4d7c6fd74c:  30 38 63 bf 2e 63 eb d1 00 00 00 00 49 00 00 00   08c..c.....
 ffff8c4d7c6fd75c:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
 ffff8c4d7c6fd76c:  04 00 04 00 08 00 01 00 03 00 00 00               ............
 
+
+
+a[root@dev-r630-04 ~]# trace tcf_sample_init -K
+TIME     PID     TID     COMM            FUNC
+5.173285 4273    4273    tc              tcf_sample_init
+        tcf_sample_init+0x1 [act_sample]
+        tcf_action_init+0x115 [kernel]
+        tcf_exts_validate+0xcb [kernel]
+        mall_change+0x168 [cls_matchall]
+        tc_new_tfilter+0x861 [kernel]
+        rtnetlink_rcv_msg+0x369 [kernel]
+        netlink_rcv_skb+0x50 [kernel]
+        rtnetlink_rcv+0x15 [kernel]
+        netlink_unicast+0x1a8 [kernel]
+        netlink_sendmsg+0x233 [kernel]
+        sock_sendmsg+0x65 [kernel]
+        ____sys_sendmsg+0x215 [kernel]
+        ___sys_sendmsg+0x81 [kernel]
+        __sys_sendmsg+0x5c [kernel]
+        __x64_sys_sendmsg+0x1f [kernel]
+        do_syscall_64+0x5a [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
 
 
