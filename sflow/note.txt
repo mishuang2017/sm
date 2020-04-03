@@ -117,3 +117,8 @@ TIME     PID     TID     COMM            FUNC
         entry_SYSCALL_64_after_hwframe+0x44 [kernel]
 
 
+=== question ===
+
+1. What is FW level support 
+mlx5_tc_ct_init_check_support()
+	err_msg = "firmware level support is missing";

@@ -175,7 +175,10 @@ def print_exts(e):
                 print("\tdst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
                 print("\ttp_dst: %d" % socket.ntohs(ip_tunnel_key.tp_dst.value_()))
         if kind == "sample":
-            print(a)
+            tcf_sample = Object(prog, 'struct tcf_sample', address=a.value_())
+            print(tcf_sample)
+            print("\trate: %d" % tcf_sample.rate)
+            print("\tpsample_group_num: %d" % tcf_sample.psample_group_num)
 
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
