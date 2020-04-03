@@ -174,6 +174,8 @@ def print_exts(e):
                 print("\tsrc ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
                 print("\tdst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
                 print("\ttp_dst: %d" % socket.ntohs(ip_tunnel_key.tp_dst.value_()))
+        if kind == "sample":
+            print(a)
 
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
