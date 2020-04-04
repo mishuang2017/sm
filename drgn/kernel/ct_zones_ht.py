@@ -16,7 +16,8 @@ zones_ht = prog['zones_ht']
 
 def print_flow_offload_tuple(t):
 #     print(t)
-    print("src_v4: %10s" % ipv4(socket.ntohl(t.src_v4.s_addr.value_())), end='\t')
+    print("flow_offload_tuple %lx" % t.address_of_())
+    print("\tsrc_v4: %10s" % ipv4(socket.ntohl(t.src_v4.s_addr.value_())), end='\t')
     print("dst_v4: %10s" % ipv4(socket.ntohl(t.dst_v4.s_addr.value_())), end='\t')
     print("src_port: %6d" % socket.ntohs(t.src_port.value_()), end='\t')
     print("dst_port: %6d" % socket.ntohs(t.dst_port.value_()), end='\t')
@@ -26,7 +27,9 @@ def print_flow_offload_tuple(t):
     print('')
 
 def print_flow_offload(flow):
-    print("%lx" % flow.address_of_())
+    print("flow_offload %lx" % flow)
+    print("\tflags %x" % flow.flags)
+#     print(flow)
 
 for i, flow_table in enumerate(hash(zones_ht, 'struct tcf_ct_flow_table', 'node')):
     nf_ft = flow_table.nf_ft
@@ -38,5 +41,10 @@ for i, flow_table in enumerate(hash(zones_ht, 'struct tcf_ct_flow_table', 'node'
     for j, tuple_rhash in enumerate(hash(ft_ht, 'struct flow_offload_tuple_rhash', 'node')):
         tuple = tuple_rhash.tuple
         print_flow_offload_tuple(tuple)
-        flow_offload = cast("struct flow_offload *", tuple_rhash)
-        print(flow_offload)
+        if tuple.dir.value_() == 0:
+            flow_offload = cast("struct flow_offload *", tuple_rhash)
+            print_flow_offload(flow_offload)
+        else:
+            flow_offload = Object(prog, 'struct flow_offload', address=tuple_rhash.value_() - \
+                prog.type('struct flow_offload_tuple_rhash').size)
+            print_flow_offload(flow_offload.address_of_())
