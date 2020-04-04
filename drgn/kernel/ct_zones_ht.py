@@ -28,7 +28,8 @@ def print_flow_offload_tuple(t):
 
 def print_flow_offload(flow):
     print("flow_offload %lx" % flow)
-    print("\tflags %x" % flow.flags)
+    print("\tflags: %x" % flow.flags, end='\t')
+    print("(NF_FLOW_HW: %x)" % (1 << prog['NF_FLOW_HW'].value_()))
 #     print(flow)
 
 for i, flow_table in enumerate(hash(zones_ht, 'struct tcf_ct_flow_table', 'node')):
