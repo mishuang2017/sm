@@ -13,6 +13,13 @@ from lib import *
 mlx5e_rep_priv = get_mlx5e_rep_priv()
 ct_priv = mlx5e_rep_priv.uplink_priv.ct_priv
 
+print("=== mlx5e_rep_priv.uplink_priv.ct_priv.ct ===")
+print("mlx5_flow_table %lx" % ct_priv.ct)
+flow_table("ct_priv.ct", ct_priv.ct)
+print("=== mlx5e_rep_priv.uplink_priv.ct_priv.post_ct ===")
+print("mlx5_flow_table %lx" % ct_priv.post_ct)
+flow_table("ct_priv.post_ct", ct_priv.post_ct)
+
 ###############################
 
 fte_ids = ct_priv.fte_ids
