@@ -139,14 +139,17 @@ def print_exts(e):
 #         print(a.cpu_bstats_hw)
         if kind == "ct":
 #             print(a)
-            tcf_conntrack_info = Object(prog, 'struct tcf_conntrack_info', address=a.value_())
-            print("\tzone: %d" % tcf_conntrack_info.zone.value_(), end='')
-            print("\tmark: 0x%x" % tcf_conntrack_info.mark.value_(), end='')
-            print("\tlabels[0]: 0x%x" % tcf_conntrack_info.labels[0].value_(), end='')
-            print("\tcommit: %d" % tcf_conntrack_info.commit.value_(), end='')
-            print("\tnat: 0x%x" % tcf_conntrack_info.nat.value_())
-            if tcf_conntrack_info.range.min_addr.ip:
-                print("snat ip: %s" % ipv4(socket.ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
+#             tcf_conntrack_info = Object(prog, 'struct tcf_conntrack_info', address=a.value_())
+#             print("\tzone: %d" % tcf_conntrack_info.zone.value_(), end='')
+#             print("\tmark: 0x%x" % tcf_conntrack_info.mark.value_(), end='')
+#             print("\tlabels[0]: 0x%x" % tcf_conntrack_info.labels[0].value_(), end='')
+#             print("\tcommit: %d" % tcf_conntrack_info.commit.value_(), end='')
+#             print("\tnat: 0x%x" % tcf_conntrack_info.nat.value_())
+#             if tcf_conntrack_info.range.min_addr.ip:
+#                 print("snat ip: %s" % ipv4(socket.ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
+            tcf_ct = cast('struct tcf_ct *', a)
+            print(tcf_ct.params)
+
         if kind == "pedit":
             tcf_pedit = Object(prog, 'struct tcf_pedit', address=a.value_())
 #             print("%lx" % a.value_())
@@ -188,7 +191,7 @@ def print_cls_fl_filter(f):
     # 1 means nofirstfrag
     # 3 means firstfrag
 #     print("ip_flags: 0x%x" % k.control.flags)
-    print("ct_state: 0x%x" % k.ct_state.value_())
+#     print("ct_state: 0x%x" % k.ct_state.value_())
 #     print("ct_zone: %d" % k.ct_zone.value_())
 #     print("ct_mark: 0x%x" % k.ct_mark.value_())
 #     print("ct_labels[0]: %x" % k.ct_labels[0].value_())
@@ -556,8 +559,38 @@ def print_tuple(tuple, ct):
 #         print("timeout: %d" % ct.timeout);
         parse_ct_status(ct.status)
 
-
 def print_tun(tun):
     print("\ttun_info: id: %x, dst ip: %s, dst port: %d" % \
         (tun.key.tun_id, ipv4(socket.ntohl(tun.key.u.ipv4.dst.value_())), \
         socket.ntohs(tun.key.tp_dst.value_())))
+
+def print_dest(rule):
+    print("\t\tmlx5_flow_rule %lx" % rule.address_of_().value_())
+    if prog['MLX5_FLOW_DESTINATION_TYPE_COUNTER'] == rule.dest_attr.type:
+        print("\t\t\tdest: counter_id: %x" % (rule.dest_attr.counter_id))
+        return
+    if prog['MLX5_FLOW_DESTINATION_TYPE_VPORT'] == rule.dest_attr.type:
+        print("\t\t\tdest: vport: %x" % rule.dest_attr.vport.num)
+        return
+    if prog['MLX5_FLOW_DESTINATION_TYPE_TIR'] == rule.dest_attr.type:
+        print("\t\t\tdest: tir_num: %x" % rule.dest_attr.tir_num)
+        return
+    if prog['MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE'] == rule.dest_attr.type:
+        print("\t\t\tdest: ft: %lx" % (rule.dest_attr.ft.value_()))
+#         flow_table("goto table", rule.dest_attr.ft)
+        return
+    else:
+        print(rule)
+
+def print_mlx5_flow_handle(handle):
+    num_rules = handle.num_rules
+    for k in range(num_rules):
+        print_dest(handle.rule[k])
+
+def print_mlx5_esw_flow_attr(attr):
+    print("\t\taction: %x" % attr.action, end='\t')
+    print("dest_chain: %x" % attr.dest_chain, end='\t')
+    print("prio: %x" % attr.prio, end='\t')
+    print("fdb: %20x" % attr.fdb, end='\t')
+    print("dest_ft: %20x" % attr.dest_ft, end='\t')
+    print('')

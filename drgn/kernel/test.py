@@ -7,7 +7,7 @@ import os
 
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
-import lib
+from lib import *
 
-priv = lib.get_pf0_netdev()
-print(priv.stats.pport)
+priv = get_pf0_netdev()
+print(priv.name.string_().decode())

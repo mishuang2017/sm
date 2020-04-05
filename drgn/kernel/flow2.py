@@ -11,9 +11,7 @@ import os
 
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
-import lib
-
-from lib import pf0_name
+from lib import *
 
 def flow_table(name, table):
     print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x" % (name, table.id.value_(), table.level.value_(), table.type))
@@ -112,11 +110,11 @@ def print_match(fte):
 
     src_ip = socket.ntohl(val[11].value_())
     if src_ip:
-        print(" src_ip: %12s" % lib.ipv4(src_ip), end='')
+        print(" src_ip: %12s" % ipv4(src_ip), end='')
 
     dst_ip = socket.ntohl(val[15].value_())
     if src_ip:
-        print(" dst_ip: %12s" % lib.ipv4(dst_ip), end='')
+        print(" dst_ip: %12s" % ipv4(dst_ip), end='')
 
     vni = socket.ntohl(val[21].value_() & 0xffffff) >> 8
     if vni:
@@ -180,34 +178,16 @@ def print_match(fte):
 
         src_ip = socket.ntohl(val[43].value_())
         if src_ip:
-            print(" src_ip: %12s" % lib.ipv4(src_ip), end='')
+            print(" src_ip: %12s" % ipv4(src_ip), end='')
 
         dst_ip = socket.ntohl(val[47].value_())
         if src_ip:
-            print(" dst_ip: %12s" % lib.ipv4(dst_ip), end='')
+            print(" dst_ip: %12s" % ipv4(dst_ip), end='')
 
     print(" action %4x: " % fte.action.action.value_())
 
-def print_dest(rule):
-    print("\t\tmlx5_flow_rule %lx" % rule.address_of_().value_())
-    if prog['MLX5_FLOW_DESTINATION_TYPE_COUNTER'] == rule.dest_attr.type:
-#         print("\t\tdest: counter_id: %d, name: %s" % (rule.dest_attr.counter_id, rule.node.name.string_().decode()))
-        return
-    if prog['MLX5_FLOW_DESTINATION_TYPE_VPORT'] == rule.dest_attr.type:
-        print("\t\tdest: vport: %x" % rule.dest_attr.vport.num)
-        return
-    if prog['MLX5_FLOW_DESTINATION_TYPE_TIR'] == rule.dest_attr.type:
-        print("\t\tdest: tir_num: %x" % rule.dest_attr.tir_num)
-        return
-    if prog['MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE'] == rule.dest_attr.type:
-        print("\t\tdest: ft: %lx" % (rule.dest_attr.ft.value_()))
-#         flow_table("goto table", rule.dest_attr.ft)
-        return
-    else:
-        print(rule)
-
-# mlx5e_priv = lib.get_mlx5_pf0()
-mlx5e_priv = lib.get_mlx5e_priv(pf0_name)
+# mlx5e_priv = get_mlx5_pf0()
+mlx5e_priv = get_mlx5e_priv(pf0_name)
 offloads = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads
 # print(offloads)
 esw_chains_priv = offloads.esw_chains_priv
@@ -215,7 +195,7 @@ chains_ht = esw_chains_priv.chains_ht
 prios_ht = esw_chains_priv.prios_ht
 # print(esw_chains_priv)
 
-for i, chain in enumerate(lib.hash(chains_ht, 'struct fdb_chain', 'node')):
+for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print(chain)
 #     print("chain id: %x" % chain.chain)
     for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
@@ -225,7 +205,7 @@ for i, chain in enumerate(lib.hash(chains_ht, 'struct fdb_chain', 'node')):
         table = prio.fdb
         flow_table("", table)
 
-# for i, prio in enumerate(lib.hash(prios_ht, 'struct fdb_prio', 'node')):
+# for i, prio in enumerate(hash(prios_ht, 'struct fdb_prio', 'node')):
 #     print(i)
 #     print(prio)
 #     table = prio.fdb

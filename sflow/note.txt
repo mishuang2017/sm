@@ -117,7 +117,58 @@ TIME     PID     TID     COMM            FUNC
         entry_SYSCALL_64_after_hwframe+0x44 [kernel]
 
 
-=== question ===
+===ct===
+
+mlx5_tc_ct_block_flow_offload
+
+3.341207 21000   21000   kworker/0:0     mlx5_fc_query_cached
+        mlx5_fc_query_cached+0x1 [mlx5_core]
+        nf_flow_offload_tuple.isra.0+0xd4 [nf_flow_table]
+        flow_offload_work_handler+0x15e [nf_flow_table]
+        process_one_work+0x240 [kernel]
+        worker_thread+0x50 [kernel]
+        kthread+0x109 [kernel]
+        ret_from_fork+0x35 [kernel]
+
+mlx5_tc_ct_priv
+
+6.494420 15108   15108   kworker/13:1    mlx5_eswitch_add_offloaded_rule
+        mlx5_eswitch_add_offloaded_rule
+        mlx5_tc_ct_block_flow_offload
+        nf_flow_offload_tuple
+        flow_offload_work_handler
+        process_one_work+0x240 [kernel]
+        worker_thread+0x50 [kernel]
+        kthread+0x109 [kernel]
+        ret_from_fork+0x35 [kernel]
+
+19.41299 3798    30693   handler66       __mlx5_tc_ct_flow_offload
+        __mlx5_tc_ct_flow_offload+0x1 [mlx5_core]
+        mlx5e_tc_offload_fdb_rules+0x6b [mlx5_core]
+        mlx5e_tc_add_fdb_flow+0x179 [mlx5_core]
+        __mlx5e_add_fdb_flow+0x16a [mlx5_core]
+        mlx5e_tc_add_flow+0x170 [mlx5_core]
+        mlx5e_configure_flower+0x2c8 [mlx5_core]
+        mlx5e_rep_setup_tc_cls_flower+0x39 [mlx5_core]
+        mlx5e_rep_setup_tc_cb+0x40 [mlx5_core]
+        tc_setup_cb_add+0xdb [kernel]
+        fl_hw_replace_filter+0x17a [cls_flower]
+        fl_change+0xc0e [cls_flower]
+        tc_new_tfilter+0x861 [kernel]
+        rtnetlink_rcv_msg+0x369 [kernel]
+        netlink_rcv_skb+0x50 [kernel]
+        rtnetlink_rcv+0x15 [kernel]
+        netlink_unicast+0x1a8 [kernel]
+        netlink_sendmsg+0x233 [kernel]
+        sock_sendmsg+0x65 [kernel]
+        ____sys_sendmsg+0x215 [kernel]
+        ___sys_sendmsg+0x81 [kernel]
+        __sys_sendmsg+0x5c [kernel]
+        __x64_sys_sendmsg+0x1f [kernel]
+        do_syscall_64+0x5a [kernel]
+        entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
+===question===
 
 1. What is FW level support 
 mlx5_tc_ct_init_check_support()
