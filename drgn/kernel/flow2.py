@@ -193,6 +193,7 @@ offloads = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads
 esw_chains_priv = offloads.esw_chains_priv
 chains_ht = esw_chains_priv.chains_ht
 prios_ht = esw_chains_priv.prios_ht
+mapping_ctx = esw_chains_priv.chains_mapping
 # print(esw_chains_priv)
 
 for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
@@ -204,6 +205,20 @@ for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
             (prio.key.chain, prio.key.prio, prio.key.level))
         table = prio.fdb
         flow_table("", table)
+
+def print_mapping_item(item):
+    print("mapping_item %lx" % item, end='\t')
+    print("cnt: %d" % item.cnt, end='\t')
+    print("id: %d" % item.id, end='\t')
+    data = Object(prog, 'int *', address=item.data.address_of_())
+    print("data: 0x%x" % data.value_())
+
+print('\n=== mapping_ctx ===\n')
+ht = mapping_ctx.ht
+print("mapping_ctx %lx" % mapping_ctx)
+for i in range(256):
+    for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
+        print_mapping_item(item)
 
 # for i, prio in enumerate(hash(prios_ht, 'struct fdb_prio', 'node')):
 #     print(i)
