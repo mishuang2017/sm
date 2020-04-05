@@ -63,6 +63,7 @@ sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils 
 # network-manager-openconnect        /usr/lib/NetworkManager/nm-openconnect-service
 # network-manager-openconnect-gnome  /usr/lib/NetworkManager/nm-openconnect-auth-dialog
 # reboot
+sudo apt install -y libopenconnect5:amd64 openconnect vpnc-scripts network-manager-openconnect network-manager-openconnect-gnome
 
 # apt install -y *pinyin*
 
