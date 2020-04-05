@@ -8,9 +8,9 @@ import os
 
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
-import lib
+from lib import *
 
-for x, dev in enumerate(lib.get_netdevs()):
+for x, dev in enumerate(get_netdevs()):
     name = dev.name.string_().decode()
     if "enp4s0f0" not in name and "vxlan_sys_4789" != name:
 #     if "enp4s0f0_1" != name:
@@ -34,16 +34,16 @@ for x, dev in enumerate(lib.get_netdevs()):
 
 #     print("block.lockeddevcnt: %d" % block.lockeddevcnt)
 
-    if lib.struct_exist("struct flow_block_cb"):
+    if struct_exist("struct flow_block_cb"):
         for cb in list_for_each_entry('struct flow_block_cb', block.flow_block.cb_list.address_of_(), 'list'):
 #             print(cb)
 
             func = cb.cb.value_()
-            func = lib.address_to_name(hex(func))
+            func = address_to_name(hex(func))
 #             print("flow_block_cb cb     : %s" % func)
 
             release = cb.release.value_()
-            release = lib.address_to_name(hex(release))
+            release = address_to_name(hex(release))
 #             print("flow_block_cb release: %s" % release)
 
             cb_priv = Object(prog, 'struct mlx5e_rep_indr_block_priv', address=cb.cb_priv.value_())
@@ -53,7 +53,7 @@ for x, dev in enumerate(lib.get_netdevs()):
         for cb in list_for_each_entry('struct tcf_block_cb', block.cb_list.address_of_(), 'list'):
             print(cb)
             func = cb.cb.value_()
-            func = lib.address_to_name(hex(func))
+            func = address_to_name(hex(func))
             print("tcf_block_cb cb: %s" % func)
 
             # ofed 4.7, cb is mlx5e_rep_indr_setup_block_cb
@@ -87,7 +87,7 @@ for x, dev in enumerate(lib.get_netdevs()):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
                 print("cls_fl_filter %lx" % f.address_of_())
-                lib.print_cls_fl_filter(f)
+                print_cls_fl_filter(f)
             tcf_proto = tcf_proto.next
             if tcf_proto.value_() == 0:
                 break
