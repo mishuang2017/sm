@@ -18,7 +18,15 @@ mlx5e_rep_priv = get_mlx5e_rep_priv()
 #     tc_ht = mlx5e_rep_priv.tc_ht
 
 # print("MLX5E_TC_FLOW_FLAG_SIMPLE %x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SIMPLE'].value_()))
-# print("MLX5E_TC_FLOW_FLAG_ESWITCH %x" % 1 << prog['MLX5E_TC_FLOW_FLAG_ESWITCH'].value_())
+print("MLX5E_TC_FLOW_FLAG_INGRESS   %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_INGRESS'].value_()))
+print("MLX5E_TC_FLOW_FLAG_ESWITCH   %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_ESWITCH'].value_()))
+print("MLX5E_TC_FLOW_FLAG_OFFLOADED %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_OFFLOADED'].value_()))
+print("MLX5E_TC_FLOW_FLAG_CT        %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_CT'].value_()))
+
+print('')
+print("MLX5_MATCH_OUTER_HEADERS     %10x" % prog['MLX5_MATCH_OUTER_HEADERS'].value_())
+print("MLX5_MATCH_MISC_PARAMETERS   %10x" % prog['MLX5_MATCH_MISC_PARAMETERS'].value_())
+print("MLX5_MATCH_MISC_PARAMETERS_2 %10x" % prog['MLX5_MATCH_MISC_PARAMETERS_2'].value_())
 
 try:
     prog.type('struct mlx5_rep_uplink_priv')
@@ -30,6 +38,10 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
     print("%-14s mlx5e_tc_flow %lx, cookie: %lx, flags: %x" % \
         (name, flow.value_(), flow.cookie.value_(), flow.flags.value_()))
+    print("dest_chain: %x" % flow.esw_attr[0].dest_chain, end='\t')
+    print("ct_state: %x" % flow.esw_attr[0].parse_attr.spec.match_value[57])
+    print("mlx5_flow_spec %lx" % flow.esw_attr[0].parse_attr.spec.address_of_())
+    print("")
 
     tun_info = flow.esw_attr[0].parse_attr.tun_info[0]
     if tun_info.value_():

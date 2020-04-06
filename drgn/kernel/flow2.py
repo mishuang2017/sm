@@ -21,7 +21,7 @@ esw_chains_priv = offloads.esw_chains_priv
 chains_ht = esw_chains_priv.chains_ht
 prios_ht = esw_chains_priv.prios_ht
 mapping_ctx = esw_chains_priv.chains_mapping
-print(esw_chains_priv)
+# print(esw_chains_priv)
 
 for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print(chain)
