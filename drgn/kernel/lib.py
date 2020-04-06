@@ -652,11 +652,11 @@ def print_match(fte):
     if ethertype:
         print(" et: %x" % ethertype, end='')
 
-#     vport = socket.ntohl(val[17].value_() & 0xffff0000)
+    vport = socket.ntohl(val[17].value_() & 0xffff0000)
     # metadata_reg_c_0
-    vport = socket.ntohl(val[59].value_() & 0xffff0000)
+#     vport = socket.ntohl(val[59].value_() & 0xffff0000)
     if vport:
-        print(" vport: %-2d" % vport, end='')
+        print(" vport: %4x" % vport, end='')
 
     ip_protocol = val[4].value_() & 0xff
     if ip_protocol:

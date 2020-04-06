@@ -119,6 +119,36 @@ TIME     PID     TID     COMM            FUNC
 
 ===ct===
 
+CONFIG_NET_TC_SKB_EXT
+mlx5e_tc_rep_update_skb
+
+[root@dev-r630-04 ~]# trace nf_flow_offload_add -K
+TIME     PID     TID     COMM            FUNC
+2.697775 0       0       swapper/5       nf_flow_offload_add
+        nf_flow_offload_add+0x1 [nf_flow_table]
+        tcf_ct_act+0x579 [act_ct]
+        tcf_action_exec+0x82 [kernel]
+        fl_classify+0x6d4 [cls_flower]
+        tcf_classify_ingress+0x81 [kernel]
+        __netif_receive_skb_core+0x441 [kernel]
+        __netif_receive_skb_list_core+0x126 [kernel]
+        netif_receive_skb_list_internal+0x1f6 [kernel]
+        gro_normal_list.part.0+0x1e [kernel]
+        napi_complete_done+0x91 [kernel]
+        mlx5e_napi_poll+0x1a0 [mlx5_core]
+        net_rx_action+0x13b [kernel]
+        __softirqentry_text_start+0xf5 [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x5a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xc2 [kernel]
+        cpuidle_enter+0x2e [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1cd [kernel]
+        cpu_startup_entry+0x20 [kernel]
+        start_secondary+0x15a [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
 mlx5_tc_ct_block_flow_offload
 
 3.341207 21000   21000   kworker/0:0     mlx5_fc_query_cached

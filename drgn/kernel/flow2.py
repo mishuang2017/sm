@@ -17,10 +17,14 @@ from lib import *
 mlx5e_priv = get_mlx5e_priv(pf0_name)
 offloads = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads
 # print(offloads)
+slow_fdb = offloads.slow_fdb
 esw_chains_priv = offloads.esw_chains_priv
 chains_ht = esw_chains_priv.chains_ht
 prios_ht = esw_chains_priv.prios_ht
 mapping_ctx = esw_chains_priv.chains_mapping
+tc_end_fdb = esw_chains_priv.tc_end_fdb
+
+print("tc_end_fdb %lx, slow_fdb: %lx" % (tc_end_fdb, slow_fdb))
 # print(esw_chains_priv)
 
 for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
@@ -28,8 +32,12 @@ for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print("chain id: %x" % chain.chain)
     for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
 #         print(prio)
+        next_fdb = prio.next_fdb
+        miss_group = prio.miss_group
+        miss_rule = prio.miss_rule
         print("\n=== chain: %x, prio: %x, level: %x ===" % \
             (prio.key.chain, prio.key.prio, prio.key.level))
+        print("next_fdb: %lx, miss_group: %lx, miss_rule: %lx" % (next_fdb, miss_group, miss_rule))
         table = prio.fdb
         flow_table("", table)
 

@@ -62,8 +62,18 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
     for j, mlx5_ct_entry in enumerate(hash(ct_entries_ht, 'struct mlx5_ct_entry', 'node')):
         print("mlx5_ct_entry %lx" % mlx5_ct_entry)
         print("\tcookie %lx" % mlx5_ct_entry.cookie)
-        mlx5_flow_handle = mlx5_ct_entry.zone_rules[0].rule
-        print_mlx5_flow_handle(mlx5_flow_handle)
+
+        for k in range(2):
+            mlx5_ct_zone_rule = mlx5_ct_entry.zone_rules[k]
+            mlx5_flow_handle = mlx5_ct_zone_rule.rule
+            nat = mlx5_ct_zone_rule.nat
+            tupleid = mlx5_ct_zone_rule.tupleid
+            print("\tmlx5_ct_entry.zone_rules[%d].rule: nat: %d, tupleid: %d" % (k, nat, tupleid))
+            print_mlx5_flow_handle(mlx5_flow_handle)
+
+#         print("\tmlx5_ct_entry.zone_rules[1].rule")
+#         mlx5_flow_handle = mlx5_ct_entry.zone_rules[1].rule
+#         print_mlx5_flow_handle(mlx5_flow_handle)
 #         print(mlx5_ct_entry.flow_rule)
 
 #     ct_entries_list = mlx5_ct_ft.ct_entries_list

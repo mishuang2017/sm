@@ -38,8 +38,12 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
     print("%-14s mlx5e_tc_flow %lx, cookie: %lx, flags: %x" % \
         (name, flow.value_(), flow.cookie.value_(), flow.flags.value_()))
+    print("chain: %x" % flow.esw_attr[0].chain, end='\t')
     print("dest_chain: %x" % flow.esw_attr[0].dest_chain, end='\t')
-    print("ct_state: %x" % flow.esw_attr[0].parse_attr.spec.match_value[57])
+    print("fdb: %x" % flow.esw_attr[0].fdb, end='\t')
+    print("dest_ft: %x" % flow.esw_attr[0].dest_ft, end='\t')
+    print("ct_state: %x/%x" % (flow.esw_attr[0].parse_attr.spec.match_value[57] >> 8, \
+        flow.esw_attr[0].parse_attr.spec.match_criteria[57] >> 8))
     print("mlx5_flow_spec %lx" % flow.esw_attr[0].parse_attr.spec.address_of_())
     print("")
 

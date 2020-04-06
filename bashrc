@@ -9596,6 +9596,12 @@ function trace3
 	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg3"
 }
 
+function trace4
+{
+	[[ $# != 1 ]] && return
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg4"
+}
+
 alias fc1='funccount miniflow_merge_work -i 1'
 alias fc2='funccount mlx5e_del_miniflow_list -i 1'
 
