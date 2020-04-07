@@ -10986,6 +10986,16 @@ set +x
 	done
 }
 
+function install_libkdumpfile
+{
+	sm
+	git clone https://github.com/ptesarik/libkdumpfile
+	cd libkdumpfile/
+	sudo yum install -y python-devel
+	autoreconf -fi
+	make-usr
+}
+
 # sflow
 
 alias vi-sflow='vi ~/sm/sflow/note.txt'
