@@ -11,5 +11,7 @@ yum install -y rsync ethtool \
         libnsl \
         pcre-devel \
 	qalculate \
-        clang clang-devel llvm llvm-devel llvm-static ncurses-devel
+        clang clang-devel llvm llvm-devel llvm-static ncurses-devel \
+	rpm-build
 
+/mswg/release/mft/mftinstall
