@@ -9525,7 +9525,7 @@ function sun3
 	lnst-ctl -d -C lnst-ctl.conf --pools r-vrt-24-120_cx5/ run recipes/ovs_offload/1_virt_ovs_vxlan_flow_key.xml
 }
 
-function yum-bcc
+function yum_bcc
 {
 	local cmd=yum
 	sudo $cmd install -y bison cmake ethtool flex git iperf libstdc++-static \
@@ -9538,8 +9538,9 @@ function yum-bcc
 	sudo $cmd install -y clang clang-devel llvm llvm-devel llvm-static ncurses-devel
 }
 
-function install-bcc
+function install_bcc
 {
+	sudo dnf install -y clang clang-devel llvm llvm-devel llvm-static ncurses-devel
 	sm
 	mkdir -p bcc/build; cd bcc/build
 	cmake .. -DCMAKE_INSTALL_PREFIX=/usr
