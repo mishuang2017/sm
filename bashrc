@@ -33,8 +33,8 @@ if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=50
 	numvfs=3
 	numvfs=49
-	numvfs=17
 	numvfs=97
+	numvfs=16
 	link=ens1f0
 	link2=ens1f1
 	vf1=ens1f2
@@ -10707,10 +10707,10 @@ alias tcp_timeout="sysctl -a | grep conntrack | grep tcp_timeout"
 
 function wrk_tune
 {
-	ethtool -L $link combined 12
-# 	set_all_vf_channel_ns 1
-	set_all_vf_affinity 12
-	set_all_rep_channel 12
+# 	ethtool -L $link combined 12
+ 	set_all_vf_channel_ns 1
+	set_all_vf_affinity 96
+	set_all_rep_channel 63
 	set_ns_nf
 }
 
@@ -10730,7 +10730,7 @@ function wrk_setup
 
 	init_vf_ns
 
-# 	wrk_tune
+	wrk_tune
 }
 
 function wrk_loop
