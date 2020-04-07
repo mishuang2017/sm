@@ -29,17 +29,11 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 [[ "$(hostname -s)" == "clx-ibmc-03" ]] && host_num=3
 
-if (( host_num == 1 || host_num == 2 || host_num == 3)); then
-	numvfs=50
-	numvfs=3
-	numvfs=49
+if (( host_num == 1 || host_num == 2 )); then
 	numvfs=97
 	numvfs=16
 	link=ens1f0
 	link2=ens1f1
-	vf1=ens1f2
-	vf2=ens1f3
-	vf3=ens1f4
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -52,7 +46,28 @@ if (( host_num == 1 || host_num == 2 || host_num == 3)); then
 			eval rep$((i+1))=${link}_$i
 		done
 	fi
+elif (( host_num == 2 )); then
+	numvfs=16
+	link=ens1f0
+	link2=ens1f1
+elif (( host_num == 1 || host_num == 2 || host_num == 3)); then
+	numvfs=97
+	numvfs=16
+	numvfs=3
+	link=ens1f0
+	link2=ens1f1
 
+	if [[ "$USER" == "root" ]]; then
+		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
+		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+	fi
+
+	if (( host_num == 1 || host_num == 3 )); then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link}_$i
+		done
+	fi
 elif (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
@@ -1112,7 +1127,12 @@ function off_all
 #	fi
 }
 
-alias off=off_all
+function off
+{
+	local l=$link
+	[[ $# == 1 ]] && l=$1
+	echo 0 > /sys/class/net/$l/device/sriov_numvfs
+}
 
 function off_pci
 {
