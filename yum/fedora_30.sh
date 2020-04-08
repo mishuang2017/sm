@@ -13,6 +13,6 @@ yum install -y rsync ethtool \
         pcre-devel \
 	qalculate \
         clang clang-devel llvm llvm-devel llvm-static ncurses-devel \
-	rpm-build kexec-tools tcpdump
+	rpm-build kexec-tools tcpdump iperf
 
 /mswg/release/mft/mftinstall
