@@ -161,7 +161,9 @@ def print_exts(e):
 #             if tcf_conntrack_info.range.min_addr.ip:
 #                 print("snat ip: %s" % ipv4(socket.ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
             tcf_ct = cast('struct tcf_ct *', a)
-            print(tcf_ct.params)
+            params = tcf_ct.params
+            print("\tzone: %d\ttcf_ct_flow_table %x\tnf_flowtable %x" % (params.zone, params.ct_ft, params.nf_ft))
+#             print(tcf_ct.params)
 
         if kind == "pedit":
             tcf_pedit = Object(prog, 'struct tcf_pedit', address=a.value_())

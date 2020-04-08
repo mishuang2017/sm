@@ -11202,3 +11202,8 @@ function sound
 {
 	sudo modprobe -v snd_hda_intel
 }
+
+function make_ovs_deb
+{
+	DEB_BUILD_OPTIONS='parallel=16' fakeroot debian/rules binary
+}

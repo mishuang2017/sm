@@ -162,6 +162,20 @@ mlx5_tc_ct_block_flow_offload
 
 mlx5_tc_ct_priv
 
+
+
+tcf_ct_act
+	tcf_ct_flow_table_process_conn
+		tcf_ct_flow_table_add
+			flow_offload_add
+				nf_flow_offload_add
+
+flow_offload_work_handler(FLOW_CLS_REPLACE)
+	flow_offload_work_add
+		flow_offload_rule_add
+			flow_offload_tuple_add
+			flow_offload_tuple_add
+
 6.494420 15108   15108   kworker/13:1    mlx5_eswitch_add_offloaded_rule
         mlx5_eswitch_add_offloaded_rule
         mlx5_tc_ct_block_flow_offload
@@ -171,6 +185,10 @@ mlx5_tc_ct_priv
         worker_thread+0x50 [kernel]
         kthread+0x109 [kernel]
         ret_from_fork+0x35 [kernel]
+
+
+
+[Wed Apr  8 14:27:24 2020] nf_flow_offload_gc_step: expried: 0, dying: 0, teardown: 1
 
 nf_flow_offload_gc_step
 	nf_flow_offload_del
@@ -194,6 +212,36 @@ flow_offload_work_handler(FLOW_CLS_DESTROY)
         worker_thread+0x50 [kernel]
         kthread+0x109 [kernel]
         ret_from_fork+0x35 [kernel]
+
+[root@dev-r630-04 ~]# trace flow_offload_teardown -K
+TIME     PID     TID     COMM            FUNC
+8.002926 0       0       swapper/11      flow_offload_teardown
+        flow_offload_teardown+0x1 [nf_flow_table]
+        tcf_ct_act+0x6ea [act_ct]
+        tcf_action_exec+0x82 [kernel]
+        fl_classify+0x6d4 [cls_flower]
+        tcf_classify_ingress+0x81 [kernel]
+        __netif_receive_skb_core+0x441 [kernel]
+        __netif_receive_skb_list_core+0x126 [kernel]
+        netif_receive_skb_list_internal+0x1f6 [kernel]
+        gro_normal_list.part.0+0x1e [kernel]
+        napi_complete_done+0x91 [kernel]
+        mlx5e_napi_poll+0x1a0 [mlx5_core]
+        net_rx_action+0x13b [kernel]
+        __softirqentry_text_start+0xf5 [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x5a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xc2 [kernel]
+        cpuidle_enter+0x2e [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1cd [kernel]
+        cpu_startup_entry+0x20 [kernel]
+        start_secondary+0x15a [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
+
+
 
 19.41299 3798    30693   handler66       __mlx5_tc_ct_flow_offload
         __mlx5_tc_ct_flow_offload+0x1 [mlx5_core]

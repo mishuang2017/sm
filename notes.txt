@@ -1653,7 +1653,8 @@ git push origin HEAD:refs/for/mlnx_ofed_5_0/kernel-5.4-perf-issue
 
 git push origin HEAD:refs/for/mlnx_ofed_5_0_2/nf_ct_l4proto_find
 git push origin HEAD:refs/for/mlnx_ofed_5_0_2/PRIO_CHAIN_SUPPORT
-git push origin HEAD:refs/for/mlnx_ofed_5_0_2/fix-5.4-ct-encap
+
+git push origin HEAD:refs/for/ct-one-table-2.13.0/fix-debian-build
 
 tc_cls_flower_offload_common
 
