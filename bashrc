@@ -10754,15 +10754,6 @@ function wrk_setup
 # 	wrk_tune
 }
 
-function wrk_loop
-{
-        n=0
-        for (( i = 0; i < 1000; i++ )); do
-                wrk_run0 $(((n%15)+1))
-                n=$((n+1))
-        done
-}
-
 function wrk_run0
 {
         local port=0
@@ -10776,8 +10767,8 @@ function wrk_run0
                 local ns=n1$((n+1))
                 n=$((n+1))
 set -x
-                ip=1.1.1.200
                 ip=8.9.10.11
+                ip=1.1.1.200
                 ip netns exec $ns taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
 set +x
 
@@ -10797,6 +10788,15 @@ set +x
         sleep 5
         cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 
+}
+
+function wrk_loop
+{
+	n=0
+	for (( i = 0; i < 1000; i++ )); do
+		wrk_run0 $(((n%15)+1))
+		n=$((n+1))
+	done
 }
 
 # best performance, conneciton=60, set all VFs affinity to cpu 0-11
