@@ -122,34 +122,16 @@ TIME     PID     TID     COMM            FUNC
 CONFIG_NET_TC_SKB_EXT
 mlx5e_tc_rep_update_skb
 
-[root@dev-r630-04 ~]# trace nf_flow_offload_add -K
-TIME     PID     TID     COMM            FUNC
-2.697775 0       0       swapper/5       nf_flow_offload_add
-        nf_flow_offload_add+0x1 [nf_flow_table]
-        tcf_ct_act+0x579 [act_ct]
-        tcf_action_exec+0x82 [kernel]
-        fl_classify+0x6d4 [cls_flower]
-        tcf_classify_ingress+0x81 [kernel]
-        __netif_receive_skb_core+0x441 [kernel]
-        __netif_receive_skb_list_core+0x126 [kernel]
-        netif_receive_skb_list_internal+0x1f6 [kernel]
-        gro_normal_list.part.0+0x1e [kernel]
-        napi_complete_done+0x91 [kernel]
-        mlx5e_napi_poll+0x1a0 [mlx5_core]
-        net_rx_action+0x13b [kernel]
-        __softirqentry_text_start+0xf5 [kernel]
-        irq_exit+0xdf [kernel]
-        do_IRQ+0x5a [kernel]
-        ret_from_intr+0x0 [kernel]
-        cpuidle_enter_state+0xc2 [kernel]
-        cpuidle_enter+0x2e [kernel]
-        call_cpuidle+0x23 [kernel]
-        do_idle+0x1cd [kernel]
-        cpu_startup_entry+0x20 [kernel]
-        start_secondary+0x15a [kernel]
-        secondary_startup_64+0xa4 [kernel]
 
-mlx5_tc_ct_block_flow_offload
+[root@dev-r630-04 kernel]# ./flowtables.py
+hostname: dev-r630-04
+
+nf_flowtable ffff8bf33c2dac70
+nf_ft.gc_work.work.func: nf_flow_offload_work_gc
+        cb: mlx5_tc_ct_block_flow_offload
+        mlx5_ct_ft ffff8bf2c61d4e00
+
+
 
 3.341207 21000   21000   kworker/0:0     mlx5_fc_query_cached
         mlx5_fc_query_cached+0x1 [mlx5_core]
@@ -160,15 +142,13 @@ mlx5_tc_ct_block_flow_offload
         kthread+0x109 [kernel]
         ret_from_fork+0x35 [kernel]
 
-mlx5_tc_ct_priv
-
-
 
 tcf_ct_act
 	tcf_ct_flow_table_process_conn
 		tcf_ct_flow_table_add
 			flow_offload_add
 				nf_flow_offload_add
+					nf_flow_offload_tuple
 
 flow_offload_work_handler(FLOW_CLS_REPLACE)
 	flow_offload_work_add
@@ -187,6 +167,9 @@ flow_offload_work_handler(FLOW_CLS_REPLACE)
         ret_from_fork+0x35 [kernel]
 
 
+nf_flow_offload_del is called because test_bit(NF_FLOW_TEARDOWN, &flow->flags)
+NF_FLOW_TEARDOWN is set because of FIN is received in
+	tcf_ct_act()->tcf_ct_flow_table_lookup()->flow_offload_teardown()
 
 [Wed Apr  8 14:27:24 2020] nf_flow_offload_gc_step: expried: 0, dying: 0, teardown: 1
 
@@ -242,6 +225,48 @@ TIME     PID     TID     COMM            FUNC
 
 
 
+[root@dev-r630-04 kernel]# ./mlx5e_tc_flow.py
+hostname: dev-r630-04
+
+MLX5E_TC_FLOW_FLAG_INGRESS            1
+MLX5E_TC_FLOW_FLAG_ESWITCH            8
+MLX5E_TC_FLOW_FLAG_OFFLOADED         20
+MLX5E_TC_FLOW_FLAG_CT              1000
+
+MLX5_MATCH_OUTER_HEADERS              1
+MLX5_MATCH_MISC_PARAMETERS            2
+MLX5_MATCH_MISC_PARAMETERS_2          8
+
+enp4s0f0np0    mlx5e_tc_flow ffff8bf33c2da800, cookie: ffff8bf3162a5000, flags: 1029
+chain: 0        dest_chain: b   fdb: 0  dest_ft: 0      ct_state: 0/4
+mlx5_flow_spec ffff8bf3162a1818
+
+enp4s0f0np0_1  mlx5e_tc_flow ffff8bf33c2db800, cookie: ffff8bf3162a4800, flags: 1029
+chain: 0        dest_chain: a   fdb: 0  dest_ft: 0      ct_state: 0/4
+mlx5_flow_spec ffff8bf3162a2818
+
+enp4s0f0np0_1  mlx5e_tc_flow ffff8bf31895cc00, cookie: ffff8bf3162a3800, flags: 29
+chain: a        dest_chain: 0   fdb: 0  dest_ft: 0      ct_state: 6/6
+mlx5_flow_spec ffff8bf3162a0818
+
+enp4s0f0np0    mlx5e_tc_flow ffff8beaff04b800, cookie: ffff8bf2897bc000, flags: 29
+chain: b        dest_chain: 0   fdb: 0  dest_ft: 0      ct_state: 6/6
+mlx5_flow_spec ffff8bf2897ba818
+
+[root@dev-r630-04 kernel]# dpd
+ct_state(+est+trk),recirc_id(0xa),in_port(enp4s0f0np0_1),eth(src=02:25:d0:14:01:02,dst=b8:59:9f:bb:31:66),eth_type(0x0800),ipv4(proto=6,frag=no), packets:1733099551, bytes:2537255428754, used:0.560s, actions:enp4s0f0np0
+ct_state(+est+trk),recirc_id(0xb),in_port(enp4s0f0np0),eth(src=b8:59:9f:bb:31:66,dst=02:25:d0:14:01:02),eth_type(0x0800),ipv4(proto=6,frag=no), packets:29013837, bytes:1916513026, used:0.560s, actions:enp4s0f0np0_1
+ct_state(-trk),recirc_id(0),in_port(enp4s0f0np0),eth_type(0x0800),ipv4(proto=6,frag=no), packets:29013837, bytes:1916513026, used:0.560s, actions:ct,recirc(0xb)
+ct_state(-trk),recirc_id(0),in_port(enp4s0f0np0_1),eth_type(0x0800),ipv4(proto=6,frag=no), packets:1733099552, bytes:2537255429046, used:0.560s, actions:ct,recirc(0xa)
+
+1. If the rule has ct action, MLX5E_TC_FLOW_FLAG_CT is set.
+
+parse_tc_fdb_actions
+	flow_flag_set(flow, CT)
+
+__mlx5_tc_ct_flow_offload() will be called.
+
+The dest ft will be mlx5e_rep_priv.uplink_priv.ct_priv.ct.
 
 19.41299 3798    30693   handler66       __mlx5_tc_ct_flow_offload
         __mlx5_tc_ct_flow_offload+0x1 [mlx5_core]
@@ -268,6 +293,9 @@ TIME     PID     TID     COMM            FUNC
         __x64_sys_sendmsg+0x1f [kernel]
         do_syscall_64+0x5a [kernel]
         entry_SYSCALL_64_after_hwframe+0x44 [kernel]
+
+
+
 
 ===question===
 
