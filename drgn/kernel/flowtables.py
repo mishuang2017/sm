@@ -14,5 +14,9 @@ flowtables = prog['flowtables']
 for nf_ft in list_for_each_entry('struct nf_flowtable', flowtables.address_of_(), 'list'):
     hash = nf_ft.rhashtable
     print("nf_flowtable %lx" % nf_ft)
+#     print(nf_ft)
+    cb_list = nf_ft.flow_block.cb_list
+    for cb in list_for_each_entry('struct flow_block_cb', cb_list.address_of_(), 'list'):
+        print(cb)
     gc_work_func = nf_ft.gc_work.work.func
     print(address_to_name(hex(gc_work_func)))

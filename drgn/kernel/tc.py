@@ -40,7 +40,7 @@ for x, dev in enumerate(get_netdevs()):
 
             func = cb.cb.value_()
             func = address_to_name(hex(func))
-#             print("flow_block_cb cb     : %s" % func)
+            print("flow_block_cb cb     : %s" % func)
 
             release = cb.release.value_()
             release = address_to_name(hex(release))
