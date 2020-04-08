@@ -52,8 +52,8 @@ elif (( host_num == 2 )); then
 	link2=ens1f1
 elif (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=97
-	numvfs=16
 	numvfs=3
+	numvfs=16
 	link=ens1f0
 	link2=ens1f1
 
@@ -6135,7 +6135,8 @@ alias syn='syndrome 16.25.6000'
 function burn5
 {
 set -x
-	mlxfwup -d $pci -f 16.27.1016
+# 	mlxfwup -d $pci -f 16.27.1016
+        mlxfwup -d $pci -f 16.27.2008
 
 	return
 
@@ -10770,8 +10771,7 @@ function wrk_run0
         [[ $# == 1 ]] && num_ns=$1
 
         cd /root/wrk-nginx-container
-        for (( cpu = 0; cpu < 1; cpu++ )); do
-#         for (( cpu = 0; cpu < 96; cpu++ )); do
+        for (( cpu = 0; cpu < 96; cpu++ )); do
                 n=$((n%num_ns))
                 local ns=n1$((n+1))
                 n=$((n+1))
