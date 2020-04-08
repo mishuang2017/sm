@@ -52,8 +52,8 @@ elif (( host_num == 2 )); then
 	link2=ens1f1
 elif (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=97
-	numvfs=16
 	numvfs=3
+	numvfs=16
 	link=ens1f0
 	link2=ens1f1
 
@@ -1127,7 +1127,9 @@ function off_all
 #	fi
 }
 
-function off
+alias off=off_all
+
+function off0
 {
 	local l=$link
 	[[ $# == 1 ]] && l=$1
@@ -10727,11 +10729,9 @@ alias tcp_timeout="sysctl -a | grep conntrack | grep tcp_timeout"
 
 function wrk_tune
 {
-# 	ethtool -L $link combined 12
  	set_all_vf_channel_ns 1
 	set_all_vf_affinity 96
 	set_all_rep_channel 63
-	set_ns_nf
 }
 
 alias wrk_rule="/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))"
@@ -10750,7 +10750,7 @@ function wrk_setup
 
 	init_vf_ns
 
-	wrk_tune
+# 	wrk_tune
 }
 
 function wrk_loop
