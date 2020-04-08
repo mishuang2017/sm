@@ -1,5 +1,6 @@
 #!/bin/bash
 
+yum update
 yum install -y rsync ethtool \
         ctags tmux screen ncurses-devel openssl-devel readline-devel snappy-devel \
 	wget tcl tcl-devel tk tk-devel git-email bc sysstat libglvnd-glx gcc-c++ bison flex make \
@@ -12,6 +13,6 @@ yum install -y rsync ethtool \
         pcre-devel \
 	qalculate \
         clang clang-devel llvm llvm-devel llvm-static ncurses-devel \
-	rpm-build kexec-tools
+	rpm-build kexec-tools tcpdump
 
 /mswg/release/mft/mftinstall

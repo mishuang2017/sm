@@ -10770,7 +10770,8 @@ function wrk_run0
         [[ $# == 1 ]] && num_ns=$1
 
         cd /root/wrk-nginx-container
-        for (( cpu = 0; cpu < 96; cpu++ )); do
+        for (( cpu = 0; cpu < 1; cpu++ )); do
+#         for (( cpu = 0; cpu < 96; cpu++ )); do
                 n=$((n%num_ns))
                 local ns=n1$((n+1))
                 n=$((n+1))
