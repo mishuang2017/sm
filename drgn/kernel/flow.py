@@ -14,6 +14,7 @@ sys.path.append(libpath)
 import lib
 
 from lib import pf0_name
+print(pf0_name)
 
 def flow_table(name, table):
     print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x" % (name, table.id.value_(), table.level.value_(), table.type))

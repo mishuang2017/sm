@@ -52,8 +52,8 @@ elif (( host_num == 2 )); then
 	link2=ens1f1
 elif (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=97
-	numvfs=3
 	numvfs=16
+	numvfs=3
 	link=ens1f0
 	link2=ens1f1
 

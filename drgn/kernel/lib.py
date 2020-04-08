@@ -11,9 +11,6 @@ import drgn
 prog = drgn.program_from_kernel()
 # prog = drgn.program_from_core_dump("/var/crash/vmcore.0")
 
-pf0_name = "ens1f0"
-pf1_name = "ens1f1"
-
 def kernel(name):
     b = os.popen('uname -r')
     text = b.read()
@@ -26,10 +23,26 @@ def kernel(name):
     else:
         return False
 
+def hostname(name):
+    b = os.popen('hostname -s')
+    text = b.read()
+    b.close()
+
+    print("hostname: %s" % text)
+
+    if name in text:
+        return True
+    else:
+        return False
+
 pf0_name = "enp4s0f0"
 if kernel("5.6.0-rc7+"):
     pf0_name = "enp4s0f0np0"
 pf1_name = "enp4s0f1"
+
+if hostname("clx-ibmc-03"):
+    pf0_name = "ens1f0"
+    pf1_name = "ens1f1"
 
 import os
 
