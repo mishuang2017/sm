@@ -172,6 +172,29 @@ mlx5_tc_ct_priv
         kthread+0x109 [kernel]
         ret_from_fork+0x35 [kernel]
 
+nf_flow_offload_gc_step
+	nf_flow_offload_del
+		NF_FLOW_HW_DYING
+		flow_offload_queue_work(offload)
+			schedule_work(&nf_flow_offload_work)
+
+flow_offload_work_handler(FLOW_CLS_DESTROY)
+	flow_offload_work_del(FLOW_OFFLOAD_DIR_ORIGINAL)
+	flow_offload_work_delFLOW_OFFLOAD_DIR_REPLY)
+	set_bit(NF_FLOW_HW_DEAD)
+
+7.037005 8055    8055    kworker/4:1     mlx5_eswitch_del_offloaded_rule
+        mlx5_eswitch_del_offloaded_rule+0x1 [mlx5_core]
+        mlx5_tc_ct_entry_del_rules+0x29 [mlx5_core]
+        mlx5_tc_ct_block_flow_offload
+        nf_flow_offload_tuple
+        flow_offload_tuple_del
+        flow_offload_work_handler
+        process_one_work+0x240 [kernel]
+        worker_thread+0x50 [kernel]
+        kthread+0x109 [kernel]
+        ret_from_fork+0x35 [kernel]
+
 19.41299 3798    30693   handler66       __mlx5_tc_ct_flow_offload
         __mlx5_tc_ct_flow_offload+0x1 [mlx5_core]
         mlx5e_tc_offload_fdb_rules+0x6b [mlx5_core]

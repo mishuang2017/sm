@@ -27,8 +27,9 @@ def print_flow_offload_tuple(t):
     print('')
 
 def print_flow_offload(flow):
-    print("flow_offload %lx" % flow)
-    print("\tflags: %x" % flow.flags, end='\t')
+    print("\tflow_offload %lx" % flow)
+    print("\t\tflags: %x, timeout: %x" % (flow.flags, flow.timeout), end='\t')
+    print("(NF_FLOW_SNAT: %x)" % (1 << prog['NF_FLOW_SNAT'].value_()), end=' ')
     print("(NF_FLOW_HW: %x)" % (1 << prog['NF_FLOW_HW'].value_()))
 #     print(flow)
 
