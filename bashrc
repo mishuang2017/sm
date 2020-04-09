@@ -7900,8 +7900,10 @@ set -x
 	clear-nat
 
 	# if --to-source is the default router, veths can access internet
-	iptables -t nat -A POSTROUTING -s 1.1.0.0/16 -j SNAT --to-source 8.9.10.$host_num
-	ifconfig $link 8.9.10.$host_num/24 up
+	iptables -t nat -A POSTROUTING -s 1.1.0.0/16 -j SNAT --to-source 8.9.10.1-8.9.10.10
+	for (( i = 1; i <= 10; i ++ )); do
+		ifconfig $link:$i 8.9.10.$i/24 up
+	done
 # 	ssh 10.75.205.14 ifconfig $link 8.9.10.11/24 up
 set +x
 }
