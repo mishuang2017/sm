@@ -2103,8 +2103,8 @@ function make-all
 }
 alias m=make-all
 alias mm='sudo make modules_install -j; sudo make install; # headers_install'
-alias mi='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
-alias mi2='make -j; sudo make install_kernel -j; reprobe'
+alias mi2='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
+alias mi='make -j; sudo make install_kernel -j; reprobe'
 
 function mi2
 {
@@ -10733,7 +10733,6 @@ function wrk_tune
 {
  	set_all_vf_channel_ns 1
 	set_all_vf_affinity 96
-	set_all_rep_channel 63
 }
 
 alias wrk_rule="/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))"
@@ -10749,9 +10748,12 @@ function wrk_setup
 # 	ovs-vsctl set open_vswitch . other_config:max-idle="300000"
 	ovs-vsctl set open_vswitch . other_config:n-handler-threads="8"
 	ovs-vsctl set open_vswitch . other_config:n-revalidator-threads="8"
-	/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))
+
+# 	wrk_rule
+	wrk_rule2
 
 	init_vf_ns
+	set_all_rep_channel 63
 
 # 	wrk_tune
 }
