@@ -52,8 +52,8 @@ elif (( host_num == 2 )); then
 	link2=ens1f1
 elif (( host_num == 1 || host_num == 2 || host_num == 3)); then
 	numvfs=97
-	numvfs=3
 	numvfs=16
+	numvfs=3
 	link=ens1f0
 	link2=ens1f1
 
@@ -2104,8 +2104,7 @@ function make-all
 alias m=make-all
 alias mm='sudo make modules_install -j; sudo make install; # headers_install'
 alias mi='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
-alias mi2='make -j; sudo make install_kernel -j'
-alias m32='make -j 32'
+alias mi2='make -j; sudo make install_kernel -j; reprobe'
 
 function mi2
 {
