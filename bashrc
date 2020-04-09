@@ -32,6 +32,7 @@ alias rc='. ~/.bashrc'
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=97
 	numvfs=16
+	numvfs=3
 	link=ens1f0
 	link2=ens1f1
 
@@ -50,10 +51,10 @@ elif (( host_num == 2 )); then
 	numvfs=16
 	link=ens1f0
 	link2=ens1f1
-elif (( host_num == 1 || host_num == 2 || host_num == 3)); then
+elif (( host_num == 3 )); then
 	numvfs=97
-	numvfs=16
 	numvfs=3
+	numvfs=16
 	link=ens1f0
 	link2=ens1f1
 
@@ -62,12 +63,10 @@ elif (( host_num == 1 || host_num == 2 || host_num == 3)); then
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
 
-	if (( host_num == 1 || host_num == 3 )); then
-		for (( i = 0; i < numvfs; i++)); do
-			eval vf$((i+1))=${link}v$i
-			eval rep$((i+1))=${link}_$i
-		done
-	fi
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link}_$i
+	done
 elif (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
@@ -10770,9 +10769,10 @@ function wrk_run0
                 n=$((n%num_ns))
                 local ns=n1$((n+1))
                 n=$((n+1))
-set -x
                 ip=1.1.1.200
                 ip=8.9.10.11
+set -x
+# 		taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
                 ip netns exec $ns taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
 set +x
 
