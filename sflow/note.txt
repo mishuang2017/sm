@@ -296,6 +296,32 @@ The dest ft will be mlx5e_rep_priv.uplink_priv.ct_priv.ct.
 
 
 
+mask is 0x5, the match val is 0. That means if it is FIN or RST (PRM page 1965),
+don't match, go through slow path.
+
+[root@dev-r630-04 kernel]# ./mlx5_tc_ct_priv.py
+hostname: dev-r630-04
+
+=== mlx5e_rep_priv.uplink_priv.ct_priv.ct ===
+mlx5_flow_table ffff94e74442dc00
+
+flow table name: ct_priv.ct
+flow table id: 6 leve: 1, type: 4
+mlx5_flow_table ffff94e74442dc00
+mlx5_flow_group ffff94f512f41568	(tcp_flags: 0x5)
+fs_fte ffff94f552b22428
+       0:  s: 00:00:00:00:00:00 d: 00:00:00:00:00:00 et: 800 ip: 6  sport: 47672 dport:   5001 src_ip:      1.1.3.1 dst_ip:    1.1.1.200 action   4c:
+                mlx5_flow_rule ffff94f558a5bc00
+                        dest: counter_id: 801005
+                mlx5_flow_rule ffff94f558a5a200
+                        dest: ft: ffff94e744428400
+fs_fte ffff94f552b250a8
+       1:  s: 00:00:00:00:00:00 d: 00:00:00:00:00:00 et: 800 ip: 6  sport:  5001 dport:  47672 src_ip:    1.1.1.200 dst_ip:      1.1.3.1 action   4c:
+                mlx5_flow_rule ffff94f558a5ba00
+                        dest: counter_id: 801006
+                mlx5_flow_rule ffff94f558a59400
+                        dest: ft: ffff94e744428400
+
 
 ===question===
 

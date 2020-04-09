@@ -10735,6 +10735,7 @@ function wrk_tune
 }
 
 alias wrk_rule="/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))"
+alias wrk_rule2="~chrism/bin/test_router5-snat-all-ofed5-logan.sh $link $((numvfs-1))"
 
 function wrk_setup
 {
