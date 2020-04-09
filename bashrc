@@ -10762,18 +10762,20 @@ function wrk_run0
         local port=0
         local time=30
         num_ns=1
-        [[ $# == 1 ]] && num_ns=$1
+	num_cpu=1
+#         [[ $# == 1 ]] && num_ns=$1
+        [[ $# == 1 ]] && num_cpu=$1
 
         cd /root/wrk-nginx-container
-        for (( cpu = 0; cpu < 96; cpu++ )); do
+        for (( cpu = 0; cpu < num_cpu; cpu++ )); do
                 n=$((n%num_ns))
                 local ns=n1$((n+1))
                 n=$((n+1))
                 ip=1.1.1.200
                 ip=8.9.10.11
 set -x
-# 		taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
-                ip netns exec $ns taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
+		taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
+#                 ip netns exec $ns taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
 set +x
 
                 port=$((port+1))
