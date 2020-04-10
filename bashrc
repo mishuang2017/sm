@@ -53,8 +53,8 @@ elif (( host_num == 2 )); then
 	link2=ens1f1
 elif (( host_num == 3 )); then
 	numvfs=97
-	numvfs=3
 	numvfs=16
+	numvfs=3
 	link=ens1f0
 	link2=ens1f1
 
@@ -10733,7 +10733,7 @@ function wrk_tune
 	set_all_vf_affinity 96
 }
 
-alias wrk_rule="/root/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))"
+alias wrk_rule="~chrism/bin/test_router5-snat-all-ofed5-2.sh $link $((numvfs-1))"
 alias wrk_rule2="~chrism/bin/test_router5-snat-all-ofed5-logan.sh $link $((numvfs-1))"
 
 function wrk_setup
@@ -10792,6 +10792,45 @@ set +x
         cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
 
 }
+
+function wrk_run1
+{
+        local port=0
+        local time=30
+        num_ns=1
+	num_cpu=1
+        [[ $# == 1 ]] && num_cpu=$1
+
+        cd /root/wrk-nginx-container
+        for (( cpu = 0; cpu < num_cpu; cpu++ )); do
+                n=$((n%num_ns))
+                local ns=n1$((n+1))
+                n=$((n+1))
+                ip=1.1.1.200
+                ip=8.9.10.11
+set -x
+                ip netns exec $ns taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
+set +x
+
+                port=$((port+1))
+                if (( $port >= 9 )); then
+                        port=0
+                fi
+        done
+
+        i=1
+        while :; do
+                echo $i
+                i=$((i+1))
+                sleep 1
+                (( i == time )) && break
+        done
+        sleep 5
+        cat /tmp/result-* | grep Requests | awk '{printf("%d+",$2)} END{print(0)}' | bc -l
+
+}
+
+
 
 function wrk_run_pf
 {
