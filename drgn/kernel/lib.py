@@ -28,7 +28,7 @@ def hostname(name):
     text = b.read()
     b.close()
 
-    print("hostname: %s" % text)
+#     print("hostname: %s" % text)
 
     if name in text:
         return True
@@ -40,7 +40,7 @@ if kernel("5.6.0-rc7+"):
     pf0_name = "enp4s0f0np0"
 pf1_name = "enp4s0f1"
 
-if hostname("clx-ibmc-03"):
+if hostname("clx-ibmc-03") or hostname("clx-ibmc-01"):
     pf0_name = "ens1f0"
     pf1_name = "ens1f1"
 
