@@ -7,6 +7,7 @@ yum install -y rsync ethtool \
         numactl-devel libmnl libmnl-devel openvswitch libcap-ng-devel libatomic libtool dh-autoreconf \
         texinfo	python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel cmake net-tools \
         libnsl pcre-devel qalculate clang clang-devel llvm llvm-devel llvm-static ncurses-devel \
-	rpm-build kexec-tools tcpdump iperf elfutils-libelf.x86_64 elfutils-libelf-devel.x86_64
+	rpm-build kexec-tools tcpdump iperf elfutils-libelf.x86_64 elfutils-libelf-devel.x86_64 \
+	grubby
 
 /mswg/release/mft/mftinstall
