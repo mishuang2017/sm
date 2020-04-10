@@ -10764,6 +10764,7 @@ function wrk_run0
 	num_cpu=96
         [[ $# == 1 ]] && num_ns=$1
 
+	/bin/rm -rf  /tmp/result-*
         cd /root/wrk-nginx-container
         for (( cpu = 0; cpu < num_cpu; cpu++ )); do
                 n=$((n%num_ns))
@@ -10801,6 +10802,7 @@ function wrk_run1
 	num_cpu=1
         [[ $# == 1 ]] && num_cpu=$1
 
+	/bin/rm -rf  /tmp/result-*
         cd /root/wrk-nginx-container
         for (( cpu = 0; cpu < num_cpu; cpu++ )); do
                 n=$((n%num_ns))
@@ -10840,6 +10842,7 @@ function wrk_run_pf
 	num_cpu=1
         [[ $# == 1 ]] && num_cpu=$1
 
+	/bin/rm -rf  /tmp/result-*
         cd /root/wrk-nginx-container
         for (( cpu = 0; cpu < num_cpu; cpu++ )); do
                 n=$((n%num_ns))
