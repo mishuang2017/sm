@@ -78,3 +78,5 @@ sudo python3 -m ensurepip
 # for nginx
 # ./configure: error: the HTTP rewrite module requires the PCRE library.
 sudo apt install -y libpcre3 libpcre3-dev
+
+sudo apt install -y rsync
