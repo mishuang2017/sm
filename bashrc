@@ -11097,7 +11097,7 @@ set -x
 	file=/etc/default/grub
 	MKCONFIG=grub-mkconfig
 	sudo sed -i '/GRUB_CMDLINE_LINUX/d' $file
-	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M\"" >> $file
+	sudo echo "GRUB_CMDLINE_LINUX=\"intel_iommu=on biosdevname=0 pci=realloc crashkernel=256M processor.max_cstate=1 intel_idle.max_cstate=0\"" >> $file
 	# for crashkernel, configure /etc/default/grub.d/kdump-tools.cfg
 
 	sudo /bin/rm -rf /boot/*.old
