@@ -2911,6 +2911,8 @@ https://mellanox.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=86a978fb-f69d-4be
 
 ===tcpdump===
 
+tcpdump -i $link dst host 8.9.10.11 -s 54
+
 ether proto 0x88cc
 
 portrange 22-23

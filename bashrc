@@ -11144,9 +11144,9 @@ fi
 
 function root-login
 {
-	local file=/etc/ssh/sshd_config
-	sudo sed -i '/PermitRootLogin/d' $file
-	sudo echo "PermitRootLogin yes" >> $file
+	file=/etc/ssh/sshd_config
+	sed -i '/PermitRootLogin/d' $file
+	echo "PermitRootLogin yes" >> $file
 	/etc/init.d/ssh restart
 }
 
