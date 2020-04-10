@@ -9564,7 +9564,6 @@ function yum_bcc
 
 function install_bcc
 {
-	sudo dnf install -y clang clang-devel llvm llvm-devel llvm-static ncurses-devel
 	sm
 	mkdir -p bcc/build; cd bcc/build
 	cmake .. -DCMAKE_INSTALL_PREFIX=/usr
