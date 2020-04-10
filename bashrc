@@ -10640,6 +10640,7 @@ function isolcpus
 
 alias vi_nginx='vi /usr/local/nginx/conf/nginx.conf'
 alias nginx_reload='/usr/local/nginx/sbin/nginx -s reload'
+alias nginx='/usr/local/nginx/sbin/nginx'
 
 # net.netfilter.nf_conntrack_generic_timeout = 600
 # net.netfilter.nf_conntrack_icmp_timeout = 30
@@ -10834,13 +10835,18 @@ set +x
 
 
 
-function wrk_run_pf
+function wrk_pf
 {
         local port=0
         local time=30
         num_ns=1
 	num_cpu=1
+	sever=2
         [[ $# == 1 ]] && num_cpu=$1
+        if [[ $# == 2 ]]; then
+		num_cpu=$1
+		server=$2
+	fi
 
 	/bin/rm -rf  /tmp/result-*
         cd /root/wrk-nginx-container
@@ -10850,7 +10856,7 @@ function wrk_run_pf
                 n=$((n+1))
                 ip=1.1.1.200
                 ip=8.9.10.11
-                ip=192.168.1.2
+                ip=192.168.1.$server
 set -x
 		taskset -c $cpu /images/chrism/wrk/wrk -d $time -t 1 -c 30 --latency --script=counter.lua http://[$ip]:$((80+port)) > /tmp/result-$cpu &
 set +x
