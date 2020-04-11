@@ -9,8 +9,7 @@ import socket
 import sys
 import os
 
-libpath = os.path.dirname(os.path.realpath("__file__"))
-sys.path.append(libpath)
+sys.path.append("..")
 from lib import *
 
 # mlx5e_priv = get_mlx5_pf0()
@@ -31,13 +30,14 @@ for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print(chain)
 #     print("chain id: %x" % chain.chain)
     for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
-#         print(prio)
         next_fdb = prio.next_fdb
         miss_group = prio.miss_group
         miss_rule = prio.miss_rule
         print("\n=== chain: %x, prio: %x, level: %x ===" % \
             (prio.key.chain, prio.key.prio, prio.key.level))
-        print("next_fdb: %lx, miss_group: %lx, miss_rule: %lx" % (next_fdb, miss_group, miss_rule))
+        print("fdb_prio %lx" % prio)
+        print("next_fdb: %lx, miss_group: %lx, miss_rule: mlx5_flow_handle %lx" % \
+            (next_fdb, miss_group, miss_rule))
         table = prio.fdb
         flow_table("", table)
 
