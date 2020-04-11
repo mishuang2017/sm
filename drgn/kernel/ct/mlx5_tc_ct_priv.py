@@ -60,18 +60,18 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
     ct_entries_ht = mlx5_ct_ft.ct_entries_ht
     for j, mlx5_ct_entry in enumerate(hash(ct_entries_ht, 'struct mlx5_ct_entry', 'node')):
         print("mlx5_ct_entry %lx" % mlx5_ct_entry)
-        print("\tcookie %lx" % mlx5_ct_entry.cookie)
-        print("\tflow_offload_tuple %lx" % mlx5_ct_entry.cookie)
+        print("\tcookie is flow_offload_tuple %lx" % mlx5_ct_entry.cookie)
 
         for k in range(2):
             mlx5_ct_zone_rule = mlx5_ct_entry.zone_rules[k]
-            print("mlx5_ct_zone_rule.mlx5_esw_flow_attr")
-#             print(mlx5_ct_zone_rule.attr)
+            print("\tmlx5_esw_flow_attr %lx" % mlx5_ct_zone_rule.attr.address_of_())
             mlx5_flow_handle = mlx5_ct_zone_rule.rule
             nat = mlx5_ct_zone_rule.nat
             tupleid = mlx5_ct_zone_rule.tupleid
             print("\tmlx5_ct_entry.zone_rules[%d].rule: nat: %d, tupleid: %d" % (k, nat, tupleid))
+            print("\t\tmlx5_ct_zone_rule.rule")
             print_mlx5_flow_handle(mlx5_flow_handle)
+        print('')
 
 #         print("\tmlx5_ct_entry.zone_rules[1].rule")
 #         mlx5_flow_handle = mlx5_ct_entry.zone_rules[1].rule

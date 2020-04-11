@@ -323,6 +323,28 @@ fs_fte ffff94f552b250a8
                         dest: ft: ffff94e744428400
 
 
+
+
+[Sat Apr 11 18:05:44 2020] mlx5e_configure_flower                  : enp4s0f0np0_1       : is called
+[Sat Apr 11 18:05:44 2020] __parse_cls_flower                      : enp4s0f0np0_1       : is called, 800
+[Sat Apr 11 18:05:44 2020] __mlx5_tc_ct_flow_offload               : enp4s0f0np0_1       : is called
+
+[Sat Apr 11 18:05:44 2020] mlx5e_configure_flower                  : enp4s0f0np0_1       : is called
+[Sat Apr 11 18:05:44 2020] __parse_cls_flower                      : enp4s0f0np0_1       : is called, 800
+
+[Sat Apr 11 18:05:44 2020] mlx5e_configure_flower                  : enp4s0f0np0         : is called
+[Sat Apr 11 18:05:44 2020] __parse_cls_flower                      : enp4s0f0np0         : is called, 800
+[Sat Apr 11 18:05:44 2020] __mlx5_tc_ct_flow_offload               : enp4s0f0np0         : is called
+
+[Sat Apr 11 18:05:44 2020] mlx5e_configure_flower                  : enp4s0f0np0         : is called
+[Sat Apr 11 18:05:44 2020] __parse_cls_flower                      : enp4s0f0np0         : is called, 800
+
+[Sat Apr 11 18:05:44 2020] mlx5e_configure_flower                  : enp4s0f0np0_1       : is called
+[Sat Apr 11 18:05:44 2020] __parse_cls_flower                      : enp4s0f0np0_1       : is called, 800
+
+[Sat Apr 11 18:05:44 2020] mlx5_tc_ct_entry_add_rules              : enp4s0f0np0         : is called
+[Sat Apr 11 18:05:44 2020] mlx5_tc_ct_entry_add_rules              : enp4s0f0np0         : is called
+
 ===question===
 
 1. What is FW level support 
