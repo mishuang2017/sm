@@ -26,12 +26,10 @@ def print_ufid_tc_data(data):
         print("chain: %3x, prio: %d, handle: %d, ifindex: %d" %
               (data.chain, data.prio, data.handle, data.ifindex));
 
-def print_hmap(hmap, struct_name):
+def print_hmap(hmap, struct_name, member):
     objs = []
 
     hmap_addr = prog[hmap]
-#     print(hmap_addr)
-
     buckets = hmap_addr.buckets.value_()
     n = hmap_addr.n.value_()
 
@@ -45,53 +43,32 @@ def print_hmap(hmap, struct_name):
             continue
 
         data = Object(prog, "struct " + struct_name, address=p.value_())
-        if hmap == "ufid_tc":
-            print_ufid_tc_data(data)
-        else:
-            objs.append(data)
-#             print(data)
+        objs.append(data)
 
         i += 1
         if i == n:
             return objs
 
-        if hmap == "ufid_tc":
-            next = data.ufid_node.next
-        if hmap == "port_to_netdev":
-            next = data.portno_node.next
-        if hmap == "all_ofprotos":
-            next = data.hmap_node.next
-        if hmap == "all_ofproto_dpifs_by_name_node":
-            next = data.all_ofproto_dpifs_by_name_node.next
+        next = data.member_(member).next
 
         while next.value_() != 0:
 
             data = Object(prog, "struct " + struct_name, address=next.value_())
-            if hmap == "ufid_tc":
-                print_ufid_tc_data(data)
-            else:
-                objs.append(data)
-#                 print(data)
+            objs.append(data)
 
             i += 1
             if i == n:
                 return objs
 
-            if hmap == "ufid_tc":
-                next = data.ufid_node.next
-            if hmap == "port_to_netdev":
-                next = data.portno_node.next
-            if hmap == "all_ofprotos":
-                next = data.hmap_node.next
-            if hmap == "all_ofproto_dpifs_by_name_node":
-                next = data.all_ofproto_dpifs_by_name_node.next
+            next = data.member_(member).next
 
         buckets = buckets + 8
 
     return objs
 
 # print_hmap("ufid_to_tc", "ufid_tc_data")
-print_hmap("port_to_netdev", "port_to_netdev_data")
+
+print_hmap("port_to_netdev", "port_to_netdev_data", "portno_node")
 
 # all_commands = prog["all_commands"]
 # print(all_commands)
@@ -168,15 +145,15 @@ print("n_handlers: %d" % n_handlers)
 #     struct ofproto up;
 # }
 
-ofproto_dpifs = print_hmap('all_ofproto_dpifs_by_name', "ofproto_dpif")
-for i, ofproto_dpif in enumerate(ofproto_dpifs):
-    sflow = ofproto_dpif.sflow
-    print(sflow)
-    print(sflow.collectors)
-    print(sflow.sflow_agent)
-    print(sflow.options)
+# ofproto_dpifs = print_hmap('all_ofproto_dpifs_by_name', "ofproto_dpif")
+# for i, ofproto_dpif in enumerate(ofproto_dpifs):
+#     sflow = ofproto_dpif.sflow
+#     print(sflow)
+#     print(sflow.collectors)
+#     print(sflow.sflow_agent)
+#     print(sflow.options)
 
-ofprotos = print_hmap('all_ofprotos', "ofproto")
+ofprotos = print_hmap('all_ofprotos', "ofproto", "hmap_node")
 for i, ofproto in enumerate(ofprotos):
     set_sflow = ofproto.ofproto_class.set_sflow
     print(address_to_name(hex(set_sflow.value_())))
