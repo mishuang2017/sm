@@ -14,6 +14,7 @@ import time
 
 socket_file_ops = prog['socket_file_ops'].address_of_().value_()
 netlink_ops = prog['netlink_ops'].address_of_().value_()
+inet_dgram_ops = prog['inet_dgram_ops'].address_of_().value_()
 
 def print_netlink_sock(sock):
     print("sock.sk_protocol: %d" % sock.sk.sk_protocol, end='')
@@ -32,14 +33,25 @@ def print_files(files):
         if socket_file_ops != file.f_op.value_():
             continue
 
-        socket = Object(prog, "struct socket", address=file.private_data)
+        sock = Object(prog, "struct socket", address=file.private_data)
         # only print netlink socket
-        if netlink_ops != socket.ops.value_():
+#         if netlink_ops != sock.ops.value_() and inet_dgram_ops != sock.ops.value_():
+        if inet_dgram_ops != sock.ops.value_():
             continue
+#         print(sock.ops)
 
-        sock = socket.sk
-        netlink_sock = cast('struct netlink_sock *', sock)
-        print_netlink_sock(netlink_sock)
+        sock = sock.sk
+#         print(sock)
+        inet_sock = cast('struct inet_sock *', sock)
+#         print(inet_sock)
+        dest_ip = inet_sock.sk.__sk_common.skc_daddr
+        src_ip = inet_sock.sk.__sk_common.skc_rcv_saddr
+        dest_port = socket.ntohs(inet_sock.sk.__sk_common.skc_dport)
+        src_port = socket.ntohs(inet_sock.inet_sport)
+        print("dest_ip: %x, src_ip: %x, dest_port: %d, src_port: %d" % \
+            (dest_ip, src_ip, dest_port, src_port))
+#         netlink_sock = cast('struct netlink_sock *', sock)
+#         print_netlink_sock(netlink_sock)
 
 def find_task(name):
     print('PID        COMM')
