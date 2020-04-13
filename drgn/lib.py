@@ -2,7 +2,8 @@ from drgn.helpers.linux import *
 from drgn import container_of
 from drgn import Object
 from drgn import cast
-import socket
+from socket import ntohl
+from socket import ntohs
 import os
 
 import subprocess
@@ -90,14 +91,14 @@ def mac(m):
     return s
 
 def print_nf_conntrack_tuple(tuple):
-    print("src ip  : %s" % ipv4(socket.ntohl(tuple.src.u3.ip.value_())))
-    print("src port: %d" % socket.ntohs(tuple.src.u.all.value_()))
-    print("dst ip  : %s" % ipv4(socket.ntohl(tuple.dst.u3.ip.value_())))
-    print("dst port: %d" % socket.ntohs(tuple.dst.u.all.value_()))
+    print("src ip  : %s" % ipv4(ntohl(tuple.src.u3.ip.value_())))
+    print("src port: %d" % ntohs(tuple.src.u.all.value_()))
+    print("dst ip  : %s" % ipv4(ntohl(tuple.dst.u3.ip.value_())))
+    print("dst port: %d" % ntohs(tuple.dst.u.all.value_()))
 
 def print_mlx5e_ct_tuple(k, tuple):
     print("\n=== mlx5e_ct_tuple start ===")
-    print("%d: ipv4: %s" % (k, ipv4(socket.ntohl(tuple.ipv4.value_()))))
+    print("%d: ipv4: %s" % (k, ipv4(ntohl(tuple.ipv4.value_()))))
     print("%d: zone: %d" % (k, tuple.zone.id))
     print("%d: nat: 0x%lx" % (k, tuple.nat))
     print("%d: mlx5e_tc_flow %lx, refcnt: %d" % (k, tuple.flow, tuple.flow.refcnt.refs.counter.value_()))
@@ -159,7 +160,7 @@ def print_exts(e):
 #             print("\tcommit: %d" % tcf_conntrack_info.commit.value_(), end='')
 #             print("\tnat: 0x%x" % tcf_conntrack_info.nat.value_())
 #             if tcf_conntrack_info.range.min_addr.ip:
-#                 print("snat ip: %s" % ipv4(socket.ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
+#                 print("snat ip: %s" % ipv4(ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
             tcf_ct = cast('struct tcf_ct *', a)
             params = tcf_ct.params
             print("\tzone: %d\ttcf_ct_flow_table %x\tnf_flowtable %x" % (params.zone, params.ct_ft, params.nf_ft))
@@ -189,9 +190,9 @@ def print_exts(e):
                 print("\tTCA_TUNNEL_KEY_ACT_SET")
                 print("\tip_tunnel_info: %x" % tun.params.tcft_enc_metadata.u.tun_info.address_of_().value_())
                 print("\ttun_id: 0x%x" % ip_tunnel_key.tun_id.value_())
-                print("\tsrc ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.src.value_())))
-                print("\tdst ip: %s" % ipv4(socket.ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
-                print("\ttp_dst: %d" % socket.ntohs(ip_tunnel_key.tp_dst.value_()))
+                print("\tsrc ip: %s" % ipv4(ntohl(ip_tunnel_key.u.ipv4.src.value_())))
+                print("\tdst ip: %s" % ipv4(ntohl(ip_tunnel_key.u.ipv4.dst.value_())))
+                print("\ttp_dst: %d" % ntohs(ip_tunnel_key.tp_dst.value_()))
         if kind == "sample":
             tcf_sample = Object(prog, 'struct tcf_sample', address=a.value_())
             print(tcf_sample)
@@ -210,15 +211,15 @@ def print_cls_fl_filter(f):
 #     print("ct_zone: %d" % k.ct_zone.value_())
 #     print("ct_mark: 0x%x" % k.ct_mark.value_())
 #     print("ct_labels[0]: %x" % k.ct_labels[0].value_())
-#     print("protocol: %x" % socket.ntohs(k.basic.n_proto))
+#     print("protocol: %x" % ntohs(k.basic.n_proto))
 #     print("dmac: %s" % mac(k.eth.dst))
 #     print("smac: %s" % mac(k.eth.src))
 #     if k.ipv4.src:
 #         print("src ip: ", end='')
-#         print(ipv4(socket.ntohl(k.ipv4.src.value_())))
+#         print(ipv4(ntohl(k.ipv4.src.value_())))
 #     if k.ipv4.dst:
 #         print("dst ip: ", end='')
-#         print(ipv4(socket.ntohl(k.ipv4.dst.value_())))
+#         print(ipv4(ntohl(k.ipv4.dst.value_())))
  
     print_exts(f.exts)
 
@@ -553,11 +554,11 @@ def print_tuple(tuple, ct):
     sport = 0;
     dport = 0;
     if protonum == IPPROTO_TCP:
-        dport = socket.ntohs(tuple.tuple.dst.u.tcp.port.value_())
-        sport = socket.ntohs(tuple.tuple.src.u.tcp.port.value_())
+        dport = ntohs(tuple.tuple.dst.u.tcp.port.value_())
+        sport = ntohs(tuple.tuple.src.u.tcp.port.value_())
     if protonum == IPPROTO_UDP:
-        dport = socket.ntohs(tuple.tuple.dst.u.udp.port.value_())
-        sport = socket.ntohs(tuple.tuple.src.u.udp.port.value_())
+        dport = ntohs(tuple.tuple.dst.u.udp.port.value_())
+        sport = ntohs(tuple.tuple.src.u.udp.port.value_())
     if dport != 4000:
         return
 
@@ -565,8 +566,8 @@ def print_tuple(tuple, ct):
 #     print("nf_conntrack_tuple %lx" % tuple.value_())
 
     if protonum == IPPROTO_TCP and dir == IP_CT_DIR_ORIGINAL:
-        print("src ip: %20s:%6d" % (ipv4(socket.ntohl(tuple.tuple.src.u3.ip.value_())), sport), end=' ')
-        print("dst ip: %20s:%6d" % (ipv4(socket.ntohl(tuple.tuple.dst.u3.ip.value_())), dport), end=' ')
+        print("src ip: %20s:%6d" % (ipv4(ntohl(tuple.tuple.src.u3.ip.value_())), sport), end=' ')
+        print("dst ip: %20s:%6d" % (ipv4(ntohl(tuple.tuple.dst.u3.ip.value_())), dport), end=' ')
         print("protonum: %3d" % protonum, end=' ')
         print("dir: %3d" % dir, end=' ')
         state = ct.proto.tcp.state
@@ -576,8 +577,8 @@ def print_tuple(tuple, ct):
 
 def print_tun(tun):
     print("\ttun_info: id: %x, dst ip: %s, dst port: %d" % \
-        (tun.key.tun_id, ipv4(socket.ntohl(tun.key.u.ipv4.dst.value_())), \
-        socket.ntohs(tun.key.tp_dst.value_())))
+        (tun.key.tun_id, ipv4(ntohl(tun.key.u.ipv4.dst.value_())), \
+        ntohs(tun.key.tp_dst.value_())))
 
 def print_dest(rule):
     print("\t\tmlx5_flow_rule %lx" % rule.address_of_().value_())
@@ -645,31 +646,31 @@ def print_match(fte):
     print("fs_fte %lx" % fte.address_of_().value_())
     val = fte.val
 #     print(val)
-#     smac = str(socket.ntohl(hex(val[0])))
+#     smac = str(ntohl(hex(val[0])))
     print("%8x: " % fte.index.value_(), end='')
-    smac_47_16 = socket.ntohl(val[0].value_())
-    smac_15_0 = socket.ntohl(val[1].value_() & 0xffff)
+    smac_47_16 = ntohl(val[0].value_())
+    smac_15_0 = ntohl(val[1].value_() & 0xffff)
     smac_47_16 <<= 16
     smac_15_0 >>= 16
     smac = smac_47_16 | smac_15_0
     print(" s: ", end='')
     print_mac(smac)
 
-    dmac_47_16 = socket.ntohl(val[2].value_())
-    dmac_15_0 = socket.ntohl(val[3].value_() & 0xffff)
+    dmac_47_16 = ntohl(val[2].value_())
+    dmac_15_0 = ntohl(val[3].value_() & 0xffff)
     dmac_47_16 <<= 16
     dmac_15_0 >>= 16
     dmac = dmac_47_16 | dmac_15_0
     print(" d: ", end='')
     print_mac(dmac)
 
-    ethertype = socket.ntohl(val[1].value_() & 0xffff0000)
+    ethertype = ntohl(val[1].value_() & 0xffff0000)
     if ethertype:
         print(" et: %x" % ethertype, end='')
 
-    vport = socket.ntohl(val[17].value_() & 0xffff0000)
+    vport = ntohl(val[17].value_() & 0xffff0000)
     # metadata_reg_c_0
-#     vport = socket.ntohl(val[59].value_() & 0xffff0000)
+#     vport = ntohl(val[59].value_() & 0xffff0000)
     if vport:
         print(" vport: %4x" % vport, end='')
 
@@ -689,56 +690,56 @@ def print_match(fte):
     if ip_version:
         print(" ipv: %-2x" % ip_version, end='')
 
-    tcp_sport = socket.ntohs(val[5].value_() & 0xffff)
+    tcp_sport = ntohs(val[5].value_() & 0xffff)
     if tcp_sport:
         print(" sport: %5d" % tcp_sport, end='')
 
-    tcp_dport = socket.ntohs(val[5].value_() >> 16 & 0xffff)
+    tcp_dport = ntohs(val[5].value_() >> 16 & 0xffff)
     if tcp_dport:
         print(" dport: %6d" % tcp_dport, end='')
 
-    udp_sport = socket.ntohs(val[7].value_() & 0xffff)
+    udp_sport = ntohs(val[7].value_() & 0xffff)
     if udp_sport:
         print(" sport: %6d" % udp_sport, end='')
 
-    udp_dport = socket.ntohs(val[7].value_() >> 16 & 0xffff)
+    udp_dport = ntohs(val[7].value_() >> 16 & 0xffff)
     if udp_dport:
         print(" dport: %6d" % udp_dport, end='')
 
-    src_ip = socket.ntohl(val[11].value_())
+    src_ip = ntohl(val[11].value_())
     if src_ip:
         print(" src_ip: %12s" % ipv4(src_ip), end='')
 
-    dst_ip = socket.ntohl(val[15].value_())
+    dst_ip = ntohl(val[15].value_())
     if src_ip:
         print(" dst_ip: %12s" % ipv4(dst_ip), end='')
 
-    vni = socket.ntohl(val[21].value_() & 0xffffff) >> 8
+    vni = ntohl(val[21].value_() & 0xffffff) >> 8
     if vni:
         print(" vni: %6d" % vni, end='')
 
-    source_sqn = socket.ntohl(val[16].value_() & 0xffffff00)
+    source_sqn = ntohl(val[16].value_() & 0xffffff00)
     if source_sqn:
         print(" source_sqn: %6x" % source_sqn, end='')
 
     if vni:
-        smac_47_16 = socket.ntohl(val[32].value_())
-        smac_15_0 = socket.ntohl(val[33].value_() & 0xffff)
+        smac_47_16 = ntohl(val[32].value_())
+        smac_15_0 = ntohl(val[33].value_() & 0xffff)
         smac_47_16 <<= 16
         smac_15_0 >>= 16
         smac = smac_47_16 | smac_15_0
         print("\n           s: ", end='')
         print_mac(smac)
 
-        dmac_47_16 = socket.ntohl(val[34].value_())
-        dmac_15_0 = socket.ntohl(val[35].value_() & 0xffff)
+        dmac_47_16 = ntohl(val[34].value_())
+        dmac_15_0 = ntohl(val[35].value_() & 0xffff)
         dmac_47_16 <<= 16
         dmac_15_0 >>= 16
         dmac = dmac_47_16 | dmac_15_0
         print(" d: ", end='')
         print_mac(dmac)
 
-        ethertype = socket.ntohl(val[33].value_() & 0xffff0000)
+        ethertype = ntohl(val[33].value_() & 0xffff0000)
         print(" et: %x" % ethertype, end='')
 
         ip_protocol = val[36].value_() & 0xff
@@ -757,28 +758,37 @@ def print_match(fte):
         if ip_version:
             print(" ipv: %-2x" % ip_version, end='')
 
-        tcp_sport = socket.ntohs(val[37].value_() & 0xffff)
+        tcp_sport = ntohs(val[37].value_() & 0xffff)
         if tcp_sport:
             print(" sport: %5d" % tcp_sport, end='')
 
-        tcp_dport = socket.ntohs(val[37].value_() >> 16 & 0xffff)
+        tcp_dport = ntohs(val[37].value_() >> 16 & 0xffff)
         if tcp_dport:
             print(" dport: %6d" % tcp_dport, end='')
 
-        udp_sport = socket.ntohs(val[39].value_() & 0xffff)
+        udp_sport = ntohs(val[39].value_() & 0xffff)
         if udp_sport:
             print(" sport: %6d" % udp_sport, end='')
 
-        udp_dport = socket.ntohs(val[39].value_() >> 16 & 0xffff)
+        udp_dport = ntohs(val[39].value_() >> 16 & 0xffff)
         if udp_dport:
             print(" dport: %6d" % udp_dport, end='')
 
-        src_ip = socket.ntohl(val[43].value_())
+        src_ip = ntohl(val[43].value_())
         if src_ip:
             print(" src_ip: %12s" % ipv4(src_ip), end='')
 
-        dst_ip = socket.ntohl(val[47].value_())
+        dst_ip = ntohl(val[47].value_())
         if src_ip:
             print(" dst_ip: %12s" % ipv4(dst_ip), end='')
 
     print(" action %4x: " % fte.action.action.value_())
+
+def print_udp_sock(sk):
+    inet_sock = cast('struct inet_sock *', sk)
+    dest_ip = inet_sock.sk.__sk_common.skc_daddr
+    src_ip = inet_sock.sk.__sk_common.skc_rcv_saddr
+    dest_port = ntohs(inet_sock.sk.__sk_common.skc_dport)
+    src_port = ntohs(inet_sock.inet_sport)
+    print("dest_ip: %s, src_ip: %s, dest_port: %d, src_port: %d" % \
+                (ipv4(ntohl(dest_ip.value_())), ipv4(ntohl(src_ip.value_())), dest_port, src_port))
