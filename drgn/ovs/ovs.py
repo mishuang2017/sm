@@ -27,16 +27,15 @@ def print_ufid_tc_data(data):
               (data.chain, data.prio, data.handle, data.ifindex));
 
 def print_hmap(hmap, struct_name):
+    objs = []
 
     hmap_addr = prog[hmap]
-    print(hmap_addr)
+#     print(hmap_addr)
 
     buckets = hmap_addr.buckets.value_()
-
-    print("buckets: %x" % buckets)
-
     n = hmap_addr.n.value_()
-    print("n: %d" % n)
+
+    print("\n=== %30s: buckets: %x, n: %d ===" % (hmap, buckets, n))
 
     i = 0
     while 1:
@@ -49,11 +48,12 @@ def print_hmap(hmap, struct_name):
         if hmap == "ufid_tc":
             print_ufid_tc_data(data)
         else:
-            print(data)
+            objs.append(data)
+#             print(data)
 
         i += 1
         if i == n:
-            return
+            return objs
 
         if hmap == "ufid_tc":
             next = data.ufid_node.next
@@ -70,11 +70,12 @@ def print_hmap(hmap, struct_name):
             if hmap == "ufid_tc":
                 print_ufid_tc_data(data)
             else:
-                print(data)
+                objs.append(data)
+#                 print(data)
 
             i += 1
             if i == n:
-                return
+                return objs
 
             if hmap == "ufid_tc":
                 next = data.ufid_node.next
@@ -86,6 +87,8 @@ def print_hmap(hmap, struct_name):
                 next = data.all_ofproto_dpifs_by_name_node.next
 
         buckets = buckets + 8
+
+    return objs
 
 # print_hmap("ufid_to_tc", "ufid_tc_data")
 print_hmap("port_to_netdev", "port_to_netdev_data")
@@ -161,6 +164,19 @@ print("n_revalidators: %d" %n_revalidators)
 n_handlers = prog['n_handlers']
 print("n_handlers: %d" % n_handlers)
 
-print_hmap('all_ofprotos', "ofproto")
+# struct ofproto_dpif {
+#     struct ofproto up;
+# }
 
-print_hmap('all_ofproto_dpifs_by_name', "ofproto_dpif")
+ofproto_dpifs = print_hmap('all_ofproto_dpifs_by_name', "ofproto_dpif")
+for i, ofproto_dpif in enumerate(ofproto_dpifs):
+    sflow = ofproto_dpif.sflow
+    print(sflow)
+    print(sflow.collectors)
+    print(sflow.sflow_agent)
+    print(sflow.options)
+
+ofprotos = print_hmap('all_ofprotos', "ofproto")
+for i, ofproto in enumerate(ofprotos):
+    set_sflow = ofproto.ofproto_class.set_sflow
+    print(address_to_name(hex(set_sflow.value_())))
