@@ -119,6 +119,8 @@ TIME     PID     TID     COMM            FUNC
 
 ===ct===
 
+nf_flow_offload_init init flow_cls_offload.cookie
+
 CONFIG_NET_TC_SKB_EXT
 mlx5e_tc_rep_update_skb
 
@@ -149,6 +151,8 @@ tcf_ct_act
 			flow_offload_add
 				nf_flow_offload_add
 					nf_flow_offload_tuple
+						nf_flow_offload_init
+							cls_flow->cookie
 
 flow_offload_work_handler(FLOW_CLS_REPLACE)
 	flow_offload_work_add
@@ -350,3 +354,12 @@ fs_fte ffff94f552b250a8
 1. What is FW level support 
 mlx5_tc_ct_init_check_support()
 	err_msg = "firmware level support is missing";
+
+2. a.	Table 1. Do match, set group id (set register c0), jump to sample.
+It seems many registers are used by CT, CHAIN_TO_REG for c0
+
+3. what is vport 0
+
+4. what is losing register
+
+5. What is FLOW_SAMPLE_OBJ

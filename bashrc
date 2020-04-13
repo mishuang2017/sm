@@ -11131,7 +11131,8 @@ function sflow_list
 
 function sflow_create
 {
-	ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+# 	ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+	ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
 }
 
 function sflowtool1

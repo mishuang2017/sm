@@ -28,14 +28,14 @@ def print_ufid_tc_data(data):
 
 def print_hmap(hmap, struct_name):
 
-    ufid_tc = prog[hmap]
-    print(ufid_tc)
+    hmap_addr = prog[hmap]
+    print(hmap_addr)
 
-    buckets = ufid_tc.buckets.value_()
+    buckets = hmap_addr.buckets.value_()
 
     print("buckets: %x" % buckets)
 
-    n = ufid_tc.n.value_()
+    n = hmap_addr.n.value_()
     print("n: %d" % n)
 
     i = 0
@@ -59,6 +59,10 @@ def print_hmap(hmap, struct_name):
             next = data.ufid_node.next
         if hmap == "port_to_netdev":
             next = data.portno_node.next
+        if hmap == "all_ofprotos":
+            next = data.hmap_node.next
+        if hmap == "all_ofproto_dpifs_by_name_node":
+            next = data.all_ofproto_dpifs_by_name_node.next
 
         while next.value_() != 0:
 
@@ -76,10 +80,14 @@ def print_hmap(hmap, struct_name):
                 next = data.ufid_node.next
             if hmap == "port_to_netdev":
                 next = data.portno_node.next
+            if hmap == "all_ofprotos":
+                next = data.hmap_node.next
+            if hmap == "all_ofproto_dpifs_by_name_node":
+                next = data.all_ofproto_dpifs_by_name_node.next
 
         buckets = buckets + 8
 
-# print_hmap("ufid_tc", "ufid_tc_data")
+# print_hmap("ufid_to_tc", "ufid_tc_data")
 print_hmap("port_to_netdev", "port_to_netdev_data")
 
 # all_commands = prog["all_commands"]
@@ -108,7 +116,7 @@ udpif = backer.udpif
 n = udpif.n_revalidators
 rev = udpif.revalidators
 
-print("n: %d" % n)
+print("udpif.n_revalidators: %d" % n)
 print("revalidators: %x" % rev)
 
 
@@ -143,3 +151,16 @@ print(address_to_name(hex(dpif.dpif_class.flow_dump_thread_create.value_())))
 print(address_to_name(hex(dpif.dpif_class.port_add.value_())))
 print(address_to_name(hex(dpif.dpif_class.recv.value_())))
 print(address_to_name(hex(dpif.dpif_class.recv_wait.value_())))
+
+all_ofprotos = prog['all_ofprotos']
+print(all_ofprotos)
+
+n_revalidators = prog['n_revalidators']
+
+print("n_revalidators: %d" %n_revalidators)
+n_handlers = prog['n_handlers']
+print("n_handlers: %d" % n_handlers)
+
+print_hmap('all_ofprotos', "ofproto")
+
+print_hmap('all_ofproto_dpifs_by_name', "ofproto_dpif")
