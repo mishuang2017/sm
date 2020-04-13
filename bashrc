@@ -582,7 +582,7 @@ alias smip="cd /$images/chrism/iproute2"
 alias smipu="cd /$images/chrism/iproute2-upstream"
 alias smb2="cd /$images/chrism/bcc/tools"
 alias smb="cd /$images/chrism/bcc/examples/tracing"
-alias smk="cd /$images/chrism/sm/drgn/kernel"
+alias smk="cd /$images/chrism/sm/drgn"
 alias smdo="cd ~chrism/sm/drgn/ovs"
 alias d-ovs="sudo ~chrism/sm/drgn/ovs/ovs.py"
 alias err="sudo ~chrism/sm/drgn/ovs/errors.py"
@@ -10037,7 +10037,7 @@ function kmsg() {
 	fi
 }
 
-drgn_dir=~chrism//sm/drgn/kernel
+drgn_dir=~chrism//sm/drgn
 
 function _flowtable
 {
