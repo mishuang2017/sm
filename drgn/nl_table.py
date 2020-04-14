@@ -21,8 +21,14 @@ NETLINK_ROUTE = 0
 # for i in range(MAX_LINKS):
 #     print(nl_table[i])
 
-hash = nl_table[NETLINK_GENERIC].hash
+nl_table_16 = nl_table[NETLINK_GENERIC]
+# print(nl_table_16.mc_list)
 
+for sock in hlist_for_each_entry('struct sock', nl_table_16.mc_list.address_of_(), '__sk_common.skc_bind_node'):
+    nsock = container_of(sock, "struct netlink_sock", "sk")
+    print("portid: %d" % nsock.portid)
+
+hash = nl_table_16.hash
 # listeners = nl_table[NETLINK_GENERIC].listeners
 # print(listeners)
 
@@ -59,6 +65,6 @@ def print_sock(nsock):
         print("\t%s" % lib.address_to_name(hex(func)))
         print("")
 
-for i, nsock in enumerate(lib.hash(hash, 'struct netlink_sock', 'node')):
-    print("netlink_sock %lx" % nsock.value_())
-    print_sock(nsock)
+# for i, nsock in enumerate(lib.hash(hash, 'struct netlink_sock', 'node')):
+#     print("netlink_sock %lx" % nsock.value_())
+#     print_sock(nsock)

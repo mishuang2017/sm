@@ -9626,6 +9626,18 @@ function trace4
 	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg4"
 }
 
+function trace5
+{
+	[[ $# != 1 ]] && return
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg5"
+}
+
+function trace6
+{
+	[[ $# != 1 ]] && return
+	sudo $BCC_DIR/tools/trace -t "$1 \"%lx\", arg6"
+}
+
 alias fc1='funccount miniflow_merge_work -i 1'
 alias fc2='funccount mlx5e_del_miniflow_list -i 1'
 
@@ -11114,9 +11126,14 @@ alias vi-sflow='vi ~/sm/sflow/note.txt'
 
 function sample1
 {
+	group=4
+	[[ $# == 1 ]] && group=$1
+
 	tc qdisc del dev $link ingress
 	tc qdisc add dev $link handle ffff: ingress
-	tc filter add dev $link parent ffff: matchall action sample rate 12 group 4
+set -x
+	tc filter add dev $link parent ffff: matchall action sample rate 12 group $group
+set +x
 }
 
 function sflow_clear

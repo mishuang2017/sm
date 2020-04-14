@@ -371,6 +371,34 @@ udpif_upcall_handler
 		process_upcall
 			dpif_sflow_received
 
+===psample===
+
+        netlink_broadcast_filtered
+netlink_broadcast
+        psample_sample_packet
+        tcf_sample_act
+        tcf_action_exec
+        mall_classify+0x3e [cls_matchall]
+        tcf_classify_ingress+0x81 [kernel]
+        __netif_receive_skb_core+0x441 [kernel]
+        __netif_receive_skb_list_core+0x126 [kernel]
+        netif_receive_skb_list_internal+0x1f6 [kernel]
+        gro_normal_list.part.0+0x1e [kernel]
+        napi_complete_done+0x91 [kernel]
+        mlx5e_napi_poll+0x1a0 [mlx5_core]
+        net_rx_action+0x13b [kernel]
+        __softirqentry_text_start+0xf5 [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x5a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xc2 [kernel]
+        cpuidle_enter+0x2e [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1cd [kernel]
+        cpu_startup_entry+0x20 [kernel]
+        start_secondary+0x15a [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
 ===datapath===
 
 do_execute_actions
