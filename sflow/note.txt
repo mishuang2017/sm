@@ -349,6 +349,15 @@ fs_fte ffff94f552b250a8
 [Sat Apr 11 18:05:44 2020] mlx5_tc_ct_entry_add_rules              : enp4s0f0np0         : is called
 [Sat Apr 11 18:05:44 2020] mlx5_tc_ct_entry_add_rules              : enp4s0f0np0         : is called
 
+===netlink===
+
+dpif_netlink_port_add
+	dpif_netlink_rtnl_port_create_and_add
+		dpif_netlink_refresh_channels for restart
+		dpif_netlink_port_add__
+			create_nl_sock
+				nl_sock_create (NETLINK_GENERIC)
+
 ===question===
 
 1. What is FW level support 

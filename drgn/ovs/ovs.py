@@ -72,22 +72,31 @@ print_hmap(prog["port_to_netdev"], "port_to_netdev_data", "portno_node")
 # all_commands = prog["all_commands"]
 # print(all_commands)
 
-all_dpif_backers = prog['all_dpif_backers']
-print("all_dpif_backers")
-print(all_dpif_backers)
-one = all_dpif_backers.map.one
-shash = Object(prog, 'struct shash_node', address=one.value_())
-print("all_dpif_backers.map.one/shash")
-print(shash)
-backer = Object(prog, 'struct dpif_backer', address=shash.data)
-print("%x" % backer.address_of_())
+# all_dpif_backers = prog['all_dpif_backers']
+# print("all_dpif_backers")
+# print(all_dpif_backers)
+# one = all_dpif_backers.map.one
+# shash = Object(prog, 'struct shash_node', address=one.value_())
+# print("all_dpif_backers.map.one/shash")
+# print(shash)
+# backer = Object(prog, 'struct dpif_backer', address=shash.data)
+# print("%x" % backer.address_of_())
+
+dpif_backers = print_hmap(prog['all_dpif_backers'].map, "hmap", "node")
+for i, dpif_backer in enumerate(dpif_backers):
+    shash = container_of(dpif_backer.address_of_(), "struct shash_node", "node")
+    print(shash.name.string_().decode())
+    if shash.name.string_().decode() == "system":
+        backer = Object(prog, 'struct dpif_backer', address=shash.data)
+        break
+        print("yes")
 
 # print("backer")
 # print(backer)
-print("backer.udpif")
-print(backer.udpif)
+# print("backer.udpif")
+# print(backer.udpif)
 
-print("udpif")
+# print("udpif")
 udpif = backer.udpif
 
 # sys.exit(0)
@@ -131,11 +140,22 @@ print(address_to_name(hex(dpif.dpif_class.port_add.value_())))
 print(address_to_name(hex(dpif.dpif_class.recv.value_())))
 print(address_to_name(hex(dpif.dpif_class.recv_wait.value_())))
 
-all_ofprotos = prog['all_ofprotos']
-print(all_ofprotos)
+dpif_netlink = container_of(dpif, "struct dpif_netlink" , "dpif")
+# print(dpif_netlink)
+
+n_handlers = dpif_netlink.n_handlers
+handlers =dpif_netlink.handlers
+for i in range(n_handlers):
+    print("handlers[%d]: epoll_fd: %d" % (i, handlers[i].epoll_fd))
+
+uc_array_size = dpif_netlink.uc_array_size
+channels =dpif_netlink.channels
+for i in range(uc_array_size):
+    sock = channels[i].sock
+    print("channels[%d]: fd: %d, pid: %x, %d" % (i, sock.fd, sock.pid, sock.pid))
+
 
 n_revalidators = prog['n_revalidators']
-
 print("n_revalidators: %d" %n_revalidators)
 n_handlers = prog['n_handlers']
 print("n_handlers: %d" % n_handlers)
@@ -151,10 +171,10 @@ for i, ofproto_dpif in enumerate(ofproto_dpifs):
     collectors = sflow.collectors
     for j in range(collectors.n_fds):
         print("fds[%d] = %d" % (j, collectors.fds[j]))
-    print(sflow.sflow_agent)
-    print(sflow.sflow_agent.samplers)
+#     print(sflow.sflow_agent)
+#     print(sflow.sflow_agent.samplers)
 #     print(sflow.sflow_agent.samplers.agent)
-    print(sflow.options)
+#     print(sflow.options)
     targets = sflow.options.targets
     ssets = print_hmap(targets.map, "sset_node", "hmap_node")
     for k, sset in enumerate(ssets):
