@@ -360,6 +360,8 @@ dpif_netlink_port_add
 
 ===upcall===
 
+epoll_ctl (handler->epoll_fd, EPOLL_CTL_ADD, nl_sock_fd(sock), &event))
+
 udpif_upcall_handler
 	recv_upcalls
 		upcall_receive
@@ -395,3 +397,7 @@ It seems many registers are used by CT, CHAIN_TO_REG for c0
 4. what is losing register
 
 5. What is FLOW_SAMPLE_OBJ
+
+6. Which FW should be used?
+
+7. What's the API to receive multicast netlink message?

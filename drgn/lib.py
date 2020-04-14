@@ -195,9 +195,10 @@ def print_exts(e):
                 print("\ttp_dst: %d" % ntohs(ip_tunnel_key.tp_dst.value_()))
         if kind == "sample":
             tcf_sample = Object(prog, 'struct tcf_sample', address=a.value_())
-            print(tcf_sample)
+#             print(tcf_sample)
             print("\trate: %d" % tcf_sample.rate)
             print("\tpsample_group_num: %d" % tcf_sample.psample_group_num)
+            print(tcf_sample.psample_group)
 
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)

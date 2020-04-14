@@ -82,7 +82,7 @@ for x, dev in enumerate(get_netdevs()):
                 (tcf_proto.value_(), socket.ntohs(tcf_proto.protocol.value_()),   \
                 tcf_proto.prio.value_() >> 16))
             head = Object(prog, 'struct cls_mall_head', address=tcf_proto.root.value_())
-            print(head)
+#             print(head)
             print_exts(head.exts)
             tcf_proto = tcf_proto.next
             if tcf_proto.value_() == 0:
