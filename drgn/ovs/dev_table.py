@@ -4,7 +4,8 @@ from drgn.helpers.linux import *
 from drgn import Object
 from drgn import cast
 import subprocess
-import socket
+from socket import ntohl
+from socket import ntohs
 import time
 import sys
 import os
@@ -27,11 +28,12 @@ for i in range(1024):
         port_no = vport.port_no
         upcall_portids = vport.upcall_portids
         ids = upcall_portids.ids
-        id = ids[0]
+        id = ids[0].value_()
         print("name: %10s,  n_ids: %d, id: %x" % (name, upcall_portids.n_ids, id))
         print("vport %lx" % vport)
         print("datapath %lx" % vport.dp)
         print("vport_portids %lx" % upcall_portids)
+        print("portid[0] %lx, %d" % (id, id))
         print("vport_no %d" % port_no)
         print("")
     p = p + 1
@@ -56,7 +58,7 @@ def print_mac(mac):
 def print_eth(eth):
     print("eth: ", end='')
     type = eth.type
-    print("type: %4x, src: %s, dst: %s" % (socket.ntohs(type), print_mac(eth.src), print_mac(eth.dst)))
+    print("type: %4x, src: %s, dst: %s" % (ntohs(type), print_mac(eth.src), print_mac(eth.dst)))
 
 def print_flow_key(key):
 #     MAC_PROTO_ETHERNET = 1
@@ -64,9 +66,9 @@ def print_flow_key(key):
 #     print(mac_proto)
     print_eth(key.eth)
     proto = key.ip.proto.value_()
-    print("proto: %d, src: %s" % (proto, lib.ipv4(socket.ntohl(key.ipv4.addr.src.value_()))))
+    print("proto: %d, src: %s" % (proto, lib.ipv4(ntohl(key.ipv4.addr.src.value_()))))
     tp_dst = key.tp.dst
-    print("tp_dst: %d" % socket.ntohs(tp_dst))
+    print("tp_dst: %d" % ntohs(tp_dst))
 
 def print_flow_act(acts):
 #     print(acts)
