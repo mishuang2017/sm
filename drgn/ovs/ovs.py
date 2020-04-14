@@ -67,7 +67,13 @@ def print_hmap(hmap_addr, struct_name, member):
 
 # print_hmap("ufid_to_tc", "ufid_tc_data")
 
-print_hmap(prog["port_to_netdev"], "port_to_netdev_data", "portno_node")
+port_to_netdev_datas = print_hmap(prog["port_to_netdev"], "port_to_netdev_data", "portno_node")
+for i, port in enumerate(port_to_netdev_datas):
+    print("ifindex: %d, name: %15s, type: %10s, port_no: %d" % \
+        (port.ifindex, port.dpif_port.name.string_().decode(), \
+        port.dpif_port.type.string_().decode(), port.dpif_port.port_no))
+
+# print(prog['dpif_netlink_class'])
 
 # all_commands = prog["all_commands"]
 # print(all_commands)
