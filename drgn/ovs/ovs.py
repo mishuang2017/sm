@@ -174,6 +174,9 @@ ofproto_dpifs = print_hmap(prog['all_ofproto_dpifs_by_name'], "ofproto_dpif", "a
 for i, ofproto_dpif in enumerate(ofproto_dpifs):
     sflow = ofproto_dpif.sflow
     print(sflow)
+    sflow_ports = print_hmap(sflow.ports.address_of_(), "dpif_sflow_port", "hmap_node")
+    for i, sflow_port in enumerate(sflow_ports):
+        print("sflow port odp_port: %d" % sflow_port.odp_port)
     collectors = sflow.collectors
     for j in range(collectors.n_fds):
         print("fds[%d] = %d" % (j, collectors.fds[j]))
@@ -184,9 +187,13 @@ for i, ofproto_dpif in enumerate(ofproto_dpifs):
     targets = sflow.options.targets
     ssets = print_hmap(targets.map, "sset_node", "hmap_node")
     for k, sset in enumerate(ssets):
-        print("%s" % sset.name[0].address_of_())
+        print("ofproto_dpif.sflow.options.targets: %s" % sset.name[0].address_of_().string_().decode())
 
 ofprotos = print_hmap(prog['all_ofprotos'], "ofproto", "hmap_node")
 for i, ofproto in enumerate(ofprotos):
     set_sflow = ofproto.ofproto_class.set_sflow
     print(address_to_name(hex(set_sflow.value_())))
+
+    ofproto_ports = print_hmap(ofproto.ports.address_of_(), "ofport", "hmap_node")
+    for j, ofproto_port in enumerate(ofproto_ports):
+        print("name: %15s, ofp_port: %d" % (ofproto_port.netdev.name.string_().decode(), ofproto_port.ofp_port))

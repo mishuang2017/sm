@@ -35,14 +35,17 @@ def print_files(files):
         if socket_file_ops != file.f_op.value_():
             continue
 
+        print("%2d" % i, end='\t')
         sock = Object(prog, "struct socket", address=file.private_data)
         sk = sock.sk
         # only print netlink socket
         if netlink_ops == sock.ops.value_():
             netlink_sock = cast('struct netlink_sock *', sk)
             print_netlink_sock(netlink_sock)
-        if inet_dgram_ops == sock.ops.value_():
+        elif inet_dgram_ops == sock.ops.value_():
             print_udp_sock(sk)
+        else:
+            print('')
 
 def find_task(name):
     print('PID        COMM')
