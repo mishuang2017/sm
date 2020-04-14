@@ -110,6 +110,9 @@ udpif = backer.udpif
 n = udpif.n_revalidators
 rev = udpif.revalidators
 
+for i in range(n):
+    print("udpif.handler_id: %d" % udpif.handlers[i].handler_id)
+
 print("udpif.n_revalidators: %d" % n)
 print("revalidators: %x" % rev)
 
@@ -139,7 +142,8 @@ def address_to_name(address):
 
 dpif = udpif.dpif
 print("dpif")
-print(dpif)
+# print(dpif)
+# print(dpif.dpif_class)
 print(address_to_name(hex(dpif.dpif_class.get_stats.value_())))
 print(address_to_name(hex(dpif.dpif_class.flow_dump_thread_create.value_())))
 print(address_to_name(hex(dpif.dpif_class.port_add.value_())))
@@ -152,6 +156,7 @@ dpif_netlink = container_of(dpif, "struct dpif_netlink" , "dpif")
 n_handlers = dpif_netlink.n_handlers
 handlers =dpif_netlink.handlers
 for i in range(n_handlers):
+#     print(handlers[i])
     print("handlers[%d]: epoll_fd: %d" % (i, handlers[i].epoll_fd))
 
 uc_array_size = dpif_netlink.uc_array_size
@@ -176,12 +181,12 @@ for i, ofproto_dpif in enumerate(ofproto_dpifs):
     print(sflow)
     sflow_ports = print_hmap(sflow.ports.address_of_(), "dpif_sflow_port", "hmap_node")
     for i, sflow_port in enumerate(sflow_ports):
-        print("sflow port odp_port: %d" % sflow_port.odp_port)
+        print("sflow port odp_port: %d, dsi: %d" % (sflow_port.odp_port, sflow_port.dsi.ds_index))
     collectors = sflow.collectors
     for j in range(collectors.n_fds):
         print("fds[%d] = %d" % (j, collectors.fds[j]))
 #     print(sflow.sflow_agent)
-#     print(sflow.sflow_agent.samplers)
+    print(sflow.sflow_agent.samplers)
 #     print(sflow.sflow_agent.samplers.agent)
 #     print(sflow.options)
     targets = sflow.options.targets

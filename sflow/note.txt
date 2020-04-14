@@ -64,7 +64,7 @@ struct user_action_cookie {
 ffff8c4d81cac29c:  (54 00 06 00 (0c 00 04 00 01 58 25 93 99 99 99 19)   T........X%.....
                                      OVS_SAMPLE_ATTR_ARG
 
-                                     OVS_USERSPACE_ATTR_PID(aa07d109)  
+                                       OVS_USERSPACE_ATTR_PID(aa07d109)  
 ffff8c4d81cac2ac:  (44 00 02 00 (08 00 01 00 09 d1 07 aa)           (34 00 02 00   D...........4...
                           OVS_ACTION_ATTR_USERSPACE                        OVS_ACTION_ATTR_USERSPACE
 
@@ -357,6 +357,29 @@ dpif_netlink_port_add
 		dpif_netlink_port_add__
 			create_nl_sock
 				nl_sock_create (NETLINK_GENERIC)
+
+===upcall===
+
+udpif_upcall_handler
+	recv_upcalls
+		upcall_receive
+			classify_upcall
+				USER_ACTION_COOKIE_SFLOW
+				SFLOW_UPCALL
+		process_upcall
+			dpif_sflow_received
+
+===datapath===
+
+do_execute_actions
+	OVS_ACTION_ATTR_SAMPLE
+	sample
+		clone_execute
+			do_execute_actions
+				OVS_ACTION_ATTR_USERSPACE
+				output_userspace
+					ovs_dp_upcall
+						queue_userspace_packet
 
 ===question===
 
