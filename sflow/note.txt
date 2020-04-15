@@ -456,6 +456,18 @@ resolved
 
 10. sFlow in HW will initiate miss to SW? How to do?
 
-11. what is vport0?
+11. what is vport0? What is vport 0 NIC_RX.
 
 12. What is losing registers issue?
+
+13. Sample is a new action type?
+
+enum mlx5_flow_destination_type {
+        MLX5_FLOW_DESTINATION_TYPE_VPORT        = 0x0,
+        MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE   = 0x1,
+        MLX5_FLOW_DESTINATION_TYPE_TIR          = 0x2,
+
+        MLX5_FLOW_DESTINATION_TYPE_PORT         = 0x99,
+        MLX5_FLOW_DESTINATION_TYPE_COUNTER      = 0x100,
+        MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE_NUM = 0x101,
+};

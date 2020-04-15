@@ -170,7 +170,7 @@ ports=1
 base_baud=115200
 base_baud=9600
 
-cpu_num=$(cat /proc/cpuinfo  | grep processor | wc -l)
+cpu_num=$(nproc)
 cpu_num2=$((cpu_num*2))
 
 nfs_dir='/auto/mtbcswgwork/chrism'
@@ -5063,7 +5063,7 @@ function set_all_vf_affinity
 	local vf
 	local n
 
-	cpu_num=$numvfs
+	local cpu_num=$numvfs
 	[[ $# == 1 ]] && cpu_num=$1
 
 	curr_cpu=1
@@ -11017,7 +11017,7 @@ function show_irq_affinity_vf
 	local vf
 	local n
 
-	cpu_num=$numvfs
+	local cpu_num=$numvfs
 	[[ $# == 1 ]] && cpu_num=$1
 
 	curr_cpu=1
