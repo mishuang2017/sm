@@ -10134,6 +10134,12 @@ function flow
 	done
 }
 
+function flow2
+{
+	cd $drgn_dir/ct
+	sudo ./esw_chains_priv.py
+}
+
 function ct_list
 {
 	i=0

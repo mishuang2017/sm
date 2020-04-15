@@ -145,11 +145,30 @@ nf_ft.gc_work.work.func: nf_flow_offload_work_gc
         ret_from_fork+0x35 [kernel]
 
 
+nf_flow_offload_add
+flow_offload_queue_work
+        schedule_work(&nf_flow_offload_work);
+
+
 tcf_ct_act
 	tcf_ct_flow_table_process_conn
 		tcf_ct_flow_table_add
+			struct flow_offload *flow = flow_offload_alloc
 			flow_offload_add
+				__set_bit(NF_FLOW_HW, &flow->flags);
 				nf_flow_offload_add
+					flow_offload_queue_work
+						schedule_work(&nf_flow_offload_work);
+							flow_offload_work_handler
+								flow_offload_work_add
+									flow_offload_work_add
+										flow_offload_rule_add
+											flow_offload_tuple_add
+												nf_flow_offload_tuple
+													mlx5_tc_ct_block_flow_offload
+
+
+
 					nf_flow_offload_tuple
 						nf_flow_offload_init
 							cls_flow->cookie
@@ -429,3 +448,14 @@ It seems many registers are used by CT, CHAIN_TO_REG for c0
 6. Which FW should be used?
 
 7. What's the API to receive multicast netlink message?
+resolved
+
+8. How do I know which flow table is hit or missed? Any FW tools?
+
+9. What is register loopback?
+
+10. sFlow in HW will initiate miss to SW? How to do?
+
+11. what is vport0?
+
+12. What is losing registers issue?

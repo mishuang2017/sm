@@ -613,7 +613,8 @@ def print_mlx5_esw_flow_attr(attr):
     print('')
 
 def flow_table(name, table):
-    print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x" % (name, table.id.value_(), table.level.value_(), table.type))
+    print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x (FS_FT_FDB: %d, FS_FT_NIC_RX: %d)" % \
+        (name, table.id.value_(), table.level.value_(), table.type, prog['FS_FT_FDB'], prog['FS_FT_NIC_RX']))
     print("mlx5_flow_table %lx" % table.value_())
 #     print("flow table address")
 #     print("%lx" % table.value_())
