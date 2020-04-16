@@ -4814,7 +4814,7 @@ function netns
 	ip netns del $n 2>/dev/null
 	ip netns add $n
 	ip link set dev $link netns $n
-	ip netns exec $n ifconfig $link mtu 1450
+	ip netns exec $n ip link set mtu 1450 dev $link
 	ip netns exec $n ip link set dev $link up
 	ip netns exec $n ip addr add $ip/16 brd + dev $link
 
