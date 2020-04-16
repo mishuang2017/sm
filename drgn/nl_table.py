@@ -26,7 +26,9 @@ nl_table_16 = nl_table[NETLINK_GENERIC]
 
 for sock in hlist_for_each_entry('struct sock', nl_table_16.mc_list.address_of_(), '__sk_common.skc_bind_node'):
     nsock = container_of(sock, "struct netlink_sock", "sk")
-    print("portid: %d" % nsock.portid)
+    print("portid: %d, dst_portid: %d, ngroups: %d" % (nsock.portid, nsock.dst_portid, nsock.ngroups))
+#     for i in range(nsock.ngroups):
+#         print("%2d: %lx" % (i, nsock.groups[i]))
 
 hash = nl_table_16.hash
 # listeners = nl_table[NETLINK_GENERIC].listeners
