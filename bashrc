@@ -4198,6 +4198,18 @@ alias clear-mirror2="ovs-vsctl clear bridge $br2 mirrors"
 alias set-mirror3="ovs-vsctl -- --id=@p get port $rep3 -- --id=@m create mirror name=m0 select-all=true output-port=@p -- set bridge $br mirrors=@m"
 alias clear-mirror3="ovs-vsctl clear bridge $br mirrors"
 
+alias mirror_list='ovs-vsctl list mirror'
+alias mirror_clear="ovs-vsctl clear bridge $br mirrors"
+
+function mirror_set
+{
+	ovs-vsctl clear bridge $br mirrors;
+
+	ovs-vsctl add-port $br $rep1
+	ifconfig $vf1 up
+	ovs-vsctl -- --id=@p get port $rep1 -- --id=@m create mirror name=m0 select-all=true output-port=@p -- set bridge $br mirrors=@m
+}
+
 function mirror-br
 {
 set -x
@@ -11136,8 +11148,8 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
 
-	TC=/images/chrism/iproute2/tc/tc
 	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
 
 	$TC qdisc del dev $rep2 ingress
 	$TC qdisc del dev $rep3 ingress
@@ -11170,11 +11182,13 @@ function sample1
 {
 	group=4
 	[[ $# == 1 ]] && group=$1
+	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
 
-	tc qdisc del dev $link ingress
-	tc qdisc add dev $link handle ffff: ingress
+	$TC qdisc del dev $link ingress
+	$TC qdisc add dev $link handle ffff: ingress
 set -x
-	tc filter add dev $link parent ffff: matchall action sample rate 12 group $group
+	$TC filter add dev $link parent ffff: matchall action sample rate 12 group $group
 set +x
 }
 
