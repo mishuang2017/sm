@@ -22,10 +22,10 @@ steering = priv.steering
 
 root_ns = steering.root_ns
 print(root_ns.mode)
-print("root ft: %lx" % root_ns.root_ft)
+print("steering.root_ns.root_ft: %lx" % root_ns.root_ft)
 
 def print_prio(prio):
-    print("prio")
+    print("prio:\t", end='')
     num_levels = prio.num_levels.value_()
     start_level = prio.start_level.value_()
     prio1 = prio.prio.value_()
@@ -48,22 +48,26 @@ def print_namespace(ns):
     prio_addr = ns.node.children.address_of_()
     for prio_node in list_for_each_entry('struct fs_node', prio_addr, 'list'):
         prio = cast("struct fs_prio *", prio_node)
+#         print("level 1 namespace")
         print_prio(prio)
 #         print(prio)
 
         n2_addr = prio.node.children.address_of_()
         for n2_node in list_for_each_entry('struct fs_node', n2_addr, 'list'):
             n2 = cast("struct mlx5_flow_namespace *", n2_node)
+#             print("level 2 prio")
 #             print(n2)
 
             p3_addr = n2.node.children.address_of_()
             for p3_node in list_for_each_entry('struct fs_node', p3_addr, 'list'):
                 p3 = cast("struct fs_prio *", p3_node)
+#                 print("level 3 prio")
 #                 print(p3)
 
                 table_addr = p3.node.children.address_of_()
                 for table_node in list_for_each_entry('struct fs_node', table_addr, 'list'):
                     table = cast("struct mlx5_flow_table *", table_node)
+#                     print("level 4 flow table")
                     print_table(table)
 
 print_namespace(root_ns.ns)
