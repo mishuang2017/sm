@@ -6319,6 +6319,16 @@ function git-patch2
 	git format-patch -o $dir ${commit}..
 }
 
+function git-patch3
+{
+	[[ $# != 3 ]] && return
+	local commit_old=$2
+	local commit_new=$3
+	local dir=$1
+	mkdir -p $dir
+	git format-patch -o $dir ${commit_old}..${commit_new}
+}
+
 linux_file=~/idr/
 function checkout
 {

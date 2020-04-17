@@ -1,3 +1,9 @@
+
+
+
+5b7cb7451585f83d414512a70b79b2086b8c6ed1 f8ab30477690bb156536a76686a5a766efe587f8
+
+
 [root@dev-r630-03 ~]# ovs-vsctl list sflow
 _uuid               : 1a79913e-670d-4cf8-982e-e4e96621cc25
 agent               : "eno1"
@@ -377,6 +383,47 @@ fs_fte ffff94f552b250a8
 
 [Sat Apr 11 18:05:44 2020] mlx5_tc_ct_entry_add_rules              : enp4s0f0np0         : is called
 [Sat Apr 11 18:05:44 2020] mlx5_tc_ct_entry_add_rules              : enp4s0f0np0         : is called
+
+using jd-ovs, mlx5e_tc_ct_restore_flow is called once
+
+[root@dev-r630-04 bin]# trace mlx5e_tc_ct_restore_flow -K
+TIME     PID     TID     COMM            FUNC
+21.67996 0       0       swapper/5       mlx5e_tc_ct_restore_flow
+        mlx5e_tc_ct_restore_flow+0x1 [mlx5_core]
+        mlx5e_handle_rx_cqe_mpwrq_rep+0x118 [mlx5_core]
+        mlx5e_poll_rx_cq+0x97f [mlx5_core]
+        mlx5e_napi_poll+0xda [mlx5_core]
+        net_rx_action+0x13b [kernel]
+        __softirqentry_text_start+0xf5 [kernel]
+        irq_exit+0xdf [kernel]
+        do_IRQ+0x5a [kernel]
+        ret_from_intr+0x0 [kernel]
+        cpuidle_enter_state+0xc2 [kernel]
+        cpuidle_enter+0x2e [kernel]
+        call_cpuidle+0x23 [kernel]
+        do_idle+0x1cd [kernel]
+        cpu_startup_entry+0x20 [kernel]
+        start_secondary+0x15a [kernel]
+        secondary_startup_64+0xa4 [kernel]
+
+===misc===
+
+mlx5e_build_rx_skb
+	skb->mark = be32_to_cpu(cqe->sop_drop_qpn) & MLX5E_TC_FLOW_ID_MASK
+
+commit 82e91ffef60e6eba9848fe149ce1eecd2b5aef12
+Author: Thomas Graf <tgraf@suug.ch>
+Date:   Thu Nov 9 15:19:14 2006 -0800
+
+    [NET]: Turn nfmark into generic mark
+
+    nfmark is being used in various subsystems and has become
+    the defacto mark field for all kinds of packets. Therefore
+    it makes sense to rename it to `mark' and remove the
+    dependency on CONFIG_NETFILTER.
+
+    Signed-off-by: Thomas Graf <tgraf@suug.ch>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
 
 ===netlink===
 
