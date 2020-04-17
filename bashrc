@@ -28,6 +28,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "clx-ibmc-01" ]] && host_num=1
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 [[ "$(hostname -s)" == "clx-ibmc-03" ]] && host_num=3
+[[ "$(hostname -s)" == "qa-h-vrt-110" ]] && host_num=10
+[[ "$(hostname -s)" == "qa-h-vrt-111" ]] && host_num=11
 
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=97
@@ -51,6 +53,8 @@ elif (( host_num == 2 )); then
 	numvfs=16
 	link=ens1f0
 	link2=ens1f1
+elif (( host_num == 10 || host_num == 11 )); then
+	link=enp94s0f0
 elif (( host_num == 3 )); then
 	numvfs=97
 	numvfs=16
