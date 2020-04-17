@@ -30,10 +30,8 @@ def print_prio(prio):
     start_level = prio.start_level.value_()
     prio1 = prio.prio.value_()
     num_ft = prio.num_ft.value_()
-#     print("fs_prio %lx" % prio)
-    if num_ft:
-        print("num_level: %4d, start_level: %4d, prio: %4d, num_ft: %4d" % \
-            (num_levels, start_level, prio1, num_ft))
+    print("start_level: %4d, num_levels: %4d, prio: %4d, num_ft: %4d" % \
+            (start_level, num_levels, prio1, num_ft))
 
 def print_table(table):
     id = table.id
@@ -41,7 +39,7 @@ def print_table(table):
     level = table.level
     type = table.type
     print("\tmlx5_flow_table %lx" % table)
-    print("\tid: %5x, max_fte: %3x, level: %3d, type: %x" % \
+    print("\t\tid: %5x, max_fte: %3x, level: %3d, type: %x" % \
         (id, max_fte, level, type), end='')
     print(type)
 
