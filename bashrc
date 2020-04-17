@@ -6637,6 +6637,24 @@ set -x
 set +x
 }
 
+# if outer header is ipv6, inner ip is 8.9.10.11
+function peer6_8
+{
+set -x
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add name $vx type vxlan id $vni dev $link remote $link_remote_ipv6 dstport 4789 \
+		udp6zerocsumtx udp6zerocsumrx
+#	ifconfig $vx $link_ip_vxlan/24 up
+	ip addr add 8.9.10.11/24 brd + dev $vx
+	ip link set dev $vx up
+#	ip link set dev $vx mtu 1000
+	ip link set $vx address $vxlan_mac
+# 	ip addr add $link_ipv6_vxlan/64 dev $vx
+
+set +x
+}
+
 function peer0
 {
 set -x

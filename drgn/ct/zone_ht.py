@@ -25,8 +25,12 @@ def print_flow_offload_tuple(t):
     print("dir: %d" % t.dir.value_(), end='\t')
     print('')
 
-def print_flow_offload(flow):
+def print_flow_offload(flow, dir):
     print("\tflow_offload %lx" % flow)
+    if dir == 0:
+        print("\tdir = 0")
+    else:
+        print("\tdir = 1")
     print("\t\tnf_conn %lx" % flow.ct)
     print("\t\tflags: %x, timeout: %x, type: %d" % (flow.flags, flow.timeout, flow.type), end='\t')
     print("(NF_FLOW_SNAT: %x)" % (1 << prog['NF_FLOW_SNAT'].value_()), end=' ')
@@ -44,12 +48,13 @@ for i, flow_table in enumerate(hash(zones_ht, 'struct tcf_ct_flow_table', 'node'
 #     print(ft_ht)
     for j, tuple_rhash in enumerate(hash(ft_ht, 'struct flow_offload_tuple_rhash', 'node')):
         tuple = tuple_rhash.tuple
-        if tuple.dir.value_() == 0:
+        dir = tuple.dir.value_()
+        if dir == 0:
             flow_offload = cast("struct flow_offload *", tuple_rhash)
-            print_flow_offload(flow_offload)
+            print_flow_offload(flow_offload, dir)
         else:
             flow_offload = Object(prog, 'struct flow_offload', address=tuple_rhash.value_() - \
                 prog.type('struct flow_offload_tuple_rhash').size)
-            print_flow_offload(flow_offload.address_of_())
+            print_flow_offload(flow_offload.address_of_(), dir)
         print_flow_offload_tuple(tuple)
     print('')
