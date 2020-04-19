@@ -425,28 +425,6 @@ Date:   Thu Nov 9 15:19:14 2006 -0800
     Signed-off-by: Thomas Graf <tgraf@suug.ch>
     Signed-off-by: David S. Miller <davem@davemloft.net>
 
-===netlink===
-
-dpif_netlink_port_add
-	dpif_netlink_rtnl_port_create_and_add
-		dpif_netlink_refresh_channels for restart
-		dpif_netlink_port_add__
-			create_nl_sock
-				nl_sock_create (NETLINK_GENERIC)
-
-===upcall===
-
-epoll_ctl (handler->epoll_fd, EPOLL_CTL_ADD, nl_sock_fd(sock), &event))
-
-udpif_upcall_handler
-	recv_upcalls
-		upcall_receive
-			classify_upcall
-				USER_ACTION_COOKIE_SFLOW
-				SFLOW_UPCALL
-		process_upcall
-			dpif_sflow_received
-
 ===psample===
 
         netlink_broadcast_filtered
@@ -474,18 +452,6 @@ netlink_broadcast
         cpu_startup_entry+0x20 [kernel]
         start_secondary+0x15a [kernel]
         secondary_startup_64+0xa4 [kernel]
-
-===datapath===
-
-do_execute_actions
-	OVS_ACTION_ATTR_SAMPLE
-	sample
-		clone_execute
-			do_execute_actions
-				OVS_ACTION_ATTR_USERSPACE
-				output_userspace
-					ovs_dp_upcall
-						queue_userspace_packet
 
 ===tc===
 
@@ -522,6 +488,44 @@ tc_replace_flower
 nl_msg_put_flower_options
 nl_msg_put_flower_acts
 nl_msg_put_act_mirred
+
+===netlink===
+
+dpif_netlink_port_add
+	dpif_netlink_rtnl_port_create_and_add
+		dpif_netlink_refresh_channels for restart
+		dpif_netlink_port_add__
+			create_nl_sock
+				nl_sock_create (NETLINK_GENERIC)
+
+===upcall===
+
+user_action_cookie was composed in ovs and send to kernel.
+kernel sends back exactly the same user_action_cookie.
+So kernel needn't to know what is USER_ACTION_COOKIE_SFLOW.
+
+epoll_ctl (handler->epoll_fd, EPOLL_CTL_ADD, nl_sock_fd(sock), &event))
+
+udpif_upcall_handler
+	recv_upcalls
+		upcall_receive
+			classify_upcall
+				if USER_ACTION_COOKIE_SFLOW
+					return SFLOW_UPCALL
+		process_upcall
+			dpif_sflow_received
+
+===datapath===
+
+do_execute_actions
+	OVS_ACTION_ATTR_SAMPLE
+	sample
+		clone_execute
+			do_execute_actions
+				OVS_ACTION_ATTR_USERSPACE
+				output_userspace
+					ovs_dp_upcall
+						queue_userspace_packet
 
 ===question===
 
