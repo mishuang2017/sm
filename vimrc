@@ -13,6 +13,8 @@ set hidden
 set hlsearch
 set nohlsearch
 
+set noincsearch
+set incsearch
 
 set tabstop=8
 
