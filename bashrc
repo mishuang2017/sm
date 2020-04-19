@@ -62,6 +62,9 @@ elif (( host_num == 3 )); then
 	link=ens1f0
 	link2=ens1f1
 
+	link=ens1f0np0
+	link2=ens1f0np1
+
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
