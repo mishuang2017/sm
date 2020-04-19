@@ -8,6 +8,6 @@ yum install -y rsync ethtool \
         texinfo	python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel cmake net-tools \
         libnsl pcre-devel qalculate clang clang-devel llvm llvm-devel llvm-static ncurses-devel \
 	rpm-build kexec-tools tcpdump iperf elfutils-libelf.x86_64 elfutils-libelf-devel.x86_64 \
-	grubby
+	grubby ascii
 
 /mswg/release/mft/mftinstall
