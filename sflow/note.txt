@@ -489,6 +489,15 @@ do_execute_actions
 
 ===tc===
 
+main
+do_cmd
+do_filter
+tc_filter_modify
+
+	sizeof (struct mlmsghdr) = 16
+	sizeof (struct tcmsg) = 20
+
+flower_parse_opt
 parse_sample
 
 ===ovs===
