@@ -11257,8 +11257,15 @@ function sflow_list
 
 function sflow_create
 {
-# 	ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
-	ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+	if (( host_num == 13 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+	fi
+	if (( host_num == 14 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+	fi
+	if (( host_num == 3 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+	fi
 }
 
 function sflowtool1
