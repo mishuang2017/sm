@@ -10,16 +10,8 @@ import drgn
 import sys
 import time
 
-def ovs_pid():
-    (status, output) = subprocess.getstatusoutput("pgrep ovs-vswitchd")
-
-    if status:
-        print("ovs is not started")
-        sys.exit(1)
-
-    return int(output)
-
-prog = drgn.program_from_pid(ovs_pid())
+sys.path.append(".")
+from lib_ovs import *
 
 print("monitor_running: %d" % prog['monitor_running'])
 print("monitor_tid: %d" % prog['monitor_running'])
