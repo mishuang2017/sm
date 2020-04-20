@@ -13,9 +13,10 @@ import time
 sys.path.append(".")
 from lib_ovs import *
 
-ofproto = get_ofproto("br")
+ofproto_dpif = get_ofproto_dpif("br")
+ofproto = ofproto_dpif.up
 
-ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
+# ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
 parts = ofproto_dpif.uuid.parts
 print("%x-%x-%x-%x" % (parts[0], parts[1], parts[2], parts[3]))
 

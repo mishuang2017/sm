@@ -515,6 +515,16 @@ udpif_upcall_handler
 		process_upcall
 			dpif_sflow_received
 
+===sflow===
+
+dpif_sflow_received
+sfl_sampler_writeFlowSample
+sfl_receiver_writeFlowSample
+sendSample
+*receiver->agent->sendFn \ sflow_agent_send_packet_cb
+collectors_send
+send
+
 ===datapath===
 
 do_execute_actions

@@ -27,7 +27,7 @@ def print_hmap(hmap_addr, struct_name, member):
     buckets = hmap_addr.buckets.value_()
     n = hmap_addr.n.value_()
 
-    print("\n=== %s: buckets: %x, n: %d ===" % (struct_name, buckets, n))
+#     print("\n=== %s: buckets: %x, n: %d ===" % (struct_name, buckets, n))
 
     i = 0
     while 1:
@@ -89,8 +89,9 @@ def address_to_name(address):
 
     return output
 
-def get_ofproto(name):
+def get_ofproto_dpif(name):
     ofprotos = print_hmap(prog['all_ofprotos'], "ofproto", "hmap_node")
     for i, ofproto in enumerate(ofprotos):
         if ofproto.name.string_().decode() == name:
-            return ofproto
+            ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
+            return ofproto_dpif

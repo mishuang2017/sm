@@ -13,4 +13,6 @@ import time
 sys.path.append(".")
 from lib_ovs import *
 
-print("erorrs: %d" % prog['errors'])
+# print("erorrs: %d" % prog['errors'])
+
+print(xcfgp.p)
