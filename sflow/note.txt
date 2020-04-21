@@ -509,6 +509,10 @@ dpif_netlink_port_add
 
 ===upcall===
 
+dpif_netlink_recv_wait__
+	poll_fd_wait / poll_fd_wait_at
+		poll_create_node
+
 user_action_cookie was composed in ovs and send to kernel.
 kernel sends back exactly the same user_action_cookie.
 So kernel needn't to know what is USER_ACTION_COOKIE_SFLOW.
@@ -520,6 +524,7 @@ udpif_upcall_handler
 		dpif_recv
 			dpif_netlink_recv
 				dpif_netlink_recv__
+					epoll_wait
 					nl_sock_recv
 						nl_sock_recv__
 							recvmsg
@@ -531,6 +536,13 @@ udpif_upcall_handler
 					return SFLOW_UPCALL
 		process_upcall
 			dpif_sflow_received
+
+	dpif_recv_wait
+		dpif_netlink_recv_wait
+			dpif_netlink_recv_wait__
+	poll_block
+		time_poll
+			poll
 
 
 parse_odp_packet

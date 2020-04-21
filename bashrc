@@ -897,6 +897,7 @@ alias bd3='sudo ~chrism/bin/single-port3.sh; enable-ovs-debug'
 
 corrupt_dir=corrupt_lat_linux
 alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
+alias cd-netlink="cd /labhome/chrism/prg/c/my_netlink2"
 alias vi-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir; vi corrupt.c"
 alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
 alias corrupt2000="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt2000"
@@ -1976,7 +1977,8 @@ OBJS = $p.o
 FILE = $p.c
 
 all: \$(EXEC)
-	\$(CC) \$(FILE) -fsanitize=address -o \$(EXEC)
+	\$(CC) \$(FILE) -o \$(EXEC)
+# 	\$(CC) \$(FILE) -fsanitize=address -o \$(EXEC)
 #	\$(CC) -Wall -Werror -ansi -pedantic-errors -g \$(FILE) -o \$(EXEC)
 
 clean:
