@@ -8,8 +8,7 @@ import socket
 import sys
 import os
 
-libpath = os.path.dirname(os.path.realpath("__file__"))
-sys.path.append(libpath)
+sys.path.append("..")
 import lib
 
 nl_table = prog['nl_table']
@@ -23,11 +22,11 @@ NETLINK_ROUTE = 0
 
 nl_table_16 = nl_table[NETLINK_GENERIC]
 # print(nl_table_16.mc_list)
-print(nl_table_16)
+# print(nl_table_16)
 
 for sock in hlist_for_each_entry('struct sock', nl_table_16.mc_list.address_of_(), '__sk_common.skc_bind_node'):
     nsock = container_of(sock, "struct netlink_sock", "sk")
-    print(nsock)
+#     print(nsock)
     print("portid: %10d, dst_portid: %d, ngroups: %d" % (nsock.portid, nsock.dst_portid, nsock.ngroups))
 #     for i in range(nsock.ngroups):
 #         print("%2d: %lx" % (i, nsock.groups[i]))
