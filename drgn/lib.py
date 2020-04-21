@@ -152,7 +152,7 @@ def print_exts(e):
         print("action %d: %10s: tc_action %lx" % (i+1, kind, a.value_()), end='')
 #         print(a.cpu_bstats_hw)
         if kind == "ct":
-#             print(a)
+            print(a)
 #             tcf_conntrack_info = Object(prog, 'struct tcf_conntrack_info', address=a.value_())
 #             print("\tzone: %d" % tcf_conntrack_info.zone.value_(), end='')
 #             print("\tmark: 0x%x" % tcf_conntrack_info.mark.value_(), end='')
@@ -161,9 +161,9 @@ def print_exts(e):
 #             print("\tnat: 0x%x" % tcf_conntrack_info.nat.value_())
 #             if tcf_conntrack_info.range.min_addr.ip:
 #                 print("snat ip: %s" % ipv4(ntohl(tcf_conntrack_info.range.min_addr.ip.value_())))
-            tcf_ct = cast('struct tcf_ct *', a)
-            params = tcf_ct.params
-            print("\tzone: %d\ttcf_ct_flow_table %x\tnf_flowtable %x" % (params.zone, params.ct_ft, params.nf_ft))
+#             tcf_ct = cast('struct tcf_ct *', a)
+#             params = tcf_ct.params
+#             print("\tzone: %d\ttcf_ct_flow_table %x\tnf_flowtable %x" % (params.zone, params.ct_ft, params.nf_ft))
 #             print(tcf_ct.params)
 
         if kind == "pedit":
@@ -203,6 +203,7 @@ def print_exts(e):
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
     k = f.mkey
+    print(k)
     #define FLOW_DIS_IS_FRAGMENT    BIT(0)
     #define FLOW_DIS_FIRST_FRAG     BIT(1)
     # 1 means nofirstfrag

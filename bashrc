@@ -11218,7 +11218,7 @@ set -x
 	dst_mac=02:25:d0:$host_num:01:03
 
 	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac \
-		action sample rate 1 group 4	\
+		action sample rate 1 group 5	\
 		action mirred egress redirect dev $rep3
 	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
 	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
@@ -11231,6 +11231,46 @@ set -x
 set +x
 }
 
+function tc_sample1
+{
+set -x
+	offload=""
+# 	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
+
+	$TC qdisc del dev $rep2 ingress
+	$TC qdisc del dev $rep3 ingress
+
+	ethtool -K $rep2 hw-tc-offload on 
+	ethtool -K $rep3 hw-tc-offload on 
+
+	$TC qdisc add dev $rep2 ingress 
+	$TC qdisc add dev $rep3 ingress 
+
+	src_mac=02:25:d0:$host_num:01:02
+	dst_mac=02:25:d0:$host_num:01:03
+
+#	$TC filter add dev $link parent ffff: matchall action sample rate 12 group $group;
+#	ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow;
+#	actions:sample(sample=10.0%,actions(      userspace(pid=2852638985,  sFlow(vid=0,pcp=0,output=72),  actions)    )),enp4s0f0_1
+
+	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac \
+		action sample rate 1 group 4	\
+		userspace pid 4 sflow vid 1 pcp 0 output 72 \
+		action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
+
+	src_mac=02:25:d0:$host_num:01:03
+	dst_mac=02:25:d0:$host_num:01:02
+	$TC filter add dev $rep3 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
+set +x
+}
 
 function sample1
 {

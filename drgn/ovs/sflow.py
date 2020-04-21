@@ -36,7 +36,10 @@ print('')
 
 # print(sflow.sflow_agent)
 print("sflow.sflow_agent.samplers.flowSampleSeqNo: %d" % sflow.sflow_agent.samplers.flowSampleSeqNo)
-print(sflow.sflow_agent.samplers.agent.sendFn)
+
+# sflow_agent_send_packet_cb
+# print(sflow.sflow_agent.samplers.agent.sendFn)
+
 print(sflow.sflow_agent.samplers.myReceiver)
 print('')
 

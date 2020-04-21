@@ -1,3 +1,5 @@
+ git clone https://github.com/mishuang2017/linux.git --branch=5.4-ct
+ git clone https://github.com/mishuang2017/ovs.git --branch=2.13.0-ct
 
 
 
@@ -468,6 +470,10 @@ parse_sample
 
 ===ovs===
 
+open_dpif_backer
+	backer->udpif = udpif_create
+		dpif_register_upcall_cb(dpif, upcall_cb, udpif);
+
 compose_sflow_action
 fix_sflow_action
 
@@ -491,6 +497,9 @@ nl_msg_put_act_mirred
 
 ===netlink===
 
+ofproto_port_add
+
+dpif_port_add
 dpif_netlink_port_add
 	dpif_netlink_rtnl_port_create_and_add
 		dpif_netlink_refresh_channels for restart
@@ -508,12 +517,26 @@ epoll_ctl (handler->epoll_fd, EPOLL_CTL_ADD, nl_sock_fd(sock), &event))
 
 udpif_upcall_handler
 	recv_upcalls
+		dpif_recv
+			dpif_netlink_recv
+				dpif_netlink_recv__
+					nl_sock_recv
+						nl_sock_recv__
+							recvmsg
+					parse_odp_packet
+						OVS_PACKET_ATTR_USERDATA
 		upcall_receive
 			classify_upcall
 				if USER_ACTION_COOKIE_SFLOW
 					return SFLOW_UPCALL
 		process_upcall
 			dpif_sflow_received
+
+
+parse_odp_packet
+    int type = (genl->cmd == OVS_PACKET_CMD_MISS ? DPIF_UC_MISS
+                : genl->cmd == OVS_PACKET_CMD_ACTION ? DPIF_UC_ACTION
+                : -1);
 
 ===sflow===
 
@@ -536,6 +559,17 @@ do_execute_actions
 				output_userspace
 					ovs_dp_upcall
 						queue_userspace_packet
+
+===prm===
+
+termination_table:
+When set, this table is used to attach actions to a steering destination
+when it is required to replicate a single packet to multiple destinations
+with different packet actions. This table may only include a
+single rule, with completely masked match criteria (match all), with
+no special miss action, and with a single destination. The destination
+must not be a Flow Table.
+Supported only when HCA_CAP.termination_table==1.
 
 ===question===
 
@@ -588,3 +622,40 @@ enum mlx5_flow_destination_type {
 17. What is miss? If we specify a table, where should the packet go
 
 18. Mirror is supported due to FW limitation?
+
+===cmd===
+
+genl-ctrl-list -d
+
+===code===
+
+void print_nlmsghdr(void *n, size_t len)
+{
+    int i = 0;
+
+    printf("%04x: ", i);
+    for (i = 0; i < len; i++) {
+        printf("%02x " , ((char *)n)[i] & 0xff);
+        if ((i+1) % 16 == 0)
+            printf("\n%04x: ", i);
+    }
+    printf("\n");
+}
+
+
+ovs
+lib/util.c
+
+void print_nlmsghdr(void *n, size_t len)
+{
+    int i = 0;
+
+    VLOG_ERR("%04x: ", i);
+    for (i = 0; i < len; i++) {
+        VLOG_ERR("%02x " , ((char *)n)[i] & 0xff);
+        if ((i+1) % 16 == 0)
+            VLOG_ERR("\n%04x: ", i);
+    }
+    VLOG_ERR("\n");
+}
+
