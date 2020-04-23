@@ -572,17 +572,6 @@ do_execute_actions
 					ovs_dp_upcall
 						queue_userspace_packet
 
-===prm===
-
-termination_table:
-When set, this table is used to attach actions to a steering destination
-when it is required to replicate a single packet to multiple destinations
-with different packet actions. This table may only include a
-single rule, with completely masked match criteria (match all), with
-no special miss action, and with a single destination. The destination
-must not be a Flow Table.
-Supported only when HCA_CAP.termination_table==1.
-
 ===question===
 
 1. What is FW level support 
@@ -635,9 +624,26 @@ enum mlx5_flow_destination_type {
 
 18. Mirror is supported due to FW limitation?
 
+===termtbl===
+
+p 1948
+
+termination_table
+
+./test-vxlan-rx-vlan-push-offload.sh
+
+mlx5_eswitch_termtbl_create
+mlx5_eswitch_termtbl_put
+mlx5_eswitch_add_termtbl_rule
+
 ===cmd===
 
 genl-ctrl-list -d
+
+===libmnl===
+
+https://www.infradead.org/~tgr/libnl/doc/api/ctrl_8c_source.html
+https://raw.githubusercontent.com/cisco/ampnetworkflow/master/test_client/test_client.c
 
 ===code===
 

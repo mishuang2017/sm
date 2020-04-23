@@ -204,6 +204,7 @@ def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
     k = f.mkey
     print(k)
+    print(f.mask.key)
     #define FLOW_DIS_IS_FRAGMENT    BIT(0)
     #define FLOW_DIS_FIRST_FRAG     BIT(1)
     # 1 means nofirstfrag
