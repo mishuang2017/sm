@@ -614,6 +614,33 @@ def print_mlx5_esw_flow_attr(attr):
     print("dest_ft: %20x" % attr.dest_ft, end='\t')
     print('')
 
+def flow_table2(name, table):
+    print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x (FS_FT_FDB: %d, FS_FT_NIC_RX: %d)" % \
+        (name, table.id.value_(), table.level.value_(), table.type, prog['FS_FT_FDB'], prog['FS_FT_NIC_RX']))
+    print("mlx5_flow_table %lx" % table.address_of_())
+#     print("flow table address")
+#     print("%lx" % table.value_())
+    fs_node = Object(prog, 'struct fs_node', address=table.address_of_())
+#     print("%lx" % fs_node.address_of_())
+#     print(fs_node)
+    group_addr = fs_node.address_of_()
+#     print("fs_node address")
+#     print("%lx" % group_addr.value_())
+    group_addr = fs_node.children.address_of_()
+#     print(group_addr)
+    for group in list_for_each_entry('struct fs_node', group_addr, 'list'):
+        print("mlx5_flow_group %lx" % group)
+        fte_addr = group.children.address_of_()
+        for fte in list_for_each_entry('struct fs_node', fte_addr, 'list'):
+            fs_fte = Object(prog, 'struct fs_fte', address=fte.value_())
+            print_match(fs_fte)
+            dest_addr = fte.children.address_of_()
+            for dest in list_for_each_entry('struct fs_node', dest_addr, 'list'):
+                rule = Object(prog, 'struct mlx5_flow_rule', address=dest.value_())
+                print_dest(rule)
+
+
+
 def flow_table(name, table):
     print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x (FS_FT_FDB: %d, FS_FT_NIC_RX: %d)" % \
         (name, table.id.value_(), table.level.value_(), table.type, prog['FS_FT_FDB'], prog['FS_FT_NIC_RX']))

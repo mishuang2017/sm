@@ -24,12 +24,9 @@ def print_netlink_sock(sock):
     print("\tdst_portid: %x" % sock.dst_portid, end='')
     print("\tflags: %x" % sock.flags)
 
-def print_files(files):
-    for i in range(64):
+def print_files(files, n):
+    for i in range(n):
         file = files[i]
-
-        if file.value_() == 0:
-            continue
 
         # only print socket file
         if socket_file_ops != file.f_op.value_():
@@ -57,5 +54,10 @@ def find_task(name):
             return task
 
 task = find_task("ovs-vswitchd")
-fd_array = task.files.fd_array
-print_files(fd_array)
+next_fd = task.files.next_fd.value_()
+open_fds_init = task.files.open_fds_init
+
+fdt = task.files.fdt
+# print(fdt)
+
+print_files(fdt.fd, next_fd)
