@@ -54,3 +54,9 @@ for i in range(uc_array_size):
 #     print(sock)
     print("channels[%d]: fd: %2d, protocol: %d, pid: %x, %d" % \
         (i, sock.fd, sock.protocol, sock.pid, sock.pid))
+
+print('')
+port_notifier = dpif_netlink.port_notifier
+sock = port_notifier
+print("port_notifier: fd: %2d, protocol: %d, pid: %x, %d" % \
+    (sock.fd, sock.protocol, sock.pid, sock.pid))
