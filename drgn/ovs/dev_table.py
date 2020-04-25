@@ -29,7 +29,7 @@ for i in range(1024):
         upcall_portids = vport.upcall_portids
         ids = upcall_portids.ids
         id = ids[0].value_()
-        print("name: %10s,  n_ids: %d, id: %x" % (name, upcall_portids.n_ids, id))
+        print("name: %10s,  n_ids: %d, id: %x, %d" % (name, upcall_portids.n_ids, id, id))
         print("vport %lx" % vport)
         print("datapath %lx" % vport.dp)
         print("vport_portids %lx" % upcall_portids)

@@ -470,6 +470,12 @@ parse_sample
 
 ===ovs===
 
+netdev_is_flow_api_enabled
+
+join multicast group
+dpif_netlink_init(void)
+	nl_lookup_genl_mcgroup
+
 open_dpif_backer
 	backer->udpif = udpif_create
 		dpif_register_upcall_cb(dpif, upcall_cb, udpif);
