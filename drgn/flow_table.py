@@ -30,9 +30,9 @@ def print_prio(prio):
     prio1 = prio.prio.value_()
     num_ft = prio.num_ft.value_()
 #     print("fs_prio %lx" % prio)
-    if num_ft:
-        print("num_level: %4d, start_level: %4d, prio: %4d, num_ft: %4d" % \
-            (num_levels, start_level, prio1, num_ft))
+#     if num_ft:
+    print("prio: num_level: %4d, start_level: %4d, prio: %4d, num_ft: %4d" % \
+        (num_levels, start_level, prio1, num_ft))
 
 def print_table(table):
     id = table.id
@@ -45,7 +45,7 @@ def print_table(table):
     print(type)
 
 def print_namespace(ns):
-    print("mlx5_flow_namespace %lx" % ns.address_of_())
+#     print(ns)
     prio_addr = ns.node.children.address_of_()
     for prio_node in list_for_each_entry('struct fs_node', prio_addr, 'list'):
         prio = cast("struct fs_prio *", prio_node)
@@ -53,11 +53,18 @@ def print_namespace(ns):
 
         table_addr = prio.node.children.address_of_()
         for table_node in list_for_each_entry('struct fs_node', table_addr, 'list'):
-            table = cast("struct mlx5_flow_table *", table_node)
-            print_table(table)
+            print(table_node.type)
+            if table_node.type.value_() == prog['FS_TYPE_NAMESPACE'].value_():
+                namespace = container_of(table_node, "struct mlx5_flow_namespace", "node")
+#                 print(namespace)
+                print("FS_TYPE_NAMESPACE")
+                print_namespace(namespace)
+            else:
+                table = cast("struct mlx5_flow_table *", table_node)
+                print_table(table)
 
-offloads = priv.eswitch.fdb_table.offloads
-print(offloads)
+# offloads = priv.eswitch.fdb_table.offloads
+# print(offloads)
 
 print_namespace(fdb_root_ns.ns)
 

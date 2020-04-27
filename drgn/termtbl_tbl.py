@@ -25,4 +25,6 @@ for i in range(256):
         print("mlx5_termtbl_handle %lx" % obj.value_())
         mlx5_termtbl_handle = Object(prog, 'struct mlx5_termtbl_handle', address=obj.value_())
         print(mlx5_termtbl_handle)
+        termtbl = mlx5_termtbl_handle.termtbl
+        flow_table("termtbl", termtbl)
         node = node.next

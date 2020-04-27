@@ -470,6 +470,8 @@ parse_sample
 
 ===ovs===
 
+netdev_tc_flow_put
+
 netdev_is_flow_api_enabled
 
 join multicast group
@@ -650,6 +652,33 @@ genl-ctrl-list -d
 
 https://www.infradead.org/~tgr/libnl/doc/api/ctrl_8c_source.html
 https://raw.githubusercontent.com/cisco/ampnetworkflow/master/test_client/test_client.c
+
+===jianbo===
+
+[chrism@dev-r630-04 linux]$ git show 92ab1eb392c6a
+commit 92ab1eb392c6ac6f7fdeee4bfdfb39aa860a371f
+Author: Jianbo Liu <jianbol@mellanox.com>
+Date:   Tue Jun 25 17:48:14 2019 +0000
+
+    net/mlx5: E-Switch, Enable vport metadata matching if firmware supports it
+
+    As the ingress ACL rules save vhca id and vport number to packet's
+    metadata REG_C_0, and the metadata matching for the rules in both fast
+    path and slow path are all added, enable this feature if supported.
+
+    Signed-off-by: Jianbo Liu <jianbol@mellanox.com>
+    Reviewed-by: Roi Dayan <roid@mellanox.com>
+    Reviewed-by: Mark Bloch <markb@mellanox.com>
+    Signed-off-by: Saeed Mahameed <saeedm@mellanox.com>
+
+MLX5_ESWITCH_VPORT_MATCH_METADATA
+
+===table===
+
+mlx5_eswitch_add_offloaded_rule
+mlx5_esw_chains_get_table
+mlx5_esw_chains_get_table
+mlx5_esw_chains_create_fdb_prio
 
 ===code===
 
