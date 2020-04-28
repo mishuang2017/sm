@@ -18,17 +18,18 @@ offloads = mlx5e_priv.mdev.priv.eswitch.fdb_table.offloads
 # print(offloads)
 slow_fdb = offloads.slow_fdb
 esw_chains_priv = offloads.esw_chains_priv
-chains_ht = esw_chains_priv.chains_ht
-prios_ht = esw_chains_priv.prios_ht
+
+chains_ht =   esw_chains_priv.chains_ht
+prios_ht =    esw_chains_priv.prios_ht
 mapping_ctx = esw_chains_priv.chains_mapping
-tc_end_fdb = esw_chains_priv.tc_end_fdb
+tc_end_fdb =  esw_chains_priv.tc_end_fdb
 
 print("tc_end_fdb %lx, slow_fdb: %lx" % (tc_end_fdb, slow_fdb))
 # print(esw_chains_priv)
 
 for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print(chain)
-#     print("chain id: %x" % chain.chain)
+    print("chain id: %x" % chain.chain)
     for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
         next_fdb = prio.next_fdb
         miss_group = prio.miss_group
@@ -60,3 +61,8 @@ for i in range(256):
 #     print(prio)
 #     table = prio.fdb
 #     flow_table("", table)
+
+
+ft_offloads_restore = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads_restore
+print("\n=== mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads_restore ===")
+flow_table("", ft_offloads_restore)

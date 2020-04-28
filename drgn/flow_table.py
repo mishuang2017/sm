@@ -30,9 +30,9 @@ def print_prio(prio):
     prio1 = prio.prio.value_()
     num_ft = prio.num_ft.value_()
 #     print("fs_prio %lx" % prio)
-#     if num_ft:
-    print("prio: num_level: %4d, start_level: %4d, prio: %4d, num_ft: %4d" % \
-        (num_levels, start_level, prio1, num_ft))
+    if num_ft:
+        print("prio: num_level: %4d, start_level: %4d, prio: %4d, num_ft: %4d" % \
+            (num_levels, start_level, prio1, num_ft))
 
 def print_table(table):
     id = table.id
@@ -53,11 +53,11 @@ def print_namespace(ns):
 
         table_addr = prio.node.children.address_of_()
         for table_node in list_for_each_entry('struct fs_node', table_addr, 'list'):
-            print(table_node.type)
+#             print(table_node.type)
             if table_node.type.value_() == prog['FS_TYPE_NAMESPACE'].value_():
                 namespace = container_of(table_node, "struct mlx5_flow_namespace", "node")
 #                 print(namespace)
-                print("FS_TYPE_NAMESPACE")
+#                 print("FS_TYPE_NAMESPACE")
                 print_namespace(namespace)
             else:
                 table = cast("struct mlx5_flow_table *", table_node)
@@ -66,7 +66,10 @@ def print_namespace(ns):
 # offloads = priv.eswitch.fdb_table.offloads
 # print(offloads)
 
+print('')
+print("============ fdb_root_ns ===============")
 print_namespace(fdb_root_ns.ns)
+print('')
 
 fdb_sub_ns = steering.fdb_sub_ns
 for i in range(4):
