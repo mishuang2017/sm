@@ -5208,7 +5208,7 @@ function start-switchdev
 		read
 	fi
 
-	smfs
+# 	smfs
 	get_pci
 	if [[ -z $pci ]]; then
 		echo "pci is null"

@@ -71,8 +71,7 @@ def print_flow_key(key):
     print("tp_dst: %d" % ntohs(tp_dst))
 
 def print_flow_act(acts):
-    print(acts)
-    return
+#     print(acts)
     nlattr = acts.actions[0]
     nla_type = nlattr.nla_type
     actions_len = acts.actions_len

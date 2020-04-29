@@ -81,6 +81,7 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
             print("\tmlx5_ct_entry.zone_rules[%d]" % k)
             print("\tmlx5_ct_zone_rule %lx" % mlx5_ct_zone_rule.address_of_())
             print("\tmlx5_esw_flow_attr %lx" % mlx5_ct_zone_rule.attr.address_of_())
+            print_mlx5_esw_flow_attr(mlx5_ct_zone_rule.attr)
             mlx5_flow_handle = mlx5_ct_zone_rule.rule
             nat = mlx5_ct_zone_rule.nat
             tupleid = mlx5_ct_zone_rule.tupleid

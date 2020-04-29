@@ -671,6 +671,24 @@ Date:   Tue Jun 25 17:48:14 2019 +0000
     Reviewed-by: Mark Bloch <markb@mellanox.com>
     Signed-off-by: Saeed Mahameed <saeedm@mellanox.com>
 
+commit 1e62e222db2e0dc7af0a89c225311d319c5d1c4f
+Author: Majd Dibbiny <majd@mellanox.com>
+Date:   Mon Jan 27 15:50:29 2020 +0200
+
+    net/mlx5: E-Switch, Use vport metadata matching only when mandatory
+
+    Multi-port RoCE mode requires tagging traffic that passes through the
+    vport.
+    This matching can cause performance degradation, therefore disable it
+    and use the legacy matching on vhca_id and source_port when possible.
+
+    Fixes: 92ab1eb392c6 ("net/mlx5: E-Switch, Enable vport metadata matching if firmware supports it")
+    Signed-off-by: Majd Dibbiny <majd@mellanox.com>
+    Reviewed-by: Mark Bloch <markb@mellanox.com>
+    Signed-off-by: Saeed Mahameed <saeedm@mellanox.com>
+
+
+
 MLX5_ESWITCH_VPORT_MATCH_METADATA
 
 ===table===
@@ -711,4 +729,44 @@ void print_nlmsghdr(void *n, size_t len)
     }
     VLOG_ERR("\n");
 }
+
+==misc===
+
+/* Reg C0 usage:
+ * Reg C0 = < ESW_VHCA_ID_BITS(8) | ESW_VPORT BITS(8) | ESW_CHAIN_TAG(16) >
+ *
+ * Highest 8 bits of the reg c0 is the vhca_id, next 8 bits is vport_num,
+ * the rest (lowest 16 bits) is left for tc chain tag restoration.
+ * VHCA_ID + VPORT comprise the SOURCE_PORT matching.
+ */
+#define ESW_VHCA_ID_BITS 8
+#define ESW_VPORT_BITS 8
+#define ESW_SOURCE_PORT_METADATA_BITS (ESW_VHCA_ID_BITS + ESW_VPORT_BITS)
+#define ESW_SOURCE_PORT_METADATA_OFFSET (32 - ESW_SOURCE_PORT_METADATA_BITS)
+#define ESW_CHAIN_TAG_METADATA_BITS (32 - ESW_SOURCE_PORT_METADATA_BITS)
+#define ESW_CHAIN_TAG_METADATA_MASK GENMASK(ESW_CHAIN_TAG_METADATA_BITS - 1,\
+                                            0)
+
+
+commit 6724e66b90eebb19d146b7623b3e2af15616782b
+Author: Paul Blakey <paulb@mellanox.com>
+Date:   Sun Feb 16 12:01:35 2020 +0200
+
+    net/mlx5: E-Switch, Get reg_c1 value on miss
+
+    The HW model implicitly decapsulates tunnels on chain 0 and sets reg_c1
+    with the mapped tunnel id. On miss, the packet does not have the outer
+    header and the driver restores the tunnel information from the tunnel id.
+
+    Getting reg_c1 value in software requires enabling reg_c1 loopback and
+    copying reg_c1 to reg_b. reg_b comes up on CQE as cqe->imm_inval_pkey.
+
+    Use the reg_c0 restoration rules to also copy reg_c1 to reg_B.
+
+    Signed-off-by: Paul Blakey <paulb@mellanox.com>
+    Reviewed-by: Oz Shlomo <ozsh@mellanox.com>
+    Reviewed-by: Mark Bloch <markb@mellanox.com>
+    Signed-off-by: Saeed Mahameed <saeedm@mellanox.com>
+
+
 
