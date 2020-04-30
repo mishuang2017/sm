@@ -31,14 +31,15 @@ for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print(chain)
     print("chain id: %x" % chain.id)
     for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
+        fdb = prio.fdb
         next_fdb = prio.next_fdb
         miss_group = prio.miss_group
         miss_rule = prio.miss_rule
         print("\n=== chain: %x, prio: %x, level: %x ===" % \
             (prio.key.chain, prio.key.prio, prio.key.level))
         print("fdb_prio %lx" % prio)
-        print("next_fdb: %lx, miss_group: %lx, miss_rule: mlx5_flow_handle %lx" % \
-            (next_fdb, miss_group, miss_rule))
+        print("fdb: %lx, next_fdb: %lx, miss_group: %lx, miss_rule: mlx5_flow_handle %lx" % \
+            (fdb, next_fdb, miss_group, miss_rule))
         table = prio.fdb
         flow_table("", table)
 
@@ -56,11 +57,11 @@ for i in range(256):
     for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
         print_mapping_item(item)
 
-# for i, prio in enumerate(hash(prios_ht, 'struct fdb_prio', 'node')):
-#     print(i)
-#     print(prio)
-#     table = prio.fdb
-#     flow_table("", table)
+print('\n=== prios_ht ===')
+
+for i, prio in enumerate(hash(prios_ht, 'struct fdb_prio', 'node')):
+    key = prio.key
+    print("%3d: chain: %8x, prio: %4x, level: %4x" % (i, key.chain, key.prio, key.level))
 
 
 ft_offloads_restore = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads_restore
