@@ -24,6 +24,14 @@ fdb_root_ns = steering.fdb_root_ns
 print(fdb_root_ns.mode)
 print("root ft: %lx" % fdb_root_ns.root_ft)
 
+
+print('')
+print("FDB_BYPASS_PATH: %d" % prog['FDB_BYPASS_PATH'])
+print("FDB_TC_OFFLOAD:  %d" % prog['FDB_TC_OFFLOAD'])
+print("FDB_FT_OFFLOAD:  %d" % prog['FDB_FT_OFFLOAD'])
+print("FDB_SLOW_PATH:   %d" % prog['FDB_SLOW_PATH'])
+print("FDB_PER_VPORT:   %d" % prog['FDB_PER_VPORT'])
+
 def print_prio(prio):
     num_levels = prio.num_levels.value_()
     start_level = prio.start_level.value_()
@@ -39,8 +47,8 @@ def print_table(table):
     max_fte = table.max_fte
     level = table.level
     type = table.type
-    print("\tmlx5_flow_table %lx" % table)
-    print("\tid: %5x, max_fte: %3x, level: %3d, type: " % \
+    print("\tmlx5_flow_table %lx" % table, end='\t')
+    print("id: %5x, max_fte: %8x, level: %3d, type: " % \
         (id, max_fte, level), end='')
     print(type)
 
