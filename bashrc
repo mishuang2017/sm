@@ -6067,10 +6067,10 @@ function flow-limit
 }
 
 # size_t n_handlers, n_revalidators;
-function ovs-thread
+function ovs_thread
 {
-	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
-	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
+	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=2
+	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=2
 }
 
 function vsconfig-wrk-nginx

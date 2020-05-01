@@ -22,14 +22,18 @@ print(dpif)
 # print(dpif.dpif_class)
 # print(prog['dpif_netlink_class'])
 
-print(address_to_name(hex(dpif.dpif_class.get_stats.value_())))
-print(address_to_name(hex(dpif.dpif_class.flow_dump_thread_create.value_())))
-print(address_to_name(hex(dpif.dpif_class.port_add.value_())))
-print(address_to_name(hex(dpif.dpif_class.recv.value_())))
-print(address_to_name(hex(dpif.dpif_class.recv_wait.value_())))
+print("===dpif_netlink_class===")
+print("%30s: %s" % ("get_stats", address_to_name(hex(dpif.dpif_class.get_stats.value_()))))
+print("%30s: %s" % ("flow_dump_thread_create", address_to_name(hex(dpif.dpif_class.flow_dump_thread_create.value_()))))
+print("%30s: %s" % ("port_add", address_to_name(hex(dpif.dpif_class.port_add.value_()))))
+print("%30s: %s" % ("recv", address_to_name(hex(dpif.dpif_class.recv.value_()))))
+print("%30s: %s" % ("recv_wait", address_to_name(hex(dpif.dpif_class.recv_wait.value_()))))
+print("%30s: %s" % ("port_get_pid", address_to_name(hex(dpif.dpif_class.port_get_pid.value_()))))
+
+print("===dpif_handler===")
 
 dpif_netlink = container_of(dpif, "struct dpif_netlink" , "dpif")
-print(dpif_netlink)
+# print(dpif_netlink)
 
 print('')
 
@@ -47,6 +51,8 @@ for i in range(n_handlers):
 
 print('')
 
+print("===dpif_channel ( for each port )===")
+
 channels = dpif_netlink.channels
 for i in range(uc_array_size):
     print(channels[i])
@@ -54,8 +60,9 @@ for i in range(uc_array_size):
 #     print(sock)
     print("channels[%d]: fd: %2d, protocol: %d, pid: %x, %d" % \
         (i, sock.fd, sock.protocol, sock.pid, sock.pid))
+    print('')
 
-print('')
+print("===port_notifier===\n")
 port_notifier = dpif_netlink.port_notifier
 sock = port_notifier
 print("port_notifier: fd: %2d, protocol: %d, pid: %x, %d" % \

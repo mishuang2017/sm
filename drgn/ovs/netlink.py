@@ -17,6 +17,7 @@ from lib import *
 socket_file_ops = prog['socket_file_ops'].address_of_().value_()
 netlink_ops = prog['netlink_ops'].address_of_().value_()
 inet_dgram_ops = prog['inet_dgram_ops'].address_of_().value_()
+eventpoll_fops = prog['eventpoll_fops'].address_of_().value_()
 
 def print_netlink_sock(sock):
     print("sock.sk_protocol: %d" % sock.sk.sk_protocol, end='')
@@ -24,12 +25,27 @@ def print_netlink_sock(sock):
     print("\tdst_portid: %x" % sock.dst_portid, end='')
     print("\tflags: %x" % sock.flags)
 
+def print_eventpoll(file):
+    epoll = file.private_data
+    epoll = Object(prog, "struct eventpoll", address=file.private_data)
+    rb_root = epoll.rbr.rb_root
+
+    print("eventpoll\t", end='')
+#     print(epoll)
+    for node in rbtree_inorder_for_each_entry("struct epitem", rb_root, "rbn"):
+        print("%d" % node.ffd.fd.value_(), end=' ')
+    print('')
+
 def print_files(files, n):
     for i in range(n):
         file = files[i]
 
         # only print socket file
-        if socket_file_ops != file.f_op.value_():
+        if file.f_op.value_() == eventpoll_fops:
+            print("%2d" % i, end='\t')
+            print_eventpoll(file)
+            continue
+        elif socket_file_ops != file.f_op.value_():
             continue
 
         print("%2d" % i, end='\t')
