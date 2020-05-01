@@ -517,9 +517,6 @@ dpif_netlink_port_add
 
 ===upcall===
 
-dpif_netlink_recv_wait__
-	poll_fd_wait / poll_fd_wait_at
-		poll_create_node
 
 user_action_cookie was composed in ovs and send to kernel.
 kernel sends back exactly the same user_action_cookie.
@@ -543,11 +540,31 @@ udpif_upcall_handler
 				if USER_ACTION_COOKIE_SFLOW
 					return SFLOW_UPCALL
 		process_upcall
-			dpif_sflow_received
+			MISS_UPCALL
+				upcall_xlate
+					xlate_actions
+						do_xlate_actions
+							OFPACT_OUTPUT
+								xlate_output_action
+									OFPP_TABLE
+										xlate_table_action
+											rule_dpif_lookup_from_table
+			SFLOW_UPCALL
+				dpif_sflow_received
+		handle_upcalls
+			dpif_operate
+				dpif_netlink_operate
+					try_send_to_netdev
+						parse_flow_put
+							netdev_flow_put
+								netdev_tc_flow_put
+									tc_replace_flower (RTM_NEWTFILTER)
 
 	dpif_recv_wait
 		dpif_netlink_recv_wait
 			dpif_netlink_recv_wait__
+				poll_fd_wait / poll_fd_wait_at
+					poll_create_node
 	poll_block
 		time_poll
 			poll

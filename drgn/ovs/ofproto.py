@@ -30,3 +30,9 @@ for j, ofproto_port in enumerate(ofproto_ports):
     print("name: %15s, ofp_port: %d" % (ofproto_port.netdev.name.string_().decode(), ofproto_port.ofp_port))
 #     print(ofproto_port)
 #     print(ofproto_port.netdev)
+
+n_tables = ofproto.n_tables
+print(n_tables)
+for i in range(1):
+    table = ofproto.tables[i]
+    print(table)

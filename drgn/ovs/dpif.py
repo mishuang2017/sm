@@ -29,6 +29,14 @@ print("%30s: %s" % ("port_add", address_to_name(hex(dpif.dpif_class.port_add.val
 print("%30s: %s" % ("recv", address_to_name(hex(dpif.dpif_class.recv.value_()))))
 print("%30s: %s" % ("recv_wait", address_to_name(hex(dpif.dpif_class.recv_wait.value_()))))
 print("%30s: %s" % ("port_get_pid", address_to_name(hex(dpif.dpif_class.port_get_pid.value_()))))
+print("%30s: %s" % ("flow_dump_next", address_to_name(hex(dpif.dpif_class.flow_dump_next.value_()))))
+print("%30s: %s" % ("operate", address_to_name(hex(dpif.dpif_class.operate.value_()))))
+
+print("===dpif_handler===")
+
+dpif_netlink = container_of(dpif, "struct dpif_netlink" , "dpif")
+# print(dpif_netlink)
+
 
 print("===dpif_handler===")
 
