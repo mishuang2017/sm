@@ -503,6 +503,28 @@ nl_msg_put_flower_options
 nl_msg_put_flower_acts
 nl_msg_put_act_mirred
 
+===ovs_vport_mcgroup===
+
+main
+	bridge_wait
+		ofproto_wait
+			port_poll_wait
+				dpif_port_poll_wait
+					dpif_netlink_port_poll_wait
+						nl_sock_wait (dpif->port_notifier)
+							poll_fd_wait
+main
+	bridge_run
+		bridge_run__
+			ofproto_type_run
+				type_run
+					process_dpif_port_changes
+						dpif_port_poll
+							dpif_netlink_port_poll
+								nl_sock_create
+								nl_sock_join_mcgroup
+						process_dpif_port_change
+
 ===netlink===
 
 ofproto_port_add
@@ -548,6 +570,9 @@ udpif_upcall_handler
 							recvmsg
 					parse_odp_packet
 						OVS_PACKET_ATTR_USERDATA
+		odp_flow_key_to_flow
+			odp_flow_key_to_flow__
+				parse_flow_nlattrs
 		upcall_receive
 			classify_upcall
 				if USER_ACTION_COOKIE_SFLOW
