@@ -14,11 +14,8 @@ sys.path.append(".")
 from lib_ovs import *
 
 backer = get_backer()
-tnl_backers = backer.tnl_backers
+odp_to_ofport_map = backer.odp_to_ofport_map
 
-print(tnl_backers)
-print(tnl_backers.map.buckets)
-
-simaps = print_hmap(tnl_backers.map, "simap_node", "node")
-for i, simap in enumerate(simaps):
-    print(simap)
+ofport_dpifs = print_hmap(odp_to_ofport_map, "ofport_dpif", "odp_port_node")
+for i, ofport_dpif in enumerate(ofport_dpifs):
+    print(ofport_dpif)
