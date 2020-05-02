@@ -515,6 +515,19 @@ dpif_netlink_port_add
 			create_nl_sock
 				nl_sock_create (NETLINK_GENERIC)
 
+===revalidate===
+
+udpif_revalidator
+	revalidate
+		netdev_tc_flow_dump_create
+			tc_dump_flower_start
+		dpif_flow_dump_next
+			dpif_netlink_flow_dump_next
+				netdev_flow_dump_next
+					netdev_tc_flow_dump_next
+						parse_netlink_to_tc_flower
+						parse_tc_flower_to_match
+
 ===upcall===
 
 

@@ -4,6 +4,7 @@ from drgn.helpers.linux import *
 from drgn import Object
 from drgn import container_of
 import socket
+from socket import ntohl
 
 import subprocess
 import drgn
@@ -95,3 +96,10 @@ def get_ofproto_dpif(name):
         if ofproto.name.string_().decode() == name:
             ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
             return ofproto_dpif
+
+def print_ufid(ufid):
+    print("%x:%x:%x:%x" % \
+        (ntohl(ufid.u32[0].value_()), \
+         ntohl(ufid.u32[1].value_()), \
+         ntohl(ufid.u32[2].value_()), \
+         ntohl(ufid.u32[3].value_())))

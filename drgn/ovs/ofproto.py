@@ -31,8 +31,10 @@ for j, ofproto_port in enumerate(ofproto_ports):
 #     print(ofproto_port)
 #     print(ofproto_port.netdev)
 
-n_tables = ofproto.n_tables
-print(n_tables)
-for i in range(1):
+# n_tables = ofproto.n_tables
+# print(n_tables)
+for i in range(2):
     table = ofproto.tables[i]
-    print(table)
+    cls = table.cls
+    n_rules = cls.n_rules
+    print("table[%d] has %d rules" % (i, n_rules))
