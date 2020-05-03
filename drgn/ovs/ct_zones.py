@@ -13,11 +13,14 @@ import time
 sys.path.append(".")
 from lib_ovs import *
 
-cmap = prog['netdev_classes']
-classes = print_cmap(cmap, "netdev_registered_class", "cmap_node")
+backer = get_backer()
 
-for i, new_class in enumerate(classes):
-    print(new_class.type)
+cmap = backer.ct_zones
+print(cmap)
+ct_zones = print_cmap(cmap, "ct_zone", "node")
+
+for i, ct_zone in enumerate(ct_zones):
+    print(ct_zone)
 
 # for i in ('netdev_linux_class', 'netdev_internal_class'):
 #     new_class = prog[i]

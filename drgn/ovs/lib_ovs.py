@@ -75,7 +75,6 @@ def get_xbridge(name):
 def get_backer():
     shashes = print_hmap(prog['all_dpif_backers'].map, "shash_node", "node")
     for i, shash in enumerate(shashes):
-        print(shash)
         if shash.name.string_().decode() == "system":
             backer = Object(prog, 'struct dpif_backer', address=shash.data)
             return backer
@@ -103,3 +102,28 @@ def print_ufid(ufid):
          ntohl(ufid.u32[1].value_()), \
          ntohl(ufid.u32[2].value_()), \
          ntohl(ufid.u32[3].value_())))
+
+def print_cmap(cmap, struct_name, member_name):
+    objs = []
+
+#     print(cmap.impl.p)
+    cmap_impl = cmap.impl.p
+    mask = cmap_impl.mask.value_()
+#     print("mask: %d" % mask)
+    buckets = cmap_impl.buckets
+    CMAP_K = 5
+    n = 0
+    for i in range(mask + 1):
+        for j in range(CMAP_K):
+            cmap_node = buckets[i].nodes[j].next.p[0]
+            if cmap_node.address_of_().value_() == 0:
+                continue
+            print(cmap_node)
+            data = container_of(cmap_node.address_of_(), "struct " + struct_name, member_name)
+            new_class = data.member_("class")
+            objs.append(new_class)
+            n += 1
+
+    return objs
+
+#     print("n = %d" % n)
