@@ -37,7 +37,7 @@ def print_hmap(hmap_addr, struct_name, member):
             buckets = buckets + 8
             continue
 
-        data = Object(prog, "struct " + struct_name, address=p.value_())
+        data = container_of(p, "struct " + struct_name, member)
         objs.append(data)
 
         i += 1
@@ -48,7 +48,7 @@ def print_hmap(hmap_addr, struct_name, member):
 
         while next.value_() != 0:
 
-            data = Object(prog, "struct " + struct_name, address=next.value_())
+            data = container_of(next, "struct " + struct_name, member)
             objs.append(data)
 
             i += 1
