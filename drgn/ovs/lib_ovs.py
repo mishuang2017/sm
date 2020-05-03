@@ -73,9 +73,9 @@ def get_xbridge(name):
 
 # usually there is only one backer named "system"
 def get_backer():
-    dpif_backers = print_hmap(prog['all_dpif_backers'].map, "hmap", "node")
-    for i, dpif_backer in enumerate(dpif_backers):
-        shash = container_of(dpif_backer.address_of_(), "struct shash_node", "node")
+    shashes = print_hmap(prog['all_dpif_backers'].map, "shash_node", "node")
+    for i, shash in enumerate(shashes):
+        print(shash)
         if shash.name.string_().decode() == "system":
             backer = Object(prog, 'struct dpif_backer', address=shash.data)
             return backer
