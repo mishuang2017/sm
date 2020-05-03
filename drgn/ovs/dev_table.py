@@ -87,8 +87,6 @@ def print_flow_act(acts):
 #     print("nla_type: %d" % nla_type)
     actions_len = acts.actions_len
     actions_addr = acts.actions.address_of_()
-    NLA_HDRLEN = prog.type('struct nlattr').size
-    ovs_conntrack_info__len = prog.type('struct ovs_conntrack_info').size
     print("\tactions_len: %d, actions: %lx" % (actions_len, actions_addr))
 
     remaining = actions_len
@@ -99,25 +97,28 @@ def print_flow_act(acts):
             addr = nla_data(nlattr)
             port = Object(prog, 'int', address=addr)
             print("\tOVS_ACTION_ATTR_OUTPUT: %d" % port)
-            remaining -= (NLA_HDRLEN + 4)
+            remaining -= nlattr.nla_len
         elif nla_type == prog['OVS_ACTION_ATTR_CT']:  # 12
             print("\tOVS_ACTION_ATTR_CT:", end=' ')
 #             print(nlattr)
+            ct_len = nlattr.nla_len
             addr = nla_data(nlattr)
             ovs_conntrack_info = Object(prog, 'struct ovs_conntrack_info', address=addr)
             print_ovs_conntrack_info(ovs_conntrack_info)
 
+            ovs_conntrack_info__len = prog.type('struct ovs_conntrack_info').size
             addr += (ovs_conntrack_info__len)
             nlattr = Object(prog, 'struct nlattr', address=addr)
             nla_type = nlattr.nla_type
-            remaining -= (NLA_HDRLEN + ovs_conntrack_info__len)
+            remaining -= ct_len
         elif nla_type == prog['OVS_ACTION_ATTR_RECIRC']:  # 7
             addr = nla_data(nlattr)
             recirc_id = Object(prog, 'int', address=addr)
             print("\tOVS_ACTION_ATTR_RECIRC: %d" % recirc_id)
-            remaining -= (NLA_HDRLEN + 4)
+            remaining -= nlattr.nla_len
         elif nla_type == prog['OVS_ACTION_ATTR_SAMPLE']:  # 7
-            print(nlattr)
+            print("\tOVS_ACTION_ATTR_SAMPLE")
+#             print(nlattr)
             sample_len = nlattr.nla_len.value_()
             print("\tsample_len: %d" % sample_len)
             addr = nla_data(nlattr)
@@ -126,7 +127,7 @@ def print_flow_act(acts):
             print("\targ_len: %d" % arg_len)
 
             if nlattr.nla_type == prog['OVS_SAMPLE_ATTR_ARG']: # 4
-                addr = addr + NLA_HDRLEN
+                addr = nla_data(nlattr)
                 sample_arg = Object(prog, 'struct sample_arg', address=addr)
                 print("\tprobability: %x, %.2f" % (sample_arg.probability, sample_arg.probability.value_() / 4294967295))
 
@@ -136,7 +137,7 @@ def print_flow_act(acts):
             nlattr = Object(prog, 'struct nlattr', address=addr)
             nla_type = nlattr.nla_type
             remaining -= sample_len
-            print(nlattr)
+#             print(nlattr)
         else:
             print(nlattr)
             break
