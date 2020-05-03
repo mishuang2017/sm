@@ -32,7 +32,11 @@ for i in range(mask + 1):
             continue
 #         print(cmap_node)
         data = container_of(cmap_node.address_of_(), "struct netdev_registered_class", "cmap_node")
-        print(data.member_("class").type)
+#         print(data.member_("class").type)
+        new_class = data.member_("class")
+        print(new_class.type)
+        print(new_class.run)
+        print('')
         n += 1
 
 print("n = %d" % n)
