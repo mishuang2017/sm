@@ -93,7 +93,7 @@ def get_ofproto_dpif(name):
     ofprotos = print_hmap(prog['all_ofprotos'], "ofproto", "hmap_node")
     for i, ofproto in enumerate(ofprotos):
         if ofproto.name.string_().decode() == name:
-            ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
+            ofproto_dpif = container_of(ofproto, "struct ofproto_dpif", "up")
             return ofproto_dpif
 
 def print_ufid(ufid):
