@@ -79,8 +79,9 @@ def nla_data(nlattr):
     return nlattr.address_of_().value_() + NLA_HDRLEN
 
 def print_userspace(nlattr):
+    print('\tOVS_ACTION_ATTR_USERSPACE')
     remaining = nlattr.nla_len.value_()
-    print("remaining: %x" % remaining)
+#     print("remaining: %x" % remaining)
     addr = nla_data(nlattr)
     nlattr = Object(prog, 'struct nlattr', address=addr)
     nla_type = nlattr.nla_type
@@ -94,7 +95,7 @@ def print_userspace(nlattr):
 
             addr += len
             nlattr = Object(prog, 'struct nlattr', address=addr)
-            print(nlattr)
+#             print(nlattr)
             remaining -= len
 #             print("remaining 2: %x" % remaining)
         elif nlattr.nla_type == prog['OVS_USERSPACE_ATTR_USERDATA']: # 2
@@ -103,7 +104,7 @@ def print_userspace(nlattr):
             len = nlattr.nla_len.value_()
             addr += len
             nlattr = Object(prog, 'struct nlattr', address=addr)
-            print(nlattr)
+#             print(nlattr)
             remaining -= len
         elif nlattr.nla_type == prog['OVS_USERSPACE_ATTR_ACTIONS']: # 4
             len = nlattr.nla_len.value_()

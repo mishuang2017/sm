@@ -3,6 +3,7 @@
 from drgn.helpers.linux import *
 from drgn import Object
 from drgn import container_of
+from socket import ntohl
 import socket
 
 import subprocess
@@ -18,7 +19,11 @@ ofproto = ofproto_dpif.up
 
 # ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
 parts = ofproto_dpif.uuid.parts
-print("%x-%x-%x-%x" % (parts[0], parts[1], parts[2], parts[3]))
+print("%x-%x-%x-%x" % \
+    (ntohl(parts[0].value_()),
+     ntohl(parts[1].value_()),
+     ntohl(parts[2].value_()),
+     ntohl(parts[3].value_())))
 
 set_sflow = ofproto.ofproto_class.set_sflow
 print(address_to_name(hex(set_sflow.value_())))

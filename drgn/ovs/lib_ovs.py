@@ -118,10 +118,9 @@ def print_cmap(cmap, struct_name, member_name):
             cmap_node = buckets[i].nodes[j].next.p[0]
             if cmap_node.address_of_().value_() == 0:
                 continue
-            print(cmap_node)
+#             print(cmap_node)
             data = container_of(cmap_node.address_of_(), "struct " + struct_name, member_name)
-            new_class = data.member_("class")
-            objs.append(new_class)
+            objs.append(data)
             n += 1
 
     return objs

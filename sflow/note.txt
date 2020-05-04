@@ -635,57 +635,9 @@ do_execute_actions
 					ovs_dp_upcall
 						queue_userspace_packet
 
-===question===
+===recirc===
 
-1. What is FW level support 
-mlx5_tc_ct_init_check_support()
-	err_msg = "firmware level support is missing";
-
-2. a.	Table 1. Do match, set group id (set register c0), jump to sample.
-It seems many registers are used by CT, CHAIN_TO_REG for c0
-
-3. what is vport 0
-
-4. what is losing register
-
-5. What is FLOW_SAMPLE_OBJ
-
-6. Which FW should be used?
-
-7. What's the API to receive multicast netlink message?
-resolved
-
-8. How do I know which flow table is hit or missed? Any FW tools?
-
-9. What is register loopback?
-
-10. sFlow in HW will initiate miss to SW? How to do?
-
-11. what is vport0? What is vport 0 NIC_RX.
-
-12. What is losing registers issue?
-
-13. Sample is a new action type?
-
-enum mlx5_flow_destination_type {
-        MLX5_FLOW_DESTINATION_TYPE_VPORT        = 0x0,
-        MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE   = 0x1,
-        MLX5_FLOW_DESTINATION_TYPE_TIR          = 0x2,
-
-        MLX5_FLOW_DESTINATION_TYPE_PORT         = 0x99,
-        MLX5_FLOW_DESTINATION_TYPE_COUNTER      = 0x100,
-        MLX5_FLOW_DESTINATION_TYPE_FLOW_TABLE_NUM = 0x101,
-};
-
-14. Who send up-call to userspace, mlx5_core or act_sample
-
-15. I need Paul or Oz talk about the CT MT implementation.
-
-16. What is shadow table?
-
-17. What is miss? If we specify a table, where should the packet go
-
-18. Mirror is supported due to FW limitation?
+recirc_id_node
 
 ===termtbl===
 

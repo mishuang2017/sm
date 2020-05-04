@@ -16,7 +16,7 @@ from lib_ovs import *
 backer = get_backer()
 
 cmap = backer.ct_zones
-print(cmap)
+# print(cmap)
 ct_zones = print_cmap(cmap, "ct_zone", "node")
 
 for i, ct_zone in enumerate(ct_zones):
