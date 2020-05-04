@@ -637,7 +637,11 @@ do_execute_actions
 
 ===recirc===
 
-recirc_id_node
+struct recirc_id_node
+
+finish_freezing__
+recirc_alloc_id_ctx
+recirc_alloc_id__
 
 ===termtbl===
 

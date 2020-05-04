@@ -21,4 +21,5 @@ ids = print_cmap(cmap, "recirc_id_node", "id_node")
 
 for i, id in enumerate(ids):
     print(id)
-    print("id: %d, table_id: %d" % (id.id, id.state.table_id))
+    print("id: %d, table_id: %d, conntracked: %d," % (id.id, id.state.table_id, id.state.conntracked), end=' ')
+    print("regs[3]: %10x, in_port: %d" % (id.state.metadata.regs[3], id.state.metadata.in_port))

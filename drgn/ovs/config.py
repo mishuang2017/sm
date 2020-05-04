@@ -27,4 +27,6 @@ print("ovs_vport_mcgroup:   %2d" % prog['ovs_vport_mcgroup'])
 print("ovs_meter_family:    %2d" % prog['ovs_meter_family'])
 print("ovs_ct_limit_family: %2d" % prog['ovs_ct_limit_family'])
 
-print("psample_mcgroup:   %2d" % prog['psample_mcgroup'])
+print("psample_mcgroup:     %2d" % prog['psample_mcgroup'])
+
+print("next_id:             %2d" % prog['next_id'])
