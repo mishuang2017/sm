@@ -96,16 +96,22 @@ def print_userspace(nlattr):
             nlattr = Object(prog, 'struct nlattr', address=addr)
             print(nlattr)
             remaining -= len
-            print("remaining 2: %x" % remaining)
+#             print("remaining 2: %x" % remaining)
         elif nlattr.nla_type == prog['OVS_USERSPACE_ATTR_USERDATA']: # 2
             data_addr = nla_data(nlattr)
+
             len = nlattr.nla_len.value_()
             addr += len
-            nlattr = Object(prog, 'struct nlattr', address=data_addr)
+            nlattr = Object(prog, 'struct nlattr', address=addr)
             print(nlattr)
             remaining -= len
-            print("remaining 3: %x" % remaining)
-            break;
+        elif nlattr.nla_type == prog['OVS_USERSPACE_ATTR_ACTIONS']: # 4
+            len = nlattr.nla_len.value_()
+            remaining -= len
+
+#             print("remaining 3: %x" % remaining)
+            if remaining == 0:
+                break;
 
 def print_flow_act(acts):
 #     print(acts)
