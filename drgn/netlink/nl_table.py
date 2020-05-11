@@ -28,8 +28,8 @@ for sock in hlist_for_each_entry('struct sock', nl_table_16.mc_list.address_of_(
     nsock = container_of(sock, "struct netlink_sock", "sk")
     print("netlink_sock %lx" % nsock)
 #     print(nsock)
-    print("portid: %10d, dst_portid: %d, ngroups: %d, group: %d" % \
-        (nsock.portid, nsock.dst_portid, nsock.ngroups, nsock.groups[0]))
+    print("portid: %10d, %10x, dst_portid: %d, ngroups: %d, group: %d" % \
+        (nsock.portid, nsock.portid, nsock.dst_portid, nsock.ngroups, nsock.groups[0]))
 #     for i in range(nsock.ngroups):
 #         print("%2d: %lx" % (i, nsock.groups[i]))
 

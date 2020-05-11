@@ -470,6 +470,17 @@ parse_sample
 
 ===ovs===
 
+group_alloc_id_ctx
+udpif_sflow_handler
+
+parse_tc_flower_to_match
+
+udpif_create
+
+dpif_print_packet
+
+ofproto_dpif_class
+
 netdev_tc_flow_put
 
 netdev_is_flow_api_enabled
@@ -481,9 +492,6 @@ dpif_netlink_init(void)
 open_dpif_backer
 	backer->udpif = udpif_create
 		dpif_register_upcall_cb(dpif, upcall_cb, udpif);
-
-compose_sflow_action
-fix_sflow_action
 
 nl_sock_create
 
@@ -550,6 +558,24 @@ udpif_revalidator
 						parse_netlink_to_tc_flower
 						parse_tc_flower_to_match
 
+
+Thread 17 "revalidator16" hit Breakpoint 1, fix_sflow_action (user_cookie_offset=0x20, ctx=0x7fab3dff5fe0) at ofproto/ofproto-dpif-xlate.c:3325
+3325        cookie = ofpbuf_at(ctx->odp_actions, user_cookie_offset, sizeof *cookie);
+(gdb) bt
+#0  fix_sflow_action (user_cookie_offset=0x20, ctx=0x7fab3dff5fe0) at ofproto/ofproto-dpif-xlate.c:3325
+#1  xlate_actions (xin=xin@entry=0x7fab3dff6470, xout=xout@entry=0x7fab3dff6830) at ofproto/ofproto-dpif-xlate.c:7760
+#2  0x000000000043e24c in xlate_key (key=<optimized out>, len=<optimized out>, push=push@entry=0x7fab3dff67f0, ctx=ctx@entry=0x7fab3dff6810, udpif=<optimized out>)
+    at ofproto/ofproto-dpif-upcall.c:2193
+#3  0x000000000043e2cd in xlate_ukey (ctx=0x7fab3dff6810, tcp_flags=<optimized out>, ukey=0x7fab5c005d00, udpif=0x1d94400) at ofproto/ofproto-dpif-upcall.c:2208
+#4  populate_xcache (udpif=udpif@entry=0x1d94400, ukey=ukey@entry=0x7fab5c005d00, tcp_flags=<optimized out>) at ofproto/ofproto-dpif-upcall.c:2225
+#5  0x000000000043e798 in revalidate_ukey (udpif=udpif@entry=0x1d94400, ukey=ukey@entry=0x7fab5c005d00, stats=stats@entry=0x7fab3dff9268, odp_actions=odp_actions@entry=0x7fab3dff6c20,
+    reval_seq=reval_seq@entry=0x4ac, recircs=recircs@entry=0x7fab3dff6c10, offloaded=0x0) at ofproto/ofproto-dpif-upcall.c:2378
+#6  0x00000000004414be in revalidate (revalidator=<optimized out>) at ofproto/ofproto-dpif-upcall.c:2762
+#7  0x0000000000442278 in udpif_revalidator (arg=0x1d54978) at ofproto/ofproto-dpif-upcall.c:1012
+#8  0x00000000004f7231 in ovsthread_wrapper (aux_=<optimized out>) at lib/ovs-thread.c:383
+#9  0x00007fab6a6544c0 in start_thread () from /lib64/libpthread.so.0
+#10 0x00007fab6a430163 in clone () from /lib64/libc.so.6
+
 ===upcall===
 
 
@@ -569,24 +595,44 @@ udpif_upcall_handler
 						nl_sock_recv__
 							recvmsg
 					parse_odp_packet
+						dp_packet_use_stub (initialize dp_packet)
 						OVS_PACKET_ATTR_USERDATA
 		odp_flow_key_to_flow
 			odp_flow_key_to_flow__
 				parse_flow_nlattrs
 		upcall_receive
+			xlate_lookup
+				upcall->sflow = xport->xbridge->sflow
 			classify_upcall
 				if USER_ACTION_COOKIE_SFLOW
 					return SFLOW_UPCALL
+		pkt_metadata_from_flow
+		flow_extract
+			miniflow_extract
+			miniflow_expand
 		process_upcall
+			xlate_in_init
+				recirc_id_node_find
 			MISS_UPCALL
 				upcall_xlate
 					xlate_actions
+						compose_sflow_action
 						do_xlate_actions
 							OFPACT_OUTPUT
 								xlate_output_action
 									OFPP_TABLE
 										xlate_table_action
 											rule_dpif_lookup_from_table
+									OFPP_NORMAL
+									OFPP_LOCAL
+							OFPACT_CT
+								compose_conntrack_action
+									compose_recirculate_and_fork
+										finish_freezing__
+											recirc_alloc_id_ctx
+												recirc_alloc_id__
+						fix_sflow_action
+
 			SFLOW_UPCALL
 				dpif_sflow_received
 		handle_upcalls
@@ -597,6 +643,8 @@ udpif_upcall_handler
 							netdev_flow_put
 								netdev_tc_flow_put
 									tc_replace_flower (RTM_NEWTFILTER)
+					dpif_netlink_operate_chunks
+						dpif_netlink_operate__
 
 	dpif_recv_wait
 		dpif_netlink_recv_wait
@@ -623,6 +671,10 @@ sendSample
 collectors_send
 send
 
+
+set_sflow
+	dpif_sflow_add_port
+
 ===datapath===
 
 do_execute_actions
@@ -639,6 +691,10 @@ do_execute_actions
 
 struct recirc_id_node
 
+do_xlate_actions
+OFPACT_CT
+compose_conntrack_action
+compose_recirculate_and_fork
 finish_freezing__
 recirc_alloc_id_ctx
 recirc_alloc_id__
@@ -740,6 +796,11 @@ void print_nlmsghdr(void *n, size_t len)
     }
     VLOG_ERR("\n");
 }
+
+==switch===
+
+mlxsw_sp_port_del_cls_matchall_sample
+mlxsw_sp_port_sample
 
 ==misc===
 

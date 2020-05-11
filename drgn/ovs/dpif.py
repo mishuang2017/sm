@@ -22,7 +22,7 @@ print(dpif)
 print("dpif.base_name: %s" % dpif.base_name.string_().decode())
 
 # print(dpif.dpif_class)
-# print(prog['dpif_netlink_class'])
+print(prog['dpif_netlink_class'])
 
 print("\n===dpif_netlink_class===")
 print("%30s: %s" % ("get_stats", address_to_name(hex(dpif.dpif_class.get_stats.value_()))))
@@ -34,12 +34,14 @@ print("%30s: %s" % ("port_get_pid", address_to_name(hex(dpif.dpif_class.port_get
 print("%30s: %s" % ("flow_dump_next", address_to_name(hex(dpif.dpif_class.flow_dump_next.value_()))))
 print("%30s: %s" % ("operate", address_to_name(hex(dpif.dpif_class.operate.value_()))))
 
-print("===dpif_handler===")
-
 dpif_netlink = container_of(dpif, "struct dpif_netlink" , "dpif")
-# print(dpif_netlink)
+print("===dpif_netlink===")
+print(dpif_netlink.psample_sock)
+print(dpif_netlink.port_notifier)
 
 print('')
+
+print("===dpif_handler===")
 
 uc_array_size = dpif_netlink.uc_array_size
 

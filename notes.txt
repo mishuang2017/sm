@@ -743,6 +743,8 @@ ts: 14
 
 ===gdb===
 
+set radix 16
+
 p *array@len
 
 (gdb) disassemble /m

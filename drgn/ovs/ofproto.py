@@ -15,6 +15,9 @@ sys.path.append(".")
 from lib_ovs import *
 
 ofproto_dpif = get_ofproto_dpif("br")
+
+print("ofproto_dpif: %lx" % ofproto_dpif)
+
 ofproto = ofproto_dpif.up
 
 # ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
@@ -29,6 +32,8 @@ set_sflow = ofproto.ofproto_class.set_sflow
 print(address_to_name(hex(set_sflow.value_())))
 
 # print(ofproto.ofproto_class)
+
+print("change_seq: %d" % ofproto.change_seq)
 
 ofproto_ports = print_hmap(ofproto.ports.address_of_(), "ofport", "hmap_node")
 for j, ofproto_port in enumerate(ofproto_ports):

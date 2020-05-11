@@ -11,7 +11,7 @@ import sys
 import os
 
 sys.path.append("..")
-import lib
+from lib import *
 
 (status, output) = subprocess.getstatusoutput("grep -w dev_table /proc/kallsyms | grep openvswitch | awk '{print $1}'")
 print("%d, %s" % (status, output))
@@ -64,10 +64,10 @@ def print_flow_key(key):
 #     MAC_PROTO_ETHERNET = 1
 #     mac_proto = key.mac_proto
 #     print(mac_proto)
-    print("recird_id: 0x%-3x" % key.recirc_id, end='\t')
+    print("recird_id: 0x%-3x, in_port: %d" % (key.recirc_id, key.phy.in_port), end='\t')
     print_eth(key.eth)
     proto = key.ip.proto.value_()
-    print("proto: %d, src: %s" % (proto, lib.ipv4(ntohl(key.ipv4.addr.src.value_()))))
+    print("proto: %d, src: %s" % (proto, ipv4(ntohl(key.ipv4.addr.src.value_()))))
     tp_dst = key.tp.dst
     print("tp_dst: %d" % ntohs(tp_dst))
 
@@ -188,8 +188,21 @@ def print_flow_act(acts):
 def print_flow_stat(stat):
     print("\tpacket_count: %d" % stat[0].packet_count)
 
+def print_flow_tun_key(tun):
+#     print(tun)
+    print("tun_id: %x, ipv4.src: %s, ipv4.dst: %s, tun_flags: %x" % \
+        (tun.tun_id, \
+         ipv4(ntohl(tun.u.ipv4.src.value_())),
+         ipv4(ntohl(tun.u.ipv4.dst.value_())),
+         ntohs(tun.tun_flags)))
+
+print('')
+
 for i in range(n_buckets):
     for flow in hlist_for_each_entry('struct sw_flow', ufid_ti.buckets[i].address_of_(), 'ufid_table'):
+#         print(flow.mask.key)
+        if flow.key.tun_proto.value_() == 2: # AF_INET
+            print_flow_tun_key(flow.key.tun_key)
         print_flow_key(flow.key)
         print_flow_act(flow.sf_acts)
         print_flow_stat(flow.stats)

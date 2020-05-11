@@ -151,8 +151,10 @@ def print_exts(e):
         kind = a.ops.kind.string_().decode()
         print("action %d: %10s: tc_action %lx" % (i+1, kind, a.value_()), end='')
 #         print(a.cpu_bstats_hw)
+#         print("hw_stats: %d" % a.hw_stats)
         if kind == "ct":
-            print(a)
+            print("\tact_ct")
+#             print(a)
 #             tcf_conntrack_info = Object(prog, 'struct tcf_conntrack_info', address=a.value_())
 #             print("\tzone: %d" % tcf_conntrack_info.zone.value_(), end='')
 #             print("\tmark: 0x%x" % tcf_conntrack_info.mark.value_(), end='')
@@ -203,8 +205,8 @@ def print_exts(e):
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
     k = f.mkey
-    print("ct_state: %x" % k.ct_state)
-    print("mask ct_state: %x" % f.mask.key.ct_state)
+#     print("ct_state: %x" % k.ct_state)
+#     print("mask ct_state: %x" % f.mask.key.ct_state)
     #define FLOW_DIS_IS_FRAGMENT    BIT(0)
     #define FLOW_DIS_FIRST_FRAG     BIT(1)
     # 1 means nofirstfrag
