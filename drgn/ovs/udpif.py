@@ -54,10 +54,14 @@ N_UMAPS = 512
 for i in range(N_UMAPS):
     cmap = ukeys[i].cmap
     if cmap.impl.p.value_() != prog['empty_cmap'].address_of_().value_():
-        print(i)
-        print(cmap)
+#         print(i)
         keys = print_cmap(cmap, "udpif_key", "cmap_node")
         for j, key in enumerate(keys):
-            print(key)
+#             print(key)
+            print("key_group_id: %d" % key.key_group_id)
+            print_ufid(key.ufid)
+#             print("key_recird_id: %d" % key.key_recirc_id)
+#             print(key.recircs)
+            print('')
 
 # print(prog['empty_cmap'].address_of_())

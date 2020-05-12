@@ -547,18 +547,6 @@ dpif_netlink_port_add
 
 ===revalidate===
 
-udpif_revalidator
-	revalidate
-		netdev_tc_flow_dump_create
-			tc_dump_flower_start
-		dpif_flow_dump_next
-			dpif_netlink_flow_dump_next
-				netdev_flow_dump_next
-					netdev_tc_flow_dump_next
-						parse_netlink_to_tc_flower
-						parse_tc_flower_to_match
-
-
 Thread 17 "revalidator16" hit Breakpoint 1, fix_sflow_action (user_cookie_offset=0x20, ctx=0x7fab3dff5fe0) at ofproto/ofproto-dpif-xlate.c:3325
 3325        cookie = ofpbuf_at(ctx->odp_actions, user_cookie_offset, sizeof *cookie);
 (gdb) bt
@@ -576,8 +564,29 @@ Thread 17 "revalidator16" hit Breakpoint 1, fix_sflow_action (user_cookie_offset
 #9  0x00007fab6a6544c0 in start_thread () from /lib64/libpthread.so.0
 #10 0x00007fab6a430163 in clone () from /lib64/libc.so.6
 
-===upcall===
+udpif_revalidator
+	revalidate
+		netdev_tc_flow_dump_create
+			tc_dump_flower_start
+		dpif_flow_dump_next
+			dpif_netlink_flow_dump_next
+				netdev_flow_dump_next
+					netdev_tc_flow_dump_next
+						parse_netlink_to_tc_flower
+						parse_tc_flower_to_match
 
+udpif_revalidator
+	revalidate
+		revalidate_ukey
+			revalidate_ukey__
+				xlate_ukey
+					xlate_key
+						xlate_actions(in, out)
+							fix_sflow_action
+		push_dp_ops
+			dpif_operate
+
+===upcall===
 
 user_action_cookie was composed in ovs and send to kernel.
 kernel sends back exactly the same user_action_cookie.
@@ -632,14 +641,19 @@ udpif_upcall_handler
 											recirc_alloc_id_ctx
 												recirc_alloc_id__
 						fix_sflow_action
+				ukey_create_from_upcall
+					ukey_create__
 
 			SFLOW_UPCALL
 				dpif_sflow_received
 		handle_upcalls
+			ukey_install
+			ops[n_ops].dop.flow_put.group_id = upcall->xout.group_id;
 			dpif_operate
 				dpif_netlink_operate
 					try_send_to_netdev
 						parse_flow_put
+							info.group_id = put->group_id;
 							netdev_flow_put
 								netdev_tc_flow_put
 									tc_replace_flower (RTM_NEWTFILTER)
