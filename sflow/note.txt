@@ -662,6 +662,9 @@ udpif_upcall_handler
 				dpif_netlink_operate
 					try_send_to_netdev
 						parse_flow_put
+							parse_key_and_mask_to_match
+								odp_flow_key_to_flow
+								odp_flow_key_to_mask
 							info.group_id = put->group_id;
 							netdev_flow_put
 								netdev_tc_flow_put
@@ -824,6 +827,17 @@ void print_nlmsghdr(void *n, size_t len)
 
 mlxsw_sp_port_del_cls_matchall_sample
 mlxsw_sp_port_sample
+
+==tunnel===
+
+ip_tunnel_info_af
+metadata_dst
+_skb_refdst
+
+skb_tunnel_info
+	skb_metadata_dst
+
+ip_tun_to_nlattr
 
 ==misc===
 

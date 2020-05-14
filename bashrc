@@ -1686,6 +1686,23 @@ set +x
 }
 alias b4=mybuild4
 
+function mybuild_psample
+{
+	local module=psample
+	driver_dir=net/psample
+	cd $linux_dir;
+	make M=$driver_dir -j || return
+	src_dir=$linux_dir/$driver_dir
+	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
+
+	sudo modprobe -r act_sample
+	sudo modprobe -r $module
+	sudo modprobe -v $module
+
+}
+
+alias bp=mybuild_psample
+
 alias bnetfilter='b4 nft_gen_flow_offload'
 
 # modprobe -rv cls_flower act_mirred
@@ -4494,13 +4511,13 @@ function brx
 set -x
 	del-br
 	vs add-br $br
- 	for (( i = 0; i < numvfs; i++)); do
-# 	for (( i = 1; i < 2; i++)); do
+#  	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < 2; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 	vxlan1
-	ifconfig $vf1 1.1.1.1/24 up
+# 	ifconfig $vf1 1.1.1.1/24 up
 set +x
 }
 

@@ -17,7 +17,7 @@ cmap = prog['netdev_classes']
 classes = print_cmap(cmap, "netdev_registered_class", "cmap_node")
 
 for i, new_class in enumerate(classes):
-    print(new_class.type)
+    print(new_class)
 
 # for i in ('netdev_linux_class', 'netdev_internal_class'):
 #     new_class = prog[i]
