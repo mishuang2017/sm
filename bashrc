@@ -4494,12 +4494,13 @@ function brx
 set -x
 	del-br
 	vs add-br $br
-# 	for (( i = 0; i < numvfs; i++)); do
-	for (( i = 1; i < 2; i++)); do
+ 	for (( i = 0; i < numvfs; i++)); do
+# 	for (( i = 1; i < 2; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 	vxlan1
+	ifconfig $vf1 1.1.1.1/24 up
 set +x
 }
 
@@ -11377,6 +11378,13 @@ function sflow_create
 	fi
 	if (( host_num == 3 )); then
 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+	fi
+}
+
+function sflow_create_vxlan
+{
+	if (( host_num == 14 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"1.1.1.200:6343\" header=128 sampling=2 polling=10 -- set bridge br sflow=@sflow
 	fi
 }
 

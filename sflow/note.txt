@@ -468,12 +468,18 @@ tc_filter_modify
 flower_parse_opt
 parse_sample
 
+===dump===
+
+format_odp_sample_action
+format_odp_userspace_action
+
+parse_tc_flower_to_match
+
 ===ovs===
 
 group_alloc_id_ctx
 udpif_sflow_handler
 
-parse_tc_flower_to_match
 
 udpif_create
 
@@ -570,6 +576,7 @@ udpif_revalidator
 			tc_dump_flower_start
 		dpif_flow_dump_next
 			dpif_netlink_flow_dump_next
+				dpif_netlink_flow_from_ofpbuf
 				netdev_flow_dump_next
 					netdev_tc_flow_dump_next
 						parse_netlink_to_tc_flower
@@ -626,6 +633,8 @@ udpif_upcall_handler
 				upcall_xlate
 					xlate_actions
 						compose_sflow_action
+							compose_sample_action
+								odp_put_userspace_action(pid)
 						do_xlate_actions
 							OFPACT_OUTPUT
 								xlate_output_action

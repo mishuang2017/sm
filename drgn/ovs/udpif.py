@@ -60,6 +60,7 @@ for i in range(N_UMAPS):
 #             print(key)
             print("key_group_id: %d" % key.key_group_id)
             print_ufid(key.ufid)
+            print(key.actions)
 #             print("key_recird_id: %d" % key.key_recirc_id)
 #             print(key.recircs)
             print('')
