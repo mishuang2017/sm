@@ -6408,23 +6408,25 @@ set +x
 }
 
 patch_dir2=~/batch/review11
-patch_dir=~/ovs/2.9
+patch_dir=~/sflow/ovs_review/1
+patch_dir=~/sflow/psample/2
 alias smp="cd $patch_dir"
 alias smp2="cd $patch_dir2"
 
-# Jamal Hadi Salim <jhs@mojatatu.com>
-# Lucas Bates <lucasb@mojatatu.com>
-
 function git-format-patch
 {
-	[[ $# != 1 ]] && return
-#	git format-patch --cover-letter --subject-prefix="INTERNAL RFC net-next v9" -o $patch_dir -$1
-#	git format-patch --cover-letter --subject-prefix="patch net-next" -o $patch_dir -$1
-#	git format-patch --cover-letter --subject-prefix="patch net-next internal v11" -o $patch_dir -$1
-#	git format-patch --cover-letter --subject-prefix="patch net internal" -o $patch_dir -$1
-#	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$1
-#	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$1
-	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$1
+	local n=1
+	[[ $# == 1 ]] && n=$1
+	mkdir -p $patch_dir
+#	git format-patch --cover-letter --subject-prefix="INTERNAL RFC net-next v9" -o $patch_dir -$n
+#	git format-patch --cover-letter --subject-prefix="patch net-next" -o $patch_dir -$n
+#	git format-patch --cover-letter --subject-prefix="patch net-next internal v11" -o $patch_dir -$n
+#	git format-patch --cover-letter --subject-prefix="patch net internal" -o $patch_dir -$n
+#	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$n
+#	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
+# 	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$n
+# 	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
+	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
 }
 
 #
@@ -6438,7 +6440,8 @@ function git-send-email
 
 	echo "#!/bin/bash" > $script
 	echo >> $script
-	echo "git send-email $patch_dir/* --to=netdev@vger.kernel.org \\" >> $script
+# 	echo "git send-email $patch_dir/* --to=netdev@vger.kernel.org \\" >> $script
+	echo "git send-email $patch_dir/* --to=roniba@mellanox.com \\" >> $script
 
 	cat $file | while read line; do
 		echo "	  --cc=$line \\" >> $script
