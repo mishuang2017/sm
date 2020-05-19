@@ -22,7 +22,7 @@ print(dpif)
 print("dpif.base_name: %s" % dpif.base_name.string_().decode())
 
 # print(dpif.dpif_class)
-print(prog['dpif_netlink_class'])
+# print(prog['dpif_netlink_class'])
 
 print("\n===dpif_netlink_class===")
 print("%30s: %s" % ("get_stats", address_to_name(hex(dpif.dpif_class.get_stats.value_()))))

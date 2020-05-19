@@ -115,7 +115,7 @@ elif (( host_num == 14 )); then
 	export DISPLAY=localhost:10.0
 
 	link=enp4s0f0
-	[[ "$(uname -r)" == "5.6.0-rc7+" ]] && link=enp4s0f0np0
+	[[ "$(uname -r)" == "5.7.0-rc4+" ]] && link=enp4s0f0np0
 	link2=enp4s0f1
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
@@ -4518,6 +4518,7 @@ set -x
 	done
 	vxlan1
 # 	ifconfig $vf1 1.1.1.1/24 up
+	sflow_create
 set +x
 }
 
@@ -7624,6 +7625,8 @@ set -x
 	sudo ovs-appctl vlog/set netdev_tc_offloads:file:DBG
 
 	sudo ovs-appctl vlog/set netlink:file:DBG
+	sudo ovs-appctl vlog/set ofproto_dpif_xlate:file:DBG
+	sudo ovs-appctl vlog/set ofproto_dpif_upcall:file:DBG
 set +x
 }
 

@@ -616,6 +616,7 @@ udpif_upcall_handler
 		odp_flow_key_to_flow
 			odp_flow_key_to_flow__
 				parse_flow_nlattrs
+				odp_tun_key_from_attr__
 		upcall_receive
 			xlate_lookup
 				upcall->sflow = xport->xbridge->sflow
@@ -838,6 +839,8 @@ skb_tunnel_info
 	skb_metadata_dst
 
 ip_tun_to_nlattr
+
+odp_tun_key_from_attr__
 
 ==misc===
 
