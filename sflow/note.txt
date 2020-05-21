@@ -172,18 +172,33 @@ tcf_ct_act
 	tcf_ct_flow_table_process_conn
 		tcf_ct_flow_table_add
 			struct flow_offload *flow = flow_offload_alloc
+				flow_offload_fill_dir(FLOW_OFFLOAD_DIR_ORIGINAL)
+				flow_offload_fill_dir(FLOW_OFFLOAD_DIR_REPLY)
 			flow_offload_add
 				__set_bit(NF_FLOW_HW, &flow->flags);
 				nf_flow_offload_add
 					flow_offload_queue_work
 						schedule_work(&nf_flow_offload_work);
 							flow_offload_work_handler
+								flow_offload_work_stats
+								flow_offload_work_del
 								flow_offload_work_add
-									flow_offload_work_add
-										flow_offload_rule_add
-											flow_offload_tuple_add
-												nf_flow_offload_tuple
-													mlx5_tc_ct_block_flow_offload
+									nf_flow_offload_rule_alloc
+										nf_flow_offload_rule_alloc(FLOW_OFFLOAD_DIR_ORIGINAL)
+										nf_flow_offload_rule_alloc(FLOW_OFFLOAD_DIR_REPLY)
+									flow_offload_rule_add
+										flow_offload_tuple_add
+											nf_flow_offload_tuple
+												mlx5_tc_ct_block_flow_offload
+													mlx5_tc_ct_block_flow_offload_stats
+													mlx5_tc_ct_block_flow_offload_del
+													mlx5_tc_ct_block_flow_offload_add
+														alloc flow_action_entry
+														mlx5_tc_ct_entry_add_rules
+															mlx5_tc_ct_entry_add_rule
+																mlx5_eswitch_add_offloaded_rule
+															mlx5_tc_ct_entry_add_rule(nat)
+																mlx5_eswitch_add_offloaded_rule
 
 
 

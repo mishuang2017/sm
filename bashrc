@@ -923,6 +923,7 @@ function ip8
 	ip addr flush $l
 	ip addr add dev $l 8.9.10.11/24
 	ip link set $l up
+	ip l d vxlan0
 }
 
 function ip200
@@ -6408,8 +6409,8 @@ set +x
 }
 
 patch_dir2=~/batch/review11
-patch_dir=~/sflow/ovs_review/1
 patch_dir=~/sflow/psample/2
+patch_dir=~/sflow/ovs_review/2
 alias smp="cd $patch_dir"
 alias smp2="cd $patch_dir2"
 
@@ -6425,8 +6426,8 @@ function git-format-patch
 #	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$n
 #	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$n
-# 	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
-	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
+	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v3" -o $patch_dir -$n
+# 	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
 }
 
 #

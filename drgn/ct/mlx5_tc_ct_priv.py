@@ -15,6 +15,10 @@ ct_priv = mlx5e_rep_priv.uplink_priv.ct_priv
 print("=== mlx5e_rep_priv.uplink_priv.ct_priv.ct ===")
 # print("mlx5_flow_table %lx" % ct_priv.ct)
 flow_table("ct_priv.ct", ct_priv.ct)
+
+print("=== mlx5e_rep_priv.uplink_priv.ct_priv.ct_nat ===")
+flow_table("ct_priv.ct_nat", ct_priv.ct_nat)
+
 print("=== mlx5e_rep_priv.uplink_priv.ct_priv.post_ct ===")
 # print("mlx5_flow_table %lx" % ct_priv.post_ct)
 flow_table("ct_priv.post_ct", ct_priv.post_ct)
@@ -48,12 +52,14 @@ for node in radix_tree_for_each(fte_ids.idr_rt):
 
 ###############################
 
-tuple_ids = ct_priv.tuple_ids
+# tuple_ids = ct_priv.tuple_ids
+# print(tuple_ids)
 
-print("=== mlx5e_rep_priv.uplink_priv.ct_priv.tuple_ids ===")
-for node in radix_tree_for_each(tuple_ids.idr_rt):
-    mlx5_ct_zone_rule = Object(prog, 'struct mlx5_ct_zone_rule', address=node[1].value_())
-    print("tupleid: %x" % mlx5_ct_zone_rule.tupleid)
+# print("=== mlx5e_rep_priv.uplink_priv.ct_priv.tuple_ids ===")
+# for node in radix_tree_for_each(tuple_ids):
+#     print(node)
+#     mlx5_ct_zone_rule = Object(prog, 'struct mlx5_ct_zone_rule', address=node[1].value_())
+#     print("tupleid: %x" % mlx5_ct_zone_rule.tupleid)
 
 ################################
 
@@ -89,6 +95,9 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
             print("\t\tmlx5_ct_zone_rule.rule")
             print_mlx5_flow_handle(mlx5_flow_handle)
         print('')
+
+    flow_table("mlx5_ct_ft.pre_ct.fdb", mlx5_ct_ft.pre_ct.fdb)
+    flow_table("mlx5_ct_ft.pre_ct_nat.fdb", mlx5_ct_ft.pre_ct_nat.fdb)
 
 #         print("\tmlx5_ct_entry.zone_rules[1].rule")
 #         mlx5_flow_handle = mlx5_ct_entry.zone_rules[1].rule
