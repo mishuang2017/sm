@@ -52,14 +52,13 @@ for node in radix_tree_for_each(fte_ids.idr_rt):
 
 ###############################
 
-# tuple_ids = ct_priv.tuple_ids
+tuple_ids = ct_priv.tuple_ids
 # print(tuple_ids)
 
-# print("=== mlx5e_rep_priv.uplink_priv.ct_priv.tuple_ids ===")
-# for node in radix_tree_for_each(tuple_ids):
-#     print(node)
-#     mlx5_ct_zone_rule = Object(prog, 'struct mlx5_ct_zone_rule', address=node[1].value_())
-#     print("tupleid: %x" % mlx5_ct_zone_rule.tupleid)
+print("=== mlx5e_rep_priv.uplink_priv.ct_priv.tuple_ids ===")
+for node in radix_tree_for_each(tuple_ids):
+    mlx5_ct_zone_rule = Object(prog, 'struct mlx5_ct_zone_rule', address=node[1].value_())
+    print("tupleid: %x" % mlx5_ct_zone_rule.tupleid)
 
 ################################
 
@@ -91,7 +90,7 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
             mlx5_flow_handle = mlx5_ct_zone_rule.rule
             nat = mlx5_ct_zone_rule.nat
             tupleid = mlx5_ct_zone_rule.tupleid
-            print("\tmlx5_ct_entry.zone_rules[%d].rule: nat: %d, tupleid: %d" % (k, nat, tupleid))
+            print("\tmlx5_ct_entry.zone_rules[%d].rule: nat: %d, tupleid: %d (tupleid is unique for mlx5_ct_entry.mlx5_ct_zone_rule[nat], it is used to restore ctinfo)" % (k, nat, tupleid))
             print("\t\tmlx5_ct_zone_rule.rule")
             print_mlx5_flow_handle(mlx5_flow_handle)
         print('')

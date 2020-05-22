@@ -193,7 +193,7 @@ tcf_ct_act
 													mlx5_tc_ct_block_flow_offload_stats
 													mlx5_tc_ct_block_flow_offload_del
 													mlx5_tc_ct_block_flow_offload_add
-														alloc flow_action_entry
+														alloc mlx5_ct_entry
 														mlx5_tc_ct_entry_add_rules
 															mlx5_tc_ct_entry_add_rule
 																mlx5_eswitch_add_offloaded_rule
