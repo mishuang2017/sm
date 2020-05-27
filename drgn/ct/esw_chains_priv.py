@@ -29,7 +29,7 @@ print("tc_end_fdb %lx, slow_fdb: %lx" % (tc_end_fdb, slow_fdb))
 
 for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
 #     print(chain)
-    print("chain id: %x" % chain.id)
+    print("chain id: %x\nfdb_chain %x" % (chain.id, chain))
     for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
         fdb = prio.fdb
         next_fdb = prio.next_fdb

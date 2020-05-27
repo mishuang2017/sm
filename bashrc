@@ -1992,11 +1992,10 @@ EOF
 cat << EOF > Makefile
 CC = gcc -g -m64
 EXEC = $p
-OBJS = $p.o
 FILE = $p.c
 
 all: \$(EXEC)
-	\$(CC) \$(FILE) -o \$(EXEC)
+# 	\$(CC) \$(FILE) -o \$(EXEC)
 # 	\$(CC) \$(FILE) -fsanitize=address -o \$(EXEC)
 #	\$(CC) -Wall -Werror -ansi -pedantic-errors -g \$(FILE) -o \$(EXEC)
 
@@ -8632,12 +8631,12 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
-test1=test-eswitch-127-reps.sh
+test1=test-tc-sample.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
 
-test2=test-ovs-ct-icmp-frag.sh
+test2=test-ovs-sflow.sh
 alias test2="./$test2"
 alias vi-test2="vi ~chrism/asap_dev_reg/$test2"
 
@@ -11290,6 +11289,44 @@ set -x
 set +x
 }
 
+function tc_sample2
+{
+set -x
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
+
+	$TC qdisc del dev $rep2 ingress
+	$TC qdisc del dev $rep3 ingress
+
+	ethtool -K $rep2 hw-tc-offload on
+	ethtool -K $rep3 hw-tc-offload on
+
+	$TC qdisc add dev $rep2 ingress 
+	$TC qdisc add dev $rep3 ingress 
+
+	src_mac=02:25:d0:$host_num:01:02
+	dst_mac=02:25:d0:$host_num:01:03
+	$TC filter add dev $rep2 ingress protocol ip  prio 2 flower $offload \
+		src_mac $src_mac dst_mac $dst_mac \
+		action sample rate 1 group 5 trunc 60	\
+		action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep3
+
+	src_mac=02:25:d0:$host_num:01:03
+	dst_mac=02:25:d0:$host_num:01:02
+	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload \
+		src_mac $src_mac dst_mac $dst_mac \
+		action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
+set +x
+}
+
 function tc_sample_vxlan
 {
 set -x
@@ -11309,8 +11346,8 @@ set -x
 	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
 	$TC qdisc del dev $vx ingress > /dev/null 2>&1
 
-	ethtool -K $link hw-tc-offload on 
-	ethtool -K $redirect  hw-tc-offload on 
+	ethtool -K $link hw-tc-offload on
+	ethtool -K $redirect  hw-tc-offload on
 
 	$TC qdisc add dev $link ingress 
 	$TC qdisc add dev $redirect ingress 
