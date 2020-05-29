@@ -11,7 +11,7 @@ from lib import *
 flowtables = prog['flowtables']
 
 for nf_ft in list_for_each_entry('struct nf_flowtable', flowtables.address_of_(), 'list'):
-    hash = nf_ft.rhashtable
+    tuple_hash = nf_ft.rhashtable
     print("nf_flowtable %lx" % nf_ft)
 #     print(nf_ft)
     gc_work_func = nf_ft.gc_work.work.func
@@ -21,3 +21,7 @@ for nf_ft in list_for_each_entry('struct nf_flowtable', flowtables.address_of_()
 #         print(cb)
         print("\tcb: %s" % address_to_name(hex(cb.cb)))
         print("\tmlx5_ct_ft %lx" % cb.cb_priv)
+
+    for i, rhash in enumerate(hash(tuple_hash, 'struct flow_offload_tuple_rhash', 'node')):
+        print("flow_offload_tuple %lx" % rhash.tuple.address_of_())
+        print(rhash.tuple)

@@ -474,6 +474,7 @@ alias clone-ovs-mishuang='git clone git@github.com:mishuang2017/ovs.git'
 alias clone-ovs-ct='git clone https://github.com/roidayan/ovs --branch=ct-one-table-2.10'
 alias clone-ovs-ct2='git clone git@github.com:mishuang2017/ovs --branch=2.13.0-ct'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
+alias clone-scripts='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/scripts'
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
 alias clone-drgn='git clone https://github.com/osandov/drgn.git'	# pip3 install drgn
@@ -923,7 +924,7 @@ function ip8
 	ip addr flush $l
 	ip addr add dev $l 8.9.10.11/24
 	ip link set $l up
-	ip l d vxlan0
+	ip l d vxlan0 2> /dev/null
 }
 
 function ip200
@@ -9055,8 +9056,7 @@ set +x
 
 function br-ct
 {
-	local proto=udp
-	local proto=tcp
+        local proto
 
 	del-br
 	ovs-vsctl add-br $br
@@ -9066,6 +9066,17 @@ function br-ct
 	ovs-ofctl add-flow $br in_port=$rep2,dl_type=0x0806,actions=output:$rep3
 	ovs-ofctl add-flow $br in_port=$rep3,dl_type=0x0806,actions=output:$rep2
 
+	proto=udp
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	proto=tcp
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	proto=icmp
 	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
 	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
 	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"

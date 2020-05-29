@@ -78,7 +78,7 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
         print("mlx5_ct_entry %lx" % mlx5_ct_entry)
         print("\tzone: %d" % mlx5_ct_entry.zone)
         print("\tcookie is flow_offload_tuple %lx" % mlx5_ct_entry.cookie)
-        print("\trestor_cookie is 'ct | ctinfo' %lx" % mlx5_ct_entry.restore_cookie)
+        print("\trestore_cookie is 'ct | ctinfo' %lx" % mlx5_ct_entry.restore_cookie)
         print('')
 
         for k in range(2):
