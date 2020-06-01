@@ -180,6 +180,7 @@ tcf_ct_act
 		tcf_ct_flow_table_add
 			struct flow_offload *flow = flow_offload_alloc
 				flow_offload_fill_dir(FLOW_OFFLOAD_DIR_ORIGINAL)
+					set flow_offload_tuple which is mlx5_ct_entry.cookie
 				flow_offload_fill_dir(FLOW_OFFLOAD_DIR_REPLY)
 			flow_offload_add
 				__set_bit(NF_FLOW_HW, &flow->flags);

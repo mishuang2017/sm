@@ -4519,7 +4519,7 @@ set -x
 	done
 	vxlan1
 # 	ifconfig $vf1 1.1.1.1/24 up
-	sflow_create
+# 	sflow_create
 set +x
 }
 
