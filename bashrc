@@ -11446,7 +11446,7 @@ function sflow_create
 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
 	fi
 	if (( host_num == 14 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=128 sampling=2 polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=96 sampling=2 polling=10 -- set bridge br sflow=@sflow
 	fi
 	if (( host_num == 3 )); then
 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
@@ -11467,7 +11467,7 @@ function sflowtool1
 
 function sflowtool2
 {
-	sflowtool -p 6343 -L localtime,srcIP,dstIP,openflow_port,ifIndex,inputPort,outputPort
+	sflowtool -p 6343 -L localtime,srcIP,dstIP,inputPort,outputPort,sampledPacketSize,IPProtocol
 }
 
 ######## uuu #######

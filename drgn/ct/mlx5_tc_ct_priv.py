@@ -11,6 +11,7 @@ from lib import *
 
 mlx5e_rep_priv = get_mlx5e_rep_priv()
 ct_priv = mlx5e_rep_priv.uplink_priv.ct_priv
+tunnel_mapping = mlx5e_rep_priv.uplink_priv.tunnel_mapping
 
 print("=== mlx5e_rep_priv.uplink_priv.ct_priv.ct ===")
 # print("mlx5_flow_table %lx" % ct_priv.ct)
@@ -106,3 +107,25 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
 #     ct_entries_list = mlx5_ct_ft.ct_entries_list
 #     for mlx5_ct_entry in list_for_each_entry('struct mlx5_ct_entry', ct_entries_list.address_of_(), 'list'):
 #         print(mlx5_ct_entry)
+
+###############################
+
+def print_chain_mapping(item):
+    print("mapping_item %lx" % item, end='\t')
+    print("cnt: %d" % item.cnt, end='\t')
+    print("id (chain_mapping): %d" % item.id, end='\t')
+    key = Object(prog, 'struct tunnel_match_key', address=item.data.address_of_())
+#     print(key)
+    print("tunnel: keyid: %x" % key.enc_key_id.keyid, end=' ')
+    print("ipv4 src: %s" % ipv4(ntohl(key.enc_ipv4.src.value_())), end=' ')
+    print("dst: %s" % ipv4(ntohl(key.enc_ipv4.dst.value_())), end=' ')
+    print("ifindex: %d" % key.filter_ifindex)
+
+print('\n=== tunnel mapping_ctx ===\n')
+ht = tunnel_mapping.ht
+print("mapping_ctx %lx" % tunnel_mapping)
+for i in range(256):
+    for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
+        print_chain_mapping(item)
+
+
