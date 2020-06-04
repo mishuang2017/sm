@@ -760,6 +760,22 @@ def print_match(fte):
     if source_sqn:
         print(" source_sqn: %6x" % source_sqn, end='')
 
+    reg_c5 = ntohl(val[54].value_())
+    if reg_c5:
+        print(" reg_c5 (fteid): %4x" % reg_c5, end='')
+
+    reg_c2 = ntohl(val[57].value_())
+    if reg_c2:
+        print(" reg_c2 (ct_state|ct_zone): %4x" % reg_c2, end='')
+
+    reg_c1 = ntohl(val[58].value_())
+    if reg_c1:
+        print(" reg_c1: %4x" % reg_c1, end='')
+
+    reg_c0 = ntohl(val[59].value_())
+    if reg_c0:
+        print(" reg_c0: %4x" % reg_c0, end='')
+
     if vni:
         smac_47_16 = ntohl(val[32].value_())
         smac_15_0 = ntohl(val[33].value_() & 0xffff)
