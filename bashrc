@@ -28,8 +28,7 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "clx-ibmc-01" ]] && host_num=1
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 [[ "$(hostname -s)" == "clx-ibmc-03" ]] && host_num=3
-[[ "$(hostname -s)" == "qa-h-vrt-110" ]] && host_num=10
-[[ "$(hostname -s)" == "qa-h-vrt-111" ]] && host_num=11
+[[ "$(hostname -s)" == "c-235-254-1-005" ]] && host_num=5
 
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=97
@@ -53,8 +52,8 @@ elif (( host_num == 2 )); then
 	numvfs=16
 	link=ens1f0
 	link2=ens1f1
-elif (( host_num == 10 || host_num == 11 )); then
-	link=enp94s0f0
+elif (( host_num == 5 )); then
+	link=eth2
 elif (( host_num == 3 )); then
 	numvfs=97
 	numvfs=16
@@ -453,6 +452,7 @@ alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
 alias clone-ofed5_0='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0'
+alias clone-ofed5_1='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_1'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0_2'
 alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
 alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_7_3'
@@ -9990,6 +9990,7 @@ cat << EOF > $file
 # override default search ordering for kmod packaging
 search updates extra built-in weak-updates
 EOF
+	depmod -a
 }
 
 function set-time
