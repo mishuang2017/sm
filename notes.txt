@@ -1658,8 +1658,7 @@ git push origin HEAD:refs/for/mlnx_ofed_5_0_2/PRIO_CHAIN_SUPPORT
 
 git push origin HEAD:refs/for/ct-one-table-2.13.0/fix_tracked_enum
 
-git push origin HEAD:refs/for/master/tc_sample
-git push origin HEAD:refs/for/master/ovs_sflow
+git push origin HEAD:refs/for/master/sflow
 
 tc_cls_flower_offload_common
 

@@ -683,6 +683,9 @@ def print_match(fte):
 #     print(val)
 #     smac = str(ntohl(hex(val[0])))
     print("%8x: " % fte.index.value_(), end='')
+    tag = fte.flow_context.flow_tag
+    if tag:
+        print(" flow_tag: %x" % tag, end=' ')
     smac_47_16 = ntohl(val[0].value_())
     smac_15_0 = ntohl(val[1].value_() & 0xffff)
     smac_47_16 <<= 16
