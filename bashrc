@@ -3021,6 +3021,20 @@ set -x
 set +x
 }
 
+#
+# local host 14
+#
+# n1
+# vlan enp4s0f0np0v1 5 192.168.1.14
+#
+
+#
+# remote host 13
+#
+# ip1
+# ping 192.168.1.14
+#
+
 function tc_vlan_termtbl
 {
 set -x
@@ -3046,10 +3060,7 @@ set -x
 	$TC filter add dev $link protocol ip prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac \
 		action vlan push id $vid		\
 		action mirred egress redirect dev $rep2
-	$TC filter add dev $link protocol arp prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac \
-		action vlan push id $vid		\
-		action mirred egress redirect dev $rep2
-	$TC filter add dev $link protocol arp prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac \
+	$TC filter add dev $link protocol arp prio 2 parent ffff: flower $offload \
 		action vlan push id $vid		\
 		action mirred egress redirect dev $rep2
 
@@ -3058,12 +3069,18 @@ set -x
 	$TC filter add dev $rep2 protocol 802.1Q prio 1 handle 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x800 vlan_id $vid vlan_prio 0 \
 		action vlan pop \
 		action mirred egress redirect dev $link
-	$TC filter add dev $rep2 protocol 802.1Q prio 2 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0 \
+	$TC filter add dev $rep2 protocol 802.1Q prio 2 parent ffff: flower $offload vlan_ethtype 0x806 vlan_id $vid vlan_prio 0 \
 		action vlan pop \
 		action mirred egress redirect dev $link
-	$TC filter add dev $rep2 protocol 802.1Q prio 3 parent ffff: flower $offload src_mac $src_mac dst_mac $brd_mac vlan_ethtype 0x806 vlan_id $vid vlan_prio 0 \
-		action vlan pop \
-		action mirred egress redirect dev $link
+
+	vlan=vlan$2
+	ip netns exec n11 modprobe 8021q
+	ip netns exec n11 ifconfig $vf2 0
+	ip netns exec n11 ip l d vlan5
+	ip netns exec n11 ip link add link $vf2 name $vlan type vlan id $vid
+	ip netns exec n11 ip link set dev $vlan up
+	ip netns exec n11 ip addr add $link_ip/16 brd + dev $vlan
+
 set +x
 }
 
@@ -11370,18 +11387,18 @@ set -x
 	dst_mac=02:25:d0:$host_num:01:03
 	$TC filter add dev $rep2 ingress protocol ip  prio 2 flower $offload \
 		src_mac $src_mac dst_mac $dst_mac \
-		action sample rate 1 group 5 trunc 60	\
+		action sample rate 2 group 5 trunc 60	\
 		action mirred egress redirect dev $rep3
-	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
-		action mirred egress redirect dev $rep3
+# 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+# 		action mirred egress redirect dev $rep3
 
 	src_mac=02:25:d0:$host_num:01:03
 	dst_mac=02:25:d0:$host_num:01:02
-	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload \
-		src_mac $src_mac dst_mac $dst_mac \
-		action mirred egress redirect dev $rep2
-	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
-		action mirred egress redirect dev $rep2
+# 	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload \
+# 		src_mac $src_mac dst_mac $dst_mac \
+# 		action mirred egress redirect dev $rep2
+# 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+# 		action mirred egress redirect dev $rep2
 set +x
 }
 

@@ -886,6 +886,12 @@ odp_tun_key_from_attr__
 
 mlx5e_get_flow_tunnel_id
 
+==obj===
+
+mlx5_create_encryption_key
+
+mlx5_ifc_create_encryption_key_in_bits
+
 ==misc===
 
 /* Reg C0 usage:

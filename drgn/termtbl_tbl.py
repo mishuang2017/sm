@@ -28,3 +28,8 @@ for i in range(256):
         termtbl = mlx5_termtbl_handle.termtbl
         flow_table("termtbl", termtbl)
         node = node.next
+
+sampler_termtbl_handle = offloads.sampler_termtbl_handle
+print(sampler_termtbl_handle)
+
+print_mlx5_flow_handle(sampler_termtbl_handle.rule)
