@@ -889,8 +889,10 @@ mlx5e_get_flow_tunnel_id
 ==obj===
 
 mlx5_create_encryption_key
-
 mlx5_ifc_create_encryption_key_in_bits
+
+mlx5_create_sampler_obj
+mlx5_ifc_sampler_obj_bits
 
 ==misc===
 

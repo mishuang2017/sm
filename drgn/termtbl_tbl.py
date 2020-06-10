@@ -30,6 +30,8 @@ for i in range(256):
         node = node.next
 
 sampler_termtbl_handle = offloads.sampler_termtbl_handle
+sampler_default_tbl = offloads.sampler_default_tbl
 print(sampler_termtbl_handle)
+print(sampler_default_tbl)
 
 print_mlx5_flow_handle(sampler_termtbl_handle.rule)

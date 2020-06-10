@@ -11389,16 +11389,16 @@ set -x
 		src_mac $src_mac dst_mac $dst_mac \
 		action sample rate 2 group 5 trunc 60	\
 		action mirred egress redirect dev $rep3
-# 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
-# 		action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep3
 
 	src_mac=02:25:d0:$host_num:01:03
 	dst_mac=02:25:d0:$host_num:01:02
-# 	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload \
-# 		src_mac $src_mac dst_mac $dst_mac \
-# 		action mirred egress redirect dev $rep2
-# 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
-# 		action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload \
+		src_mac $src_mac dst_mac $dst_mac \
+		action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
 set +x
 }
 

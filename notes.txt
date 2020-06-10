@@ -8974,6 +8974,8 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+memzero_explicit
+
 GENMASK
 
 ARRAY_SIZE
