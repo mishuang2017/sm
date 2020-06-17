@@ -600,6 +600,9 @@ def print_dest(rule):
         print("\t\t\tdest: ft: %lx" % (rule.dest_attr.ft.value_()))
 #         flow_table("goto table", rule.dest_attr.ft)
         return
+    if prog['MLX5_FLOW_DESTINATION_TYPE_FLOW_SAMPLER'] == rule.dest_attr.type:
+        print("\t\t\tdest: sampler_id: %x" % rule.dest_attr.sampler_id)
+        return
     else:
         print(rule)
 

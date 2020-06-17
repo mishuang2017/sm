@@ -28,6 +28,10 @@ for i in range(256):
         node = node.next
 
 sampler_termtbl_handle = offloads.sampler_termtbl_handle
-print(sampler_termtbl_handle)
-# sampler_default_tbl = offloads.sampler_default_tbl
-# print(sampler_default_tbl)
+# print(sampler_termtbl_handle)
+
+sampler_default_tbl = offloads.sampler_default_tbl
+flow_table("sampler_default_tbl", sampler_default_tbl)
+print("sampler_default_tbl: %x" % sampler_default_tbl.id)
+
+print("num_flows: %d" % offloads.num_flows.counter)

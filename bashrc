@@ -6249,6 +6249,10 @@ alias syn='syndrome 16.25.6000'
 function burn5
 {
 set -x
+	mlxburn -d $pci -fw /root/fw-ConnectX5.mlx -conf_dir /root/customised_ini
+
+	return
+
 # 	mlxfwup -d $pci -f 16.27.1016
         mlxfwup -d $pci -f 16.27.2008
 
@@ -6262,9 +6266,10 @@ set -x
 	version=fw-4119-rel-16_25_6000
 	version=fw-4119-rel-16_26_1200
 
-	mkdir -p /mswg/
-	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
-	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/$version/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
+# 	mkdir -p /mswg/
+# 	sudo mount 10.4.0.102:/vol/mswg/mswg /mswg/
+# 	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/$version/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
+
 
 #	yes | sudo mlxburn -d $pci -fw /mswg/release/fw-4119/last_revision/fw-ConnectX5.mlx -conf_dir /mswg/release/fw-4119/$version
 
@@ -11341,42 +11346,6 @@ set -x
 	$TC qdisc del dev $rep2 ingress
 	$TC qdisc del dev $rep3 ingress
 
-	ethtool -K $rep2 hw-tc-offload on 
-	ethtool -K $rep3 hw-tc-offload on 
-
-	$TC qdisc add dev $rep2 ingress 
-	$TC qdisc add dev $rep3 ingress 
-
-	src_mac=02:25:d0:$host_num:01:02
-	dst_mac=02:25:d0:$host_num:01:03
-
-	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac \
-		action sample rate 1 group 5 trunc 60	\
-		action mirred egress redirect dev $rep3
-	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
-	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
-
-	src_mac=02:25:d0:$host_num:01:03
-	dst_mac=02:25:d0:$host_num:01:02
-	$TC filter add dev $rep3 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
-	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
-	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
-set +x
-}
-
-function tc_sample2
-{
-set -x
-	offload=""
-	[[ "$1" == "sw" ]] && offload="skip_hw"
-	[[ "$1" == "hw" ]] && offload="skip_sw"
-
-	TC=tc
-	TC=/images/chrism/iproute2/tc/tc
-
-	$TC qdisc del dev $rep2 ingress
-	$TC qdisc del dev $rep3 ingress
-
 	ethtool -K $rep2 hw-tc-offload on
 	ethtool -K $rep3 hw-tc-offload on
 
@@ -11399,6 +11368,42 @@ set -x
 		action mirred egress redirect dev $rep2
 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
 		action mirred egress redirect dev $rep2
+set +x
+}
+
+function tc_sample2
+{
+set -x
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
+
+	$TC qdisc del dev $rep2 ingress
+	$TC qdisc del dev $rep3 ingress
+
+	ethtool -K $rep2 hw-tc-offload on 
+	ethtool -K $rep3 hw-tc-offload on 
+
+	$TC qdisc add dev $rep2 ingress 
+	$TC qdisc add dev $rep3 ingress 
+
+	src_mac=02:25:d0:$host_num:01:02
+	dst_mac=02:25:d0:$host_num:01:03
+
+	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac \
+		action sample rate 1 group 5 trunc 60	\
+		action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep3
+
+	src_mac=02:25:d0:$host_num:01:03
+	dst_mac=02:25:d0:$host_num:01:02
+	$TC filter add dev $rep3 prio 1 protocol ip  parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: flower $offload  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
 set +x
 }
 
@@ -11506,14 +11511,15 @@ function sflow_list
 
 function sflow_create
 {
+	local rate=10
 	if (( host_num == 13 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=$rate polling=10 -- set bridge br sflow=@sflow
 	fi
 	if (( host_num == 14 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=96 sampling=2 polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=96 sampling=$rate polling=10 -- set bridge br sflow=@sflow
 	fi
 	if (( host_num == 3 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=128 sampling=10 polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=128 sampling=$rate polling=10 -- set bridge br sflow=@sflow
 	fi
 }
 

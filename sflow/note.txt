@@ -894,6 +894,21 @@ mlx5_ifc_create_encryption_key_in_bits
 mlx5_create_sampler_obj
 mlx5_ifc_sampler_obj_bits
 
+mlx5_flow_destination_type
+mlx5_flow_destination
+
+==restore===
+
+esw_create_restore_table
+	esw->offloads.restore_copy_hdr_id
+		copy MLX5_ACTION_IN_FIELD_METADATA_REG_C_1 to MLX5_ACTION_IN_FIELD_METADATA_REG_B
+
+create_fdb_chain_restore
+
+
+esw_add_restore_rule
+	flow_context->flow_tag = tag;
+
 ==misc===
 
 /* Reg C0 usage:
@@ -931,6 +946,14 @@ Date:   Sun Feb 16 12:01:35 2020 +0200
     Reviewed-by: Oz Shlomo <ozsh@mellanox.com>
     Reviewed-by: Mark Bloch <markb@mellanox.com>
     Signed-off-by: Saeed Mahameed <saeedm@mellanox.com>
+
+
+
+[Mon Jun 15 17:04:41 2020] mlx5_core 0000:04:00.0: mlx5_cmd_check:753:(pid 6557): SET_FLOW_TABLE_ENTRY(0x936) op_mod(0x0) failed, status bad parameter(0x3), syndrome (0x4c7783)
+BAD_PARAM           | 0x4C7783 |  set_flow_table_entry: Modify action in FDB flow table can be supported only when forwarding to Vport or to FT
+
+add modify_hdr in sample_termtbl
+[Fri Jun 12 15:33:26 2020] mlx5_core 0000:04:00.0: mlx5_cmd_check:753:(pid 26682): CREATE_GENERAL_OBJECT(0xa00) op_mod(0x20) failed, status bad parameter(0x3), syndrome (0xafd05d)
 
 
 
