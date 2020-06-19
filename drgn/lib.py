@@ -307,7 +307,7 @@ def get_mlx5e_rep_priv():
 
     return mlx5e_rep_priv
 
-def get_mlx5e_rep_priv2():
+def get_mlx5e_rep_priv2(port):
     mlx5e_priv = get_mlx5_pf0()
 
     # struct mlx5_esw_offload
@@ -319,20 +319,22 @@ def get_mlx5e_rep_priv2():
 
     # struct mlx5_eswitch_rep
 
+    if port == 0:
+        port = total_vports - 1
     if kernel("4.20.16+") or kernel("4.20.0-rc1+"):
         mlx5_eswitch_rep = offloads.vport_reps[0]
     else:
-        mlx5_eswitch_rep = offloads.vport_reps[total_vports - 1]
+        mlx5_eswitch_rep = offloads.vport_reps[port]
 
 #     for i in range(total_vports):
 #         print("%lx" % offloads.vport_reps[i].address_of_())
 #     print("%lx" % vport.address_of_())
 
-    # struct mlx5_eswitch_rep_if
-    rep_if = mlx5_eswitch_rep.rep_if
+    # struct mlx5_eswitch_rep_data
+    rep_data = mlx5_eswitch_rep.rep_data
 
     # struct mlx5e_rep_priv
-    priv = rep_if[prog['REP_ETH']].priv
+    priv = rep_data[prog['REP_ETH']].priv
 
 #     print("priv: %lx" % priv.value_())
 
@@ -668,6 +670,8 @@ def flow_table(name, table):
         for fte in list_for_each_entry('struct fs_node', fte_addr, 'list'):
             fs_fte = Object(prog, 'struct fs_fte', address=fte.value_())
             print_match(fs_fte)
+            if fs_fte.action.action & 0x40:
+                print("modify_hdr id: %x" % fs_fte.action.modify_hdr.id)
             dest_addr = fte.children.address_of_()
             for dest in list_for_each_entry('struct fs_node', dest_addr, 'list'):
                 rule = Object(prog, 'struct mlx5_flow_rule', address=dest.value_())

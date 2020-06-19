@@ -38,3 +38,9 @@ print("=== offloads.sampler_default_tbl ===")
 
 print("=== offloads.sampler_termtbl_handle.rule ===")
 print_mlx5_flow_handle(sampler_termtbl_handle.rule)
+
+print("=== offloads.vport_reps.rep_data.priv ===")
+for i in range(4):
+    rpriv = get_mlx5e_rep_priv2(i)
+    print(rpriv.netdev.name)
+    print(rpriv.sampler_termtbl_handle.termtbl.id)
