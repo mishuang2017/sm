@@ -909,6 +909,11 @@ create_fdb_chain_restore
 esw_add_restore_rule
 	flow_context->flow_tag = tag;
 
+==skb===
+
+mlx5e_handle_rx_cqe_mpwrq_rep
+mlx5e_tc_rep_update_skb
+
 ==misc===
 
 /* Reg C0 usage:

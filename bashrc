@@ -2269,6 +2269,25 @@ set -x
 set +x
 }
 
+function tc_nat
+{
+	TC=/images/chrism/iproute2/tc/tc
+
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+set -x
+
+	$TC qdisc del dev $rep2 ingress
+	ethtool -K $rep2 hw-tc-offload on
+	$TC qdisc add dev $rep2 ingress
+
+	$TC filter add dev $rep2 ingress prio 1 chain 0 proto ip flower $offload ip_flags nofrag ip_proto tcp \
+		action ct pipe action goto chain 2
+set +x
+}
+
 function tc-pf
 {
 set -x
@@ -2465,8 +2484,8 @@ function tc-setup
 {
 	local l=$link
 	[[ $# == 1 ]] && l=$1
-	TC=/images/chrism/iproute2/tc/tc
 	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
 	$TC qdisc del dev $link ingress > /dev/null 2>&1
 	ethtool -K $link hw-tc-offload on 
 	$TC qdisc add dev $link ingress 
