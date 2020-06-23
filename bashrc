@@ -28,7 +28,7 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "clx-ibmc-01" ]] && host_num=1
 [[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
 [[ "$(hostname -s)" == "clx-ibmc-03" ]] && host_num=3
-[[ "$(hostname -s)" == "c-235-254-1-005" ]] && host_num=5
+[[ "$(hostname -s)" == "c-135-185-1-009" ]] && host_num=9
 
 if (( host_num == 1 || host_num == 2 )); then
 	numvfs=97
@@ -52,7 +52,7 @@ elif (( host_num == 2 )); then
 	numvfs=16
 	link=ens1f0
 	link2=ens1f1
-elif (( host_num == 5 )); then
+elif (( host_num == 9 )); then
 	link=eth2
 elif (( host_num == 3 )); then
 	numvfs=97
@@ -2269,7 +2269,7 @@ set -x
 set +x
 }
 
-function tc_nat
+function tc_nat1
 {
 	TC=/images/chrism/iproute2/tc/tc
 
@@ -2287,6 +2287,8 @@ set -x
 		action ct pipe action goto chain 2
 set +x
 }
+
+alias tc_nat='sudo ~chrism/bin/tc_nat.sh'
 
 function tc-pf
 {
@@ -11535,7 +11537,10 @@ function sflow_create
 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=128 sampling=$rate polling=10 -- set bridge br sflow=@sflow
 	fi
 	if (( host_num == 14 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=96 sampling=$rate polling=10 -- set bridge br sflow=@sflow
+set -x
+# 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=96 sampling=$rate polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=$link target=\"192.168.1.13:6343\" header=96 sampling=$rate polling=10 -- set bridge br sflow=@sflow
+set +x
 	fi
 	if (( host_num == 3 )); then
 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=128 sampling=$rate polling=10 -- set bridge br sflow=@sflow
