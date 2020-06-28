@@ -27,8 +27,9 @@ miniflow_list = []
 #             miniflow_list.append(miniflow)
 
 mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
+mf_ht = mlx5e_rep_priv.uplink_priv.mf_ht
 
-for i, flow in enumerate(lib.hash(mlx5e_rep_priv.mf_ht, 'struct mlx5e_miniflow', 'node')):
+for i, flow in enumerate(lib.hash(mf_ht, 'struct mlx5e_miniflow', 'node')):
     print("mlx5e_miniflow %lx" % flow.value_())
     miniflow_list.append(flow)
 

@@ -38,21 +38,21 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
     print("%-14s mlx5e_tc_flow %lx, cookie: %lx, flags: %x" % \
         (name, flow.value_(), flow.cookie.value_(), flow.flags.value_()))
-    print("chain: %x" % flow.esw_attr[0].chain, end='\t')
-    print("dest_chain: %x" % flow.esw_attr[0].dest_chain, end='\t')
+#     print("chain: %x" % flow.esw_attr[0].chain, end='\t')
+#     print("dest_chain: %x" % flow.esw_attr[0].dest_chain, end='\t')
 #     print("fdb: %x" % flow.esw_attr[0].fdb, end='\t')
 #     print("dest_ft: %x" % flow.esw_attr[0].dest_ft, end='\t')
-    print("ct_state: %x/%x" % (flow.esw_attr[0].parse_attr.spec.match_value[57] >> 8, \
-        flow.esw_attr[0].parse_attr.spec.match_criteria[57] >> 8))
-    print("mlx5_flow_spec %lx" % flow.esw_attr[0].parse_attr.spec.address_of_())
+#     print("ct_state: %x/%x" % (flow.esw_attr[0].parse_attr.spec.match_value[57] >> 8, \
+#         flow.esw_attr[0].parse_attr.spec.match_criteria[57] >> 8))
+#     print("mlx5_flow_spec %lx" % flow.esw_attr[0].parse_attr.spec.address_of_())
 #     print("sample_rate: %x" % flow.esw_attr[0].sample_rate)
 #     print("psample_group_num: %x" % flow.esw_attr[0].psample_group_num)
-    print("action: %x" % flow.esw_attr[0].action)
+#     print("action: %x" % flow.esw_attr[0].action)
 #     print(flow.sampler)
-    print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
+#     print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
 #     print(flow.esw_attr[0].parse_attr)
 #     print(flow.esw_attr[0])
-    print("")
+#     print("")
 
     tun_info = flow.esw_attr[0].parse_attr.tun_info[0]
     if tun_info.value_():
@@ -61,8 +61,8 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
 #     continue
 #     print(flow.miniflow_list)
 
-#     j = 0
-#     for mlx5e_miniflow_node in list_for_each_entry('struct mlx5e_miniflow_node', flow.miniflow_list.address_of_(), 'node'):
+    j = 0
+    for mlx5e_miniflow_node in list_for_each_entry('struct mlx5e_miniflow_node', flow.miniflow_list.address_of_(), 'node'):
 #         print(mlx5e_miniflow_node)
-#         print("%d: mlx5e_miniflow %lx" % (j, mlx5e_miniflow_node.miniflow.value_()))
-#         j = j + 1
+        print("\t%d: mlx5e_miniflow %lx" % (j, mlx5e_miniflow_node.miniflow.value_()))
+        j = j + 1

@@ -5824,7 +5824,7 @@ function tcm2
 alias noodle=/auto/mtbcswgwork/chrism/noodle/noodle
 alias noodle1='noodle -c 1.1.14.1 -p 9999 -C 10000 -n 100 -l 3000  -b 10 -r 10'
 # noodle -p 1500 -l 2000 -C 40000 -n 5000  -r 8 -b 1
-alias noodle1='noodle -c 1.1.14.1 -p 1500 -C 40000 -n 5000 -l 2000  -b 1 -r 8'
+alias noodle1='noodle -c 8.9.10.11 -p 1500 -C 40000 -n 5000 -l 2000  -b 1 -r 8'
 
 alias noodle_arp='arp -s 1.1.14.1 02:25:d0:e2:14:00; arp -a'
 noodle_dst_port=1500
@@ -11023,12 +11023,15 @@ function wrk_setup
 # 	wrk_tune
 }
 
+alias wrk_loop="while :; do wrk_run0 ; sleep 30; done"
+
 function wrk_run0
 {
         local port=0
         local time=30
         num_ns=1
 	num_cpu=96
+	num_cpu=16
         [[ $# == 1 ]] && num_ns=$1
 
 	/bin/rm -rf  /tmp/result-*
