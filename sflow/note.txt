@@ -909,6 +909,56 @@ create_fdb_chain_restore
 esw_add_restore_rule
 	flow_context->flow_tag = tag;
 
+==mlxsw===
+
+mlxsw_pci_aqs_init
+	mlxsw_pci_queue_group_init	mlxsw_pci_eq_ops	mlxsw_pci_cq_ops	mlxsw_pci_sdq_ops	mlxsw_pci_rdq_ops
+		mlxsw_pci_queue_init
+
+static const struct mlxsw_pci_queue_ops mlxsw_pci_cq_ops = {
+        .type           = MLXSW_PCI_QUEUE_TYPE_CQ,
+        .pre_init       = mlxsw_pci_cq_pre_init,
+        .init           = mlxsw_pci_cq_init,
+        .fini           = mlxsw_pci_cq_fini,
+        .tasklet        = mlxsw_pci_cq_tasklet,
+        .elem_count_f   = mlxsw_pci_cq_elem_count,
+        .elem_size_f    = mlxsw_pci_cq_elem_size
+};
+
+mlxsw_pci_cq_tasklet
+	mlxsw_pci_cqe_rdq_handle
+		mlxsw_core_skb_receive
+			mlxsw_core->rx_listener_list
+				rxl->func
+
+MLXSW_TRAP_ID_MAX
+
+mlxsw_sp1_driver
+
+mlxsw_sp1_init
+	mlxsw_sp_init
+		mlxsw_sp_traps_init (mlxsw_sp_listener)
+			mlxsw_sp_traps_register
+				mlxsw_core_trap_register
+					mlxsw_core_listener_register
+						mlxsw_core_rx_listener_register
+							list_add_rcu(&rxl_item->list, &mlxsw_core->rx_listener_list)
+
+
+struct mlxsw_listener mlxsw_sp_listener[]
+	MLXSW_RXL (MLXSW_TRAP_ID_PKT_SAMPLE)
+		mlxsw_sp_rx_listener_sample_func
+			psample_sample_packet
+
+mlxsw_pci_init
+	request_irq  (mlxsw_pci_eq_irq_handler)
+		mlxsw_pci_queue_tasklet_schedule
+			tasklet_schedule(&q->tasklet)
+
+mlxsw_pci_eq_tasklet
+		mlxsw_pci_queue_tasklet_schedule
+			tasklet_schedule(&q->tasklet)
+
 ==skb===
 
 mlx5e_handle_rx_cqe_mpwrq_rep

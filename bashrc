@@ -5798,6 +5798,29 @@ function tcm2
 #	sudo tc filter add  dev $link prio 1 protocol ip handle 2 parent ffff: flower skip_hw src_mac e4:11:0:0:0:2 dst_mac e4:12:0:0:0:2 action drop
 }
 
+# Usage: /auto/mtbcswgwork/chrism/noodle/noodle [-s | -c host] [client(sender) options]
+#  where options are:
+#               -h help screen
+#               -v report statistics, otherwise be silent
+#               -p port (default 10005)
+#               -l local port bind start (default random)
+#               -L local ip address to bind (default ANY)
+#               -c server host address
+#               -C concurrent connections(100000 max)
+#               -P use Packet Pacing for throttling. otherwise software is used
+#               -n conn created per second
+#               -t active time per connection in seconds. The connection will be //closed and a new connection will be created once time is up.
+#               -T Total run time in secs, otherwise run forever or till killed
+#               -r how many client threads. (This box has 16 cores available)
+#               -R how many server threads. (This box has 16 cores available)
+#               -M Modify pace, currently hard-coded to 10 rates
+#               -y yield send factor
+#               -S snd buffer size (KB)
+#               -E rcv buffer size (KB)
+#               -z bandwidth per conn (bits) or
+#               -b bandwidth per conn (kbps) or
+#               -B total bandwidth (kbps)
+
 alias noodle=/auto/mtbcswgwork/chrism/noodle/noodle
 alias noodle1='noodle -c 1.1.14.1 -p 9999 -C 10000 -n 100 -l 3000  -b 10 -r 10'
 # noodle -p 1500 -l 2000 -C 40000 -n 5000  -r 8 -b 1
