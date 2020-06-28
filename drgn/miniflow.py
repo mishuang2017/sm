@@ -42,7 +42,7 @@ for i in miniflow_list:
 
     if name == "enp4s0f0_1" or name == "enp4s0f0" or name == "enp4s0f0_2":
         flow = i.flow
-        print("miniflow->flow: mlx5e_tc_flow %lx" % (flow))
+        print("miniflow->flow: mlx5e_tc_flow %lx, refcnt: %d" % (flow, flow.refcnt.refs.counter))
         fc = flow.esw_attr[0].counter
 #         print(fc)
 #         lib.print_mlx5_flow_handle(flow.rule[0])
