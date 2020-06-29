@@ -29,9 +29,15 @@ miniflow_list = []
 mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
 mf_ht = mlx5e_rep_priv.uplink_priv.mf_ht
 
+j = 0
+
 for i, flow in enumerate(lib.hash(mf_ht, 'struct mlx5e_miniflow', 'node')):
-    print("mlx5e_miniflow %lx" % flow.value_())
+    print("%3d: mlx5e_miniflow %lx, nr_ct_tuples: %d" % (i, flow.value_(), flow.nr_ct_tuples))
     miniflow_list.append(flow)
+    j = i
+
+j=j+1
+print("total: %d" % (j))
 
 print('')
 for i in miniflow_list:
@@ -42,7 +48,8 @@ for i in miniflow_list:
 
     if name == "enp4s0f0_1" or name == "enp4s0f0" or name == "enp4s0f0_2":
         flow = i.flow
-        print("miniflow->flow: mlx5e_tc_flow %lx, refcnt: %d" % (flow, flow.refcnt.refs.counter))
+        print("miniflow->flow: mlx5e_tc_flow %lx, refcnt: %d, flags: %x" % \
+            (flow, flow.refcnt.refs.counter, flow.flags))
         fc = flow.esw_attr[0].counter
 #         print(fc)
 #         lib.print_mlx5_flow_handle(flow.rule[0])
@@ -63,6 +70,7 @@ for i in miniflow_list:
 
         for j in range(8):
             flow = i.path.flows[j]
+            continue
             if flow.value_():
                 lastuse = flow.dummy_counter.cache.lastuse
                 print("mlx5e_tc_flow %lx, lastuse: %lx" % (flow.value_(), lastuse / 1000))

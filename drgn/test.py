@@ -11,6 +11,8 @@ from lib import *
 priv = get_pf0_netdev()
 print(priv.name.string_().decode())
 
-mlx5_flow_table = Object(prog, 'struct mlx5_flow_table', address=0xffff958995150400)
-# print(mlx5_flow_table)
-flow_table2("", mlx5_flow_table)
+nr_of_total_mf_alloc_flow = prog['nr_of_total_mf_alloc_flow']
+nr_of_total_mf_dealloc_flow = prog['nr_of_total_mf_dealloc_flow']
+
+print(nr_of_total_mf_alloc_flow)
+print(nr_of_total_mf_dealloc_flow)
