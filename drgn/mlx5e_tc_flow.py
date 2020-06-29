@@ -17,10 +17,10 @@ mlx5e_rep_priv = get_mlx5e_rep_priv()
 # else:
 #     tc_ht = mlx5e_rep_priv.tc_ht
 
-print("MLX5E_TC_FLOW_FLAG_SIMPLE    %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SIMPLE'].value_()))
 print("MLX5E_TC_FLOW_FLAG_INGRESS   %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_INGRESS'].value_()))
 print("MLX5E_TC_FLOW_FLAG_ESWITCH   %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_ESWITCH'].value_()))
 print("MLX5E_TC_FLOW_FLAG_OFFLOADED %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_OFFLOADED'].value_()))
+print("MLX5E_TC_FLOW_FLAG_SIMPLE    %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SIMPLE'].value_()))
 print("MLX5E_TC_FLOW_FLAG_CT        %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_CT'].value_()))
 print("MLX5E_TC_FLOW_FLAG_CT_ORIG   %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_CT_ORIG'].value_()))
 
