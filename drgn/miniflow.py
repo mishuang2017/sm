@@ -58,7 +58,7 @@ for i in miniflow_list:
         for j in range(8):
             flow = i.path.flows[j]
             if flow:
-                print("%s: path.flows[%d]: %lx" % (name, j, flow.value_()))
+                print("%s: path.flows[%d]: %lx, flags: %x" % (name, j, flow.value_(), flow.flags))
                 continue
                 attr = flow.esw_attr[0]
                 fc = flow.dummy_counter
