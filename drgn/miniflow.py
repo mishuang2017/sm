@@ -10,6 +10,12 @@ libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
 
+def print_miniflow_list(flow):
+    j = 0
+    for mlx5e_miniflow_node in list_for_each_entry('struct mlx5e_miniflow_node', flow.miniflow_list.address_of_(), 'node'):
+        print("\t%d: mlx5e_miniflow %lx" % (j, mlx5e_miniflow_node.miniflow.value_()))
+        j = j + 1
+
 miniflow_list = []
 
 # for old 4.20 kernel
@@ -32,7 +38,8 @@ mf_ht = mlx5e_rep_priv.uplink_priv.mf_ht
 j = 0
 
 for i, flow in enumerate(lib.hash(mf_ht, 'struct mlx5e_miniflow', 'node')):
-    print("%3d: mlx5e_miniflow %lx, nr_ct_tuples: %d" % (i, flow.value_(), flow.nr_ct_tuples))
+    print("%3d: mlx5e_miniflow %lx, nr_ct_tuples: %d, nr_flows: %d" % \
+        (i, flow.value_(), flow.nr_ct_tuples, flow.nr_flows))
     miniflow_list.append(flow)
     j = i
 
@@ -59,6 +66,7 @@ for i in miniflow_list:
             flow = i.path.flows[j]
             if flow:
                 print("%s: path.flows[%d]: %lx, flags: %x" % (name, j, flow.value_(), flow.flags))
+#                 print_miniflow_list(flow)
                 continue
                 attr = flow.esw_attr[0]
                 fc = flow.dummy_counter
