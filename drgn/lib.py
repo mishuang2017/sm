@@ -37,7 +37,7 @@ def hostname(name):
         return False
 
 pf0_name = "enp4s0f0"
-if kernel("5.7.0-rc4+"):
+if kernel("5.8.0-rc2+"):
     pf0_name = "enp4s0f0np0"
 pf1_name = "enp4s0f1"
 
