@@ -114,7 +114,7 @@ elif (( host_num == 14 )); then
 	export DISPLAY=localhost:10.0
 
 	link=enp4s0f0
-	[[ "$(uname -r)" == "5.7.0-rc4+" ]] && link=enp4s0f0np0
+	[[ "$(uname -r)" == "5.8.0-rc2+" ]] && link=enp4s0f0np0
 	link2=enp4s0f1
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
@@ -606,6 +606,7 @@ fi
 
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
+alias sml3="cd /$images/chrism/linux3"
 alias sm5="cd /$images/chrism/5.4"
 alias 5c="cd /$images/chrism/5.4-ct"
 alias sm-build="cdr; cd build"
