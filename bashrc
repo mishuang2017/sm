@@ -3261,18 +3261,32 @@ set +x
 }
 
 # test with tcv
-function vlan2
+function tc_mirror_vlan
 {
 set -x
-	redirect=$rep2
-	mirror=$rep1
-	TC=tc
-
 	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
+
+	$TC qdisc del dev $rep2 ingress
+	$TC qdisc del dev $link ingress
+
+	ethtool -K $rep2 hw-tc-offload on 
+	ethtool -K $link hw-tc-offload on 
+
+	ip link set $rep2 promisc on
+	ip link set $link promisc on
+
+	$TC qdisc add dev $rep2 ingress 
+	$TC qdisc add dev $link ingress 
+
 	src_mac=02:25:d0:$host_num:01:02	# local vm mac
 	dst_mac=$remote_mac			# remote vm mac
-	$TC filter change dev $redirect protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac	dst_mac $dst_mac \
-		action mirred egress mirror dev $mirror	\
+	$TC filter add dev $rep2 protocol ip prio 1 handle 1 parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac \
+		action mirred egress mirror dev $rep1	\
 		action vlan push id $vid		\
 		action mirred egress redirect dev $link
 set +x
@@ -11417,9 +11431,6 @@ set -x
 		action mirred egress redirect dev $rep2
 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
 		action mirred egress redirect dev $rep2
-
-
-# 		action sample rate $rate group 6 trunc 60	\
 set +x
 }
 
