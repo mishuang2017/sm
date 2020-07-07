@@ -964,6 +964,8 @@ mlxsw_pci_eq_tasklet
 mlx5e_handle_rx_cqe_mpwrq_rep
 mlx5e_tc_rep_update_skb
 
+mlx5e_rep_tc_update_skb
+
 ==misc===
 
 /* Reg C0 usage:
