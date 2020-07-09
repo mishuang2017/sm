@@ -1660,7 +1660,7 @@ git push origin HEAD:refs/for/ct-one-table-2.13.0/fix_tracked_enum
 
 git push origin HEAD:refs/for/master/sflow
 
-git push origin HEAD:refs/for/net-next-mlx5/sflow
+git push origin HEAD:refs/for/net-next-mlx5/sflow-driver
 
 ===git===
 
