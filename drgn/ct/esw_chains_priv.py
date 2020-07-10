@@ -68,7 +68,7 @@ ft_offloads_restore = mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads_restore
 print("\n=== mlx5e_priv.mdev.priv.eswitch.offloads.ft_offloads_restore ===")
 flow_table("", ft_offloads_restore)
 
-print("\n=== split vport table ===")
+print("\n=== split vport table ===\n")
 vports = offloads.vports.table
 # print(vports)
 
@@ -76,11 +76,11 @@ for i in range(256):
     node = vports[i].first
     while node.value_():
         obj = container_of(node, "struct mlx5_vport_table", "hlist")
-        print("mlx5_sampler_handle %lx" % obj.value_())
         mlx5_vport_table = Object(prog, 'struct mlx5_vport_table', address=obj.value_())
         print(mlx5_vport_table)
         node = node.next
 
         flow_table("", mlx5_vport_table.fdb)
+        print('-----------------------------')
 
 

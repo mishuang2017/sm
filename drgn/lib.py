@@ -651,8 +651,10 @@ def flow_table2(name, table):
 
 
 def flow_table(name, table):
-    print("\nflow table name: %s\nflow table id: %x leve: %x, type: %x (FS_FT_FDB: %d, FS_FT_NIC_RX: %d)" % \
-        (name, table.id.value_(), table.level.value_(), table.type, prog['FS_FT_FDB'], prog['FS_FT_NIC_RX']))
+    print("\nflow table name: %s\nflow table id: %x leve: %x, \
+        type: %x (FS_FT_FDB: %d, FS_FT_NIC_RX: %d, max_fte: %d, %x)" % \
+        (name, table.id.value_(), table.level.value_(), table.type, \
+        prog['FS_FT_FDB'], prog['FS_FT_NIC_RX'], table.max_fte, table.max_fte))
     print("mlx5_flow_table %lx" % table.value_())
 #     print("flow table address")
 #     print("%lx" % table.value_())
