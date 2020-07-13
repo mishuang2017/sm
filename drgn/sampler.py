@@ -33,10 +33,12 @@ for i in range(256):
         print_mlx5_sampler_handle(mlx5_sampler_handle)
         node = node.next
 
-print('\n=== sampler_termtbl ===\n')
+print('\n=== sampler_termtbl ===')
 sampler_termtbl = sample_priv.termtbl
 flow_table("", sampler_termtbl)
 
+print('\n=== offloads.num_flows.counter ===\n')
+sampler_termtbl = sample_priv.termtbl
 print("num_flows: %d" % offloads.num_flows.counter)
 
 print('\n=== sample_mapping_hashtbl ===\n')
@@ -79,6 +81,6 @@ ht = mapping_ctx.ht
 print("mapping_ctx %lx" % mapping_ctx)
 for i in range(256):
     for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
-        print("mapping id: %d" % item.id)
+        print("mapping id: %d\t" % item.id, end='')
         data = Object(prog, 'struct mlx5_reg_c0_mapping',  address=item.data.address_of_())
         print_reg_c0_mapping(data)
