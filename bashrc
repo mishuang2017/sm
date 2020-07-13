@@ -11564,7 +11564,7 @@ set -x
 		enc_dst_ip $link_ip		\
 		enc_dst_port $vxlan_port	\
 		enc_key_id $vni			\
-		action sample rate 1 group 5 trunc 128	\
+		action sample rate 2 group 5 trunc 128	\
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
 	$TC filter add dev $vx protocol arp parent ffff: prio 2 flower skip_hw	\
