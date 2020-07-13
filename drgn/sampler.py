@@ -19,24 +19,23 @@ sample_priv = offloads.sample_priv
 
 sampler_hashtbl = sample_priv.sampler_hashtbl
 
+def print_mlx5_sampler_handle(handle):
+    print("sampler_id: %d, sample_ratio: %d, sample_table_id: %x, default_table_id: %x, ref_count: %d" % \
+            (handle.sampler_id, handle.sample_ratio, handle.sample_table_id, handle.default_table_id, handle.ref_count))
+
 print('\n=== sampler_hashtbl ===\n')
 for i in range(256):
     node = sampler_hashtbl[i].first
     while node.value_():
         obj = container_of(node, "struct mlx5_sampler_handle", "sampler_hlist")
-        print("mlx5_sampler_handle %lx" % obj.value_())
+#         print("mlx5_sampler_handle %lx" % obj.value_())
         mlx5_sampler_handle = Object(prog, 'struct mlx5_sampler_handle', address=obj.value_())
-        print(mlx5_sampler_handle)
+        print_mlx5_sampler_handle(mlx5_sampler_handle)
         node = node.next
 
 print('\n=== sampler_termtbl ===\n')
 sampler_termtbl = sample_priv.termtbl
 flow_table("", sampler_termtbl)
-
-print('\n=== sampler_default_tbl ===\n')
-sampler_default_tbl = sample_priv.default_tbl
-flow_table("sampler_default_tbl", sampler_default_tbl)
-print("sampler_default_tbl: %x" % sampler_default_tbl.id)
 
 print("num_flows: %d" % offloads.num_flows.counter)
 
@@ -49,7 +48,8 @@ for i in range(256):
         obj = container_of(node, "struct mlx5_sample_mapping", "mapping_hlist")
         print("mlx5_sample_mapping %lx" % obj.value_())
         mlx5_sample_mapping = Object(prog, 'struct mlx5_sample_mapping', address=obj.value_())
-        print(mlx5_sample_mapping)
+        print("mlx5_sample_mapping.mapping_id: %d" % (mlx5_sample_mapping.mapping_id))
+#         print(mlx5_sample_mapping)
         node = node.next
 
 
@@ -62,11 +62,23 @@ mlx5e_priv = get_mlx5e_priv(pf0_name)
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
 mapping_ctx = offloads.reg_c0_mapping
 
+MLX5_REG_C0_SAMPLE = prog['MLX5_REG_C0_SAMPLE']
+MLX5_REG_C0_CHAIN = prog['MLX5_REG_C0_CHAIN']
+
+def print_reg_c0_mapping(mapping):
+    if MLX5_REG_C0_SAMPLE == mapping.type:
+#         print(mapping.type)
+        print("\tgroup_id: %d, %x, rate: %d, truncate: %d, trunc_size: %d" % \
+            (mapping.sample.group_id, mapping.sample.group_id, mapping.sample.rate, mapping.sample.truncate, mapping.sample.trunc_size))
+
+    if MLX5_REG_C0_CHAIN == mapping.type:
+        print("\tchain: %d, %x" % (mapping.chain, mapping.chain))
+
 print('\n=== reg_c0 mapping_ctx ===\n')
 ht = mapping_ctx.ht
 print("mapping_ctx %lx" % mapping_ctx)
 for i in range(256):
     for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
-        print(item.id)
+        print("mapping id: %d" % item.id)
         data = Object(prog, 'struct mlx5_reg_c0_mapping',  address=item.data.address_of_())
-        print(data)
+        print_reg_c0_mapping(data)
