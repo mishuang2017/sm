@@ -95,12 +95,10 @@ elif (( host_num == 13 )); then
 	vf2=enp4s0f3
 	vf3=enp4s0f4
 
-	if (( host_num == 1 )); then
-		for (( i = 0; i < numvfs; i++)); do
-			eval vf$((i+1))=${link}v$i
-			eval rep$((i+1))=${link}_$i
-		done
-	fi
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link}_$i
+	done
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -114,7 +112,8 @@ elif (( host_num == 14 )); then
 	export DISPLAY=localhost:10.0
 
 	link=enp4s0f0
-	[[ "$(uname -r)" == "5.8.0-rc2+" ]] && link=enp4s0f0np0
+	link=enp4s0f0np0
+# 	[[ "$(uname -r)" == "5.8.0-rc2+" ]] && link=enp4s0f0np0
 	link2=enp4s0f1
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
@@ -272,18 +271,6 @@ bond=bond0
 #		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 #	fi
 # fi
-
-rep1=${link}_0
-rep2=${link}_1
-rep3=${link}_2
-rep4=${link}_3
-rep5=${link}_4
-
-rep1_2=${link2}_0
-rep2_2=${link2}_1
-rep3_2=${link2}_2
-rep4_2=${link2}_3
-rep5_2=${link2}_4
 
 link_ip_vlan=1.1.1.100
 link_ip_vxlan=1.1.1.200

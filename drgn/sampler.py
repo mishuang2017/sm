@@ -15,9 +15,9 @@ mlx5e_priv = get_mlx5_pf0()
 
 # struct mlx5_esw_offload
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
-sample_priv = offloads.sample_priv
+sample_table = offloads.sample_table
 
-sampler_hashtbl = sample_priv.sampler_hashtbl
+sampler_hashtbl = sample_table.sampler_hashtbl
 
 def print_mlx5_sampler_handle(handle):
     print("sampler_id: %d, sample_ratio: %d, sample_table_id: %x, default_table_id: %x, ref_count: %d" % \
@@ -34,15 +34,15 @@ for i in range(256):
         node = node.next
 
 print('\n=== sampler_termtbl ===')
-sampler_termtbl = sample_priv.termtbl
+sampler_termtbl = sample_table.termtbl
 flow_table("", sampler_termtbl)
 
 print('\n=== offloads.num_flows.counter ===\n')
-sampler_termtbl = sample_priv.termtbl
+sampler_termtbl = sample_table.termtbl
 print("num_flows: %d" % offloads.num_flows.counter)
 
 print('\n=== sample_mapping_hashtbl ===\n')
-sample_mapping_tbl = sample_priv.sample_mapping_hashtbl
+sample_mapping_tbl = sample_table.sample_mapping_hashtbl
 
 for i in range(256):
     node = sample_mapping_tbl[i].first

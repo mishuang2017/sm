@@ -37,8 +37,8 @@ def hostname(name):
         return False
 
 pf0_name = "enp4s0f0"
-if kernel("5.8.0-rc2+"):
-    pf0_name = "enp4s0f0np0"
+# if kernel("5.8.0-rc2+"):
+pf0_name = "enp4s0f0np0"
 pf1_name = "enp4s0f1"
 
 if hostname("clx-ibmc-03") or hostname("clx-ibmc-01"):
