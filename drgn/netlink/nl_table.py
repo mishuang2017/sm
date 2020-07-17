@@ -15,6 +15,7 @@ nl_table = prog['nl_table']
 MAX_LINKS = 32
 
 NETLINK_GENERIC = 16
+NETLINK_USERSOCK = 2
 NETLINK_ROUTE = 0
 
 # for i in range(MAX_LINKS):

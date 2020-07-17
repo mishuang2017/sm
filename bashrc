@@ -78,6 +78,7 @@ elif (( host_num == 13 )); then
 	export DISPLAY=localhost:10.0	# via vpn
 
 	link=enp4s0f0
+	link=enp4s0f0np0
 	link2=enp4s0f1
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
@@ -8790,6 +8791,7 @@ test1=test-tc-sample.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
+alias psample='/labhome/chrism/asap_dev_reg/psample/psample'
 
 test2=test-ovs-sflow.sh
 alias test2="./$test2"

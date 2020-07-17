@@ -2474,7 +2474,7 @@ GACT_TAB_MASK
  0xffffffff816657a1 : tcf_exts_validate                    c1/0x110 [kernel]
  0xffffffffa08aca07 : fl_set_parms                    a7/0xa40 [cls_flower]
  0xffffffffa08ad5c0 : fl_change                    220/0x0 [cls_flower]
- 0xffffffff81666d44 : tc_ctl_tfilter                    7f4/0x970 [kernel]
+ 0xffffffff81666d44 : tc_new_tfilter                    7f4/0x970 [kernel]
  0xffffffff8164b17c : rtnetlink_rcv_msg                    ac/0x240 [kernel]
  0xffffffff8166e7ed : netlink_rcv_skb                    ed/0x120 [kernel]
  0xffffffff81645158 : rtnetlink_rcv                    28/0x30 [kernel]
