@@ -17,10 +17,12 @@ MAX_LINKS = 32
 NETLINK_GENERIC = 16
 NETLINK_USERSOCK = 2
 NETLINK_ROUTE = 0
+NETLINK_KOBJECT_UEVENT = 15
 
 # for i in range(MAX_LINKS):
 #     print(nl_table[i])
 
+nl_table_16 = nl_table[NETLINK_KOBJECT_UEVENT]
 nl_table_16 = nl_table[NETLINK_GENERIC]
 # print(nl_table_16.mc_list)
 # print(nl_table_16)
