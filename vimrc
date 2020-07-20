@@ -1,7 +1,7 @@
 set mouse=v
 
-set background=dark
 set bg=light
+set background=dark
 
 set nopaste
 set paste

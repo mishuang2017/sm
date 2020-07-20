@@ -135,6 +135,7 @@ elif (( host_num == 14 )); then
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=${link}v$i
 		eval rep$((i+1))=${link}_$i
+		eval rep$((i+1))=enp4s0f0npf0vf$i
 	done
 
 # 	modprobe aer-inject
@@ -4292,7 +4293,8 @@ alias vf152="ip link set dev $link vf 1 vlan 52 qos 0"
 function get_rep
 {
 	[[ $# != 1 ]] && return
-	echo "${link}_$1"
+# 	echo "${link}_$1"
+	echo enp4s0f0npf0vf$i
 }
 
 function get_rep2
@@ -5055,7 +5057,7 @@ function up_all_reps
 	echo
 	echo "start up_all_reps"
 	for (( i = 0; i < numvfs; i++)); do
-		rep=${l}_$i
+		rep=$(get_rep $i)
 		ifconfig $rep up
 		echo "up $rep"
 		if (( ecmp == 1 )); then
@@ -5076,7 +5078,7 @@ function set_all_rep_channel
 	echo
 	echo "start set_all_rep_channel"
 	for (( i = 0; i < numvfs; i++)); do
-		rep=${l}_$i
+		rep=$(get_rep $i)
 set -x
 		ethtool -L $rep combined $n
 set +x
@@ -5107,7 +5109,7 @@ function hw_tc_all
 	echo "hw-tc-offload on $l"
 	$ETHTOOL -K $l hw-tc-offload on
 	for (( i = 0; i < numvfs; i++)); do
-		rep=${l}_$i
+		rep=$(get_rep $i)
 		echo "hw-tc-offload on $rep"
 		$ETHTOOL -K $rep hw-tc-offload on
 	done
@@ -5706,11 +5708,11 @@ function __prompt_command() {
 }
 
 (( "$UID" == 0 )) && PS1="[\u@\h \W]# "
-(( "$UID" == 0 )) && PS1="\e[0;31m[\u@\h \W]# \e[0m"	  # set background=light
 (( "$UID" == 0 )) && PS1="\e[1;31m[\u@\h \W]# \e[0m"	  # set background=dark
+(( "$UID" == 0 )) && PS1="\e[0;31m[\u@\h \W]# \e[0m"	  # set background=light
 (( "$UID" != 0 )) && PS1="[\u@\h \W]\$ "
-(( "$UID" != 0 )) && PS1="\033[0;33m[\u@\h \W]$ \033[0m"
 (( "$UID" != 0 )) && PS1="\033[1;33m[\u@\h \W]$ \033[0m"
+(( "$UID" != 0 )) && PS1="\033[0;33m[\u@\h \W]$ \033[0m"
 
 # 30 is black
 (( "$UID" != 0 )) && PS1="\[\e[0;34m\][\[\e[0m\]\[\e[0;34m\]\u\[\e[0m\]\[\e[0;34m\]@\[\e[0m\]\[\e[0;34m\]\h\[\e[0m\] \[\e[0;34m\]\W\[\e[0m\]\[\e[0;34m\]]\$\[\e[0m\] "	# blue
