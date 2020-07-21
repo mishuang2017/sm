@@ -1522,8 +1522,9 @@ function buildm
 
 function mybuild
 {
-set -x; 
 	(( $UID == 0 )) && return
+	test -f Kconfig || return
+set -x; 
 	module=mlx5_core;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	cd $linux_dir;
@@ -1593,10 +1594,10 @@ set +x
 }
 
 if (( ofed == 1 )); then
-	alias b=mybuild_old
-	alias b=mybuild
+	alias bu=mybuild_old
+	alias bu=mybuild
 else
-	alias b=mybuild
+	alias bu=mybuild
 fi
 
 build-mlx5-ib () 

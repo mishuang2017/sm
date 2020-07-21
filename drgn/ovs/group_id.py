@@ -21,10 +21,18 @@ ids = print_cmap(cmap, "dpif_gid_node", "id_node")
 #     print(id)
 
 for i, id in enumerate(ids):
-    print("%x" % id)
-    print("id: %d, ofp_in_port: %d, output: %10d, %10x, pid: %x, %d, rate: %x, refcount: %d, address: %x" % \
-         (id.id, id.action.cookie.ofp_in_port, id.action.cookie.sflow.output, id.action.cookie.sflow.output, \
-          id.action.dpif_gid_pid, id.action.dpif_gid_pid, id.action.dpif_gid_rate, id.refcount.count, id))
+    len = id.action.len
+    attr = id.action.attr
+    print("id: %d, len: %d, ref: %d" % (id.id, len, id.refcount.count))
+    p = Object(prog, 'unsigned char *', address=attr.address_of_())
+
+    for j in range(len):
+        if j % 16 == 0:
+            if j:
+                print('')
+            print("%04x: " % j, end='')
+        print("%02x " % (p[j]), end='')
+    print('\n')
 
 # It doesn't include the nodes whose refcount is 0
 def print_metadata_map():
