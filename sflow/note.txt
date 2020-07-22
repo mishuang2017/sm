@@ -654,11 +654,12 @@ udpif_upcall_handler
 				parse_flow_nlattrs
 				odp_tun_key_from_attr__
 		upcall_receive
-			xlate_lookup
-				upcall->sflow = xport->xbridge->sflow
 			classify_upcall
 				if USER_ACTION_COOKIE_SFLOW
 					return SFLOW_UPCALL
+			if MISS_UPCALL
+				xlate_lookup
+					upcall->sflow = xport->xbridge->sflow
 		pkt_metadata_from_flow
 		flow_extract
 			miniflow_extract

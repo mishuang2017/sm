@@ -8510,6 +8510,25 @@ function addflow-port2
 	set +x
 }
 
+function addflow_tcp_port
+{
+	local file=/tmp/of.txt
+	rm -f $file
+
+	bru
+	restart-ovs
+	max_ip=1
+	for(( src = 42300; src < 43400; src++)); do
+		echo "table=0,priority=1,tcp,tp_src=$src,in_port=$rep2,action=output:$link"
+	done >> $file
+
+	br=br
+	set -x
+	ovs-ofctl add-flows $br -O openflow13 $file
+	ovs-ofctl dump-flows $br | wc -l
+	set +x
+}
+
 function addflow-ip
 {
 	local file=/tmp/of.txt

@@ -23,7 +23,7 @@ ids = print_cmap(cmap, "dpif_gid_node", "id_node")
 for i, id in enumerate(ids):
     len = id.action.len
     attr = id.action.attr
-    print("id: %d, len: %d, ref: %d" % (id.id, len, id.refcount.count))
+    print("id: %d, len: %d, ref: %d, hash: %x" % (id.id, len, id.refcount.count, id.hash))
     p = Object(prog, 'unsigned char *', address=attr.address_of_())
 
     for j in range(len):
