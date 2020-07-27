@@ -19,3 +19,6 @@ ids = print_cmap(cmap, "netdev_registered_flow_api", "cmap_node")
 
 for i, id in enumerate(ids):
     print(id)
+
+netdev_offload_tc = prog['netdev_offload_tc']
+print(netdev_offload_tc)
