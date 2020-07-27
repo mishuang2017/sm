@@ -19,10 +19,8 @@ dpif = xbridge.dpif
 
 print(dpif)
 
-print("dpif.base_name: %s" % dpif.base_name.string_().decode())
-
 # print(dpif.dpif_class)
-# print(prog['dpif_netlink_class'])
+print(prog['dpif_netlink_class'])
 
 print("\n===dpif_netlink_class===")
 print("%30s: %s" % ("get_stats", address_to_name(hex(dpif.dpif_class.get_stats.value_()))))
@@ -30,7 +28,7 @@ print("%30s: %s" % ("flow_dump_thread_create", address_to_name(hex(dpif.dpif_cla
 print("%30s: %s" % ("port_add", address_to_name(hex(dpif.dpif_class.port_add.value_()))))
 print("%30s: %s" % ("recv", address_to_name(hex(dpif.dpif_class.recv.value_()))))
 print("%30s: %s" % ("recv_wait", address_to_name(hex(dpif.dpif_class.recv_wait.value_()))))
-print("%30s: %s" % ("port_get_pid", address_to_name(hex(dpif.dpif_class.port_get_pid.value_()))))
+# print("%30s: %s" % ("port_get_pid", address_to_name(hex(dpif.dpif_class.port_get_pid.value_()))))
 print("%30s: %s" % ("flow_dump_next", address_to_name(hex(dpif.dpif_class.flow_dump_next.value_()))))
 print("%30s: %s" % ("operate", address_to_name(hex(dpif.dpif_class.operate.value_()))))
 

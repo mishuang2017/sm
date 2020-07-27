@@ -20,12 +20,7 @@ ids = print_cmap(cmap, "dpif_gid_node", "id_node")
 # for i, id in enumerate(ids):
 #     print(id)
 
-for i, id in enumerate(ids):
-    len = id.action.len
-    attr = id.action.attr
-    print("id: %d, len: %d, ref: %d, hash: %x" % (id.id, len, id.refcount.count, id.hash))
-    p = Object(prog, 'unsigned char *', address=attr.address_of_())
-
+def print_hex_dump(buf, len):
     for j in range(len):
         if j % 16 == 0:
             if j:
@@ -33,6 +28,17 @@ for i, id in enumerate(ids):
             print("%04x: " % j, end='')
         print("%02x " % (p[j]), end='')
     print('\n')
+
+for i, id in enumerate(ids):
+    len = id.mapping.len
+    attr = id.mapping.attr
+    print("id: %d, len: %d, ref: %d, hash: %x" % (id.id, len, id.refcount.count, id.hash))
+    p = Object(prog, 'unsigned char *', address=attr.address_of_())
+#     print(id)
+    if id.mapping.has_tunnel:
+        print("tp_src: %x" % id.mapping.tunnel.tp_src)
+#         print(id.mapping.tunnel)
+    print_hex_dump(p, len)
 
 # It doesn't include the nodes whose refcount is 0
 def print_metadata_map():
