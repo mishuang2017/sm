@@ -739,6 +739,12 @@ send
 set_sflow
 	dpif_sflow_add_port
 
+===hw-offload===
+
+bridge_run
+    netdev_set_flow_api_enabled
+        netdev_flow_api_enabled = true;
+
 ===datapath===
 
 do_execute_actions

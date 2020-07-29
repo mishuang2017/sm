@@ -1784,6 +1784,7 @@ function install-ovs
 {
 set -x
 	./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
+# 	./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc --with-debug
 #	./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc --with-dpdk=$DPDK_BUILD
 	make -j
 	sudo make install -j
@@ -1792,6 +1793,7 @@ set +x
 
 function io
 {
+	test -d ofproto || return
 set -x
 	make -j
 	sudo make install
