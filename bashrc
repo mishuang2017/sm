@@ -570,8 +570,8 @@ alias win='vncviewer 10.75.201.135:0'
 
 # alias uperf="$nfs_dir/uperf-1.0.5/src/uperf"
 
-alias chown1="sudo chown -R chrism.mtl $linux_dir"
-alias chown2="sudo chown -R chrism.mtl ."
+alias chown-linux="sudo chown -R chrism.mtl $linux_dir"
+alias chown1="sudo chown -R chrism.mtl ."
 alias sb='tmux save-buffer'
 
 alias sm="cd /$images/chrism"

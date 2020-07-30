@@ -20,7 +20,7 @@ dpif = xbridge.dpif
 print(dpif)
 
 # print(dpif.dpif_class)
-print(prog['dpif_netlink_class'])
+# print(prog['dpif_netlink_class'])
 
 print("\n===dpif_netlink_class===")
 print("%30s: %s" % ("get_stats", address_to_name(hex(dpif.dpif_class.get_stats.value_()))))
