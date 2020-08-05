@@ -595,6 +595,7 @@ fi
 
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
+alias sml2="cd /$images/chrism/linux2"
 alias sml3="cd /$images/chrism/linux3"
 alias sm5="cd /$images/chrism/5.4"
 alias 5c="cd /$images/chrism/5.4-ct"
@@ -756,6 +757,7 @@ alias vit='vi ~/.tmux.conf'
 alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
+alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c"
 
 alias rm='rm -i'
 alias cp='cp -i'
@@ -996,7 +998,7 @@ set -x
 set +x
 }
 
-alias cu='time cscope -R -b -k'
+# alias cu='time cscope -R -b -k'
 
 function greps
 {
@@ -1532,6 +1534,10 @@ set -x;
 		set +x
 		return
 	}
+
+# 	set +x
+# 	return
+
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 #	make modules_install -j

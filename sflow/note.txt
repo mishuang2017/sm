@@ -744,6 +744,9 @@ set_sflow
 bridge_run
     netdev_set_flow_api_enabled
         netdev_flow_api_enabled = true;
+        netdev_ports_flow_init
+            for each port_to_netdev
+                netdev_init_flow_api (netdev)
 
 ===datapath===
 

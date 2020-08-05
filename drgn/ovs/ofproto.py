@@ -20,6 +20,8 @@ print("ofproto_dpif: %lx" % ofproto_dpif)
 
 ofproto = ofproto_dpif.up
 
+print(ofproto_dpif.sflow)
+
 # ofproto_dpif = container_of(ofproto.address_of_(), "struct ofproto_dpif", "up")
 parts = ofproto_dpif.uuid.parts
 print("%x-%x-%x-%x" % \
