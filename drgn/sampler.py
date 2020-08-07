@@ -36,6 +36,9 @@ print('\n=== sampler_termtbl ===')
 sampler_termtbl = prog['sampler_termtbl']
 flow_table("", sampler_termtbl)
 
+termtbl_ref_count = prog['termtbl_ref_count']
+print("termtbl_ref_count: %d" % termtbl_ref_count)
+
 print('\n=== offloads.num_flows.counter ===\n')
 print("num_flows: %d" % offloads.num_flows.counter)
 

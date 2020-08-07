@@ -758,6 +758,7 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c"
+alias vi_tc="vi lib/netdev-offload-tc.c"
 
 alias rm='rm -i'
 alias cp='cp -i'
