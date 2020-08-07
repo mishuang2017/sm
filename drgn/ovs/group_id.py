@@ -13,9 +13,9 @@ import time
 sys.path.append(".")
 from lib_ovs import *
 
-cmap = prog['dpif_gid_map']
+cmap = prog['gid_map']
 # print(cmap)
-ids = print_cmap(cmap, "dpif_gid_node", "id_node")
+ids = print_cmap(cmap, "gid_node", "id_node")
 
 # for i, id in enumerate(ids):
 #     print(id)
@@ -30,19 +30,19 @@ def print_hex_dump(buf, len):
     print('\n')
 
 for i, id in enumerate(ids):
-    len = id.mapping.len
-    attr = id.mapping.attr
+    len = id.sflow.len
+    attr = id.sflow.attr
     print("id: %d, len: %d, ref: %d, hash: %x" % (id.id, len, id.refcount.count, id.hash))
     p = Object(prog, 'unsigned char *', address=attr.address_of_())
 #     print(id)
-    if id.mapping.has_tunnel:
-        print("tp_src: %x" % id.mapping.tunnel.tp_src)
-#         print(id.mapping.tunnel)
+    if id.sflow.has_tunnel:
+        print("tp_src: %x" % id.sflow.tunnel.tp_src)
+#         print(id.sflow.tunnel)
     print_hex_dump(p, len)
 
 # It doesn't include the nodes whose refcount is 0
 def print_metadata_map():
-    cmap = prog['dpif_gid_metadata_map']
+    cmap = prog['gid_metadata_map']
     ids = print_cmap(cmap, "group_id_node", "metadata_node")
 
     for i, id in enumerate(ids):
@@ -52,14 +52,14 @@ def print_metadata_map():
 
 print("\n=== group_expiring ===\n")
 
-expiring = prog['dpif_gid_expiring']
+expiring = prog['gid_expiring']
 # print(expiring)
 
 next = expiring.next
 while 1:
     if next.value_() == expiring.address_of_().value_():
         break
-    id = container_of(next, "struct dpif_gid_node", "exp_node")
+    id = container_of(next, "struct gid_node", "exp_node")
     next = id.exp_node.next
     print("id: %2x" % id.id, end='\t')
     print("next %lx" % next.value_())
