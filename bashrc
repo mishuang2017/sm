@@ -1841,11 +1841,6 @@ function stop-ovs
 	sudo systemctl stop openvswitch.service
 }
 
-function gita
-{
-	git log --no-merges --author="torvalds@linux-foundation.org" --name-only --pretty=format:""
-}
-
 function fetch-net
 {
 set -x
@@ -2289,6 +2284,7 @@ set +x
 }
 
 alias tc_nat='sudo ~chrism/bin/tc_nat.sh'
+alias tc_ct='sudo ~chrism/bin/tc_ct.sh'
 
 function tc-pf
 {

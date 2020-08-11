@@ -969,12 +969,23 @@ mlxsw_pci_eq_tasklet
 		mlxsw_pci_queue_tasklet_schedule
 			tasklet_schedule(&q->tasklet)
 
-==skb===
+==func===
 
 mlx5e_handle_rx_cqe_mpwrq_rep
 mlx5e_tc_rep_update_skb
+mlx5e_rep_tc_update_skb old
 
-mlx5e_rep_tc_update_skb
+mlx5_esw_create_sample_mapping_id
+mlx5_esw_reg_c0_chain_obj_create
+mlx5_esw_reg_c0_sample_obj_create
+mlx5_esw_reg_c0_obj_delete
+mlx5_esw_reg_c0_obj_create
+
+mlx5e_tc_offload_fdb_rules
+parse_tc_fdb_actions
+
+mlx5_tc_ct_flow_offload
+__mlx5_tc_ct_flow_offload
 
 ==misc===
 
@@ -1027,4 +1038,5 @@ add modify_hdr in sample_termtbl
 [Fri Jun 12 15:33:26 2020] mlx5_core 0000:04:00.0: mlx5_cmd_check:753:(pid 26682): CREATE_GENERAL_OBJECT(0xa00) op_mod(0x20) failed, status bad parameter(0x3), syndrome (0xafd05d)
 
 
+ftedump -d /dev/mst/mt4121_pciconf0 -a /mswg/release/host_fw/fw-4119/fw-4119-rel-16_28_1002/../etc/galil_def.adb --no_zero
 

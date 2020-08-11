@@ -30,8 +30,8 @@ def print_hex_dump(buf, len):
     print('\n')
 
 for i, id in enumerate(ids):
-    len = id.sflow.len
-    attr = id.sflow.attr
+    len = id.sflow.sflow_len
+    attr = id.sflow.sflow
     print("id: %d, len: %d, ref: %d, hash: %x" % (id.id, len, id.refcount.count, id.hash))
     p = Object(prog, 'unsigned char *', address=attr.address_of_())
 #     print(id)
