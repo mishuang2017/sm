@@ -9468,13 +9468,20 @@ function br-dnat3
 # ifconfig $device up
 # ifconfig $device2 up
 
-function bond-delete
+function bond_delete_old
 {
 	ifenslave -d bond0 $link $link2 2> /dev/null
 	sleep 1
 	rmmod bonding
 	sleep 1
-	off
+}
+
+function bond_delete
+{
+	ip link set dev $link down
+	ip link set dev $link2 down
+	ip link set dev bond0 down
+	ip link delete bond0
 }
 
 function bond_switchdev
@@ -9507,21 +9514,24 @@ function bond_switchdev
 function bond_create
 {
 set -x
-	ifenslave -d bond0 $link $link2 2> /dev/null
-	sleep 1
-	rmmod bonding
-	sleep 1
-	modprobe bonding mode=4 miimon=100
-	sleep 1
-	ifconfig bond0 up
-	ifconfig $link down
-	ifconfig $link2 down
-	ip link set $link master bond0
-	sleep 1
-	ip link set $link2 master bond0
-	sleep 1
-	ifconfig $link up
-	ifconfig $link2 up
+# 	ifenslave -d bond0 $link $link2 2> /dev/null
+# 	sleep 1
+# 	rmmod bonding
+# 	sleep 1
+# 	modprobe bonding mode=4 miimon=100
+# 	sleep 1
+
+	ip link set dev $link down
+	ip link set dev $link2 down
+
+	ip link add name bond0 type bond
+	ip link set dev bond0 type bond mode active-backup
+	ip link set dev $link master bond0
+	ip link set dev $link2 master bond0
+	ip link set dev bond0 up
+	ip link set dev $link up
+	ip link set dev $link2 up
+
 	ethtool -K $link hw-tc-offload on
 	ethtool -K $link2 hw-tc-offload on
 set +x
@@ -9530,9 +9540,11 @@ set +x
 	sleep 1
 	bi2
 	sleep 1
+
+	set_netns_all 1
 }
 
-function br-bond
+function br_bond
 {
 set -x
 	restart-ovs
