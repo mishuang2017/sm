@@ -62,7 +62,7 @@ elif (( host_num == 3 )); then
 	link2=ens1f1
 
 	link=ens1f0np0
-	link2=ens1f0np1
+	link2=enp4s0f1np0
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -79,7 +79,7 @@ elif (( host_num == 13 )); then
 
 	link=enp4s0f0
 	link=enp4s0f0np0
-	link2=enp4s0f1
+	link2=enp4s0f1np1
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
@@ -113,9 +113,11 @@ elif (( host_num == 14 )); then
 	export DISPLAY=localhost:10.0
 
 	link=enp4s0f0
-	link=enp4s0f0np0
-# 	[[ "$(uname -r)" == "5.8.0-rc2+" ]] && link=enp4s0f0np0
 	link2=enp4s0f1
+
+	link=enp4s0f0np0
+	link2=enp4s0f1np1
+
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
@@ -171,8 +173,8 @@ vxlan_port=4000
 vxlan_port=4789
 vxlan_mac=24:25:d0:e2:00:00
 ecmp=0
-ports=2
 ports=1
+ports=2
 
 base_baud=115200
 base_baud=9600
@@ -1049,20 +1051,11 @@ set -x
 set +x
 }
 # alias vfs="cat /sys/class/net/$link/device/sriov_totalvfs"
-mac_prefix="02:25:d0:e2:18"
-function set-mac2
-{
-	[[ $# != 1 ]] && return
-
-	local vf=$1
-	local mac_vf=$((vf+5))
-	ip link set $link vf $vf mac $mac_prefix:$mac_vf
-}
 
 alias on-sriov1="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
 alias on-sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.1/sriov_numvfs"
 alias on-sriov="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
-alias on1='on-sriov; set-mac 1; un; ip link set $link vf 0 spoofchk on'
+alias on1='on-sriov; set_mac 1; un; ip link set $link vf 0 spoofchk on'
 alias un2="unbind_all $link2"
 alias off-sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
 
@@ -1111,6 +1104,7 @@ function off_test
 
 function off_all
 {
+set -x
 	local l
 #	for l in $link; do
 	for l in $link $link2; do
@@ -1129,6 +1123,7 @@ function off_all
 #	if (( ofed == 1)); then
 #		echo legacy > /sys/kernel/debug/mlx5/$pci/compat/mode 2 > /dev/null || echo "legacy"
 #	fi
+set +x
 }
 
 alias off=off_all
@@ -5132,7 +5127,7 @@ function start_vm_all
 	done
 }
 
-function set-mac
+function set_mac
 {
 	local port=1
 	[[ $# == 1 ]] && port=$1
@@ -5153,8 +5148,7 @@ function set-mac
 	mac_vf=1
 
 	# echo "Set mac: "
-# 	for vf in `ip link show $l | grep "vf " | awk {'print $2'}`; do
-	for vf in `ip link | grep "vf " | awk {'print $2'}`; do
+	for vf in `ip link show $l | grep "vf " | awk {'print $2'}`; do
 		local mac_addr=$mac_prefix:$(printf "%x" $mac_vf)
 		echo "vf${vf} mac address: $mac_addr"
 		ip link set $l vf $vf mac $mac_addr
@@ -5390,7 +5384,7 @@ function start-switchdev
 
 	time echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 
-	set-mac $port
+	set_mac $port
 
 	time unbind_all $l
 
@@ -9483,10 +9477,10 @@ function bond-delete
 	off
 }
 
-function bond-create
+function bond_switchdev
 {
 	nic=$1
-	off
+	off_all
 	on-sriov
 	sleep 1
 	on-sriov2
@@ -9506,9 +9500,12 @@ function bond-create
 	sleep 1
 	dev2
 	sleep 1
-	set-mac
-	set-mac 2
+	set_mac
+	set_mac 2
+}
 
+function bond_create
+{
 set -x
 	ifenslave -d bond0 $link $link2 2> /dev/null
 	sleep 1

@@ -775,7 +775,7 @@ def print_match(fte):
 
     reg_c2 = ntohl(val[57].value_())
     if reg_c2:
-        print(" reg_c2 (ct_state|ct_zone): %4x" % reg_c2, end='')
+        print(" reg_c2 (ct_state|ct_zone, trk=4, trk+est+nat=c): %4x" % reg_c2, end='')
 
     reg_c1 = ntohl(val[58].value_())
     if reg_c1:
