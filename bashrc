@@ -173,8 +173,8 @@ vxlan_port=4000
 vxlan_port=4789
 vxlan_mac=24:25:d0:e2:00:00
 ecmp=0
-ports=1
 ports=2
+ports=1
 
 base_baud=115200
 base_baud=9600
@@ -1104,7 +1104,6 @@ function off_test
 
 function off_all
 {
-set -x
 	local l
 #	for l in $link; do
 	for l in $link $link2; do
@@ -1123,7 +1122,6 @@ set -x
 #	if (( ofed == 1)); then
 #		echo legacy > /sys/kernel/debug/mlx5/$pci/compat/mode 2 > /dev/null || echo "legacy"
 #	fi
-set +x
 }
 
 alias off=off_all
