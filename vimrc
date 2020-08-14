@@ -1,7 +1,7 @@
 set mouse=v
 
-set bg=light
 set background=dark
+set bg=light
 
 set nopaste
 set paste
@@ -173,3 +173,5 @@ set term=screen
 "    endif
 "    set csverb
 " endif
+
+" color desert
