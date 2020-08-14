@@ -472,6 +472,7 @@ alias clone-drgn='git clone https://github.com/osandov/drgn.git'	# pip3 install 
 alias clone-wrk='git clone git@github.com:wg/wrk.git'
 alias clone-netperf='git clone git@github.com:HewlettPackard/netperf.git'
 alias pull='git pull origin master'
+alias wget_teams='wget https://packages.microsoft.com/repos/ms-teams/pool/main/t/teams/teams_1.3.00.16851_amd64.deb'	# apt install ./teams_1.3.00.teams_1.3.00.16851_amd64.deb
 
 alias clone-ubuntu-xenial='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-xential.git'
 alias clone-ubuntu='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-bionic.git'
