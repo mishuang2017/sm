@@ -10,6 +10,7 @@ ofed_mlx5=0
 /sbin/modinfo mlx5_core -n | egrep "extra|updates" > /dev/null 2>&1 && ofed_mlx5=1
 
 numvfs=17
+numvfs=1
 numvfs=3
 
 # alias virc='vi /images/chrism/sm/bashrc'
@@ -23,57 +24,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
-[[ "$(hostname -s)" == "nps-server-30" ]] && host_num=20
-[[ "$(hostname -s)" == "nps-server-31" ]] && host_num=40
-[[ "$(hostname -s)" == "clx-ibmc-01" ]] && host_num=1
-[[ "$(hostname -s)" == "clx-ibmc-02" ]] && host_num=2
-[[ "$(hostname -s)" == "clx-ibmc-03" ]] && host_num=3
-[[ "$(hostname -s)" == "c-135-185-1-009" ]] && host_num=9
 
-if (( host_num == 1 || host_num == 2 )); then
-	numvfs=97
-	numvfs=16
-	numvfs=3
-	link=ens1f0
-	link2=ens1f1
-
-	if [[ "$USER" == "root" ]]; then
-		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
-		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
-	fi
-
-	if (( host_num == 1 )); then
-		for (( i = 0; i < numvfs; i++)); do
-			eval vf$((i+1))=${link}v$i
-			eval rep$((i+1))=${link}_$i
-		done
-	fi
-elif (( host_num == 2 )); then
-	numvfs=16
-	link=ens1f0
-	link2=ens1f1
-elif (( host_num == 9 )); then
-	link=eth2
-elif (( host_num == 3 )); then
-	numvfs=97
-	numvfs=16
-	numvfs=3
-	link=ens1f0
-	link2=ens1f1
-
-	link=ens1f0np0
-	link2=enp4s0f1np0
-
-	if [[ "$USER" == "root" ]]; then
-		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
-		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
-	fi
-
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
-		eval rep$((i+1))=${link}_$i
-	done
-elif (( host_num == 13 )); then
+if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
 
@@ -146,14 +98,6 @@ elif (( host_num == 14 )); then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
-elif (( host_num == 20 )); then
-	numvfs=2
-	link=enp59s0f0
-	link2=enp59s0f1
-elif (( host_num == 40 )); then
-	numvfs=2
-	link=enp59s0f0
-	link2=enp59s0f1
 elif (( host_num == 15 )); then
 	link=ens9
 elif (( host_num == 16 )); then
@@ -5364,6 +5308,8 @@ function start-switchdev
 {
 	local port=$1
 	local mode=switchdev
+	TIME=time
+	TIME=""
 
 	if (( numvfs > 99 )); then
 		echo "numvfs = $numvfs, return to confirm"
@@ -5385,13 +5331,13 @@ function start-switchdev
 		pci_addr=$pci2
 	fi
 
-	time echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
+	$TIME echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 
 	set_mac $port
 
-	time unbind_all $l
+	$TIME unbind_all $l
 
-	echo "enable switchdev mode for: $pci_addr"
+	printf "\nenable switchdev mode for: $pci_addr\n"
 	if (( centos72 == 1 )); then
 		sysfs_dir=/sys/class/net/$link/compat/devlink
 		echo switchdev >  $sysfs_dir/mode || echo "switchdev failed"
@@ -5410,7 +5356,7 @@ function start-switchdev
 # 	return
 
 	sleep 1
-	time bind_all $l
+	$TIME bind_all $l
 	sleep 1
 
 # 	set_all_vf_channel
@@ -5418,7 +5364,7 @@ function start-switchdev
 	ip1
 
 	sleep 1
-	time up_all_reps $port
+	$TIME up_all_reps $port
 	hw_tc_all $port
 
 # 	if (( host_num == 13 )); then
@@ -5427,14 +5373,14 @@ function start-switchdev
 # 		ip link set dev $vf3 address 02:25:d0:$host_num:01:03
 # 	fi
 
-	time set_netns_all $port
+	$TIME set_netns_all $port
 	set_ns_nf
 
 # 	ethtool -K $link tx-vlan-stag-hw-insert off
 
-	if (( host_num == 13 || host_num == 14 )); then
-		combined 4
-	fi
+# 	if (( host_num == 13 || host_num == 14 )); then
+# 		combined 4
+# 	fi
 
 # 	affinity_set
 

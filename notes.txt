@@ -134,8 +134,34 @@ so offload will never happen for us but should work with tc sw
 
 ===udev===
 
+mlx5e_add
+
 mlx5e_rep_get_phys_port_name
 phys_switch_id_show
+
+[root@dev-r630-04 ~]#  udevadm test-builtin net_id /sys/class/net/enp4s0f0np0
+Load module index
+Parsed configuration file /usr/lib/systemd/network/99-default.link
+Created link configuration context.
+Using default interface naming scheme 'v240'.
+ID_NET_NAMING_SCHEME=v240
+ID_NET_NAME_MAC=enxb8599fbb3182
+ID_OUI_FROM_DATABASE=Mellanox Technologies, Inc.
+ID_NET_NAME_PATH=enp4s0f0np0
+Unload module index
+Unloaded link configuration context.
+
+[root@dev-r630-04 ~]#  udevadm test-builtin net_id /sys/class/net/enp4s0f0np0v0
+Load module index
+Parsed configuration file /usr/lib/systemd/network/99-default.link
+Created link configuration context.
+Using default interface naming scheme 'v240'.
+ID_NET_NAMING_SCHEME=v240
+ID_NET_NAME_PATH=enp4s0f0np0v0
+Unload module index
+Unloaded link configuration context.
+
+
 
 udevadm test /sys/class/net/enp4s0f0
 
