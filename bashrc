@@ -5367,20 +5367,10 @@ function start-switchdev
 	$TIME up_all_reps $port
 	hw_tc_all $port
 
-# 	if (( host_num == 13 )); then
-# 		ip link set dev $vf1 address 02:25:d0:$host_num:01:01
-# 		ip link set dev $vf2 address 02:25:d0:$host_num:01:02
-# 		ip link set dev $vf3 address 02:25:d0:$host_num:01:03
-# 	fi
-
-	$TIME set_netns_all $port
-	set_ns_nf
+# 	$TIME set_netns_all $port
+# 	set_ns_nf
 
 # 	ethtool -K $link tx-vlan-stag-hw-insert off
-
-# 	if (( host_num == 13 || host_num == 14 )); then
-# 		combined 4
-# 	fi
 
 # 	affinity_set
 
@@ -10484,7 +10474,7 @@ function disable-avahi-daemon.service
 alias udps="UDPServer.py --ipAddress=1.1.1.1 --port=4000 --clients 1.1.3.1 --successRate=100.0 --max_delay=10 --size=100 --packets=100"
 alias udpc="UDPClient.py --serverAddr 1.1.1.1 --port=4000 --size=100 --packets=100 --sleep=0.1"
 
-function combined
+function set_combined
 {
 	n=4
 	if [[ $# == 1 ]]; then

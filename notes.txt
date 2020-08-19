@@ -134,9 +134,12 @@ so offload will never happen for us but should work with tc sw
 
 ===udev===
 
-mlx5e_add
+register_devlink_port
+	devlink_port_attrs_pci_vf_set (DEVLINK_PORT_FLAVOUR_PCI_VF)
 
-mlx5e_rep_get_phys_port_name
+__devlink_port_phys_port_name_get
+
+devlink_port_flavour
 phys_switch_id_show
 
 [root@dev-r630-04 ~]#  udevadm test-builtin net_id /sys/class/net/enp4s0f0np0
