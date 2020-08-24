@@ -134,6 +134,8 @@ so offload will never happen for us but should work with tc sw
 
 ===udev===
 
+devlink port show
+
 dev_change_name
 
 rtnl_phys_port_name_fill or phys_port_name_show
