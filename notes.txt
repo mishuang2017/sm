@@ -134,10 +134,16 @@ so offload will never happen for us but should work with tc sw
 
 ===udev===
 
+dev_change_name
+
+rtnl_phys_port_name_fill or phys_port_name_show
+	dev_get_phys_port_name
+		devlink_compat_phys_port_name_get
+			__devlink_port_phys_port_name_get
+
 register_devlink_port
 	devlink_port_attrs_pci_vf_set (DEVLINK_PORT_FLAVOUR_PCI_VF)
 
-__devlink_port_phys_port_name_get
 
 devlink_port_flavour
 phys_switch_id_show

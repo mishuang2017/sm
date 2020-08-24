@@ -1478,8 +1478,10 @@ set -x;
 		return
 	}
 
-# 	set +x
-# 	return
+	if [[ $# != 0 ]]; then
+		set +x
+		return
+	fi
 
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
@@ -5365,9 +5367,10 @@ function start-switchdev
 
 	sleep 1
 	$TIME up_all_reps $port
-	hw_tc_all $port
 
-# 	$TIME set_netns_all $port
+# 	hw_tc_all $port
+
+	$TIME set_netns_all $port
 # 	set_ns_nf
 
 # 	ethtool -K $link tx-vlan-stag-hw-insert off

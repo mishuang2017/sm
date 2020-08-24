@@ -142,6 +142,9 @@ nf_flow_offload_init init flow_cls_offload.cookie
 CONFIG_NET_TC_SKB_EXT
 mlx5e_tc_rep_update_skb
 
+new:
+mlx5e_rep_tc_update_skb
+
 
 [root@dev-r630-04 kernel]# ./flowtables.py
 hostname: dev-r630-04
@@ -973,7 +976,7 @@ mlxsw_pci_eq_tasklet
 
 mlx5e_handle_rx_cqe_mpwrq_rep
 mlx5e_tc_rep_update_skb
-mlx5e_rep_tc_update_skb old
+mlx5e_rep_tc_update_skb new
 
 mlx5_esw_create_sample_mapping_id
 mlx5_esw_reg_c0_chain_obj_create
