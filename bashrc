@@ -30,7 +30,7 @@ if (( host_num == 13 )); then
 	export DISPLAY=localhost:10.0	# via vpn
 
 	link=enp4s0f0
-	link=enp4s0f0np0
+	link=enp4s0f1np0
 	link2=enp4s0f1np1
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
@@ -70,6 +70,9 @@ elif (( host_num == 14 )); then
 	link=enp4s0f0np0
 	link2=enp4s0f1np1
 
+	link_pre=enp4s0f0n
+	link=${link_pre}p0
+
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
@@ -88,8 +91,8 @@ elif (( host_num == 14 )); then
 
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=${link}v$i
-		eval rep$((i+1))=${link}_$i
-		eval rep$((i+1))=enp4s0f0npf0vf$i
+# 		eval rep$((i+1))=${link}_$i
+		eval rep$((i+1))=${link_pre}pf0vf$i
 	done
 
 # 	modprobe aer-inject
@@ -11604,6 +11607,11 @@ function sflowtool1
 function sflowtool2
 {
 	sflowtool -p 6343 -L localtime,srcIP,dstIP,inputPort,outputPort,sampledPacketSize,IPProtocol
+}
+
+function sflowtool_tcpdump
+{
+	sflowtool -p 6343 -t | tcpdump -r -
 }
 
 ######## uuu #######
