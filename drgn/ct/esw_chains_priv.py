@@ -22,17 +22,17 @@ esw_chains_priv = offloads.esw_chains_priv
 chains_ht =   esw_chains_priv.chains_ht
 prios_ht =    esw_chains_priv.prios_ht
 # mapping_ctx = esw_chains_priv.chains_mapping
-tc_end_fdb =  esw_chains_priv.tc_end_fdb
+tc_end_ft =  esw_chains_priv.tc_end_ft
 
-print("tc_end_fdb %lx, slow_fdb: %lx" % (tc_end_fdb, slow_fdb))
+print("tc_end_ft %lx, slow_fdb: %lx" % (tc_end_ft, slow_fdb))
 # print(esw_chains_priv)
 
-for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
+for i, chain in enumerate(hash(chains_ht, 'struct fs_chain', 'node')):
 #     print(chain)
     print("chain id: %x\nfdb_chain %x" % (chain.id, chain))
-    for prio in list_for_each_entry('struct fdb_prio', chain.prios_list.address_of_(), 'list'):
-        fdb = prio.fdb
-        next_fdb = prio.next_fdb
+    for prio in list_for_each_entry('struct prio', chain.prios_list.address_of_(), 'list'):
+        fdb = prio.ft
+        next_fdb = prio.next_ft
         miss_group = prio.miss_group
         miss_rule = prio.miss_rule
         print("\n=== chain: %x, prio: %x, level: %x ===" % \
@@ -40,7 +40,7 @@ for i, chain in enumerate(hash(chains_ht, 'struct fdb_chain', 'node')):
         print("fdb_prio %lx" % prio)
         print("fdb: %lx, next_fdb: %lx, miss_group: %lx, miss_rule: mlx5_flow_handle %lx" % \
             (fdb, next_fdb, miss_group, miss_rule))
-        table = prio.fdb
+        table = prio.ft
         flow_table("", table)
 
 def print_chain_mapping(item):
@@ -59,7 +59,7 @@ print('\n=== chain mapping_ctx ===\n')
 
 print('\n=== prios_ht ===')
 
-for i, prio in enumerate(hash(prios_ht, 'struct fdb_prio', 'node')):
+for i, prio in enumerate(hash(prios_ht, 'struct prio', 'node')):
     key = prio.key
     print("%3d: chain: %8x, prio: %4x, level: %4x" % (i, key.chain, key.prio, key.level))
 

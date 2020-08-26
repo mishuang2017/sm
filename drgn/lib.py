@@ -618,7 +618,7 @@ def print_mlx5_esw_flow_attr(attr):
     print("chain: %x" % attr.chain, end='\t')
     print("dest_chain: %x" % attr.dest_chain, end='\t')
     print("prio: %x" % attr.prio, end='\t')
-    print("fdb: %20x" % attr.fdb, end='\t')
+    print("ft: %20x" % attr.ft, end='\t')
     print("dest_ft: %20x" % attr.dest_ft, end='\t')
 #     print(attr.modify_hdr)
     print('')

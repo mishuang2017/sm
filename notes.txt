@@ -132,6 +132,12 @@ we dont have src/dst ports in fragmented later packets
 This conversation is being saved. You'll see it soon in your Outlook Inbox folder. 
 so offload will never happen for us but should work with tc sw
 
+===systemd===
+
+builtin_net_id
+	name_pci
+		dev_pci_slot
+
 ===udev===
 
 devlink port show

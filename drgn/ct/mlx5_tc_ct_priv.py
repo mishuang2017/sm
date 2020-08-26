@@ -94,8 +94,8 @@ for i, mlx5_ct_ft in enumerate(hash(zone_ht, 'struct mlx5_ct_ft', 'node')):
             print_mlx5_flow_handle(mlx5_flow_handle)
         print('')
 
-    flow_table("mlx5_ct_ft.pre_ct.fdb", mlx5_ct_ft.pre_ct.fdb)
-    flow_table("mlx5_ct_ft.pre_ct_nat.fdb", mlx5_ct_ft.pre_ct_nat.fdb)
+    flow_table("mlx5_ct_ft.pre_ct.ft", mlx5_ct_ft.pre_ct.ft)
+    flow_table("mlx5_ct_ft.pre_ct_nat.ft", mlx5_ct_ft.pre_ct_nat.ft)
 
 #         print("\tmlx5_ct_entry.zone_rules[1].rule")
 #         mlx5_flow_handle = mlx5_ct_entry.zone_rules[1].rule
