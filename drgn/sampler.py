@@ -51,7 +51,7 @@ for i in range(256):
         obj = container_of(node, "struct mlx5_sample_mapping", "mapping_hlist")
         print("mlx5_sample_mapping %lx" % obj.value_())
         mlx5_sample_mapping = Object(prog, 'struct mlx5_sample_mapping', address=obj.value_())
-        print("mlx5_sample_mapping.mapping_id: %d" % (mlx5_sample_mapping.mapping_id))
+        print("mlx5_sample_mapping.obj_id: %d" % (mlx5_sample_mapping.obj_id))
 #         print(mlx5_sample_mapping)
         node = node.next
 

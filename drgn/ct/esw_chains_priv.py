@@ -21,7 +21,7 @@ esw_chains_priv = offloads.esw_chains_priv
 
 chains_ht =   esw_chains_priv.chains_ht
 prios_ht =    esw_chains_priv.prios_ht
-# mapping_ctx = esw_chains_priv.chains_mapping
+mapping_ctx = esw_chains_priv.chains_mapping
 tc_end_ft =  esw_chains_priv.tc_end_ft
 
 print("tc_end_ft %lx, slow_fdb: %lx" % (tc_end_ft, slow_fdb))
@@ -51,11 +51,11 @@ def print_chain_mapping(item):
     print("data (chain): 0x%x" % data.value_())
 
 print('\n=== chain mapping_ctx ===\n')
-# ht = mapping_ctx.ht
-# print("mapping_ctx %lx" % mapping_ctx)
-# for i in range(256):
-#     for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
-#         print_chain_mapping(item)
+ht = mapping_ctx.ht
+print("mapping_ctx %lx" % mapping_ctx)
+for i in range(256):
+    for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
+        print_chain_mapping(item)
 
 print('\n=== prios_ht ===')
 

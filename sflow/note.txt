@@ -978,6 +978,8 @@ mlx5e_handle_rx_cqe_mpwrq_rep
 mlx5e_tc_rep_update_skb
 mlx5e_rep_tc_update_skb new
 
+mlx5e_tc_update_skb
+
 mlx5_esw_create_sample_mapping_id
 mlx5_esw_reg_c0_chain_obj_create
 mlx5_esw_reg_c0_sample_obj_create

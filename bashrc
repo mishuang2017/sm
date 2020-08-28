@@ -710,9 +710,13 @@ alias vit='vi ~/.tmux.conf'
 alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
+
 alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c"
 alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c"
+alias vi_reg="vi drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_pool.c drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_pool.h"
+
 alias vi_tc="vi lib/netdev-offload-tc.c"
+
 
 alias rm='rm -i'
 alias cp='cp -i'
@@ -2063,7 +2067,7 @@ function make-all
 	[[ $UID == 0 ]] && break
 
 	unset CONFIG_LOCALVERSION_AUTO
-	make olddefconfig
+# 	make olddefconfig
 	make -j $cpu_num2
 	sudo make modules_install -j $cpu_num2
 	sudo make install
