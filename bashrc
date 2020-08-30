@@ -1221,12 +1221,12 @@ set +x
 alias make_core='make M=drivers/net/ethernet/mellanox/mlx5/core'
 
 alias stap='/usr/local/bin/stap --all-modules -v'
-stap_str_common="--all-modules -d /usr/sbin/ovs-vswitchd -d /usr/sbin/tc -d /usr/bin/ping -d /usr/sbin/ip"
+stap_str_common="--all-modules -d /usr/sbin/ovs-vswitchd -d /usr/sbin/tc -d /usr/bin/ping -d /usr/sbin/ip -d /sbin/udevadm"
 if (( ofed == 1 || kernel49 == 1 )); then
 	stap_str="$stap_str_common -d /usr/lib64/libc-2.17.so -d /usr/lib64/libpthread-2.17.so"
 	STAP="/usr/local/bin/stap -v"
-else
-	stap_str="$stap_str_common -d /usr/lib64/libc-2.26.so -d /usr/lib64/libpthread-2.26.so"
+elif (( debian == 1 )); then
+	stap_str="$stap_str_common -d /lib/x86_64-linux-gnu/libc-2.27.so -d /lib/x86_64-linux-gnu/libpthread-2.27.so"
 	STAP="/usr/local/bin/stap -v"
 fi
 
