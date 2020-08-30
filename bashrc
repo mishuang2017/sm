@@ -7,7 +7,7 @@ debian=0
 test -f /usr/bin/lsb_release && debian=1
 
 ofed_mlx5=0
-/sbin/modinfo mlx5_core -n | egrep "extra|updates" > /dev/null 2>&1 && ofed_mlx5=1
+/sbin/modinfo mlx5_core -n > /dev/null 2>&1 && /sbin/modinfo mlx5_core -n | egrep "extra|updates" > /dev/null 2>&1 && ofed_mlx5=1
 
 numvfs=17
 numvfs=1
@@ -2067,7 +2067,7 @@ function make-all
 	[[ $UID == 0 ]] && break
 
 	unset CONFIG_LOCALVERSION_AUTO
-# 	make olddefconfig
+	make olddefconfig
 	make -j $cpu_num2
 	sudo make modules_install -j $cpu_num2
 	sudo make install
@@ -7182,10 +7182,13 @@ function disable-firewall
 # /mswg/release/linux/ovs_release/scripts/udev
 # /mswg/release/linux/ovs_release/scripts/udev2
 
-alias udevadm1="udevadm info -a --path=/sys/class/net/$link"
-alias udevadm2="udevadm info -a --path=/sys/class/net/$link2"
+alias udevadm_info="udevadm info --path=/sys/class/net/$link"
+alias udevadm_info_a="udevadm info -a --path=/sys/class/net/$link"
 
-alias udevadm_1="udevadm info -a --path=/sys/class/net/$rep2"
+alias udevadm_test="udevadm test-builtin net_id /sys/class/net/$link"
+alias udevadm_info_rep="udevadm info -a --path=/sys/class/net/$rep2"
+
+alias udevadm2="udevadm info -a --path=/sys/class/net/$link2"
 
 function udev-old
 {
@@ -7203,28 +7206,6 @@ SUBSYSTEM=="net", ACTION=="add", ATTR{phys_switch_id}=="$id", \
 ATTR{phys_port_name}!="", NAME="${l}_\$attr{phys_port_name}"
 EOF
 	cat $file
-}
-
-function udev3
-{
-	cd /etc/udev/rules.d
-	cp ~chrism/udev3/82-net-setup-link.rules .
-	cd ..
-	cp ~chrism/udev3/vf-net-link-name.sh .
-}
-
-function udev
-{
-	cd /etc/udev/rules.d
-	cp ~chrism/udev2/82-net-setup-link.rules .
-	cd ..
-	cp ~chrism/udev2/vf-net-link-name.sh .
-}
-
-function udev2
-{
-	/bin/rm -rf /etc/udev/rules.d/82-net-setup-link.rules
-	/bin/rm -rf /etc/udev/vf-net-link-name.sh
 }
 
 mac_start=1
