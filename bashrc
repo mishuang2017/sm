@@ -30,7 +30,7 @@ if (( host_num == 13 )); then
 	export DISPLAY=localhost:10.0	# via vpn
 
 	link=enp4s0f0
-	link=enp4s0f1np0
+	link=enp4s0f0np0
 	link2=enp4s0f1np1
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
@@ -712,6 +712,7 @@ alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
 alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c"
+alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c"
 alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c"
 alias vi_reg="vi drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_pool.c drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_pool.h"
 
