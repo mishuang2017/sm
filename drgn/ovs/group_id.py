@@ -35,7 +35,7 @@ for i, id in enumerate(ids):
     print("id: %d, len: %d, ref: %d, hash: %x" % (id.id, len, id.refcount.count, id.hash))
     p = Object(prog, 'unsigned char *', address=attr.address_of_())
 #     print(id)
-    if id.sflow.has_tunnel:
+    if id.sflow.tunnel:
         print("tp_src: %x" % id.sflow.tunnel.tp_src)
 #         print(id.sflow.tunnel)
     print_hex_dump(p, len)

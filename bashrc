@@ -714,7 +714,9 @@ alias vigdb='vi ~/.gdbinit'
 alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c"
 alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c"
 alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c"
-alias vi_reg="vi drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_pool.c drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_pool.h"
+alias vi_esw2="vi include/linux/mlx5/eswitch.h"
+alias vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h"
+alias vi_reg="vi drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_obj_pool.c drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_obj_pool.h"
 
 alias vi_tc="vi lib/netdev-offload-tc.c"
 
@@ -3596,6 +3598,54 @@ set -x
 
 set +x
 }
+
+function tc_sample_encap
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+	rate=2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on
+	ethtool -K $redirect  hw-tc-offload on
+
+	$TC qdisc add dev $link ingress
+	$TC qdisc add dev $redirect ingress
+	$TC qdisc add dev $vx ingress
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
+		src_mac $local_vm_mac	\
+		dst_mac $remote_vm_mac	\
+		action sample rate $rate group 5 trunc 60 \
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress redirect dev $vx
+set +x
+}
+
 
 alias tun0='sudo ~chrism/sm/prg/c/tun/tun -i tun0 -s -d'
 
@@ -11415,7 +11465,7 @@ set -x
 	src_mac=02:25:d0:$host_num:01:02
 	dst_mac=02:25:d0:$host_num:01:03
 	$TC filter add dev $rep2 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
-		action sample rate $rate group 5 trunc 60\
+		action sample rate $rate group 5 trunc 60 \
 		action mirred egress redirect dev $rep3
 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
 		action mirred egress redirect dev $rep3
@@ -11423,7 +11473,7 @@ set -x
 	src_mac=02:25:d0:$host_num:01:03
 	dst_mac=02:25:d0:$host_num:01:02
 	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
-		action sample rate $rate group 6 trunc 60\
+		action sample rate $rate group 6 trunc 60 \
 		action mirred egress redirect dev $rep2
 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
 		action mirred egress redirect dev $rep2
@@ -11564,24 +11614,27 @@ function sflow_create
 {
 	local rate=10
 	local header=60
+	local polling=1000
 	if (( host_num == 13 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=$header sampling=$rate polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.14:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 	fi
 	if (( host_num == 14 )); then
 set -x
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=$header sampling=$rate polling=10 -- set bridge br sflow=@sflow
-# 		ovs-vsctl -- --id=@sflow create sflow agent=$link target=\"192.168.1.13:6343\" header=$header sampling=$rate polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.75.205.13:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
+# 		ovs-vsctl -- --id=@sflow create sflow agent=$link target=\"192.168.1.13:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 set +x
 	fi
 	if (( host_num == 3 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=$header sampling=$rate polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 	fi
 }
 
 function sflow_create_vxlan
 {
+	local polling=1000
+
 	if (( host_num == 14 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"1.1.1.200:6343\" header=128 sampling=2 polling=10 -- set bridge br sflow=@sflow
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"1.1.1.200:6343\" header=128 sampling=2 polling=$polling -- set bridge br sflow=@sflow
 	fi
 }
 
