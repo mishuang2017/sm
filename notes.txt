@@ -1708,16 +1708,6 @@ git push origin HEAD:refs/for/net-next-mlx5/sflow-driver
 
 ===git===
 
-Your action is required today to align your local environment identity:
-
-       git config --global user.email "<NVIDIA_USERNAME>@nvidia.com"
-
-Commits created with the @mellanox.com identify should be amended before push to Gerrit:
-
-git commit --amend --reset-author
-
-
-
 # remove a branch on github
 git push origin --delete 5.4
 

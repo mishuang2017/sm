@@ -33,11 +33,11 @@ for i in range(256):
         node = node.next
 
 print('\n=== sampler_termtbl ===')
-sampler_termtbl = prog['sampler_termtbl']
-flow_table("", sampler_termtbl)
 
-termtbl_ref_count = prog['termtbl_ref_count']
-print("termtbl_ref_count: %d" % termtbl_ref_count)
+termtbl_list = prog['termtbl_list'].address_of_()
+print(termtbl_list)
+for handle in list_for_each_entry('struct mlx5_sampler_termtbl_handle', termtbl_list, 'list'):
+    print(handle)
 
 print('\n=== offloads.num_flows.counter ===\n')
 print("num_flows: %d" % offloads.num_flows.counter)
@@ -63,25 +63,25 @@ for i in range(256):
 
 mlx5e_priv = get_mlx5e_priv(pf0_name)
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
-mapping_ctx = offloads.reg_c0_obj_pool
+mapping_ctx = offloads.mapping_obj_pool
 
-MLX5_REG_C0_OBJ_SAMPLE = prog['MLX5_REG_C0_OBJ_SAMPLE']
-MLX5_REG_C0_OBJ_CHAIN = prog['MLX5_REG_C0_OBJ_CHAIN']
+MLX5_MAPPING_OBJ_SAMPLE = prog['MLX5_MAPPING_OBJ_SAMPLE']
+MLX5_MAPPING_OBJ_CHAIN = prog['MLX5_MAPPING_OBJ_CHAIN']
 
-def print_reg_c0_mapping(mapping):
-    if MLX5_REG_C0_OBJ_SAMPLE == mapping.type:
+def print_mapping_mapping(mapping):
+    if MLX5_MAPPING_OBJ_SAMPLE == mapping.type:
 #         print(mapping.type)
         print("\tgroup_id: %d, %x, rate: %d, trunc_size: %d" % \
             (mapping.sample.group_id, mapping.sample.group_id, mapping.sample.rate, mapping.sample.trunc_size))
 
-    if MLX5_REG_C0_OBJ_CHAIN == mapping.type:
+    if MLX5_MAPPING_OBJ_CHAIN == mapping.type:
         print("\tchain: %d, %x" % (mapping.chain, mapping.chain))
 
-print('\n=== reg_c0 mapping_ctx ===\n')
+print('\n=== mapping mapping_ctx ===\n')
 ht = mapping_ctx.ht
 print("mapping_ctx %lx" % mapping_ctx)
 for i in range(256):
     for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
         print("mapping id: %d\t" % item.id, end='')
-        data = Object(prog, 'struct mlx5_reg_c0_obj',  address=item.data.address_of_())
-        print_reg_c0_mapping(data)
+        data = Object(prog, 'struct mlx5_mapping_obj',  address=item.data.address_of_())
+        print_mapping_mapping(data)

@@ -711,12 +711,13 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
-alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c"
-alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c"
-alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c"
-alias vi_esw2="vi include/linux/mlx5/eswitch.h"
-alias vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h"
-alias vi_reg="vi drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_obj_pool.c drivers/net/ethernet/mellanox/mlx5/core/en/reg_c0_obj_pool.h"
+alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c "
+alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c "
+alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c "
+alias vi_esw2="vi include/linux/mlx5/eswitch.h "
+alias vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h "
+alias vi_mapping="vi drivers/net/ethernet/mellanox/mlx5/core/en/mapping_obj_pool.c drivers/net/ethernet/mellanox/mlx5/core/en/mapping_obj_pool.h "
+alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.h "
 
 alias vi_tc="vi lib/netdev-offload-tc.c"
 
@@ -3596,53 +3597,6 @@ set -x
 		action mirred egress redirect dev $redirect
 
 
-set +x
-}
-
-function tc_sample_encap
-{
-set -x
-	offload=""
-	[[ "$1" == "hw" ]] && offload="skip_sw"
-	[[ "$1" == "sw" ]] && offload="skip_hw"
-
-	TC=tc
-	redirect=$rep2
-	rate=2
-
-	ip1
-	ip link del $vx > /dev/null 2>&1
-	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
-	ip link set $vx up
-
-	$TC qdisc del dev $link ingress > /dev/null 2>&1
-	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
-	$TC qdisc del dev $vx ingress > /dev/null 2>&1
-
-	ethtool -K $link hw-tc-offload on
-	ethtool -K $redirect  hw-tc-offload on
-
-	$TC qdisc add dev $link ingress
-	$TC qdisc add dev $redirect ingress
-	$TC qdisc add dev $vx ingress
-
-	ip link set $link promisc on
-	ip link set $redirect promisc on
-	ip link set $vx promisc on
-
-	local_vm_mac=02:25:d0:$host_num:01:02
-	remote_vm_mac=$vxlan_mac
-
-	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
-		src_mac $local_vm_mac	\
-		dst_mac $remote_vm_mac	\
-		action sample rate $rate group 5 trunc 60 \
-		action tunnel_key set	\
-		src_ip $link_ip		\
-		dst_ip $link_remote_ip	\
-		dst_port $vxlan_port	\
-		id $vni			\
-		action mirred egress redirect dev $vx
 set +x
 }
 
@@ -11508,6 +11462,100 @@ set -x
 set +x
 }
 
+function tc_sample_encap
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+	rate=2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on
+	ethtool -K $redirect  hw-tc-offload on
+
+	$TC qdisc add dev $link ingress
+	$TC qdisc add dev $redirect ingress
+	$TC qdisc add dev $vx ingress
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
+		src_mac $local_vm_mac	\
+		dst_mac $remote_vm_mac	\
+		action sample rate $rate group 5 trunc 60 \
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress redirect dev $vx
+set +x
+}
+
+function tc_sample_decap
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on
+	ethtool -K $redirect  hw-tc-offload on
+
+	$TC qdisc add dev $link ingress
+	$TC qdisc add dev $redirect ingress
+	$TC qdisc add dev $vx ingress
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $vx protocol ip  parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac	\
+		dst_mac $local_vm_mac	\
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		action sample rate 2 group 5 trunc 128	\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+
+set +x
+}
+
 function tc_sample_vxlan
 {
 set -x
@@ -11547,6 +11595,7 @@ set -x
 	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
 		src_mac $local_vm_mac	\
 		dst_mac $remote_vm_mac	\
+		action sample rate 2 group 5 trunc 128	\
 		action tunnel_key set	\
 		src_ip $link_ip		\
 		dst_ip $link_remote_ip	\
@@ -11570,7 +11619,7 @@ set -x
 		enc_dst_ip $link_ip		\
 		enc_dst_port $vxlan_port	\
 		enc_key_id $vni			\
-		action sample rate 2 group 5 trunc 128	\
+		action sample rate 2 group 6 trunc 128	\
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
 	$TC filter add dev $vx protocol arp parent ffff: prio 2 flower skip_hw	\
