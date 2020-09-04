@@ -73,6 +73,9 @@ elif (( host_num == 14 )); then
 	link_pre=enp4s0f0n
 	link=${link_pre}p0
 
+	link2_pre=enp4s0f1n
+	link2=${link2_pre}p1
+
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
@@ -93,6 +96,12 @@ elif (( host_num == 14 )); then
 		eval vf$((i+1))=${link}v$i
 # 		eval rep$((i+1))=${link}_$i
 		eval rep$((i+1))=${link_pre}pf0vf$i
+	done
+
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))_2=${link2}v$i
+# 		eval rep$((i+1))_2=${link2}_$i
+		eval rep$((i+1))_2=${link2_pre}pf1vf$i
 	done
 
 # 	modprobe aer-inject
@@ -4256,13 +4265,14 @@ function get_rep
 {
 	[[ $# != 1 ]] && return
 # 	echo "${link}_$1"
-	echo enp4s0f0npf0vf$i
+	echo ${link_pre}pf0vf$1
 }
 
 function get_rep2
 {
 	[[ $# != 1 ]] && return
-	echo "${link2}_$1"
+# 	echo "${link2}_$1"
+	echo ${link2_pre}pf1vf$1
 }
 
 function ovs-vlan-set
@@ -4514,6 +4524,22 @@ set -x
 	vs add-br $br
 	for (( i = 1; i < numvfs; i++)); do
 		local rep=$(get_rep $i)
+		ifconfig $rep up
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+set +x
+}
+
+function br2
+{
+set -x
+	echo "numvfs=$numvfs"
+	del-br
+	vs add-br $br
+	for (( i = 1; i < numvfs; i++)); do
+		echo "i=$i"
+		local rep=$(get_rep2 $i)
+		ifconfig $rep up
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 set +x
@@ -4872,7 +4898,7 @@ set -x
 set +x
 }
 
-alias br2='create-br-ecmp normal'
+# alias br2='create-br-ecmp normal'
 function create-br-ecmp
 {
 set -x

@@ -19,8 +19,8 @@ offloads = mlx5e_priv.mdev.priv.eswitch.offloads
 sampler_hashtbl = prog['sampler_hashtbl']
 
 def print_mlx5_sampler_handle(handle):
-    print("sampler_id: %d, sample_ratio: %d, sample_table_id: %x, default_table_id: %x, ref_count: %d" % \
-            (handle.sampler_id, handle.sample_ratio, handle.sample_table_id, handle.default_table_id, handle.ref_count))
+    print("sampler_id: %d, sample_ratio: %d, sample_table_id: %x, default_table_id: %x, vhca_id: %d, ref_count: %d" % \
+            (handle.sampler_id, handle.sample_ratio, handle.sample_table_id, handle.default_table_id, handle.vhca_id, handle.ref_count))
 
 print('\n=== sampler_hashtbl ===\n')
 for i in range(256):
@@ -52,7 +52,7 @@ for i in range(256):
         print("mlx5_sample_mapping %lx" % obj.value_())
         mlx5_sample_mapping = Object(prog, 'struct mlx5_sample_mapping', address=obj.value_())
         print("mlx5_sample_mapping.obj_id: %d" % (mlx5_sample_mapping.obj_id))
-#         print(mlx5_sample_mapping)
+        print(mlx5_sample_mapping)
         node = node.next
 
 
