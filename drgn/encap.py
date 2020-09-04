@@ -35,5 +35,5 @@ for i in range(256):
 mlx5e_rep_priv = get_mlx5e_rep_priv()
 addr = mlx5e_rep_priv.neigh_update.neigh_list.address_of_()
 for e in list_for_each_entry('struct mlx5e_neigh_hash_entry', addr, 'neigh_list'):
-#     print(e)
+    print(e)
     print("mlx5e_neigh_hash_entry %lx" % e.value_())

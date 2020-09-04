@@ -37,6 +37,8 @@ except LookupError as x:
 
 for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
+    print(flow.rule[0])
+    print(flow.sample.rule)
     flow_attr = flow.attr
     esw_attr = flow_attr.esw_attr[0]
     parse_attr = flow_attr.parse_attr
