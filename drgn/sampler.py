@@ -16,13 +16,24 @@ mlx5e_priv = get_mlx5_pf0()
 # struct mlx5_esw_offload
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
 
-sampler_hashtbl = prog['sampler_hashtbl']
-
 def print_mlx5_sampler_handle(handle):
     print("sampler_id: %d, sample_ratio: %d, sample_table_id: %x, default_table_id: %x, vhca_id: %d, ref_count: %d" % \
             (handle.sampler_id, handle.sample_ratio, handle.sample_table_id, handle.default_table_id, handle.vhca_id, handle.ref_count))
 
+print('\n=== sampler_termtbl ===')
+
+# termtbl_list = prog['termtbl_list'].address_of_()
+# print(termtbl_list)
+# for handle in list_for_each_entry('struct mlx5_sampler_termtbl_handle', termtbl_list, 'list'):
+#     print(handle)
+
+print(offloads.sampler_termtbl_handle)
+flow_table("sampler_termtbl", offloads.sampler_termtbl_handle.termtbl)
+
 print('\n=== sampler_hashtbl ===\n')
+
+sampler_hashtbl = prog['sampler_hashtbl']
+
 for i in range(256):
     node = sampler_hashtbl[i].first
     while node.value_():
@@ -32,27 +43,20 @@ for i in range(256):
         print_mlx5_sampler_handle(mlx5_sampler_handle)
         node = node.next
 
-print('\n=== sampler_termtbl ===')
-
-termtbl_list = prog['termtbl_list'].address_of_()
-print(termtbl_list)
-for handle in list_for_each_entry('struct mlx5_sampler_termtbl_handle', termtbl_list, 'list'):
-    print(handle)
-
 print('\n=== offloads.num_flows.counter ===\n')
 print("num_flows: %d" % offloads.num_flows.counter)
 
-print('\n=== sample_mapping_hashtbl ===\n')
-sample_mapping_hashtbl = prog['sample_mapping_hashtbl']
+print('\n=== sample_restore_hashtbl ===\n')
+sample_restore_hashtbl = prog['sample_restore_hashtbl']
 
 for i in range(256):
-    node = sample_mapping_hashtbl[i].first
+    node = sample_restore_hashtbl[i].first
     while node.value_():
-        obj = container_of(node, "struct mlx5_sample_mapping", "mapping_hlist")
-        print("mlx5_sample_mapping %lx" % obj.value_())
-        mlx5_sample_mapping = Object(prog, 'struct mlx5_sample_mapping', address=obj.value_())
-        print("mlx5_sample_mapping.obj_id: %d" % (mlx5_sample_mapping.obj_id))
-        print(mlx5_sample_mapping)
+        obj = container_of(node, "struct mlx5_sample_restore_handle", "restore_hlist")
+        print("mlx5_sample_restore_handle %lx" % obj.value_())
+        mlx5_sample_restore_handle = Object(prog, 'struct mlx5_sample_restore_handle', address=obj.value_())
+        print("mlx5_sample_restore_handle.obj_id: %d" % (mlx5_sample_restore_handle.obj_id))
+        print(mlx5_sample_restore_handle)
         node = node.next
 
 
@@ -63,7 +67,7 @@ for i in range(256):
 
 mlx5e_priv = get_mlx5e_priv(pf0_name)
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
-mapping_ctx = offloads.mapping_obj_pool
+mapping_ctx = offloads.reg_c0_obj_pool
 
 MLX5_MAPPING_OBJ_SAMPLE = prog['MLX5_MAPPING_OBJ_SAMPLE']
 MLX5_MAPPING_OBJ_CHAIN = prog['MLX5_MAPPING_OBJ_CHAIN']

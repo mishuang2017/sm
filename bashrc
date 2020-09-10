@@ -723,10 +723,12 @@ alias vigdb='vi ~/.gdbinit'
 alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c "
 alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c "
 alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c "
+alias vi_offloads="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c "
 alias vi_esw2="vi include/linux/mlx5/eswitch.h "
 alias vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h "
-alias vi_mapping="vi drivers/net/ethernet/mellanox/mlx5/core/en/mapping_obj_pool.c drivers/net/ethernet/mellanox/mlx5/core/en/mapping_obj_pool.h "
+alias vi_mapping="vi drivers/net/ethernet/mellanox/mlx5/core/mapping_obj.h "
 alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.h "
+alias vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 
 alias vi_tc="vi lib/netdev-offload-tc.c"
 

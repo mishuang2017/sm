@@ -1702,11 +1702,12 @@ git push origin HEAD:refs/for/mlnx_ofed_5_0_2/PRIO_CHAIN_SUPPORT
 git push origin HEAD:refs/for/ct-one-table-2.13.0/fix_tracked_enum
 
 git push origin HEAD:refs/for/master/sflow-ovs
-git push origin HEAD:refs/for/master/sflow-ovs-tc
-
 git push origin HEAD:refs/for/net-next-mlx5/sflow-driver
 
 ===git===
+
+nvidia.com
+git commit --amend --reset-author
 
 # remove a branch on github
 git push origin --delete 5.4
