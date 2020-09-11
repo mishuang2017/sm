@@ -436,7 +436,8 @@ alias clone-ubuntu='git clone git://kernel.ubuntu.com/ubuntu/ubuntu-bionic.git'
 # http://archive.ubuntu.com/ubuntu/pool/main/l/linux/linux_4.4.0.orig.tar.gz
 # http://archive.ubuntu.com/ubuntu/pool/main/l/linux/linux_4.4.0-145.171.diff.gz
 
-alias git-net='git remote add david git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git'
+alias git-net='git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git'
+alias git-net-next='git remote add net-next git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git'
 alias gg='git grep -n'
 
 alias dmesg='dmesg -T'
@@ -1807,16 +1808,6 @@ function stop-ovs
 	sudo systemctl stop openvswitch.service
 }
 
-function fetch-net
-{
-set -x
-	[[ $# != 1 ]] && return
-	git fetch origin net-next-mlx5
-	git checkout FETCH_HEAD
-	git checkout -b $1
-set +x
-}
-
 function tct
 {
 	tc-setup $rep2
@@ -1827,106 +1818,7 @@ function tct
 		pipe action mirred egress redirect dev $rep3
 }
 
-function u0
-{
-	if [[ $# == 0 ]]; then
-		echo "Please specify remote ip"
-		return
-	fi
-	if [[ $# == 1 ]]; then
-		export h=$1
-	fi
-
-	export s=64k
-	export n=1
-	export proto=tcp
-	export t=120
-	uperf -m $nfs_dir/uperf-1.0.5/workloads/netperf.xml
-}
-
-alias u3='u0 1.1.1.3'
-alias u5='u2 1.1.1.5'
-
-
-function u1
-{
-set -x
-	if [[ $# == 0 ]]; then
-		export h=$link_remote_ip
-		export n=1
-	fi
-	if (( $# >=  1 )); then
-		export h=$1
-		export n=1
-	fi
-	if (( $# >= 2 )); then
-		export h=$1
-		export n=$2
-	fi
-
-	echo $h
-	echo $s
-
-	export n=1
-	export s=64k
-	export proto=tcp
-	export t=120000000
-	uperf -m $nfs_dir/uperf-1.0.5/workloads/netperf.xml
-set +x
-}
-
-alias u4="u1 $link_remote_ip"
-
-function u2
-{
-set -x
-	if [[ $# == 0 ]]; then
-		export h=192.168.1.14
-		export s=8k
-	fi
-	if (( $# >=  1 )); then
-		export h=$1
-		export s=8k
-	fi
-	if (( $# >= 2 )); then
-		export h=$1
-		export s=$2
-	fi
-
-	export n=16
-	export s=64k
-	export proto=tcp
-	export t=1200000
-	ip netns exec n1 uperf -m $nfs_dir/uperf-1.0.5/workloads/netperf.xml
-set +x
-}
-
-alias u11='u2 1.1.1.11'
-alias u6='u2 1.1.1.6'
-alias u4='u2 1.1.1.4'
-alias u3='u2 1.1.1.3'
-
 alias perf1='perf stat -e cycles:k,instructions:k -B --cpu=0-15 sleep 2'
-
-function tc-htb1
-{
-	tc qdisc add dev p2p1 root handle 1: htb default 20
-	tc qdisc show dev p2p1
-
-	tc class add dev p2p1 parent 1:0 classid 1:10 htb rate 200kbit ceil 200kbit prio 1 mtu 1500
-	tc class add dev p2p1 parent 1:0 classid 1:20 htb rate 824kbit ceil 1024kbit prio 2 mtu 1500
-	tc class show dev p2p1
-}
-
-function tc-htb2
-{
-	tc class delete dev p2p1 parent 1:0 classid 1:10 htb rate 200kbit ceil 200kbit prio 1 mtu 1500
-	tc class delete dev p2p1 parent 1:0 classid 1:20 htb rate 824kbit ceil 1024kbit prio 2 mtu 1500
-	tc class show dev p2p1
-
-	tc qdisc delete dev p2p1 root handle 1: htb default 20
-	tc qdisc show dev p2p1
-}
 
 # yum install -y libasan
 # -fsanitize=address
