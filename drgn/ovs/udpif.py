@@ -46,23 +46,17 @@ print("n_handlers: %d" % n_handlers)
 
 # print_handlers()
 
-ukeys = udpif.ukeys
-print(ukeys)
+flow_limit = udpif.flow_limit
+print("flow_limit: %d" % flow_limit)
 
-N_UMAPS = 512
+dump_duration = udpif.dump_duration
+print("dump_duration: %d" % dump_duration)
 
-for i in range(N_UMAPS):
-    cmap = ukeys[i].cmap
-    if cmap.impl.p.value_() != prog['empty_cmap'].address_of_().value_():
-#         print(i)
-        keys = print_cmap(cmap, "udpif_key", "cmap_node")
-        for j, key in enumerate(keys):
-#             print(key)
-            print("key_group_id: %d" % key.key_group_id)
-            print_ufid(key.ufid)
-            print(key.actions)
-#             print("key_recird_id: %d" % key.key_recirc_id)
-#             print(key.recircs)
-            print('')
+reval_seq = udpif.reval_seq
+# print(reval_seq)
 
-# print(prog['empty_cmap'].address_of_())
+ofproto_min_revalidate_pps = prog['ofproto_min_revalidate_pps']
+print("ofproto_min_revalidate_pps: %d" % ofproto_min_revalidate_pps)
+
+ofproto_max_revalidator = prog['ofproto_max_revalidator']
+print("ofproto_max_revalidator: %d" % ofproto_max_revalidator)

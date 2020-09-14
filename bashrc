@@ -1210,7 +1210,7 @@ alias normal2="ovs-ofctl add-flow $br 'nw_src=192.168.1.3 action=normal'"
 
 mac1=02:25:d0:14:01:04
 alias dropm="ovs-ofctl add-flow $br 'dl_dst=02:25:d0:14:01:04  action=drop'"
-# alias delm="ovs-ofctl add-flow $br 'dl_dst=02:25:d0:14:01:04	action=drop'"
+alias  delm="ovs-ofctl add-flow $br 'dl_dst=02:25:d0:14:01:04	action=drop'"
 alias normalm="ovs-ofctl add-flow $br 'dl_dst=24:8a:07:88:27:9a  action=normal'"
 alias normalm="ovs-ofctl add-flow $br 'dl_dst=24:8a:07:88:27:9a  table=0,priority=10,action=normal'"
 alias delm="ovs-ofctl del-flows $br dl_dst=$mac1"
@@ -2476,7 +2476,7 @@ set -x
 #	tc filter add dev eth5 protocol ip parent ffff: chain 0 flower ct_state -trk    action ct    action goto chain 1
 #	tc filter add dev eth5 protocol ip parent ffff: chain 1 flower ct_state +trk+est    action mirred egress redirect dev eth6
 
-	tc filter add dev $rep2 prio 1 protocol ip parent ffff: chain 0 flower ct_state -trk		action ct    action goto chain 1
+	tc filter add dev $rep2 prio 1 protocol ip parent ffff: chain 0 flower ct_state -trk		action ct pipe	action goto chain 1
 	tc filter add dev $rep2 prio 1 protocol ip parent ffff: chain 1 flower ct_state +trk+est	action mirred egress redirect dev $rep3
 
 #	$TC filter add dev $rep2 prio 1 protocol ip  parent ffff: chain 0 flower $offload src_mac $src_mac dst_mac $dst_mac action goto chain 1
@@ -6125,8 +6125,8 @@ function flow-limit
 # size_t n_handlers, n_revalidators;
 function ovs_thread
 {
-	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=2
-	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=2
+	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
+	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
 }
 
 function vsconfig-wrk-nginx
@@ -6144,6 +6144,10 @@ function none
 	vsconfig2
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
+
+	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
+	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
+
 	restart-ovs
 	vsconfig
 }
@@ -9065,7 +9069,6 @@ set -x
 	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac2 ct_state +trk+est \
 		action mirred egress redirect dev $rep3
-
 
 
 	$TC filter add dev $rep3 ingress protocol ip chain 0 prio 2 flower $offload \
