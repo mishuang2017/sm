@@ -30,8 +30,14 @@ print("%x-%x-%x-%x" % \
      ntohl(parts[2].value_()),
      ntohl(parts[3].value_())))
 
+tables_version = ofproto.tables_version
+print("tables_version: %d" % tables_version)
+
 set_sflow = ofproto.ofproto_class.set_sflow
 print(address_to_name(hex(set_sflow.value_())))
+
+set_tables_version = ofproto.ofproto_class.set_tables_version
+print(address_to_name(hex(set_tables_version.value_())))
 
 # print(ofproto.ofproto_class)
 

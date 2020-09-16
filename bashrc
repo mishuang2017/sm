@@ -6094,14 +6094,27 @@ function skip_sw
 	vsconfig
 }
 
+function none
+{
+	vsconfig2
+	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
+	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
+
+#	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=5000
+#	ovs-vsctl set Open_vSwitch . other_config:min_revalidate_pps=1
+	restart-ovs
+	vsconfig
+}
+
 function none1
 {
 	vsconfig2
 	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
 	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-	ovs-vsctl set Open_vSwitch . other_config:max-idle=600000 
-#	ovs-vsctl set Open_vSwitch . other_config:max-revalidator=5000
-#	ovs-vsctl set Open_vSwitch . other_config:min_revalidate_pps=1
+
+	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
+	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
+
 	restart-ovs
 	vsconfig
 }
@@ -6135,19 +6148,6 @@ function vsconfig-wrk-nginx
 	ovs-vsctl set open_vswitch . other_config:max-idle="30000"
 	ovs-vsctl set open_vswitch . other_config:n-handler-threads="8"
 	ovs-vsctl set open_vswitch . other_config:n-revalidator-threads="8"
-	restart-ovs
-	vsconfig
-}
-
-function none
-{
-	vsconfig2
-	ovs-vsctl set Open_vSwitch . other_config:hw-offload="true"
-	ovs-vsctl set Open_vSwitch . other_config:tc-policy=none
-
-	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
-	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
-
 	restart-ovs
 	vsconfig
 }
@@ -6443,11 +6443,8 @@ set -x
 set +x
 }
 
-patch_dir2=~/batch/review11
-patch_dir=~/sflow/psample/2
-patch_dir=~/sflow/ovs_review/2
+patch_dir=~/sflow/ovs/3
 alias smp="cd $patch_dir"
-alias smp2="cd $patch_dir2"
 
 function git-format-patch
 {

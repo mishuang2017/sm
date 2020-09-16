@@ -27,8 +27,21 @@ print("ovs_vport_mcgroup:           %2d" % prog['ovs_vport_mcgroup'])
 print("ovs_meter_family:            %2d" % prog['ovs_meter_family'])
 print("ovs_ct_limit_family:         %2d" % prog['ovs_ct_limit_family'])
 
-print("psample_family:              %2d" % prog['psample_family'])
-print("psample_mcgroup:             %2d" % prog['psample_mcgroup'])
+# print("psample_family:              %2d" % prog['psample_family'])
+# print("psample_mcgroup:             %2d" % prog['psample_mcgroup'])
 
 print("next_id:                     %2d" % prog['next_id'])
 print("netdev_flow_api_enabled:     %2d" % prog['netdev_flow_api_enabled'])
+
+print("n_coverage_counters:         %2d" % prog['n_coverage_counters'])
+print("allocated_coverage_counters: %2d" % prog['allocated_coverage_counters'])
+
+n_coverage_counters = prog['n_coverage_counters']
+coverage_counters = prog['coverage_counters']
+for i in range(n_coverage_counters):
+#     print(coverage_counters[i])
+    total = coverage_counters[i].total
+    last_total = coverage_counters[i].last_total
+    name = coverage_counters[i].name
+    if total:
+        print("%80s, %5d, %5d" % (name, total, last_total))
