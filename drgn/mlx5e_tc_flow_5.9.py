@@ -35,10 +35,13 @@ try:
 except LookupError as x:
     tc_ht = mlx5e_rep_priv.tc_ht
 
+# hash(tc_ht, 'struct mlx5e_tc_flow', 'node')
+
+# sys.exit(0)
+
 for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
     print(flow.rule[0])
-    print(flow.sample.rule)
     flow_attr = flow.attr
     esw_attr = flow_attr.esw_attr[0]
     parse_attr = flow_attr.parse_attr
@@ -51,7 +54,7 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     print("ct_state: %x/%x" % (parse_attr.spec.match_value[57] >> 8, parse_attr.spec.match_criteria[57] >> 8))
     print("mlx5_flow_spec %lx" % parse_attr.spec.address_of_())
     print("action: %x" % flow_attr.action)
-    print(esw_attr)
+#     print(esw_attr)
 #     print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
 #     print(flow.esw_attr[0].parse_attr)
     print("")

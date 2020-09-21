@@ -36,14 +36,10 @@ def hostname(name):
     else:
         return False
 
-pf0_name = "enp4s0f0"
-# if kernel("5.8.0-rc2+"):
 pf0_name = "enp4s0f0np0"
+if kernel("4.19.36+"):
+    pf0_name = "enp4s0f0"
 pf1_name = "enp4s0f1"
-
-if hostname("clx-ibmc-03") or hostname("clx-ibmc-01"):
-    pf0_name = "ens1f0"
-    pf1_name = "ens1f1"
 
 import os
 
@@ -387,10 +383,11 @@ def hash(rhashtable, type, member):
 
     tbl = rhashtable.tbl
 
-#     print("rhashtable %lx" % rhashtable.address_of_())
-#     print("bucket_table %lx" % tbl)
-#     buckets = tbl.buckets
-#     print("buckets %lx" % buckets.address_of_())
+    print('')
+    print("rhashtable %lx" % rhashtable.address_of_())
+    print("bucket_table %lx" % tbl)
+    buckets = tbl.buckets
+    print("buckets %lx" % buckets.address_of_())
 
     buckets = tbl.buckets
     size = tbl.size.value_()

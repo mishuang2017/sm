@@ -29,9 +29,11 @@ if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
 
-	link=enp4s0f0
 	link=enp4s0f0np0
 	link2=enp4s0f1np1
+
+	link=enp4s0f0
+
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
@@ -44,14 +46,18 @@ if (( host_num == 13 )); then
 # 	link_mac2=24:8a:07:88:27:9b
 # 	remote_mac=24:8a:07:88:27:ca
 
-	vf1=enp4s0f2
-	vf2=enp4s0f3
-	vf3=enp4s0f4
-
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=${link}v$i
 		eval rep$((i+1))=${link}_$i
 	done
+
+	vf1=enp4s0f2
+	vf2=enp4s0f3
+	vf3=enp4s0f4
+
+	vf1=enp4s0f0v0
+	vf2=enp4s0f0v1
+	vf3=enp4s0f0v2
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -64,9 +70,6 @@ elif (( host_num == 14 )); then
 # 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0
 
-	link=enp4s0f0
-	link2=enp4s0f1
-
 	link=enp4s0f0np0
 	link2=enp4s0f1np1
 
@@ -75,6 +78,9 @@ elif (( host_num == 14 )); then
 
 	link2_pre=enp4s0f1n
 	link2=${link2_pre}p1
+
+# 	link=enp4s0f0
+# 	link2=enp4s0f1
 
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
@@ -103,6 +109,11 @@ elif (( host_num == 14 )); then
 # 		eval rep$((i+1))_2=${link2}_$i
 		eval rep$((i+1))_2=${link2_pre}pf1vf$i
 	done
+
+# 	for (( i = 0; i < numvfs; i++)); do
+# 		eval vf$((i+1))=${link}v$i
+# 		eval rep$((i+1))=${link}_$i
+# 	done
 
 # 	modprobe aer-inject
 
@@ -722,6 +733,9 @@ alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
 alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c "
+alias vi_tc_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
+alias vi_tc_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
+
 alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c "
 alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c "
 alias vi_offloads="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c "
@@ -732,6 +746,8 @@ alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c driv
 alias vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 
 alias vi_tc="vi lib/netdev-offload-tc.c"
+
+alias vi_in='vi utilities/ovs-kmod-ctl.in'
 
 
 alias rm='rm -i'
@@ -1486,6 +1502,13 @@ function buildm
 	module=mlx5_core;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	make M=$driver_dir -j
+}
+
+function mlx5_clean
+{
+	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
+	cd $linux_dir;
+	make M=$driver_dir clean
 }
 
 function mybuild
@@ -4158,8 +4181,8 @@ alias vf152="ip link set dev $link vf 1 vlan 52 qos 0"
 function get_rep
 {
 	[[ $# != 1 ]] && return
-# 	echo "${link}_$1"
 	echo ${link_pre}pf0vf$1
+# 	echo "${link}_$1"
 }
 
 function get_rep2
@@ -5645,15 +5668,15 @@ function tm
 
 	if [ $? != 0 ]; then
 		$cmd new -d -n cmd -s $session
-		$cmd neww -n trace
+		$cmd neww -n n1
+		$cmd neww -n n2
 		$cmd neww -n bash
-		$cmd neww -n bash
-		$cmd neww -n 4.19
+		$cmd neww -n linux
 		$cmd neww -n live
-		$cmd neww -n 4.6
-		$cmd neww -n 4.7
-		$cmd neww -n bash	# 8
-		$cmd neww -n bash	# 9
+		$cmd neww -n build-ovs
+		$cmd neww -n ovs
+		$cmd neww -n drgn-run
+		$cmd neww -n drgn
 	fi
 
 	$cmd att -t $session
@@ -6138,8 +6161,8 @@ function flow-limit
 # size_t n_handlers, n_revalidators;
 function ovs_thread
 {
-	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
-	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
+	ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=4
+	ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=2
 }
 
 function vsconfig-wrk-nginx
@@ -6443,13 +6466,11 @@ set -x
 set +x
 }
 
-patch_dir=~/sflow/ovs/3
-alias smp="cd $patch_dir"
-
 function git-format-patch
 {
-	local n=1
-	[[ $# == 1 ]] && n=$1
+	[[ $# != 2 ]] && return
+	local patch_dir=$1
+	local n=$2
 	mkdir -p $patch_dir
 #	git format-patch --cover-letter --subject-prefix="INTERNAL RFC net-next v9" -o $patch_dir -$n
 #	git format-patch --cover-letter --subject-prefix="patch net-next" -o $patch_dir -$n
@@ -10507,6 +10528,18 @@ function trex
 	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/AsapPerfTestParams.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 }
 
+function trex_loop
+{
+	cd-trex
+	i=0
+	while : ; do
+		trex
+		(( i++ == 100 )) && break
+		echo "=============== $i ==============="
+		sleep 10
+	done
+}
+
 function trex-vxlan
 {
 	cd-trex
@@ -11778,3 +11811,16 @@ function make_ovs_deb
 {
 	DEB_BUILD_OPTIONS='parallel=16' fakeroot debian/rules binary
 }
+
+function load_psample
+{
+	psample=`find /lib/modules/$(uname -r) -name psample.ko*`
+	echo $psample
+	if test -n $psample; then
+		module=`basename $psample | cut -d . -f 1`
+		echo $module
+	fi
+}
+
+alias status='systemctl status openvswitch-switch'
+alias status2='systemctl status openvswitch-nonetwork.service'

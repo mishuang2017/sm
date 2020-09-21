@@ -12,6 +12,10 @@ sys.path.append(libpath)
 from lib import *
 
 mlx5e_priv = get_mlx5_pf0()
+mlx5e_rep_priv = get_mlx5e_rep_priv()
+uplink_priv = mlx5e_rep_priv.uplink_priv
+sample_priv = uplink_priv.sample_priv
+print(sample_priv)
 
 # struct mlx5_esw_offload
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
@@ -27,8 +31,10 @@ print('\n=== sampler_termtbl ===')
 # for handle in list_for_each_entry('struct mlx5_sampler_termtbl_handle', termtbl_list, 'list'):
 #     print(handle)
 
-print(offloads.sampler_termtbl_handle)
-flow_table("sampler_termtbl", offloads.sampler_termtbl_handle.termtbl)
+# print(sample_priv.termtbl)
+flow_table("sampler_termtbl", sample_priv.termtbl)
+
+exit(0)
 
 print('\n=== sampler_hashtbl ===\n')
 
