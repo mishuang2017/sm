@@ -383,11 +383,11 @@ def hash(rhashtable, type, member):
 
     tbl = rhashtable.tbl
 
-    print('')
-    print("rhashtable %lx" % rhashtable.address_of_())
-    print("bucket_table %lx" % tbl)
-    buckets = tbl.buckets
-    print("buckets %lx" % buckets.address_of_())
+#     print('')
+#     print("rhashtable %lx" % rhashtable.address_of_())
+#     print("bucket_table %lx" % tbl)
+#     buckets = tbl.buckets
+#     print("buckets %lx" % buckets.address_of_())
 
     buckets = tbl.buckets
     size = tbl.size.value_()

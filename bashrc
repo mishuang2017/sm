@@ -34,6 +34,12 @@ if (( host_num == 13 )); then
 
 	link=enp4s0f0
 
+	link_pre=enp4s0f0n
+	link=${link_pre}p0
+
+	link2_pre=enp4s0f1n
+	link2=${link2_pre}p1
+
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
@@ -49,6 +55,12 @@ if (( host_num == 13 )); then
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=${link}v$i
 		eval rep$((i+1))=${link}_$i
+	done
+
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))_2=${link2}v$i
+# 		eval rep$((i+1))_2=${link2}_$i
+		eval rep$((i+1))_2=${link2_pre}pf1vf$i
 	done
 
 	vf1=enp4s0f2
@@ -732,8 +744,8 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
-alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_sample.c "
 alias vi_tc_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
+alias vi_sample=vi_tc_sample
 alias vi_tc_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
 
 alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c "
@@ -741,7 +753,7 @@ alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vpor
 alias vi_offloads="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c "
 alias vi_esw2="vi include/linux/mlx5/eswitch.h "
 alias vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h "
-alias vi_mapping="vi drivers/net/ethernet/mellanox/mlx5/core/mapping_obj.h "
+alias vi_mapping='vi drivers/net/ethernet/mellanox/mlx5/core/mapping_obj.h '
 alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.h "
 alias vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 
