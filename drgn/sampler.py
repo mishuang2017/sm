@@ -114,10 +114,11 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     print("ct_state: %x/%x" % (parse_attr.spec.match_value[57] >> 8, parse_attr.spec.match_criteria[57] >> 8))
     print("mlx5_flow_spec %lx" % parse_attr.spec.address_of_())
     print("action: %x" % flow_attr.action)
-    print(esw_attr.sample)
     sample_flow = esw_attr.sample.sample_flow
-    print(sample_flow)
-    print(sample_flow.pre_attr)
+    if sample_flow.value_() != 0:
+        print(sample_flow)
+        print(sample_flow.pre_attr)
+        print(flow_attr)
 #     print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
 #     print(flow.esw_attr[0].parse_attr)
     print("")

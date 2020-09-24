@@ -744,9 +744,8 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
-alias vi_tc_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
-alias vi_sample=vi_tc_sample
-alias vi_tc_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
+alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
+alias vi_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
 
 alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c "
 alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c "
@@ -760,6 +759,8 @@ alias vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 alias vi_tc="vi lib/netdev-offload-tc.c"
 
 alias vi_in='vi utilities/ovs-kmod-ctl.in'
+
+alias vi_errno='vi include/uapi/asm-generic/errno.h '
 
 
 alias rm='rm -i'
@@ -9059,8 +9060,7 @@ function ct-ext
 	tc filter add dev $rep2 ingress protocol ip prio 2 flower dst_mac $mac1 e4:11:22:33:44:50  action ct action goto chain 1 
 }
 
-alias ct-udp=ct-tcp
-function ct_tcp
+function tc_ct
 {
 	offload=""
 	[[ "$1" == "sw" ]] && offload="skip_hw"
@@ -9094,6 +9094,7 @@ set -x
 
 	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac2 ct_state +trk+new \
+		action ct commit \
 		action mirred egress redirect dev $rep3
 
 	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
@@ -9107,15 +9108,13 @@ set -x
 
 	$TC filter add dev $rep3 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac1 ct_state +trk+new \
+		action ct commit \
 		action mirred egress redirect dev $rep2
 
 	$TC filter add dev $rep3 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac1 ct_state +trk+est \
 		action mirred egress redirect dev $rep2
 
-	$TC filter add dev $rep3 ingress protocol ip chain 1 prio 2 flower $offload \
-		dst_mac $mac1 ct_state -trk \
-		action mirred egress redirect dev $rep2
 set +x
 }
 
@@ -11364,7 +11363,7 @@ alias vi-sflow='vi ~/sm/sflow/note.txt'
 function tc_sample
 {
 set -x
-	rate=2
+	rate=1
 	offload=""
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
@@ -11627,6 +11626,9 @@ function sflow_list
 function sflow_create
 {
 	local rate=10
+
+	[[ $# == 1 ]] && rate=$1
+
 	local header=60
 	local polling=1000
 	if (( host_num == 13 )); then
