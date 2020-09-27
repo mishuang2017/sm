@@ -4570,6 +4570,22 @@ set -x
 set +x
 }
 
+function brx6
+{
+set -x
+	del-br
+	vs add-br $br
+#  	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < 2; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan6
+# 	ifconfig $vf1 1.1.1.1/24 up
+# 	sflow_create
+set +x
+}
+
 function brx2
 {
 set -x
@@ -6492,7 +6508,7 @@ function git-format-patch
 #	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$n
 #	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$n
-	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v3" -o $patch_dir -$n
+	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v4" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
 }
 
@@ -6731,7 +6747,7 @@ set -x
 	ip link add name $vx type vxlan id $vni dev $link remote $link_remote_ipv6 dstport 4789 \
 		udp6zerocsumtx udp6zerocsumrx
 #	ifconfig $vx $link_ip_vxlan/24 up
-	ip addr add $link_ip_vxlan/24 brd + dev $vx
+	ip addr add $link_ip_vxlan/16 brd + dev $vx
 	ip link set dev $vx up
 #	ip link set dev $vx mtu 1000
 	ip link set $vx address $vxlan_mac
@@ -11545,9 +11561,6 @@ set -x
 	$TC qdisc add dev $link ingress 
 	$TC qdisc add dev $redirect ingress 
 	$TC qdisc add dev $vx ingress 
-#	$TC qdisc add dev $link clsact
-#	$TC qdisc add dev $redirect clsact
-#	$TC qdisc add dev $vx clsact
 
 	ip link set $link promisc on
 	ip link set $redirect promisc on
@@ -11625,7 +11638,7 @@ function sflow_list
 
 function sflow_create
 {
-	local rate=10
+	local rate=1
 
 	[[ $# == 1 ]] && rate=$1
 
@@ -11657,6 +11670,11 @@ function sflow_create_vxlan
 function sflowtool1
 {
 	sflowtool -p 6343 -L localtime,srcIP,dstIP
+}
+
+function sflowtool6
+{
+	sflowtool -p 6343 -L localtime,srcIP,dstIP,srcIP6,dstIP6
 }
 
 function sflowtool2

@@ -7,11 +7,21 @@ import sys
 import os
 
 sys.path.append("..")
-from lib import *
+# from lib import *
+from lib_pedit import *
 
 mlx5e_rep_priv = get_mlx5e_rep_priv()
 ct_priv = mlx5e_rep_priv.uplink_priv.ct_priv
 tunnel_mapping = mlx5e_rep_priv.uplink_priv.tunnel_mapping
+
+print("=== mlx5e_rep_priv.uplink_priv.ct_priv.mod_hdr_tbl ===")
+mod_hdr_tbl = ct_priv.mod_hdr_tbl
+ht = mod_hdr_tbl.hlist
+for i in range(256):
+    for mh in hlist_for_each_entry('struct mlx5e_mod_hdr_handle', ht[i], 'mod_hdr_hlist'):
+#         print(mh)
+        print("--- %d ---" % i)
+        print_mod_hdr_key(mh.key)
 
 print("=== mlx5e_rep_priv.uplink_priv.ct_priv.ct ===")
 # print("mlx5_flow_table %lx" % ct_priv.ct)
