@@ -992,6 +992,9 @@ parse_tc_fdb_actions
 mlx5_tc_ct_flow_offload
 __mlx5_tc_ct_flow_offload
 
+
+mlx5_tc_ct_match_add
+
 ===gdb===
 
 (gdb) x/84b 0x7fabfc019aa0
