@@ -713,9 +713,9 @@ def print_match(fte):
     if ethertype:
         print(" et: %x" % ethertype, end='')
 
-    vport = ntohl(val[17].value_() & 0xffff0000)
-    # metadata_reg_c_0
-#     vport = ntohl(val[59].value_() & 0xffff0000)
+#     vport = ntohl(val[17].value_() & 0xffff0000)
+#     metadata_reg_c_0
+    vport = ntohl(val[59].value_() & 0xffff0000)
     if vport:
         print(" vport: %4x" % vport, end='')
 
@@ -773,7 +773,7 @@ def print_match(fte):
 
     reg_c2 = ntohl(val[57].value_())
     if reg_c2:
-        print(" reg_c2 (ct_state|ct_zone, trk=4, trk+est+nat=c): %4x" % reg_c2, end='')
+        print(" reg_c2 (ct_state|ct_zone, trk+est=6, trk+est+nat=e): %4x" % reg_c2, end='')
 
     reg_c1 = ntohl(val[58].value_())
     if reg_c1:

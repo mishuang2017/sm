@@ -20,8 +20,8 @@ mod_hdr_tbl = ct_priv.mod_hdr_tbl
 ht = mod_hdr_tbl.hlist
 for i in range(256):
     for mh in hlist_for_each_entry('struct mlx5e_mod_hdr_handle', ht[i], 'mod_hdr_hlist'):
-#         print(mh)
         print("--- %d ---" % i)
+        print("\tmlx5e_mod_hdr_handle.refcnt: %d" % mh.refcnt.refs.counter)
         print_mod_hdr_key(mh.key)
 
 print('\n=== labels_mapping ===\n')
@@ -32,8 +32,6 @@ for i in range(256):
 #         print(item)
         ct_labels_id = Object(prog, 'u32 *', address=item.data.address_of_())
         print("cnt: %d, id: %d, data: %d" % (item.cnt, item.id, ct_labels_id))
-
-exit(0)
 
 print("=== mlx5e_rep_priv.uplink_priv.ct_priv.ct ===")
 # print("mlx5_flow_table %lx" % ct_priv.ct)
