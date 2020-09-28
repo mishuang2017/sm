@@ -2177,8 +2177,8 @@ set -x
 set +x
 }
 
-alias tc_nat='sudo ~chrism/bin/tc_nat.sh'
-alias tc_ct='sudo ~chrism/bin/tc_ct.sh'
+alias tc_nat.sh='sudo ~chrism/bin/tc_nat.sh'
+alias tc_ct.sh='sudo ~chrism/bin/tc_ct.sh'
 
 function tc-pf
 {

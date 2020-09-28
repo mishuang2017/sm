@@ -9021,6 +9021,10 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+numactl --hardware
+
+getconf -a | grep CACHE
+
 memzero_explicit
 
 GENMASK
