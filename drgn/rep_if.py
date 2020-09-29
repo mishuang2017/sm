@@ -13,4 +13,5 @@ import lib
 mlx5e_priv = lib.get_mlx5_pf0()
 # struct mlx5_eswitch_rep
 vport_reps = mlx5e_priv.mdev.priv.eswitch.offloads.vport_reps
-print(vport_reps)
+for i in range(3):
+    print(vport_reps[i])

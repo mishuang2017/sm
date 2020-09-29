@@ -24,6 +24,8 @@ print("MLX5E_TC_FLOW_FLAG_OFFLOADED %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_OFFLO
 print("MLX5E_TC_FLOW_FLAG_CT        %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_CT'].value_()))
 # print("MLX5E_TC_FLOW_FLAG_CT_ORIG   %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_CT_ORIG'].value_()))
 
+print("MLX5E_TC_FLOW_FLAG_SAMPLE    %10x" % (1 << prog['MLX5E_TC_FLOW_FLAG_SAMPLE'].value_()))
+
 print('')
 print("MLX5_MATCH_OUTER_HEADERS     %10x" % prog['MLX5_MATCH_OUTER_HEADERS'].value_())
 print("MLX5_MATCH_MISC_PARAMETERS   %10x" % prog['MLX5_MATCH_MISC_PARAMETERS'].value_())
@@ -47,14 +49,16 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     parse_attr = flow_attr.parse_attr
     print("%-14s mlx5e_tc_flow %lx, cookie: %lx, flags: %x, refcnt: %d" % \
         (name, flow.value_(), flow.cookie.value_(), flow.flags.value_(), flow.refcnt.refs.counter))
-    print("chain: %x" % flow_attr.chain, end='\t')
+    print("chain: %x, prio: %d" % (flow_attr.chain, flow_attr.prio), end='\t')
     print("dest_chain: %x" % flow_attr.dest_chain, end='\t')
     print("ft: %x" % flow_attr.ft, end='\t')
     print("dest_ft: %x" % flow_attr.dest_ft, end='\t')
     print("ct_state: %x/%x" % (parse_attr.spec.match_value[57] >> 8, parse_attr.spec.match_criteria[57] >> 8))
     print("mlx5_flow_spec %lx" % parse_attr.spec.address_of_())
     print("action: %x" % flow_attr.action)
-#     print(esw_attr)
+    if flow.flags.value_() & 1 << prog['MLX5E_TC_FLOW_FLAG_SAMPLE']:
+        print(esw_attr)
+#         print(parse_attr.mod_hdr_acts)
 #     print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
 #     print(flow.esw_attr[0].parse_attr)
     print("")

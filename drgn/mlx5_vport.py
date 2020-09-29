@@ -6,6 +6,8 @@ import time
 import sys
 import os
 
+# print esw->vports, struct mlx5_vport
+
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
 import lib
