@@ -58,18 +58,15 @@ if (( host_num == 13 )); then
 	done
 
 	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link_pre}pf0vf$i
+	done
+
+	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))_2=${link2}v$i
 # 		eval rep$((i+1))_2=${link2}_$i
 		eval rep$((i+1))_2=${link2_pre}pf1vf$i
 	done
-
-	vf1=enp4s0f2
-	vf2=enp4s0f3
-	vf3=enp4s0f4
-
-	vf1=enp4s0f0v0
-	vf2=enp4s0f0v1
-	vf3=enp4s0f0v2
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -1534,7 +1531,9 @@ set -x;
 	module=mlx5_core;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	cd $linux_dir;
-	make M=$driver_dir -j || {
+	make M=$driver_dir -j W=1 || {
+# 	make M=$driver_dir -j W=1 || {
+# 	make M=$driver_dir -j C=2 || {
 		set +x
 		return
 	}
@@ -11607,6 +11606,7 @@ set -x
 
 	TC=tc
 	redirect=$rep2
+	rate=1
 
 	ip1
 	ip link del $vx > /dev/null 2>&1
@@ -11634,7 +11634,7 @@ set -x
 	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
 		src_mac $local_vm_mac	\
 		dst_mac $remote_vm_mac	\
-		action sample rate 2 group 5 trunc 128	\
+		action sample rate $rate group 5 trunc 128	\
 		action tunnel_key set	\
 		src_ip $link_ip		\
 		dst_ip $link_remote_ip	\
@@ -11658,7 +11658,7 @@ set -x
 		enc_dst_ip $link_ip		\
 		enc_dst_port $vxlan_port	\
 		enc_key_id $vni			\
-		action sample rate 2 group 6 trunc 128	\
+		action sample rate $rate group 6 trunc 128	\
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
 	$TC filter add dev $vx protocol arp parent ffff: prio 2 flower skip_hw	\

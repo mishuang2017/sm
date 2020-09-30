@@ -28,8 +28,11 @@ uplink_idx = total_vports - 1
 print("vport: %x" % vports[uplink_idx].vport)
 print_mac(vports[uplink_idx].info.mac)
 
+def print_vport(vport):
+    print("vport: %4x, metadata: %x" % (vport.vport, vport.metadata), end=' ')
+    print_mac(vport.info.mac)
 
 for i in range(enabled_vports):
-    vport = vports[i]
-    print("vport: %x, metadata: %x" % (vport.vport, vport.metadata), end=' ')
-    print_mac(vport.info.mac)
+    print_vport(vports[i])
+
+print_vport(vports[total_vports - 1])

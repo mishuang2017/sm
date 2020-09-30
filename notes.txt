@@ -1686,7 +1686,7 @@ git push origin HEAD:refs/for/mlnx_ofed_4_7_3/nic_netdev_cleanup_fix
 
 git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd_te/fix_syndrome_for_tap
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd_te/fix_access_reg_syndrome
+git push origin HEAD:refs/for/mlnx_ofed_6_2/update-rep-state
 
 git push origin HEAD:refs/for/master/stats-update
 

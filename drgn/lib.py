@@ -843,7 +843,7 @@ def print_match(fte):
         if src_ip:
             print(" dst_ip: %12s" % ipv4(dst_ip), end='')
 
-    print(" action %4x: " % fte.action.action.value_())
+    print(" action: %4x" % fte.action.action.value_())
 
 def print_udp_sock(sk):
     inet_sock = cast('struct inet_sock *', sk)
