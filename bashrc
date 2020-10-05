@@ -1845,14 +1845,21 @@ function stop-ovs
 	sudo systemctl stop openvswitch.service
 }
 
-function tct
+function tc_pedit
 {
-	tc-setup $rep2
-	tc filter add dev $rep2 protocol ip parent ffff: prio 1 \
+	TC=tc
+
+set -x
+	$TC qdisc del dev $rep2 ingress
+	ethtool -K $rep2 hw-tc-offload on
+	$TC qdisc add dev $rep2 ingress
+
+	tc filter add dev $rep2 prio 1 protocol ip parent ffff: \
 		flower skip_sw ip_proto tcp \
 		action pedit ex \
 		munge ip ttl set 0xee \
 		pipe action mirred egress redirect dev $rep3
+set +x
 }
 
 alias perf1='perf stat -e cycles:k,instructions:k -B --cpu=0-15 sleep 2'
