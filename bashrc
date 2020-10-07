@@ -9780,31 +9780,6 @@ alias scapyl="scapy-traffic-tester.py -i $scapy_device -l --src-ip $src_ip --int
 
 # alias test2="modprobe -r mlx5_core; modprobe -v mlx5_core; ip link set dev $link up"
 
-function test-ibd
-{
-	restart
-	br
-	restart-ovs
-	(( host_num == 13 )) && ip netns exec n11 ping 1.1.1.2 -c 5
-	(( host_num == 14 )) && ip netns exec n11 ping 1.1.3.2 -c 5
-#	off
-}
-
-function test-ibd2
-{
-	restart
-	brx
-	restart-ovs
-#	ip netns exec n11 ping 1.1.1.200 -c 5
-	(( host_num == 13 )) && ip netns exec n11 ping 1.1.3.1 -c 5
-	(( host_num == 14 )) && ip netns exec n11 ping 1.1.1.1 -c 5
-#	off
-}
-
-alias ibd='/etc/init.d/openibd restart'
-alias ibd2='/etc/init.d/openibd force-restart'
-
-
 function git-push
 {
 	[[ $# != 2 ]] && return
@@ -9824,26 +9799,6 @@ set -x
 	insmod $dir/extra/mlnx-ofa_kernel/drivers/net/ethernet/mellanox/mlx5/core/mlx5_core.ko
 	insmod $dir/extra/mlnx-ofa_kernel/drivers/infiniband/hw/mlx5/mlx5_ib.ko
 set +x
-}
-
-function sun1
-{
-	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
-	WITH_VMS=1 ./load-r-vrt-24-120.sh cx5
-}
-
-alias sus='su sundost'
-
-function sun2
-{
-	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
-	./r-vrt-24-120_cx5/update-r-vrt-24-120_cx5.py
-}
-
-function sun3
-{
-	cd /.autodirect/mtrsysgwork/sundost/asap_dev_reg
-	lnst-ctl -d -C lnst-ctl.conf --pools r-vrt-24-120_cx5/ run recipes/ovs_offload/1_virt_ovs_vxlan_flow_key.xml
 }
 
 function yum_bcc

@@ -24,7 +24,7 @@ for nf_ft in list_for_each_entry('struct nf_flowtable', flowtables.address_of_()
         print("\tcb: %s" % address_to_name(hex(cb.cb)))
         print("\tmlx5_ct_ft %lx" % cb.cb_priv)
         mlx5_ct_ft = Object(prog, 'struct mlx5_ct_ft *', address=cb.cb_priv.address_of_().value_())
-#         print(mlx5_ct_ft)
+        print("\tmlx5_ct_ft.zone_restore_id: %d" % mlx5_ct_ft.zone_restore_id)
  
     tuple_hash = nf_ft.rhashtable
     for i, rhash in enumerate(hash(tuple_hash, 'struct flow_offload_tuple_rhash', 'node')):

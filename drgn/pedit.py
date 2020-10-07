@@ -36,7 +36,7 @@ for i in range(256):
         # old ofed
 #         print("mlx5e_mod_hdr_handle %lx, mod_hdr_id %lx" % (obj.value_(), mlx5e_mod_hdr_handle.mod_hdr_id.value_()))
         # ofed 5.0
-        print(mlx5e_mod_hdr_handle)
+#         print(mlx5e_mod_hdr_handle)
         print("mlx5e_mod_hdr_handle %lx, mod_hdr_id %lx" % (obj.value_(), mlx5e_mod_hdr_handle.modify_hdr.id.value_()))
 
         print_mod_hdr_key(mlx5e_mod_hdr_handle.key)
