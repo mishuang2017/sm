@@ -61,6 +61,9 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
 #         print(parse_attr.mod_hdr_acts)
 #     print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
 #     print(flow.esw_attr[0].parse_attr)
+    print(flow_attr.modify_hdr)
+#     print(flow_attr.parse_attr)
+#     print(flow_attr.parse_attr.mod_hdr_acts)
     print("")
 
     tun_info = parse_attr.tun_info[0]

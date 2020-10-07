@@ -741,20 +741,19 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
-alias vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
-alias vi_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
-
-alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c "
-alias vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c "
+alias   vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
+alias       vi_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
+alias  vi_mod_hdr='vi drivers/net/ethernet/mellanox/mlx5/core/en/mod_hdr.c '
+alias    vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c "
 alias vi_offloads="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c "
+alias      vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h "
+alias  vi_mapping='vi drivers/net/ethernet/mellanox/mlx5/core/mapping_obj.h '
+alias   vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.h "
+alias    vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
+
 alias vi_esw2="vi include/linux/mlx5/eswitch.h "
-alias vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h "
-alias vi_mapping='vi drivers/net/ethernet/mellanox/mlx5/core/mapping_obj.h '
-alias vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.h "
-alias vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 
 alias vi_tc="vi lib/netdev-offload-tc.c"
-
 alias vi_in='vi utilities/ovs-kmod-ctl.in'
 
 alias vi_errno='vi include/uapi/asm-generic/errno.h '
