@@ -43,7 +43,7 @@ except LookupError as x:
 
 for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     name = flow.priv.netdev.name.string_().decode()
-    print(flow.rule[0])
+#     print(flow.rule[0])
     flow_attr = flow.attr
     esw_attr = flow_attr.esw_attr[0]
     parse_attr = flow_attr.parse_attr
@@ -56,12 +56,14 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     print("ct_state: %x/%x" % (parse_attr.spec.match_value[57] >> 8, parse_attr.spec.match_criteria[57] >> 8))
     print("mlx5_flow_spec %lx" % parse_attr.spec.address_of_())
     print("action: %x" % flow_attr.action)
-    if flow.flags.value_() & 1 << prog['MLX5E_TC_FLOW_FLAG_SAMPLE']:
-        print(esw_attr)
+    print(esw_attr.sample)
+#     if flow.flags.value_() & 1 << prog['MLX5E_TC_FLOW_FLAG_SAMPLE']:
+#         print(esw_attr)
+#         print("mlx5_esw_flow_attr %lx" % esw_attr.address_of_())
 #         print(parse_attr.mod_hdr_acts)
 #     print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
 #     print(flow.esw_attr[0].parse_attr)
-    print(flow_attr.modify_hdr)
+#     print(flow_attr.modify_hdr)
 #     print(flow_attr.parse_attr)
 #     print(flow_attr.parse_attr.mod_hdr_acts)
     print("tunnel_id: %x" % flow.tunnel_id)

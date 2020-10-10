@@ -744,7 +744,7 @@ alias vigdb='vi ~/.gdbinit'
 alias   vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
 alias       vi_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
 alias  vi_mod_hdr='vi drivers/net/ethernet/mellanox/mlx5/core/en/mod_hdr.c '
-alias    vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads_vporttbl.c "
+alias    vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/esw/vporttbl.c "
 alias vi_offloads="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c "
 alias      vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h "
 alias  vi_mapping='vi drivers/net/ethernet/mellanox/mlx5/core/mapping_obj.h '
@@ -1531,8 +1531,8 @@ set -x;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	cd $linux_dir;
 	make M=$driver_dir -j W=1 || {
-# 	make M=$driver_dir -j W=1 || {
 # 	make M=$driver_dir -j C=2 || {
+# 		make M=$driver_dir -j W=1 > /tmp/1.txt 2>& 1
 		set +x
 		return
 	}
@@ -1544,19 +1544,10 @@ set -x;
 
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
-#	make modules_install -j
 
 	sudo modprobe -r mlx5_ib
 	sudo modprobe -r mlx5_core
 	sudo modprobe -v mlx5_core
-
-#	cd $src_dir;
-#	make CONFIG_MLX5_CORE=m -C $linux_dir M=$src_dir modules -j;
-#	/bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/drivers/net/ethernet/mellanox/mlx5/core
-#	sudo rmmod mlx5_ib
-#	sudo rmmod $module;
-#	sudo modprobe mlx5_ib
-#	sudo modprobe $module;
 set +x
 }
 
@@ -11436,7 +11427,7 @@ set -x
 set +x
 }
 
-function tc_sample2
+function tc_sample1
 {
 set -x
 	rate=2
@@ -11612,7 +11603,7 @@ set -x
 		id $vni			\
 		action mirred egress redirect dev $vx
 
-	$TC filter add dev $vx protocol ip  parent ffff: prio 2 flower $offload	\
+	$TC filter add dev $vx protocol ip  parent ffff: prio 3 flower $offload	\
 		src_mac $remote_vm_mac	\
 		dst_mac $local_vm_mac	\
 		enc_src_ip $link_remote_ip	\

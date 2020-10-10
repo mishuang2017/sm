@@ -14,7 +14,11 @@ from lib import *
 mlx5e_priv = get_mlx5_pf0()
 mlx5e_rep_priv = get_mlx5e_rep_priv()
 uplink_priv = mlx5e_rep_priv.uplink_priv
-sample_priv = uplink_priv.sample_priv
+sample_priv = uplink_priv.tc_psample
+
+print(sample_priv)
+
+sys.exit(0)
 
 # struct mlx5_esw_offload
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads

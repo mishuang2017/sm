@@ -111,8 +111,8 @@ field_name = {
 }
 
 def parse_pedit(l, h):
-#     print("%lx" % l)
-#     print("%lx" % h)
+#     print("l: %lx" % l)
+#     print("h: %lx" % h)
     action_type = (l & 0xf0000000) >> 28
     field = (l & 0xfff0000) >> 16
     offset = (l & 0x1f00) >> 8
