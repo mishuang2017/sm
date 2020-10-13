@@ -1532,7 +1532,7 @@ set -x;
 	cd $linux_dir;
 	make M=$driver_dir -j W=1 || {
 # 	make M=$driver_dir -j C=2 || {
-# 		make M=$driver_dir -j W=1 > /tmp/1.txt 2>& 1
+		make M=$driver_dir -j W=1 > /tmp/1.txt 2>& 1
 		set +x
 		return
 	}
@@ -8713,6 +8713,7 @@ alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh 
 alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
+test1=test-eswitch-persistent-netdev.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"

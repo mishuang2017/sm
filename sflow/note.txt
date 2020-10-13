@@ -974,9 +974,16 @@ mlxsw_pci_eq_tasklet
 
 ==func===
 
+mlx5_tc_sample_offload
+
+mlx5e_tc_esw_init
+
+mlx5e_rep_tc_update_skb
+mlx5e_tc_get_flow_tun_id
+mlx5e_get_flow_tunnel_id
+
 mlx5e_handle_rx_cqe_mpwrq_rep
-mlx5e_tc_rep_update_skb
-mlx5e_rep_tc_update_skb new
+mlx5e_rep_tc_update_skb
 
 mlx5e_tc_update_skb
 
@@ -992,8 +999,9 @@ parse_tc_fdb_actions
 mlx5_tc_ct_flow_offload
 __mlx5_tc_ct_flow_offload
 
-
 mlx5_tc_ct_match_add
+
+mlx5e_tc_match_to_reg_set
 
 ===gdb===
 
