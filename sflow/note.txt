@@ -976,14 +976,17 @@ mlxsw_pci_eq_tasklet
 
 mlx5_tc_sample_offload
 
-mlx5e_tc_esw_init
+mlx5e_tc_match_to_reg_match
+mlx5e_tc_match_to_reg_set
 
 mlx5e_rep_tc_update_skb
+
+mlx5e_tc_esw_init
+
 mlx5e_tc_get_flow_tun_id
 mlx5e_get_flow_tunnel_id
 
 mlx5e_handle_rx_cqe_mpwrq_rep
-mlx5e_rep_tc_update_skb
 
 mlx5e_tc_update_skb
 
@@ -1001,7 +1004,6 @@ __mlx5_tc_ct_flow_offload
 
 mlx5_tc_ct_match_add
 
-mlx5e_tc_match_to_reg_set
 
 ===gdb===
 
@@ -1027,6 +1029,26 @@ OVS_SAMPLE_ATTR_ARG (6)
                         OVS_USERSPACE_ATTR_PID (1)
                         OVS_USERSPACE_ATTR_USERDATA (2)
                         OVS_USERSPACE_ATTR_ACTIONS (4)
+
+==upcall_cb===
+
+netdev_sflow_attr_get
+
+udpif_start_threads
+	dpif_enable_upcall
+
+dpif_register_upcall_cb
+dpif_disable_upcall
+
+dpif_netdev_register_upcall_cb
+dpif_netdev_enable_upcall
+dpif_netdev_disable_upcall
+
+dpif_psample_poll
+dpif_netlink_psample_poll
+
+dp_netdev_upcall
+	upcall_cb
 
 ==misc===
 

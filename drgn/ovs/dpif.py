@@ -33,8 +33,8 @@ print("%30s: %s" % ("flow_dump_next", address_to_name(hex(dpif.dpif_class.flow_d
 print("%30s: %s" % ("operate", address_to_name(hex(dpif.dpif_class.operate.value_()))))
 
 dpif_netlink = container_of(dpif, "struct dpif_netlink" , "dpif")
-print("===dpif_netlink.psample_sock===")
-print(dpif_netlink.psample_sock)
+# print("===dpif_netlink.psample_sock===")
+# print(dpif_netlink.psample_sock)
 print("===dpif_netlink.port_notifier===")
 print(dpif_netlink.port_notifier)
 

@@ -29,16 +29,13 @@ if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
 
-	link=enp4s0f0np0
-	link2=enp4s0f1np1
-
-	link=enp4s0f0
-
 	link_pre=enp4s0f0n
 	link=${link_pre}p0
 
 	link2_pre=enp4s0f1n
 	link2=${link2_pre}p1
+
+# 	link=enp4s0f0
 
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
@@ -415,6 +412,7 @@ alias dud='du -h -d 1'
 alias dus='du -sh * | sort -h'
 
 alias clone-git='git clone git@github.com:git/git.git'
+alias clone-sflowtool='git clone https://github.com/sflow/sflowtool.git'
 alias clone-gdb="git clone git://sourceware.org/git/binutils-gdb.git"
 alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/ethtool.git'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
@@ -439,8 +437,10 @@ alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-ovs-mishuang='git clone git@github.com:mishuang2017/ovs.git'
 alias clone-ovs-ct='git clone https://github.com/roidayan/ovs --branch=ct-one-table-2.10'
+alias clone-ovs-ct-one-table-2.10='git clone ssh://10.7.0.100:29418/openvswitch --branch=ct-one-table-2.10'
 alias clone-ovs-ct2='git clone git@github.com:mishuang2017/ovs --branch=2.13.0-ct'
 alias clone-linux='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/linux'
+alias clone-linux-4.19-bd='git clone git@github.com:mishuang2017/linux --branch=4.19-bd'
 alias clone-scripts='git clone ssh://chrism@l-gerrit.lab.mtl.com:29418/upstream/scripts'
 alias clone-bcc='git clone https://github.com/iovisor/bcc.git'
 alias clone-bpftrace='git clone https://github.com/iovisor/bpftrace'
@@ -753,8 +753,11 @@ alias    vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 
 alias vi_esw2="vi include/linux/mlx5/eswitch.h "
 
-alias vi_tc="vi lib/netdev-offload-tc.c"
-alias vi_in='vi utilities/ovs-kmod-ctl.in'
+alias vi_netdev-offload-tc="vi lib/netdev-offload-tc.c"
+alias vi-tc="vi lib/netdev-offload-tc.c"
+alias vi_netdev-offload="vi lib/netdev-offload.c"
+alias vi_dpif-netlink="vi lib/dpif-netlink.c"
+alias vi_ovs_in='vi utilities/ovs-kmod-ctl.in'
 
 alias vi_errno='vi include/uapi/asm-generic/errno.h '
 
