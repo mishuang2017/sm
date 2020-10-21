@@ -19,6 +19,7 @@ ofproto_dpif = get_ofproto_dpif("br")
 print("ofproto_dpif: %lx" % ofproto_dpif)
 
 ofproto = ofproto_dpif.up
+print("ofproto.type: %s" % ofproto.type)
 
 print(ofproto_dpif.sflow)
 

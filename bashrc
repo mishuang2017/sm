@@ -755,6 +755,7 @@ alias vi_esw2="vi include/linux/mlx5/eswitch.h "
 
 alias vi_netdev-offload-tc="vi lib/netdev-offload-tc.c"
 alias vi-tc="vi lib/netdev-offload-tc.c"
+alias vi-dpdk="vi lib/netdev-offload-dpdk.c"
 alias vi_netdev-offload="vi lib/netdev-offload.c"
 alias vi_dpif-netlink="vi lib/dpif-netlink.c"
 alias vi_ovs_in='vi utilities/ovs-kmod-ctl.in'
@@ -6234,6 +6235,7 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config n-revalidator-threads
 	ovs-vsctl remove Open_vSwitch . other_config n-handler-threads
 	ovs-vsctl remove Open_vSwitch . other_config flow-limit
+	ovs-vsctl remove Open_vSwitch . other_config dpkd-init
 	restart-ovs
 	vsconfig
 }
@@ -6425,7 +6427,7 @@ function git-revert
 
 function git-patch
 {
-	[[ $# > 2 ]] && return
+	[[ $# < 2 ]] && return
 	local n=$2
 	[[ $# == 1 ]] && n=1
 	local dir=$1
@@ -6435,13 +6437,18 @@ function git-patch
 
 function git-patch2
 {
-	[[ $# > 2 ]] && return
+	[[ $# < 2 ]] && return
 	local commit=$2
-	[[ $# == 1 ]] && n=1
 	local dir=$1
 	mkdir -p $dir
-#	git format-patch -o $dir c00f5a7..
 	git format-patch -o $dir ${commit}..
+}
+
+function git-ovs
+{
+	[[ $# != 1 ]] && return
+	local dir=$1
+	git format-patch -o ~/sflow/ofproto/$dir d4bd63f47
 }
 
 function git-patch3
