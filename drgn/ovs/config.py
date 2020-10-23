@@ -14,7 +14,6 @@ sys.path.append(".")
 from lib_ovs import *
 
 print("block_support: %d" % prog['block_support'])
-print("dpdk_initialized: %d" % prog['dpdk_initialized'])
 
 print("monitor_running: %d" % prog['monitor_running'])
 print("monitor_tid: %d" % prog['monitor_running'])

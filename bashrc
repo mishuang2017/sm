@@ -51,11 +51,6 @@ if (( host_num == 13 )); then
 
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=${link}v$i
-		eval rep$((i+1))=${link}_$i
-	done
-
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
 		eval rep$((i+1))=${link_pre}pf0vf$i
 	done
 
@@ -64,6 +59,13 @@ if (( host_num == 13 )); then
 # 		eval rep$((i+1))_2=${link2}_$i
 		eval rep$((i+1))_2=${link2_pre}pf1vf$i
 	done
+
+	if [[ "$link" == "enp4s0f0" ]]; then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link}_$i
+		done
+        fi
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -116,10 +118,12 @@ elif (( host_num == 14 )); then
 		eval rep$((i+1))_2=${link2_pre}pf1vf$i
 	done
 
-# 	for (( i = 0; i < numvfs; i++)); do
-# 		eval vf$((i+1))=${link}v$i
-# 		eval rep$((i+1))=${link}_$i
-# 	done
+	if [[ "$link" == "enp4s0f0" ]]; then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link}_$i
+		done
+	fi
 
 # 	modprobe aer-inject
 
@@ -4196,15 +4200,21 @@ alias vf152="ip link set dev $link vf 1 vlan 52 qos 0"
 function get_rep
 {
 	[[ $# != 1 ]] && return
-	echo ${link_pre}pf0vf$1
-# 	echo "${link}_$1"
+	if [[ "$link" == "enp4s0f0" ]]; then
+		echo "${link}_$1"
+	else
+		echo ${link_pre}pf0vf$1
+	fi
 }
 
 function get_rep2
 {
 	[[ $# != 1 ]] && return
-# 	echo "${link2}_$1"
-	echo ${link2_pre}pf1vf$1
+	if [[ "$link" == "enp4s0f0" ]]; then
+		echo "${link2}_$1"
+	else
+		echo ${link2_pre}pf1vf$1
+	fi
 }
 
 function ovs-vlan-set
@@ -4449,7 +4459,7 @@ set -x
 set +x
 }
 
-function br
+function br_vf
 {
 set -x
 	del-br
@@ -4459,6 +4469,31 @@ set -x
 		ifconfig $rep up
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
+set +x
+}
+
+alias br=br_vf
+
+function br3
+{
+set -x
+	del-br
+	vs add-br $br
+	for (( i = 1; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		ifconfig $rep up
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+
+# 	ovs-ofctl add-flow $br table=0,priority=2,arp,action=normal
+
+	ovs-ofctl del-flows $br
+	ovs-ofctl add-flow $br table=0,priority=1,action=drop
+	ovs-ofctl add-flow $br table=0,priority=2,in_port=2,dl_dst=02:25:d0:14:01:03,action=normal
+	ovs-ofctl add-flow $br table=0,priority=2,in_port=3,dl_dst=02:25:d0:14:01:02,action=normal
+
+	ovs-ofctl add-flow $br table=0,priority=2,in_port=2,dl_src=02:25:d0:14:01:02,dl_dst=ff:ff:ff:ff:ff:ff,action=normal
+	ovs-ofctl add-flow $br table=0,priority=3,in_port=2,dl_src=02:25:d0:14:01:03,dl_dst=ff:ff:ff:ff:ff:ff,action=normal
 set +x
 }
 
@@ -6446,9 +6481,13 @@ function git-patch2
 
 function git-ovs
 {
-	[[ $# != 1 ]] && return
-	local dir=$1
-	git format-patch -o ~/sflow/ofproto/$dir d4bd63f47
+	dir=~/sflow/ofproto
+	local n=$1
+	if [[ $# == 0 ]]; then
+		n=$(ls $dir | sort -n | tail -n 1)
+		n=$((n+1))
+	fi
+	git format-patch -o $dir/$n 2c5a48c9a
 }
 
 function git-patch3
@@ -7702,6 +7741,8 @@ set -x
 	sudo ovs-appctl vlog/set netlink:file:DBG
 	sudo ovs-appctl vlog/set ofproto_dpif_xlate:file:DBG
 	sudo ovs-appctl vlog/set ofproto_dpif_upcall:file:DBG
+
+	sudo ovs-appctl vlog/set dpif_netdev:file:DBG
 set +x
 }
 
@@ -11710,6 +11751,11 @@ function sflowtool2
 function sflowtool_tcpdump
 {
 	sflowtool -p 6343 -t | tcpdump -r -
+}
+
+function ovs_run_test
+{
+	make check TESTSUITEFLAGS=$1
 }
 
 ######## uuu #######
