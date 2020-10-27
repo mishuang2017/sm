@@ -422,6 +422,7 @@ alias clone-ethtool='git clone https://git.kernel.org/pub/scm/network/ethtool/et
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git'
 alias clone-ofed5_0='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0'
 alias clone-ofed5_1='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_1'
+alias clone-ofed5_2='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_2'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0_2'
 alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
 alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_7_3'
@@ -1033,6 +1034,16 @@ function create-images
 {
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
+}
+
+function cloud_setup
+{
+	mkdir -p /images/chrism
+	chown chrism.mtl /images/chrism
+
+	yum install -y cscope tmux
+
+	ln -s ~chrism/.tmux.conf
 }
 
 function bind5
@@ -5325,7 +5336,7 @@ function start-switchdev-all
 }
 
 alias mystart=start-switchdev-all
-alias restart='off; mystart'
+alias restart='off; dmfs; mystart'
 
 function start-switchdev
 {
@@ -6311,7 +6322,7 @@ set -x
 	return
 
 # 	mlxfwup -d $pci -f 16.27.1016
-        mlxfwup -d $pci -f 16.27.2008
+        mlxfwup -d $pci -f 16.28.1002
 
 	return
 
@@ -6488,6 +6499,30 @@ function git-ovs
 		n=$((n+1))
 	fi
 	git format-patch -o $dir/$n 2c5a48c9a
+}
+
+function git-ofed
+{
+	dir=~/sflow/backport
+	mkdir -p $dir
+	local n=$1
+	if [[ $# == 0 ]]; then
+		n=$(ls $dir | sort -n | tail -n 1)
+		n=$((n+1))
+	fi
+	git format-patch -o $dir/$n 9bb9d8123
+}
+
+function git-linux
+{
+	dir=~/sflow/tunnel
+	mkdir -p $dir
+	local n=$1
+	if [[ $# == 0 ]]; then
+		n=$(ls $dir | sort -n | tail -n 1)
+		n=$((n+1))
+	fi
+	git format-patch -o $dir/$n 6f14b7d62cb5
 }
 
 function git-patch3

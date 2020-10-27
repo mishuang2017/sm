@@ -1706,6 +1706,9 @@ git push origin HEAD:refs/for/net-next-mlx5/sflow-driver-decap-fix
 
 git push origin HEAD:refs/for/master/new-sflow-ovs-test-case
 
+git push origin HEAD:refs/for/mlnx_ofed_5_2/ofed-sflow-driver
+git push origin HEAD:refs/for/mlnx_ofed_5_2/ofed-sflow-ovs
+
 ===git===
 
 nvidia.com
