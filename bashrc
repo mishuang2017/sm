@@ -1046,6 +1046,11 @@ function cloud_setup
 	ln -s ~chrism/.tmux.conf
 }
 
+function cloud_ofed_cp
+{
+	cp -r /swgwork/chrism/mlnx-ofa_kernel-4.0 /images/chrism
+}
+
 function bind5
 {
 set -x
@@ -6281,7 +6286,7 @@ function vsconfig2
 	ovs-vsctl remove Open_vSwitch . other_config n-revalidator-threads
 	ovs-vsctl remove Open_vSwitch . other_config n-handler-threads
 	ovs-vsctl remove Open_vSwitch . other_config flow-limit
-	ovs-vsctl remove Open_vSwitch . other_config dpkd-init
+	ovs-vsctl remove Open_vSwitch . other_config dpdk-init
 	restart-ovs
 	vsconfig
 }
@@ -6495,10 +6500,10 @@ function git-ovs
 	dir=~/sflow/ofproto
 	local n=$1
 	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1)
+		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
 		n=$((n+1))
 	fi
-	git format-patch -o $dir/$n 2c5a48c9a
+	git format-patch -o $dir/$n 50f603dc4
 }
 
 function git-ofed
@@ -6507,10 +6512,10 @@ function git-ofed
 	mkdir -p $dir
 	local n=$1
 	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1)
+		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
 		n=$((n+1))
 	fi
-	git format-patch -o $dir/$n 9bb9d8123
+	git format-patch -o $dir/$n ae89da18d
 }
 
 function git-linux
@@ -6519,7 +6524,7 @@ function git-linux
 	mkdir -p $dir
 	local n=$1
 	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1)
+		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
 		n=$((n+1))
 	fi
 	git format-patch -o $dir/$n 6f14b7d62cb5
@@ -8181,13 +8186,19 @@ alias ofed='rej; git add -u; ofed1; ofed2'
 
 alias ofed-meta='./devtools/add_metadata.sh'
 
+
+# add $rep2 and uplink rep to bridge
+# only $rep2 can initiate new tcp connection to remote host
 function ct1
 {
 set -x
+	bru
+
+	sudo ovs-ofctl del-flows $br
 	sudo ovs-ofctl add-flow $br table=0,arp,action=normal
 	sudo ovs-ofctl add-flow $br table=0,icmp,action=normal
 	sudo ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)"
-	sudo ovs-ofctl add-flow $br "table=1, ct_state=+trk+new,tcp,in_port=$link actions=ct(commit),normal"
+	sudo ovs-ofctl add-flow $br "table=1, ct_state=+trk+new,tcp,in_port=$rep2 actions=ct(commit),normal"
 	sudo ovs-ofctl add-flow $br "table=1, ct_state=+trk+est,tcp actions=normal"
 set +x
 }
@@ -11085,7 +11096,6 @@ set +x
 }
 
 alias est='conntrack -L | grep EST'
-alias ct1='conntrack -L'
 alias ct8='conntrack -L | grep 8.9.10'
 alias tcp_timeout="sysctl -a | grep conntrack | grep tcp_timeout"
 
