@@ -1041,7 +1041,7 @@ function cloud_setup
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
 
-	yum install -y cscope tmux
+	yum install -y cscope tmux ctags
 
 	ln -s ~chrism/.tmux.conf
 }
@@ -6427,10 +6427,11 @@ function git-ofed-reset
 
 function git_ofed_reset
 {
-	[[ $# != 1 ]] && return
-	local file=$1
+	local file="$1"
 	git show --stat
-	git reset HEAD~ $file
+	for i in "$file"; do
+		git reset HEAD~ $i
+	done
 	git commit --amend
 	git show --stat
 }
@@ -6503,7 +6504,7 @@ function git-ovs
 		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
 		n=$((n+1))
 	fi
-	git format-patch -o $dir/$n 50f603dc4
+	git format-patch -o $dir/$n 93023e80b
 }
 
 function git-ofed
@@ -7734,6 +7735,25 @@ function fetch
 	git checkout -b $new_branch
 }
 
+function rebase
+{
+	if [[ $# == 0 ]]; then
+		repo=origin
+		branch=master
+	elif [[ $# == 1 ]]; then
+		repo=origin
+		local branch=$1
+	elif [[ $# == 2 ]]; then
+		local repo=$1
+		local branch=$2
+	else
+		return
+	fi
+
+	git fetch $repo $branch
+	git rebase FETCH_HEAD
+}
+
 alias git-lx='git apply  ~/sm/kgdb/lx-symbole.patch'
 
 function fetch-13
@@ -8185,7 +8205,7 @@ function ofed3
 alias ofed='rej; git add -u; ofed1; ofed2'
 
 alias ofed-meta='./devtools/add_metadata.sh'
-
+# /images/chrism/mlnx-ofa_kernel-4.0//devtools/verify_metadata.sh -p /images/chrism/mlnx-ofa_kernel-4.0//metadata/Chris_Mi.csv
 
 # add $rep2 and uplink rep to bridge
 # only $rep2 can initiate new tcp connection to remote host
