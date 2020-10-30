@@ -19,6 +19,7 @@ sample_priv = uplink_priv.tc_psample
 print('\n=== mlx5_tc_psample ===\n')
 print("mlx5_tc_psample %x" % sample_priv)
 # print(sample_priv)
+ct = 1
 
 # sys.exit(0)
 
@@ -122,6 +123,9 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
     print("action: %x" % flow_attr.action)
     if esw_attr.sample.value_() != 0:
         sample_flow = esw_attr.sample.sample_flow
+        if ct:
+            print(sample_flow.ct_attr)
+        print("mlx5_sample_flow %x" % sample_flow)
         print("fte_id: %d" % sample_flow.fte_id)
 #         print(sample_flow)
 #         print(sample_flow.pre_attr)
