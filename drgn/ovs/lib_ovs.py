@@ -17,6 +17,7 @@ def ovs_pid():
     if status:
         print("ovs is not started")
         sys.exit(1)
+    print("ovs pid %d" % int(output))
 
     return int(output)
 

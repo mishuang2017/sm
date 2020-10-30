@@ -25,6 +25,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
+[[ "$(hostname -s)" == "c-234-3-220-221" ]] && host_num=221
+
 if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
@@ -139,6 +141,8 @@ elif (( host_num == 17 )); then
 	link=ens9
 elif (( host_num == 18 )); then
 	link=ens9
+elif (( host_num == 221 )); then
+	link=enp6s0f0
 fi
 
 vni=200
@@ -213,10 +217,10 @@ if uname -r | grep 3.10.0-957 > /dev/null 2>&1; then
 	centos76=1
 fi
 
-if [[ "$UID" == "0" ]]; then
-	dmidecode | grep "Red Hat" > /dev/null 2>&1
-	rh=$?
-fi
+# if [[ "$UID" == "0" ]]; then
+# 	dmidecode | grep "Red Hat" > /dev/null 2>&1
+# 	rh=$?
+# fi
 
 export LC_ALL=en_US.UTF-8
 # export DISPLAY=:0.0
@@ -748,6 +752,8 @@ alias vigdb='vi ~/.gdbinit'
 
 alias   vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
 alias       vi_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
+alias      vi_cts="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c \
+	              drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h"
 alias  vi_mod_hdr='vi drivers/net/ethernet/mellanox/mlx5/core/en/mod_hdr.c '
 alias    vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/esw/vporttbl.c "
 alias vi_offloads="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c "
@@ -1041,9 +1047,13 @@ function cloud_setup
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
 
-	yum install -y cscope tmux ctags
+	yum install -y cscope tmux ctags rsync kexec-tools
 
+	mv ~/.bashrc bashrc.orig
+	ln -s ~chrism/.bashrc
 	ln -s ~chrism/.tmux.conf
+	ln -s ~chrism/.vimrc
+	ln -s ~chrism/.vim
 }
 
 function cloud_ofed_cp
@@ -6507,6 +6517,17 @@ function git-ovs
 	git format-patch -o $dir/$n 93023e80b
 }
 
+function git-ct
+{
+	dir=~/sflow/ct
+	local n=$1
+	if [[ $# == 0 ]]; then
+		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
+		n=$((n+1))
+	fi
+	git format-patch -o $dir/$n 61a47b4dac80
+}
+
 function git-ofed
 {
 	dir=~/sflow/backport
@@ -6596,7 +6617,7 @@ function git-format-patch
 #	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$n
 #	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$n
-	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v4" -o $patch_dir -$n
+	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v5" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
 }
 
@@ -9243,6 +9264,63 @@ set -x
 		action mirred egress redirect dev $rep2
 
 	$TC filter add dev $rep3 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac1 ct_state +trk+est \
+		action mirred egress redirect dev $rep2
+
+set +x
+}
+
+function tc_ct_pf
+{
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+set -x
+
+	TC=/images/chrism/iproute2/tc/tc;
+
+	$TC qdisc del dev $rep2 ingress > /dev/null 2>&1;
+	ethtool -K $rep2 hw-tc-offload on;
+	$TC qdisc add dev $rep2 ingress
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1;
+	ethtool -K $link hw-tc-offload on;
+	$TC qdisc add dev $link ingress
+
+	mac1=02:25:d0:$host_num:01:02
+	mac2=$remote_mac
+	echo "add arp rules"
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $link
+
+	$TC filter add dev $link ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
+
+	echo "add ct rules"
+	$TC filter add dev $rep2 ingress protocol ip chain 0 prio 2 flower $offload \
+		dst_mac $mac2 ct_state -trk \
+		action ct pipe action goto chain 1
+
+	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+new \
+		action ct commit \
+		action mirred egress redirect dev $link
+
+	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+est \
+		action mirred egress redirect dev $link
+
+	$TC filter add dev $link ingress protocol ip chain 0 prio 2 flower $offload \
+		dst_mac $mac1 ct_state -trk \
+		action ct pipe action goto chain 1
+
+	$TC filter add dev $link ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac1 ct_state +trk+new \
+		action ct commit \
+		action mirred egress redirect dev $rep2
+
+	$TC filter add dev $link ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac1 ct_state +trk+est \
 		action mirred egress redirect dev $rep2
 

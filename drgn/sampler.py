@@ -16,6 +16,8 @@ mlx5e_rep_priv = get_mlx5e_rep_priv()
 uplink_priv = mlx5e_rep_priv.uplink_priv
 sample_priv = uplink_priv.tc_psample
 
+print('\n=== mlx5_tc_psample ===\n')
+print("mlx5_tc_psample %x" % sample_priv)
 # print(sample_priv)
 
 # sys.exit(0)
