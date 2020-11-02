@@ -4,6 +4,7 @@ if [ -f /etc/bashrc ]; then
 fi
 
 debian=0
+cloud=0
 test -f /usr/bin/lsb_release && debian=1
 
 ofed_mlx5=0
@@ -25,7 +26,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
-[[ "$(hostname -s)" == "c-234-3-220-221" ]] && host_num=221
+[[ "$(hostname -s)" == "c-234-89-1-007" ]] && host_num=7
+[[ "$(hostname -s)" == "c-236-0-240-241" ]] && host_num=241
 
 if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
@@ -141,8 +143,12 @@ elif (( host_num == 17 )); then
 	link=ens9
 elif (( host_num == 18 )); then
 	link=ens9
-elif (( host_num == 221 )); then
+elif (( host_num == 7 )); then
 	link=enp6s0f0
+	cloud=1
+elif (( host_num == 241 )); then
+	link=eth2
+	cloud=1
 fi
 
 vni=200
@@ -161,7 +167,11 @@ base_baud=115200
 base_baud=9600
 
 cpu_num=$(nproc)
-cpu_num2=$((cpu_num*2))
+if (( cloud == 0 )); then
+	cpu_num2=$((cpu_num*2))
+else
+	cpu_num2=$((cpu_num-2))
+fi
 
 nfs_dir='/auto/mtbcswgwork/chrism'
 if which kdump-config > /dev/null 2>&1; then
@@ -2517,8 +2527,6 @@ set -x
 	$TC filter add dev $rep3 prio 2 protocol arp parent ffff: chain 0 flower $offload src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
 set +x
 }
-
-
 
 function tc-ct
 {
@@ -9393,6 +9401,67 @@ set +x
 
 alias sample3=tc_ct_pf_sample
 
+function tc_ct_vf_sample
+{
+	rate=1
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+set -x
+
+	TC=/images/chrism/iproute2/tc/tc;
+
+	$TC qdisc del dev $rep2 ingress > /dev/null 2>&1;
+	ethtool -K $rep2 hw-tc-offload on;
+	$TC qdisc add dev $rep2 ingress
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1;
+	ethtool -K $link hw-tc-offload on;
+	$TC qdisc add dev $link ingress
+
+	mac1=02:25:d0:$host_num:01:02
+	mac2=$remote_mac
+	echo "add arp rules"
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $link
+
+	$TC filter add dev $link ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
+
+	echo "add ct rules"
+	$TC filter add dev $rep2 ingress protocol ip chain 0 prio 2 flower $offload \
+		dst_mac $mac2 ct_state -trk \
+		action sample rate $rate group 5 trunc 60 \
+		action ct pipe action goto chain 1
+
+	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+new \
+		action ct commit \
+		action mirred egress redirect dev $link
+
+	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+est \
+		action mirred egress redirect dev $link
+
+	$TC filter add dev $link ingress protocol ip chain 0 prio 2 flower $offload \
+		dst_mac $mac1 ct_state -trk \
+		action ct pipe action goto chain 1
+
+	$TC filter add dev $link ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac1 ct_state +trk+new \
+		action ct commit \
+		action mirred egress redirect dev $rep2
+
+	$TC filter add dev $link ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac1 ct_state +trk+est \
+		action mirred egress redirect dev $rep2
+
+set +x
+}
+
+alias sample4=tc_ct_vf_sample
+
 function tc_ct_sample
 {
 	rate=1
@@ -9415,19 +9484,16 @@ set -x
 	mac1=02:25:d0:$host_num:01:02
 	mac2=02:25:d0:$host_num:01:03
 	echo "add arp rules"
-# 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
-# 		action mirred egress redirect dev $rep3
-# 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
-# 		action mirred egress redirect dev $rep2
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep3
+	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
 
 	echo "add ct rules"
 	$TC filter add dev $rep2 ingress protocol ip chain 0 prio 2 flower $offload \
 		dst_mac $mac2 ct_state -trk \
 		action sample rate $rate group 5 trunc 60 \
 		action ct pipe action goto chain 1
-
-set +x
-	return
 
 	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac2 ct_state +trk+new \
