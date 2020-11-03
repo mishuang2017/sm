@@ -33,10 +33,44 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-148-180-181" ]] && host_num=81
 [[ "$(hostname -s)" == "c-236-148-180-182" ]] && host_num=82
 
+function get_vf
+{
+	local h=$1
+	local p=$2
+	local n=$3
+
+	h=$(printf "%02d" $h)
+	p=$(printf "%02d" $p)
+	n=$(printf "%02x" $n)
+
+	[[ $# != 3 ]] && return
+
+	local l=$link
+	local dir1=/sys/class/net/$l
+	[[ ! -d $dir1 ]] && return
+
+	local dir2=$(readlink $dir1)
+	# dir1=/sys/class/net/enp4s0f0
+	# dir2=../../devices/pci0000:00/0000:00:02.0/0000:04:00.0/net/enp4s0f0
+	cd $dir1
+
+	cd ../$dir2
+
+	cd ../../../
+	# /sys/devices/pci0000:00/0000:00:02.0
+	for a in $(find . -name address); do
+		local mac=$(cat $a)
+		if [[ "$mac" == "02:25:d0:$h:$p:$n" ]]; then
+			dirname $a | xargs basename
+		fi
+	done
+}
+
 if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
 
+	link_name=2
 	link_pre=enp4s0f0n
 	link=${link_pre}p0
 
@@ -52,10 +86,6 @@ if (( host_num == 13 )); then
 
 	link_mac=b8:59:9f:bb:31:66
 	remote_mac=b8:59:9f:bb:31:82
-
-# 	link_mac=24:8a:07:88:27:9a
-# 	link_mac2=24:8a:07:88:27:9b
-# 	remote_mac=24:8a:07:88:27:ca
 
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=${link}v$i
@@ -89,6 +119,7 @@ elif (( host_num == 14 )); then
 	link=enp4s0f0np0
 	link2=enp4s0f1np1
 
+	link_name=2
 	link_pre=enp4s0f0n
 	link=${link_pre}p0
 
@@ -102,10 +133,6 @@ elif (( host_num == 14 )); then
 	link_remote_ip=192.168.1.$rhost_num
 	link_remote_ip2=192.168.2.$rhost_num
 	link_remote_ipv6=1::$rhost_num
-
-# 	link_mac=24:8a:07:88:27:ca
-# 	link_mac2=24:8a:07:88:27:cb
-# 	remote_mac=24:8a:07:88:27:9a
 
 	link_mac=b8:59:9f:bb:31:82
 	remote_mac=b8:59:9f:bb:31:66
@@ -151,6 +178,7 @@ elif (( host_num == 7 )); then
 	link=enp6s0f0
 	cloud=1
 elif (( host_num == 41 )); then
+	link_name=2
 	link_pre=enp8s0f0n
 	link=${link_pre}p0
 	link_mac=0c:42:a1:d1:d1:50
@@ -164,6 +192,7 @@ elif (( host_num == 41 )); then
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 elif (( host_num == 42)); then
+	link_name=2
 	link_pre=enp8s0f0n
 	link=${link_pre}p0
 
@@ -178,27 +207,27 @@ elif (( host_num == 42)); then
 	cloud=1
 
 elif (( host_num == 81 )); then
+	link_name=1
 	link=enp8s0f0
 
 	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
+		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
 		eval rep$((i+1))=${link}_$i
 	done
 	rhost_num=82
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 elif (( host_num == 82)); then
+	link_name=1
 	link=enp8s0f0
 	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
+		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
 		eval rep$((i+1))=${link}_$i
 	done
 	rhost_num=81
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 fi
-
-
 
 vni=200
 vni=100
@@ -2111,7 +2140,7 @@ function make-all
 alias m=make-all
 alias mm='sudo make modules_install -j; sudo make install; # headers_install'
 alias mi2='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
-alias mi='make -j; sudo make install_kernel -j; reprobe'
+alias mi="make -j $cpu_num2; sudo make install_kernel -j $cpu_num2; reprobe"
 
 function mi2
 {
@@ -4282,10 +4311,15 @@ alias vf152="ip link set dev $link vf 1 vlan 52 qos 0"
 function get_rep
 {
 	[[ $# != 1 ]] && return
-	if [[ "$link" == "enp4s0f0" ]]; then
+	if (( link_name == 1 )); then
 		echo "${link}_$1"
+		return
+	elif (( link_name == 2 )); then
+		echo "${link_pre}pf0vf$1"
+		return
 	else
-		echo ${link_pre}pf0vf$1
+		echo "error"
+		return
 	fi
 }
 
@@ -7955,39 +7989,6 @@ function get_vf_ns
 	local n=$1
 	ns=n1$((n))
 	ip netns exec $ns ls /sys/class/net | grep en
-}
-
-function get_vf
-{
-	local h=$1
-	local p=$2
-	local n=$3
-
-	h=$(printf "%02d" $h)
-	p=$(printf "%02d" $p)
-	n=$(printf "%02x" $n)
-
-	[[ $# != 3 ]] && return
-
-	local l=$link
-	local dir1=/sys/class/net/$l
-	[[ ! -d $dir1 ]] && return
-
-	local dir2=$(readlink $dir1)
-	# dir1=/sys/class/net/enp4s0f0
-	# dir2=../../devices/pci0000:00/0000:00:02.0/0000:04:00.0/net/enp4s0f0
-	cd $dir1
-
-	cd ../$dir2
-
-	cd ../../../
-	# /sys/devices/pci0000:00/0000:00:02.0
-	for a in $(find . -name address); do
-		local mac=$(cat $a)
-		if [[ "$mac" == "02:25:d0:$h:$p:$n" ]]; then
-			dirname $a | xargs basename
-		fi
-	done
 }
 
 # vf1=$(get_vf $host_num 1 1)
