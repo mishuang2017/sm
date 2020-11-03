@@ -30,6 +30,9 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-0-240-241" ]] && host_num=41
 [[ "$(hostname -s)" == "c-236-0-240-242" ]] && host_num=42
 
+[[ "$(hostname -s)" == "c-236-148-180-181" ]] && host_num=81
+[[ "$(hostname -s)" == "c-236-148-180-182" ]] && host_num=82
+
 if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
 	export DISPLAY=localhost:10.0	# via vpn
@@ -157,7 +160,8 @@ elif (( host_num == 41 )); then
 		eval vf$((i+1))=${link}v$i
 		eval rep$((i+1))=${link_pre}pf0vf$i
 	done
-
+	rhost_num=42
+	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 elif (( host_num == 42)); then
 	link_pre=enp8s0f0n
@@ -169,9 +173,32 @@ elif (( host_num == 42)); then
 		eval vf$((i+1))=${link}v$i
 		eval rep$((i+1))=${link_pre}pf0vf$i
 	done
+	rhost_num=41
+	link_remote_ip=192.168.1.$rhost_num
+	cloud=1
 
+elif (( host_num == 81 )); then
+	link=enp8s0f0
+
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link}_$i
+	done
+	rhost_num=82
+	link_remote_ip=192.168.1.$rhost_num
+	cloud=1
+elif (( host_num == 82)); then
+	link=enp8s0f0
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link}_$i
+	done
+	rhost_num=81
+	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 fi
+
+
 
 vni=200
 vni=100
@@ -1078,7 +1105,7 @@ function cloud_setup
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
 
-	yum install -y cscope tmux ctags rsync grubby libnsl
+	yum install -y cscope tmux ctags rsync grubby
 
 	mv ~/.bashrc bashrc.orig
 	ln -s ~chrism/.bashrc
@@ -9437,17 +9464,17 @@ set -x
 	ethtool -K $rep2 hw-tc-offload on;
 	$TC qdisc add dev $rep2 ingress
 
-	$TC qdisc del dev $link ingress > /dev/null 2>&1;
-	ethtool -K $link hw-tc-offload on;
-	$TC qdisc add dev $link ingress
+	$TC qdisc del dev $rep3 ingress > /dev/null 2>&1;
+	ethtool -K $rep3 hw-tc-offload on;
+	$TC qdisc add dev $rep3 ingress
 
 	mac1=02:25:d0:$host_num:01:02
-	mac2=$remote_mac
+	mac2=02:25:d0:$host_num:01:03
 	echo "add arp rules"
 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
-		action mirred egress redirect dev $link
+		action mirred egress redirect dev $rep3
 
-	$TC filter add dev $link ingress protocol arp prio 1 flower $offload \
+	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
 		action mirred egress redirect dev $rep2
 
 	echo "add ct rules"
@@ -9459,24 +9486,25 @@ set -x
 	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac2 ct_state +trk+new \
 		action ct commit \
-		action mirred egress redirect dev $link
+		action mirred egress redirect dev $rep3
 
 	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac2 ct_state +trk+est \
-		action mirred egress redirect dev $link
+		action mirred egress redirect dev $rep3
 
-	$TC filter add dev $link ingress protocol ip chain 0 prio 2 flower $offload \
+	$TC filter add dev $rep3 ingress protocol ip chain 0 prio 2 flower $offload \
 		dst_mac $mac1 ct_state -trk \
 		action ct pipe action goto chain 1
 
-	$TC filter add dev $link ingress protocol ip chain 1 prio 2 flower $offload \
+	$TC filter add dev $rep3 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac1 ct_state +trk+new \
 		action ct commit \
 		action mirred egress redirect dev $rep2
 
-	$TC filter add dev $link ingress protocol ip chain 1 prio 2 flower $offload \
+	$TC filter add dev $rep3 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac1 ct_state +trk+est \
 		action mirred egress redirect dev $rep2
+
 
 set +x
 }
