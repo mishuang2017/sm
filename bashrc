@@ -27,7 +27,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
 [[ "$(hostname -s)" == "c-234-89-1-007" ]] && host_num=7
-[[ "$(hostname -s)" == "c-236-0-240-241" ]] && host_num=241
+[[ "$(hostname -s)" == "c-236-0-240-241" ]] && host_num=41
+[[ "$(hostname -s)" == "c-236-0-240-242" ]] && host_num=42
 
 if (( host_num == 13 )); then
 	export DISPLAY=MTBC-CHRISM:0.0
@@ -146,8 +147,29 @@ elif (( host_num == 18 )); then
 elif (( host_num == 7 )); then
 	link=enp6s0f0
 	cloud=1
-elif (( host_num == 241 )); then
-	link=eth2
+elif (( host_num == 41 )); then
+	link_pre=enp8s0f0n
+	link=${link_pre}p0
+	link_mac=0c:42:a1:d1:d1:50
+	remote_mac=0c:42:a1:d1:d0:b4
+
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link_pre}pf0vf$i
+	done
+
+	cloud=1
+elif (( host_num == 42)); then
+	link_pre=enp8s0f0n
+	link=${link_pre}p0
+
+	link_mac=0c:42:a1:d1:d0:b4
+	remote_mac=0c:42:a1:d1:d1:50
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=${link}v$i
+		eval rep$((i+1))=${link_pre}pf0vf$i
+	done
+
 	cloud=1
 fi
 
@@ -586,6 +608,7 @@ alias smk="cd /$images/chrism/sm/drgn"
 alias smdo="cd ~chrism/sm/drgn/ovs"
 alias d-ovs="sudo ~chrism/sm/drgn/ovs/ovs.py"
 alias err="sudo ~chrism/sm/drgn/ovs/errors.py"
+alias sk='cd /swgwork/chrism'
 
 alias softirq="/$images/chrism/bcc/tools/softirqs.py 1"
 alias hardirq="/$images/chrism/bcc/tools/hardirqs.py 5"
@@ -916,13 +939,11 @@ alias bd2='sudo ~chrism/bin/single-port2.sh; enable-ovs-debug'	# dnat
 alias bd3='sudo ~chrism/bin/single-port3.sh; enable-ovs-debug'
 
 corrupt_dir=corrupt_lat_linux
-alias cd-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir"
-alias cd-netlink="cd /labhome/chrism/prg/c/my_netlink2"
-alias cd-mnl="cd /labhome/chrism/prg/c/libmnl_genl2"
-alias vi-corrupt="cd /labhome/chrism/prg/c/corrupt/$corrupt_dir; vi corrupt.c"
-alias corrupt="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt"
-alias corrupt2000="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt2000"
-alias corrupt2="/labhome/chrism/prg/c/corrupt/$corrupt_dir/corrupt2"
+alias cd-corrupt="cd /labhome/chrism/sm/prg/c/$corrupt_dir"
+alias cd-netlink="cd /labhome/chrism/sm/prg/c/my_netlink2"
+alias cd-mnl="cd /labhome/chrism/prg/sm/c/libmnl_genl2"
+alias vi-corrupt="cd /labhome/chrism/sm/prg/c/$corrupt_dir; vi corrupt.c"
+alias corrupt="/labhome/chrism/sm/prg/c/$corrupt_dir/corrupt"
 
 [[ $UID == 0 ]] && echo 2 > /proc/sys/fs/suid_dumpable
 
@@ -1057,7 +1078,7 @@ function cloud_setup
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
 
-	yum install -y cscope tmux ctags rsync kexec-tools
+	yum install -y cscope tmux ctags rsync grubby libnsl
 
 	mv ~/.bashrc bashrc.orig
 	ln -s ~chrism/.bashrc
@@ -2222,7 +2243,7 @@ set +x
 alias tc_nat.sh='sudo ~chrism/bin/tc_nat.sh'
 alias tc_ct.sh='sudo ~chrism/bin/tc_ct.sh'
 
-function tc-pf
+function tc_pf
 {
 set -x
 	offload=""
@@ -2255,11 +2276,11 @@ set -x
 # 	$TC filter add dev $rep2 prio 2 protocol arp chain 100 parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $link
 # 	$TC filter add dev $rep2 prio 1 protocol arp chain 100 parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $link
 
-# 	src_mac=$remote_mac
-# 	dst_mac=02:25:d0:$host_num:01:02
-# 	$TC filter add dev $link prio 3 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
-# 	$TC filter add dev $link prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
-# 	$TC filter add dev $link prio 1 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
+	src_mac=$remote_mac
+	dst_mac=02:25:d0:$host_num:01:02
+	$TC filter add dev $link prio 3 protocol ip  parent ffff: flower $offload src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $link prio 2 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $dst_mac action mirred egress redirect dev $rep2
+	$TC filter add dev $link prio 1 protocol arp parent ffff: flower skip_hw  src_mac $src_mac dst_mac $brd_mac action mirred egress redirect dev $rep2
 set +x
 }
 
@@ -9856,12 +9877,13 @@ alias udp14=/labhome/chrism/prg/python/scapy/udp14.py
 alias reboot='echo reboot; read; reboot'
 
 # two way traffic
-alias udp-server-2='/labhome/chrism/prg/c/udp-server/udp-server-2'
-alias udp-client-2='/labhome/chrism/prg/c/udp-client/udp-client-2'
+alias udp-server-2='/labhome/chrism/sm/prg/c/udp-server/udp-server-2'
+alias udp-client-2='/labhome/chrism/sm/prg/c/udp-client/udp-client-2'
 
 # one way traffic
-alias udp-server='/labhome/chrism/prg/c/udp-server/udp-server'
-alias udp-client="/labhome/chrism/prg/c/udp-client/udp-client -c 192.168.1.$rhost_num -i 1 -t 10000"
+alias udp-server='/labhome/chrism/sm/prg/c/udp-server/udp-server'
+alias udp-client="/labhome/chrism/sm/prg/c/udp-client/udp-client"
+alias udp-client-example="/labhome/chrism/sm/prg/c/udp-client/udp-client -c 192.168.1.$rhost_num -i 1 -t 10000"
 
 function udp1
 {
@@ -11994,8 +12016,8 @@ set -x
 # 		ovs-vsctl -- --id=@sflow create sflow agent=$link target=\"192.168.1.13:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 set +x
 	fi
-	if (( host_num == 3 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.130.42.1:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
+	if (( host_num == 41 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.236.0.242:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 	fi
 }
 
