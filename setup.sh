@@ -48,14 +48,14 @@ set -x
 	yum -y instal texinfo
 
 	# drgn, xz-devel for lzma
-	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel
+	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel bzip2-devel
 
 	sleep 1
 	systemctl disable gdm
 	systemctl stop gdm
 
-	# libnsl.so.1
-	yum -y install libnsl
+	# "cannot find -lnsl", on fedora 31, install libnsl2-devel
+	yum -y install libnsl libnsl2-devel
 	sleep 1
 
 	# nginx
