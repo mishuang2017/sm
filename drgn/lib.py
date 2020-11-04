@@ -211,7 +211,9 @@ def print_exts(e):
 
 def print_cls_fl_filter(f):
     print("handle: 0x%x" % f.handle)
+    print("in_hw_count: %d" % f.in_hw_count)
     k = f.mkey
+    print("ct_state: 0x%x" % k.ct.ct_state)
 #     print("ct_state: %x" % k.ct_state)
 #     print("mask ct_state: %x" % f.mask.key.ct_state)
     #define FLOW_DIS_IS_FRAGMENT    BIT(0)

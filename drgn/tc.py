@@ -32,7 +32,7 @@ for x, dev in enumerate(get_netdevs()):
     if block.value_() == 0:
         continue
 
-#     print("block.lockeddevcnt: %d" % block.lockeddevcnt)
+    print("tcf_block %lx, block index: %d" % (block, block.index))
 
     if struct_exist("struct flow_block_cb"):
         for cb in list_for_each_entry('struct flow_block_cb', block.flow_block.cb_list.address_of_(), 'list'):
@@ -40,7 +40,7 @@ for x, dev in enumerate(get_netdevs()):
 
             func = cb.cb.value_()
             func = address_to_name(hex(func))
-            print("flow_block_cb cb     : %s" % func)
+            print("flow_block_cb cb     : %s, cb_priv: %x" % (func, cb.cb_priv))
 
             release = cb.release.value_()
             release = address_to_name(hex(release))
@@ -71,7 +71,6 @@ for x, dev in enumerate(get_netdevs()):
             print("chain 0, continue")
             continue
         print("tcf_chain %lx" % chain.value_())
-        print("tcf_block %lx" % chain.block.value_())
         print("chain index: %d, 0x%x" % (chain.index, chain.index))
         print("chain refcnt: %d" % (chain.refcnt))
         print("chain action_refcnt: %d" % (chain.action_refcnt))
@@ -86,6 +85,7 @@ for x, dev in enumerate(get_netdevs()):
             for node in radix_tree_for_each(head.handle_idr.idr_rt):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
+                print("++++++++++++++++++++++++++++++++++++++++++")
                 print("cls_fl_filter %lx" % f.address_of_())
                 print_cls_fl_filter(f)
             tcf_proto = tcf_proto.next
