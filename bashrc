@@ -1140,6 +1140,20 @@ function cloud_setup
 	ln -s ~chrism/.tmux.conf
 	ln -s ~chrism/.vimrc
 	ln -s ~chrism/.vim
+
+	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel bzip2-devel
+	yum_bcc
+}
+
+function cloud_install
+{
+	sm
+	clone-drgn
+	cd drgn
+	sudo ./setup.py build
+	sudo ./setup.py install
+
+	install_bcc
 }
 
 function cloud_ofed_cp
