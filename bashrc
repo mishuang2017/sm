@@ -30,8 +30,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-0-240-241" ]] && host_num=41
 [[ "$(hostname -s)" == "c-236-0-240-242" ]] && host_num=42
 
-[[ "$(hostname -s)" == "c-236-148-180-183" ]] && host_num=83
-[[ "$(hostname -s)" == "c-236-148-180-184" ]] && host_num=84
+[[ "$(hostname -s)" == "c-236-149-180-183" ]] && host_num=83
+[[ "$(hostname -s)" == "c-236-149-180-184" ]] && host_num=84
 
 function get_vf
 {
@@ -1135,11 +1135,13 @@ function cloud_setup
 
 	yum install -y cscope tmux ctags rsync grubby
 
-	mv ~/.bashrc bashrc.orig
-	ln -s ~chrism/.bashrc
-	ln -s ~chrism/.tmux.conf
-	ln -s ~chrism/.vimrc
-	ln -s ~chrism/.vim
+	if ! test ~/.tmux.conf; then
+		mv ~/.bashrc bashrc.orig
+		ln -s ~chrism/.bashrc
+		ln -s ~chrism/.tmux.conf
+		ln -s ~chrism/.vimrc
+		ln -s ~chrism/.vim
+	fi
 
 	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel bzip2-devel
 	yum_bcc
