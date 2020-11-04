@@ -13,6 +13,9 @@ import time
 sys.path.append(".")
 from lib_ovs import *
 
+ufid_to_tc = prog['ufid_to_tc']
+# print(ufid_to_tc)
+
 def print_ufid_tc_data(data):
     print("name: %s" % data.netdev.name.string_().decode(), end='\t')
     print_ufid(data.ufid)

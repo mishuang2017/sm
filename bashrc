@@ -86,6 +86,7 @@ if (( host_num == 13 )); then
 
 	link_mac=b8:59:9f:bb:31:66
 	remote_mac=b8:59:9f:bb:31:82
+	machine_num=1
 
 	if (( link_name == 2 )); then
 		for (( i = 0; i < numvfs; i++)); do
@@ -137,6 +138,7 @@ elif (( host_num == 14 )); then
 
 	link_mac=b8:59:9f:bb:31:82
 	remote_mac=b8:59:9f:bb:31:66
+	machine_num=2
 
 	vf1=enp4s0f2
 	vf2=enp4s0f3
@@ -210,10 +212,16 @@ elif (( host_num == 42)); then
 elif (( host_num == 83 )); then
 	link_name=1
 	link=enp8s0f0
+	link2=enp8s0f1
+	machine_num=1
 
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
 		eval rep$((i+1))=${link}_$i
+	done
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
+		eval rep$((i+1))_2=${link2}_$i
 	done
 	rhost_num=84
 	link_remote_ip=192.168.1.$rhost_num
@@ -221,9 +229,16 @@ elif (( host_num == 83 )); then
 elif (( host_num == 84)); then
 	link_name=1
 	link=enp8s0f0
+	link2=enp8s0f1
+	machine_num=2
+
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
 		eval rep$((i+1))=${link}_$i
+	done
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
+		eval rep$((i+1))_2=${link2}_$i
 	done
 	rhost_num=83
 	link_remote_ip=192.168.1.$rhost_num
@@ -239,8 +254,8 @@ vxlan_port=4000
 vxlan_port=4789
 vxlan_mac=24:25:d0:e2:00:00
 ecmp=0
-ports=2
 ports=1
+ports=2
 
 base_baud=115200
 base_baud=9600
@@ -1189,9 +1204,10 @@ set +x
 }
 # alias vfs="cat /sys/class/net/$link/device/sriov_totalvfs"
 
-alias on-sriov1="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
-alias on-sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.1/sriov_numvfs"
+# alias on-sriov1="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
+# alias on-sriov2="echo $numvfs > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.1/sriov_numvfs"
 alias on-sriov="echo $numvfs > /sys/class/net/$link/device/sriov_numvfs"
+alias on-sriov2="echo $numvfs > /sys/class/net/$link2/device/sriov_numvfs"
 alias on1='on-sriov; set_mac 1; un; ip link set $link vf 0 spoofchk on'
 alias un2="unbind_all $link2"
 alias off-sriov="echo 0 > /sys/devices/pci0000:00/0000:00:02.0/0000:04:00.0/sriov_numvfs"
@@ -5110,9 +5126,9 @@ function set_netns_all
 
 	echo
 	echo "start set_netns_all"
-	if (( host_num == 13 )); then
+	if (( machine_num == 1 )); then
 		ns_ip=1.1.$p
-	elif (( host_num == 14 )); then
+	elif (( machine_num == 2 )); then
 		ns_ip=1.1.$((p+2))
 	fi
 
@@ -9917,7 +9933,7 @@ set -x
 	ovs-vsctl add-port $br $rep1
 	ovs-vsctl add-port $br $rep2
 	ovs-vsctl add-port $br $rep3
-	ifconfig $vf1 192.168.1.$host_num/24 up
+# 	ifconfig $vf1 192.168.1.$host_num/24 up
 	ifconfig $rep1 up
 # 	ovs-ofctl add-flow $br "in_port=bond0,dl_dst=2:25:d0:13:01:01 action=$rep1"
 set +x

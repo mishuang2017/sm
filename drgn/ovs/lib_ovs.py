@@ -29,6 +29,9 @@ def print_hmap(hmap_addr, struct_name, member):
     buckets = hmap_addr.buckets.value_()
     n = hmap_addr.n.value_()
 
+    if n == 0:
+        return objs
+
 #     print("\n=== %s: buckets: %x, n: %d ===" % (struct_name, buckets, n))
 
     i = 0
