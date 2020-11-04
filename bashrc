@@ -9423,6 +9423,64 @@ set -x
 set +x
 }
 
+function tc_ct_bond
+{
+	offload=""
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+
+set -x
+
+	TC=/images/chrism/iproute2/tc/tc;
+
+	bond=bond0
+	$TC qdisc del dev $rep2 ingress > /dev/null 2>&1;
+	ethtool -K $rep2 hw-tc-offload on;
+	$TC qdisc add dev $rep2 ingress
+
+	$TC qdisc del dev $bond ingress > /dev/null 2>&1;
+	ethtool -K $bond hw-tc-offload on;
+	$TC qdisc add dev $bond ingress
+
+	mac1=02:25:d0:$host_num:01:02
+	mac2=$remote_mac
+	echo "add arp rules"
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $bond
+
+	$TC filter add dev $bond ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
+
+	echo "add ct rules"
+	$TC filter add dev $rep2 ingress protocol ip chain 0 prio 2 flower $offload \
+		dst_mac $mac2 ct_state -trk \
+		action ct pipe action goto chain 1
+
+	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+new \
+		action ct commit \
+		action mirred egress redirect dev $bond
+
+	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac2 ct_state +trk+est \
+		action mirred egress redirect dev $bond
+
+	$TC filter add dev $bond ingress protocol ip chain 0 prio 2 flower $offload \
+		dst_mac $mac1 ct_state -trk \
+		action ct pipe action goto chain 1
+
+	$TC filter add dev $bond ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac1 ct_state +trk+new \
+		action ct commit \
+		action mirred egress redirect dev $rep2
+
+	$TC filter add dev $bond ingress protocol ip chain 1 prio 2 flower $offload \
+		dst_mac $mac1 ct_state +trk+est \
+		action mirred egress redirect dev $rep2
+
+set +x
+}
+
 function tc_ct_pf_sample
 {
 	rate=1
