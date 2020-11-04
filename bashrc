@@ -9939,6 +9939,8 @@ set -x
 set +x
 	up_all_reps 1
 	up_all_reps 2
+
+	bond_br_ct_pf
 }
 
 function bond_br_ct_pf
@@ -9947,25 +9949,22 @@ function bond_br_ct_pf
 
 	bond=bond0
 
-	ovs-ofctl add-flow $br in_port=$rep2,dl_type=0x0806,actions=output:$bond
-	ovs-ofctl add-flow $br in_port=$bond,dl_type=0x0806,actions=output:$rep2
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL
 
-	proto=udp
-	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
-	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
-	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
-
-	proto=tcp
-	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
-	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
-	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
-
-	proto=icmp
-	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
-	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
-	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+	ovs-ofctl add-flow $br "table=0, ip,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, ip,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, ip,ct_state=+trk+est actions=normal"
 
 	ovs-ofctl dump-flows $br
+}
+
+function bond_setup
+{
+	off
+	bond_delete
+	bond_switchdev
+	bond_create
+	bond_br
 }
 
 alias cd-scapy='cd /labhome/chrism/prg/python/scapy'
