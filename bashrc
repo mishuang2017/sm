@@ -30,8 +30,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-0-240-241" ]] && host_num=41
 [[ "$(hostname -s)" == "c-236-0-240-242" ]] && host_num=42
 
-[[ "$(hostname -s)" == "c-236-148-180-181" ]] && host_num=81
-[[ "$(hostname -s)" == "c-236-148-180-182" ]] && host_num=82
+[[ "$(hostname -s)" == "c-236-148-180-183" ]] && host_num=83
+[[ "$(hostname -s)" == "c-236-148-180-184" ]] && host_num=84
 
 function get_vf
 {
@@ -206,7 +206,7 @@ elif (( host_num == 42)); then
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 
-elif (( host_num == 81 )); then
+elif (( host_num == 83 )); then
 	link_name=1
 	link=enp8s0f0
 
@@ -214,17 +214,17 @@ elif (( host_num == 81 )); then
 		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
 		eval rep$((i+1))=${link}_$i
 	done
-	rhost_num=82
+	rhost_num=84
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
-elif (( host_num == 82)); then
+elif (( host_num == 84)); then
 	link_name=1
 	link=enp8s0f0
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
 		eval rep$((i+1))=${link}_$i
 	done
-	rhost_num=81
+	rhost_num=83
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 fi
@@ -521,7 +521,6 @@ alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_ke
 alias clone-ofed-4.6='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
 alias clone-iproute2-ct='git clone https://github.com/roidayan/iproute2 --branch=ct-one-table'
-alias clone-iproute2='git clone http://gerrit:8080/upstream/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
 alias clone-crash-upstream='git clone git@github.com:crash-utility/crash.git'

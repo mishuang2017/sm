@@ -1716,6 +1716,9 @@ git push origin HEAD:refs/for/mlnx_ofed_5_2/fix-sampler-term-table-issue
 
 ===git===
 
+# Finding what branch a Git commit came from
+git branch -a --contains 6b37dd13fc27
+
 nvidia.com
 git commit --amend --reset-author
 
