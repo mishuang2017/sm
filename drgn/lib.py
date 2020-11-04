@@ -49,6 +49,8 @@ if hostname("c-236-0-240-241"):
 
 if hostname("c-236-149-180-183"):
     pf0_name = "enp8s0f0"
+if hostname("c-236-149-180-184"):
+    pf0_name = "enp8s0f0"
 
 import os
 
