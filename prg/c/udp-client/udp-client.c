@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 		if (verbose)
 			printf("Server : %s\n", buffer); 
 #endif
-		sleep(interval);
+		sleep(0.01);
 	}
 
 	close(sockfd); 

@@ -537,6 +537,7 @@ alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_ke
 alias clone-ofed-4.6='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
 alias clone-iproute2-ct='git clone https://github.com/roidayan/iproute2 --branch=ct-one-table'
+alias clone-iproute='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
 alias clone-crash-upstream='git clone git@github.com:crash-utility/crash.git'
@@ -2262,7 +2263,7 @@ function tc2
 {
 	local l
 #	for link in p2p1 $rep1 $rep2 $vx_rep; do
-	for l in $link $rep1 $rep2 $rep3; do
+	for l in $link $rep1 $rep2 $rep3 bond0; do
 		ip link show $l > /dev/null 2>&1 || continue
 		tc qdisc show dev $l ingress | grep ffff > /dev/null 2>&1
 		if (( $? == 0 )); then
@@ -5475,6 +5476,7 @@ function start-switchdev-all
 
 alias mystart=start-switchdev-all
 alias restart='off; dmfs; mystart'
+alias restart_smfs='off; smfs; mystart'
 
 function start-switchdev
 {
@@ -9434,13 +9436,13 @@ set -x
 	TC=/images/chrism/iproute2/tc/tc;
 
 	bond=bond0
-	$TC qdisc del dev $rep2 ingress > /dev/null 2>&1;
-	ethtool -K $rep2 hw-tc-offload on;
-	$TC qdisc add dev $rep2 ingress
+	block_id=$(tc qdisc show dev bond0 | grep ingress_block | cut -d ' ' -f 7)
 
-	$TC qdisc del dev $bond ingress > /dev/null 2>&1;
-	ethtool -K $bond hw-tc-offload on;
-	$TC qdisc add dev $bond ingress
+	for i in $link $link2 $rep2; do
+		$TC qdisc del dev $i ingress > /dev/null 2>&1;
+		ethtool -K $i hw-tc-offload on;
+		$TC qdisc add dev $i ingress
+	done
 
 	mac1=02:25:d0:$host_num:01:02
 	mac2=$remote_mac
@@ -9448,7 +9450,7 @@ set -x
 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
 		action mirred egress redirect dev $bond
 
-	$TC filter add dev $bond ingress protocol arp prio 1 flower $offload \
+	$TC filter add block $block_id ingress protocol arp prio 1 flower $offload \
 		action mirred egress redirect dev $rep2
 
 	echo "add ct rules"
@@ -9465,16 +9467,16 @@ set -x
 		dst_mac $mac2 ct_state +trk+est \
 		action mirred egress redirect dev $bond
 
-	$TC filter add dev $bond ingress protocol ip chain 0 prio 2 flower $offload \
+	$TC filter add block $block_id ingress protocol ip chain 0 prio 2 flower $offload \
 		dst_mac $mac1 ct_state -trk \
 		action ct pipe action goto chain 1
 
-	$TC filter add dev $bond ingress protocol ip chain 1 prio 2 flower $offload \
+	$TC filter add block $block_id ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac1 ct_state +trk+new \
 		action ct commit \
 		action mirred egress redirect dev $rep2
 
-	$TC filter add dev $bond ingress protocol ip chain 1 prio 2 flower $offload \
+	$TC filter add block $block_id ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac1 ct_state +trk+est \
 		action mirred egress redirect dev $rep2
 
@@ -9925,6 +9927,7 @@ function bond_switchdev
 {
 	nic=$1
 	off_all
+	smfs
 	on-sriov
 	sleep 1
 	on-sriov2
@@ -9962,7 +9965,8 @@ set -x
 	ip link set dev $link2 down
 
 	ip link add name bond0 type bond
-	ip link set dev bond0 type bond mode active-backup
+# 	ip link set dev bond0 type bond mode active-backup
+	ip link set dev bond0 type bond mode balance-rr
 	ip link set dev $link master bond0
 	ip link set dev $link2 master bond0
 	ip link set dev bond0 up
@@ -9998,7 +10002,7 @@ set +x
 	up_all_reps 1
 	up_all_reps 2
 
-	bond_br_ct_pf
+# 	bond_br_ct_pf
 }
 
 function bond_br_ct_pf
