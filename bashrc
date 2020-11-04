@@ -87,23 +87,24 @@ if (( host_num == 13 )); then
 	link_mac=b8:59:9f:bb:31:66
 	remote_mac=b8:59:9f:bb:31:82
 
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
-		eval rep$((i+1))=${link_pre}pf0vf$i
-	done
+	if (( link_name == 2 )); then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link_pre}pf0vf$i
+		done
 
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))_2=${link2}v$i
-# 		eval rep$((i+1))_2=${link2}_$i
-		eval rep$((i+1))_2=${link2_pre}pf1vf$i
-	done
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))_2=${link2}v$i
+			eval rep$((i+1))_2=${link2_pre}pf1vf$i
+		done
+	fi
 
-	if [[ "$link" == "enp4s0f0" ]]; then
+	if (( link_name == 1 )); then
 		for (( i = 0; i < numvfs; i++)); do
 			eval vf$((i+1))=${link}v$i
 			eval rep$((i+1))=${link}_$i
 		done
-        fi
+	fi
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
@@ -530,6 +531,7 @@ alias clone-bin='git clone https://github.com/mishuang2017/bin.git'
 alias clone-c='git clone https://github.com/mishuang2017/c.git'
 alias clone-rpmbuild='git clone git@github.com:mishuang2017/rpmbuild.git'
 alias clone-ovs='git clone ssh://10.7.0.100:29418/openvswitch'
+alias clone-ovs-ofed-5.2='git clone ssh://10.7.0.100:29418/openvswitch --branch=mlnx_ofed_5_2'
 alias clone-ovs-upstream='git clone git@github.com:openvswitch/ovs.git'
 alias clone-ovs-mishuang='git clone git@github.com:mishuang2017/ovs.git'
 alias clone-ovs-ct='git clone https://github.com/roidayan/ovs --branch=ct-one-table-2.10'
@@ -2153,7 +2155,7 @@ function make-all
 	/bin/rm -rf ~/.ccache
 }
 alias m=make-all
-alias mm='sudo make modules_install -j; sudo make install; # headers_install'
+alias mm='sudo make modules_install -j; sudo make install; headers_install'
 alias mi2='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
 alias mi="make -j $cpu_num2; sudo make install_kernel -j $cpu_num2; reprobe"
 
@@ -7834,6 +7836,12 @@ alias ofed-configure-all="./configure  --with-core-mod --with-user_mad-mod --wit
 alias ofed-configure="./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j $cpu_num2"
 alias ofed-configure="./configure --with-mlx5-core-and-ib-and-en-mod -j $cpu_num2"
 
+function ofed_configure
+{
+	smm
+	./configure $(cat /etc/infiniband/info  | grep Configure | cut -d : -f 2 | sed 's/"//') -j $cpu_num2
+}
+
 # alias ofed-configure2="./configure -j32 --with-linux=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --kernel-version=4.7-rc7 --kernel-sources=/mswg2/work/kernel.org/x86_64/linux-4.7-rc7 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
 
 # ./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlx5-mod --with-mlx4-mod --with-mlx4_en-mod --with-ipoib-mod --with-mlxfw-mod --with-srp-mod --with-iser-mod --with-isert-mod --with-innova-flex --kernel-sources=/images/kernel_headers/x86_64//linux-4.7-rc7 --kernel-version=4.7-rc7 -j 8
@@ -9585,7 +9593,7 @@ set -x
 set +x
 }
 
-function br-ct
+function br_ct
 {
         local proto
 
@@ -9614,6 +9622,7 @@ function br-ct
 
 	ovs-ofctl dump-flows $br
 }
+
 
 function br_qa_ct
 {
@@ -9898,7 +9907,7 @@ set +x
 	set_netns_all 1
 }
 
-function br_bond
+function bond_br
 {
 set -x
 	restart-ovs
@@ -9906,10 +9915,41 @@ set -x
 	ovs-vsctl add-br $br
 	ovs-vsctl add-port $br bond0
 	ovs-vsctl add-port $br $rep1
+	ovs-vsctl add-port $br $rep2
+	ovs-vsctl add-port $br $rep3
 	ifconfig $vf1 192.168.1.$host_num/24 up
 	ifconfig $rep1 up
 # 	ovs-ofctl add-flow $br "in_port=bond0,dl_dst=2:25:d0:13:01:01 action=$rep1"
 set +x
+	up_all_reps 1
+	up_all_reps 2
+}
+
+function bond_br_ct_pf
+{
+        local proto
+
+	bond=bond0
+
+	ovs-ofctl add-flow $br in_port=$rep2,dl_type=0x0806,actions=output:$bond
+	ovs-ofctl add-flow $br in_port=$bond,dl_type=0x0806,actions=output:$rep2
+
+	proto=udp
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	proto=tcp
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	proto=icmp
+	ovs-ofctl add-flow $br "table=0, $proto,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1, $proto,ct_state=+trk+est actions=normal"
+
+	ovs-ofctl dump-flows $br
 }
 
 alias cd-scapy='cd /labhome/chrism/prg/python/scapy'

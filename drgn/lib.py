@@ -38,9 +38,11 @@ def hostname(name):
         return False
 
 pf0_name = "enp4s0f0np0"
+pf1_name = "enp4s0f1np1"
+
 if kernel("4.19.36+"):
     pf0_name = "enp4s0f0"
-pf1_name = "enp4s0f1"
+    pf1_name = "enp4s0f1"
 
 if hostname("c-236-0-240-241"):
     pf0_name = "enp8s0f0np0"

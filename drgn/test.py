@@ -12,7 +12,9 @@ sys.path.append(libpath)
 from lib import *
 
 mlx5e_priv = get_mlx5_pf0()
-mlx5e_rep_priv = get_mlx5e_rep_priv()
-uplink_priv = mlx5e_rep_priv.uplink_priv
-sample_priv = uplink_priv.tc_psample
-print(uplink_priv)
+esw = mlx5e_priv.mdev.priv.eswitch
+print(esw.tc_refcnt)
+
+priv2 = get_mlx5_pf1()
+esw2 = priv2.mdev.priv.eswitch
+print(esw2.tc_refcnt)
