@@ -12004,3 +12004,9 @@ TIME     PID     TID     COMM            FUNC
         entry_SYSCALL_64_after_hwframe+0x44 [kernel]
 
 ===end===
+
+alias cx6='ssh root@10.236.0.241'
+alias cx6-2='ssh root@10.236.0.242'
+
+alias 183='ssh root@10.236.149.183'
+alias 184='ssh root@10.236.149.184'
