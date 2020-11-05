@@ -7894,9 +7894,11 @@ function fetch
 
 function rebase
 {
+	b=$(test -f .git/index > /dev/null 2>&1 && git branch | grep \* | cut -d ' ' -f2)
 	if [[ $# == 0 ]]; then
 		repo=origin
-		branch=master
+		branch=$b
+		echo $b
 	elif [[ $# == 1 ]]; then
 		repo=origin
 		local branch=$1
