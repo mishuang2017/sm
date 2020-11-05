@@ -254,8 +254,8 @@ vxlan_port=4000
 vxlan_port=4789
 vxlan_mac=24:25:d0:e2:00:00
 ecmp=0
-ports=1
 ports=2
+ports=1
 
 base_baud=115200
 base_baud=9600
@@ -4360,10 +4360,15 @@ function get_rep
 function get_rep2
 {
 	[[ $# != 1 ]] && return
-	if [[ "$link" == "enp4s0f0" ]]; then
+	if (( link_name == 1 )); then
 		echo "${link2}_$1"
-	else
+		return
+	elif (( link_name == 2 )); then
 		echo ${link2_pre}pf1vf$1
+		return
+		echo "error"
+	else
+		return
 	fi
 }
 
@@ -9425,6 +9430,12 @@ set -x
 set +x
 }
 
+function bond_block_id
+{
+	id=$(tc qdisc show dev bond0 | grep ingress_block | cut -d ' ' -f 7)
+	echo $id
+}
+
 function tc_ct_bond
 {
 	offload=""
@@ -9436,7 +9447,7 @@ set -x
 	TC=/images/chrism/iproute2/tc/tc;
 
 	bond=bond0
-	block_id=$(tc qdisc show dev bond0 | grep ingress_block | cut -d ' ' -f 7)
+	block_id=$(bond_block_id)
 
 	for i in $link $link2 $rep2; do
 		$TC qdisc del dev $i ingress > /dev/null 2>&1;
@@ -9975,8 +9986,8 @@ set -x
 	ip link set dev $link2 down
 
 	ip link add name bond0 type bond
-# 	ip link set dev bond0 type bond mode active-backup
-	ip link set dev bond0 type bond mode 802.3ad
+	ip link set dev bond0 type bond mode active-backup
+# 	ip link set dev bond0 type bond mode 802.3ad
 	ip link set dev $link master bond0
 	ip link set dev $link2 master bond0
 	ip link set dev bond0 up
@@ -10002,11 +10013,12 @@ set -x
 	del-br
 	ovs-vsctl add-br $br
 	ovs-vsctl add-port $br bond0
-	ovs-vsctl add-port $br $rep1
-	ovs-vsctl add-port $br $rep2
-	ovs-vsctl add-port $br $rep3
-# 	ifconfig $vf1 192.168.1.$host_num/24 up
-	ifconfig $rep1 up
+	for (( i = 0; i < numvfs; i++)); do
+		local rep=$(get_rep $i)
+		ovs-vsctl add-port $br $rep
+# 		local rep=$(get_rep2 $i)
+# 		ovs-vsctl add-port $br $rep
+	done
 # 	ovs-ofctl add-flow $br "in_port=bond0,dl_dst=2:25:d0:13:01:01 action=$rep1"
 set +x
 	up_all_reps 1

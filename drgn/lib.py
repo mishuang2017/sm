@@ -129,12 +129,12 @@ def print_action_stats(a):
             bstats = per_cpu_ptr(a.cpu_bstats, cpu).bstats
             bytes += bstats.bytes
             packets += bstats.packets
-        print("\tpercpu bytes: %d, packets: %d" % (bytes, packets))
+        print("percpu bytes: %d, packets: %d" % (bytes, packets))
     else:
         bstats = a.tcfa_bstats
         bytes += bstats.bytes
         packets += bstats.packets
-        print("\tbytes: %d, packets: %d" % (bytes, packets))
+        print("bytes: %d, packets: %d" % (bytes, packets))
 
     bytes = 0
     packets = 0
@@ -152,11 +152,11 @@ def print_action_stats(a):
 #         print("hw bytes: %d, packets: %d" % (bytes, packets))
  
 def print_exts(e):
-    print("\nnr_actions: %d" % e.nr_actions)
+    print("      nr_actions: %d" % e.nr_actions)
     for i in range(e.nr_actions):
         a = e.actions[i]
         kind = a.ops.kind.string_().decode()
-        print("action %d: %10s: tc_action %lx" % (i+1, kind, a.value_()), end='')
+        print("        action %d: %10s: tc_action %lx" % (i+1, kind, a.value_()), end='')
 #         print(a.cpu_bstats_hw)
 #         print("hw_stats: %d" % a.hw_stats)
         if kind == "ct":
@@ -187,7 +187,7 @@ def print_exts(e):
                 print("\tvalue:  %08x" % tcf_pedit.tcfp_keys[i].val)
         if kind == "mirred":
             tcf_mirred = Object(prog, 'struct tcf_mirred', address=a.value_())
-            print("\toutput: %s" % tcf_mirred.tcfm_dev.name.string_().decode())
+            print("\toutput: %s," % tcf_mirred.tcfm_dev.name.string_().decode(), end='\t')
             print_action_stats(a)
         if kind == "gact":
             print("\ttcf_chain %lx" % a.goto_chain.value_(), end='')
@@ -210,8 +210,9 @@ def print_exts(e):
 #             print(tcf_sample.psample_group)
 
 def print_cls_fl_filter(f):
-    print("handle: 0x%x" % f.handle)
-    print("in_hw_count: %d" % f.in_hw_count)
+    print("    cls_fl_filter %lx" % f.address_of_(), end=' ')
+    print("handle: 0x%x" % f.handle, end=' ')
+    print("in_hw_count: %d" % f.in_hw_count, end=' ')
     k = f.mkey
     print("ct_state: 0x%x" % k.ct.ct_state)
 #     print("ct_state: %x" % k.ct_state)

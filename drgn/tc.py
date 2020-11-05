@@ -32,6 +32,8 @@ for x, dev in enumerate(get_netdevs()):
     if block.value_() == 0:
         continue
 
+    print("=============================================================================")
+    print("%20s ingress_sched_data %20x\n" % (name, addr))
     print("tcf_block %lx, block index: %d" % (block, block.index))
 
     if struct_exist("struct flow_block_cb"):
@@ -63,32 +65,24 @@ for x, dev in enumerate(get_netdevs()):
 
             # on ofed 4.6, priv is the pointer of struct mlx5e_priv
 
-    print("\n%20s ingress_sched_data %20x\n" % (name, addr))
-
     chain_list_addr = block.chain_list.address_of_()
     for chain in list_for_each_entry('struct tcf_chain', chain_list_addr, 'list'):
         if (chain.value_() == 0):
             print("chain 0, continue")
             continue
-        print("tcf_chain %lx" % chain.value_())
-        print("chain index: %d, 0x%x" % (chain.index, chain.index))
-        print("chain refcnt: %d" % (chain.refcnt))
-        print("chain action_refcnt: %d" % (chain.action_refcnt))
+        print("tcf_chain %lx, index: %d, %x, refcnt: %d, action_refcnt: %d" % \
+             (chain, chain.index, chain.index, chain.refcnt, chain.action_refcnt))
         tcf_proto = chain.filter_chain
         while True:
-            print("------------------------------------------")
-            print("tcf_proto %lx\n    protocol %x, prio %x" %       \
+            print("  tcf_proto %lx, protocol %x, prio %x" %       \
                 (tcf_proto.value_(), socket.ntohs(tcf_proto.protocol.value_()),   \
                 tcf_proto.prio.value_() >> 16))
             head = Object(prog, 'struct cls_fl_head', address=tcf_proto.root.value_())
-            print("list -H %lx" % head.masks.address_of_())
+#             print("list -H %lx" % head.masks.address_of_())
             for node in radix_tree_for_each(head.handle_idr.idr_rt):
 #                 print("%lx" % node[1].value_())
                 f = Object(prog, 'struct cls_fl_filter', address=node[1].value_())
-                print("++++++++++++++++++++++++++++++++++++++++++")
-                print("cls_fl_filter %lx" % f.address_of_())
                 print_cls_fl_filter(f)
             tcf_proto = tcf_proto.next
             if tcf_proto.value_() == 0:
                 break
-        print("==========================================\n")
