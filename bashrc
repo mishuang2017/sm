@@ -9923,6 +9923,16 @@ function bond_delete
 	ip link delete bond0
 }
 
+function bond_cleanup
+{
+	un
+	un2
+	bond_delete
+	dev off
+	dev2 off
+	off
+}
+
 function bond_switchdev
 {
 	nic=$1
