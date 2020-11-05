@@ -9447,12 +9447,17 @@ set -x
 	TC=/images/chrism/iproute2/tc/tc;
 
 	bond=bond0
-	block_id=$(bond_block_id)
+	block_id=22
 
-	for i in $link $link2 $rep2; do
+	$TC qdisc del dev $rep2 ingress > /dev/null 2>&1;
+	ethtool -K $rep2 hw-tc-offload on;
+	$TC qdisc add dev $rep2 ingress
+
+	for i in $link $link2; do
+		$TC qdisc del dev $i ingress_block 22 ingress &>/dev/null
 		$TC qdisc del dev $i ingress > /dev/null 2>&1;
 		ethtool -K $i hw-tc-offload on;
-		$TC qdisc add dev $i ingress
+		$TC qdisc add dev $i ingress_block 22 ingress
 	done
 
 	mac1=02:25:d0:$host_num:01:02
@@ -9477,6 +9482,7 @@ set -x
 	$TC filter add dev $rep2 ingress protocol ip chain 1 prio 2 flower $offload \
 		dst_mac $mac2 ct_state +trk+est \
 		action mirred egress redirect dev $bond
+
 
 	$TC filter add block $block_id ingress protocol ip chain 0 prio 2 flower $offload \
 		dst_mac $mac1 ct_state -trk \
@@ -9985,8 +9991,9 @@ set -x
 	ip link set dev $link down
 	ip link set dev $link2 down
 
-	ip link add name bond0 type bond
-	ip link set dev bond0 type bond mode active-backup
+# 	ip link add name bond0 type bond
+# 	ip link set dev bond0 type bond mode active-backup miimon 100
+	ip link add name bond0 type bond mode active-backup miimon 100
 # 	ip link set dev bond0 type bond mode 802.3ad
 	ip link set dev $link master bond0
 	ip link set dev $link2 master bond0
@@ -9994,16 +10001,11 @@ set -x
 	ip link set dev $link up
 	ip link set dev $link2 up
 
-	ethtool -K $link hw-tc-offload on
-	ethtool -K $link2 hw-tc-offload on
+	ifconfig $link 0
+	ifconfig $link2 0
+	ifconfig bond0 1.1.1.200/16 up
+
 set +x
-
-	bi
-	sleep 1
-	bi2
-	sleep 1
-
-	set_netns_all 1
 }
 
 function bond_br
@@ -10048,6 +10050,14 @@ function bond_setup
 	bond_delete
 	bond_switchdev
 	bond_create
+
+	ifconfig bond0 0
+	bi
+	sleep 1
+	bi2
+	sleep 1
+	set_netns_all 1
+
 	bond_br
 }
 
