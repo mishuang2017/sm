@@ -864,7 +864,7 @@ alias  vi_mod_hdr='vi drivers/net/ethernet/mellanox/mlx5/core/en/mod_hdr.c '
 alias    vi_vport="vi drivers/net/ethernet/mellanox/mlx5/core/esw/vporttbl.c "
 alias vi_offloads="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch_offloads.c "
 alias      vi_esw="vi drivers/net/ethernet/mellanox/mlx5/core/eswitch.h "
-alias  vi_mapping='vi drivers/net/ethernet/mellanox/mlx5/core/mapping_obj.h '
+alias  vi_mapping='vi drivers/net/ethernet/mellanox/mlx5/core/en/mapping.c drivers/net/ethernet/mellanox/mlx5/core/en/mapping.h '
 alias   vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.h "
 alias    vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 
