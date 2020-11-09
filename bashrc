@@ -6672,7 +6672,7 @@ function git-ofed
 
 function git-linux
 {
-	dir=~/stack_device
+	dir=~/sflow/tunnel
 	mkdir -p $dir
 	local n=$1
 	if [[ $# == 0 ]]; then
@@ -6684,7 +6684,7 @@ function git-linux
 
 function git-stack
 {
-	dir=~/sflow/tunnel
+	dir=~/stack_device
 	mkdir -p $dir
 	local n=$1
 	if [[ $# == 0 ]]; then
