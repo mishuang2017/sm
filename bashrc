@@ -6672,7 +6672,7 @@ function git-ofed
 
 function git-linux
 {
-	dir=~/sflow/tunnel
+	dir=~/stack_device
 	mkdir -p $dir
 	local n=$1
 	if [[ $# == 0 ]]; then
@@ -6681,6 +6681,19 @@ function git-linux
 	fi
 	git format-patch -o $dir/$n 6f14b7d62cb5
 }
+
+function git-stack
+{
+	dir=~/sflow/tunnel
+	mkdir -p $dir
+	local n=$1
+	if [[ $# == 0 ]]; then
+		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
+		n=$((n+1))
+	fi
+	git format-patch -o $dir/$n 6b4d3e031
+}
+
 
 function git-patch3
 {
