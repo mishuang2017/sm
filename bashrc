@@ -7839,25 +7839,9 @@ fi
 
 alias restart-udev='sudo systemctl restart systemd-udevd.service'
 
-alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j'
-alias ofed-configure1='./configure --with-mlx5-core-and-en-mod -j'
-
-alias ofed-configure2='./configure --with-core-mod --with-mlx5-mod --with-mlxfw-mod -j'
-
-alias ofed-configure3='./configure --with-mlx5-core-and-en-mod --with-core-mod --with-ipoib-mod --with-mlx5-mod -j'
 alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j'
-alias ofed-configure-all2='./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j32'
-
-# centos 7.4
-alias ofed-configure='./configure --with-mlx5-core-and-ib-and-en-mod -j'
-# Redhat 7.5
-alias ofed-configure5="./configure -j32 --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-ipoib-mod --with-mlx5-mod"
-
-alias ofed-configure-all='./configure -j32  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx4-mod --with-mlx4_en-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod'
 alias ofed-configure-all="./configure  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod -j $cpu_num2"
-
-alias ofed-configure="./configure --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-innova-flex --with-e_ipoib-mod -j $cpu_num2"
-alias ofed-configure="./configure --with-mlx5-core-and-ib-and-en-mod -j $cpu_num2"
+alias ofed-configure="./configure --with-mlx5-core-and-ib-and-en-mod --with-mlxfw-mod -j $cpu_num2"
 
 function ofed_configure
 {
