@@ -6636,65 +6636,6 @@ function git-patch2
 	git format-patch -o $dir ${commit}..
 }
 
-function git-ovs
-{
-	dir=~/sflow/ofproto
-	local n=$1
-	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
-		n=$((n+1))
-	fi
-	git format-patch -o $dir/$n 93023e80b
-}
-
-function git-ct
-{
-	dir=~/sflow/ct
-	local n=$1
-	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
-		n=$((n+1))
-	fi
-	git format-patch -o $dir/$n 61a47b4dac80
-}
-
-function git-ofed
-{
-	dir=~/sflow/backport
-	mkdir -p $dir
-	local n=$1
-	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
-		n=$((n+1))
-	fi
-	git format-patch -o $dir/$n ae89da18d
-}
-
-function git-linux
-{
-	dir=~/sflow/tunnel
-	mkdir -p $dir
-	local n=$1
-	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
-		n=$((n+1))
-	fi
-	git format-patch -o $dir/$n 6f14b7d62cb5
-}
-
-function git-stack
-{
-	dir=~/stack_device
-	mkdir -p $dir
-	local n=$1
-	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
-		n=$((n+1))
-	fi
-	git format-patch -o $dir/$n 6b4d3e031
-}
-
-
 function git-patch3
 {
 	[[ $# != 3 ]] && return
@@ -6703,6 +6644,20 @@ function git-patch3
 	local dir=$1
 	mkdir -p $dir
 	git format-patch -o $dir ${commit_old}..${commit_new}
+}
+
+function git-patch4
+{
+	dir=~/stack_device
+	mkdir -p $dir
+	local n=$1
+	if [[ $# == 0 ]]; then
+		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
+		n=$((n+1))
+	fi
+	b=$(git branch | grep \* | cut -d ' ' -f2)
+	commit=$(git slog | grep $b | grep -v HEAD | cut -f 1 -d " ")
+	git format-patch -o $dir/$n $commit
 }
 
 linux_file=~/idr/
@@ -7855,6 +7810,11 @@ alias restart-udev='sudo systemctl restart systemd-udevd.service'
 alias ofed-configure-memtrack='./configure --with-mlx5-core-and-en-mod --with-memtrack -j'
 alias ofed-configure-all="./configure  --with-core-mod --with-user_mad-mod --with-user_access-mod --with-addr_trans-mod --with-mlxfw-mod --with-mlx5-mod --with-ipoib-mod --with-srp-mod --with-iser-mod --with-isert-mod -j $cpu_num2"
 alias ofed-configure="./configure --with-mlx5-core-and-ib-and-en-mod --with-mlxfw-mod -j $cpu_num2"
+
+alias ofed-configure-5.3="./configure --with-mlx5-core-and-ib-and-en-mod --with-mlxfw-mod -j $cpu_num2 --kernel-version 5.3 --kernel-sources /.autodirect/mswg2/work/kernel.org/x86_64/linux-5.3 "
+alias ofed-configure-5.0="./configure --with-mlx5-core-and-ib-and-en-mod --with-mlxfw-mod -j $cpu_num2 --kernel-version 5.0 --kernel-sources /.autodirect/mswg2/work/kernel.org/x86_64/linux-5.0 "
+alias ofed-configure-4.17="./configure --with-mlx5-core-and-ib-and-en-mod --with-mlxfw-mod -j $cpu_num2 --kernel-version 4.17-rc1 --kernel-sources /.autodirect/mswg2/work/kernel.org/x86_64/linux-4.17-rc1 "
+alias ofed-configure-5.9="./configure --with-mlx5-core-and-ib-and-en-mod --with-mlxfw-mod -j $cpu_num2 --kernel-version 5.9-rc2 --kernel-sources /.autodirect/mswg2/work/kernel.org/x86_64/linux-5.9-rc2 "
 
 function ofed_configure
 {

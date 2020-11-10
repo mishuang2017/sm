@@ -1712,7 +1712,7 @@ git push origin HEAD:refs/for/mlnx_ofed_5_2/ofed-ct-trk-new
 
 git push origin HEAD:refs/for/master/sflow-ovs
 
-git push origin HEAD:refs/for/mlnx_ofed_5_2/fix-sampler-term-table-issue
+git push origin HEAD:refs/for/mlnx_ofed_5_2/ofed-stack-devices
 
 ===git===
 
