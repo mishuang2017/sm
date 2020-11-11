@@ -980,6 +980,7 @@ mlx5e_tc_match_to_reg_match
 mlx5e_tc_match_to_reg_set
 
 mlx5e_rep_tc_update_skb
+	psample_sample_packet
 
 mlx5e_tc_esw_init
 

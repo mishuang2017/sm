@@ -6646,7 +6646,7 @@ function git-patch3
 	git format-patch -o $dir ${commit_old}..${commit_new}
 }
 
-function git-patch4
+function git_patch
 {
 	dir=~/stack_device
 	mkdir -p $dir
