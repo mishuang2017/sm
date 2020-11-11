@@ -9526,7 +9526,7 @@ set -x
 set +x
 }
 
-alias sample3=tc_ct_pf_sample
+alias s3=tc_ct_pf_sample
 
 function tc_ct_vf_sample
 {
@@ -9588,7 +9588,7 @@ set -x
 set +x
 }
 
-alias sample4=tc_ct_vf_sample
+alias s4=tc_ct_vf_sample
 
 function tc_ct_sample
 {
