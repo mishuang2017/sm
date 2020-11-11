@@ -5520,15 +5520,9 @@ function start-switchdev
 	if (( centos72 == 1 )); then
 		sysfs_dir=/sys/class/net/$link/compat/devlink
 		echo switchdev >  $sysfs_dir/mode || echo "switchdev failed"
-		if (( cx5 == 0 )); then
-			echo transport > $sysfs_dir/inline 2>/dev/null|| echo "transport failed"
-		fi
 #		echo basic > $sysfs_dir/encap || echo "baisc failed"
 	else
 		devlink dev eswitch set pci/$pci_addr mode switchdev
-		if (( cx5 == 0 )); then
-			devlink dev eswitch set pci/$pci_addr inline-mode transport
-		fi
 #		devlink dev eswitch set pci/$pci_addr encap enable
 	fi
 
@@ -8291,7 +8285,7 @@ function ofed3
 alias ofed='rej; git add -u; ofed1; ofed2'
 
 alias ofed-meta='./devtools/add_metadata.sh'
-# /images/chrism/mlnx-ofa_kernel-4.0//devtools/verify_metadata.sh -p /images/chrism/mlnx-ofa_kernel-4.0//metadata/Chris_Mi.csv
+alias ofed-meta-check='/images/chrism/mlnx-ofa_kernel-4.0//devtools/verify_metadata.sh -p /images/chrism/mlnx-ofa_kernel-4.0//metadata/Chris_Mi.csv'
 
 # add $rep2 and uplink rep to bridge
 # only $rep2 can initiate new tcp connection to remote host
