@@ -13,8 +13,7 @@ from lib import *
 
 mlx5e_priv = get_mlx5_pf0()
 esw = mlx5e_priv.mdev.priv.eswitch
-print(esw.tc_refcnt)
+print(esw.manager_vport)
 
 priv2 = get_mlx5_pf1()
 esw2 = priv2.mdev.priv.eswitch
-print(esw2.tc_refcnt)
