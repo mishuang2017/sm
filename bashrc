@@ -11380,7 +11380,7 @@ set -x
 	if (( ofed_mlx5 == 1 )); then
 		cat /sys/class/net/$link/compat/devlink/steering_mode
 	else
-		devlink dev  param show  pci/0000:04:00.0 name flow_steering_mode
+		devlink dev  param show  pci/$pci name flow_steering_mode
 	fi
 set +x
 }
