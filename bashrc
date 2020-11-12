@@ -1990,6 +1990,9 @@ function stop-ovs
 	sudo systemctl stop openvswitch.service
 }
 
+# cleanup tc rules when stopping ovs
+alias ovs_exit_cleanup='ovs-appctl exit --cleanup'
+
 function tc_pedit
 {
 	TC=tc
@@ -6653,6 +6656,19 @@ function git_patch
 	commit=$(git slog | grep $b | grep -v HEAD | cut -f 1 -d " ")
 	git format-patch -o $dir/$n $commit
 }
+
+function git_linux
+{
+	dir=~/sflow/mark
+	mkdir -p $dir
+	local n=$1
+	if [[ $# == 0 ]]; then
+		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
+		n=$((n+1))
+	fi
+	git format-patch -o $dir/$n 6f14b7d62cb5
+}
+
 
 linux_file=~/idr/
 function checkout
