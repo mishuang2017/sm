@@ -1153,7 +1153,7 @@ function cloud_setup
 
 	yum install -y cscope tmux ctags rsync grubby iperf3
 
-	if ! test ~/.tmux.conf; then
+	if ! test -f ~/.tmux.conf; then
 		mv ~/.bashrc bashrc.orig
 		ln -s ~chrism/.bashrc
 		ln -s ~chrism/.tmux.conf
