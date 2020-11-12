@@ -1987,6 +1987,7 @@ function restart-ovs
 
 function stop-ovs
 {
+	ovs-appctl exit --cleanup
 	sudo systemctl stop openvswitch.service
 }
 
