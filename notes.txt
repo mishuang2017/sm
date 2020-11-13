@@ -1616,6 +1616,8 @@ https://mirrors.huaweicloud.com/fedora/releases/31/Server/x86_64/iso/Fedora-Serv
 
 ===fw===
 
+/workspace/cloud_tools/cloud_firmware_reset.sh --ips 10.236.149.183
+
 Use mlxfwmanager to find the psid:
 
   Part Number:      MCX512A-ACA_Ax

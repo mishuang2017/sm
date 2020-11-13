@@ -27,8 +27,8 @@ ct = 1
 offloads = mlx5e_priv.mdev.priv.eswitch.offloads
 
 def print_mlx5_sampler(handle):
-    print("sampler_id: %d, sample_ratio: %d, sample_table_id: %x, default_table_id: %x, ref_count: %d" % \
-            (handle.sampler_id, handle.sample_ratio, handle.sample_table_id, handle.default_table_id, handle.ref_count))
+    print("sampler_id: %d, sample_ratio: %d, sample_table_id: %x, default_table_id: %x, count: %d" % \
+            (handle.sampler_id, handle.sample_ratio, handle.sample_table_id, handle.default_table_id, handle.count))
 
 print('\n=== sampler_termtbl ===')
 
