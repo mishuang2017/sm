@@ -680,7 +680,6 @@ alias smb="cd /$images/chrism/bcc/examples/tracing"
 alias smk="cd /$images/chrism/sm/drgn"
 alias smdo="cd ~chrism/sm/drgn/ovs"
 alias d-ovs="sudo ~chrism/sm/drgn/ovs/ovs.py"
-alias err="sudo ~chrism/sm/drgn/ovs/errors.py"
 alias sk='cd /swgwork/chrism'
 
 alias softirq="/$images/chrism/bcc/tools/softirqs.py 1"
@@ -11373,7 +11372,7 @@ set -x
 		echo dmfs > /sys/class/net/$link/compat/devlink/steering_mode 
 	else
 		devlink dev param set pci/$pci name flow_steering_mode value "dmfs" \
-			cmode runtime || err "Failed to set steering sw"
+			cmode runtime || echo "Failed to set steering sw"
 	fi
 
 set +x
@@ -11386,7 +11385,7 @@ set -x
 		echo smfs > /sys/class/net/$link/compat/devlink/steering_mode
 	else
 		devlink dev param set pci/$pci name flow_steering_mode value "smfs" \
-			cmode runtime || err "Failed to set steering sw"
+			cmode runtime || echo "Failed to set steering sw"
 	fi
 set +x
 }
@@ -11929,16 +11928,16 @@ set -x
 	$TC filter add dev $rep2 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
 		action sample rate $rate group 5 trunc 60 \
 		action mirred egress redirect dev $rep3
-	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
-		action mirred egress redirect dev $rep3
+# 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+# 		action mirred egress redirect dev $rep3
 
 	src_mac=02:25:d0:$host_num:01:03
 	dst_mac=02:25:d0:$host_num:01:02
-	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
-		action sample rate $rate group 6 trunc 60 \
-		action mirred egress redirect dev $rep2
-	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
-		action mirred egress redirect dev $rep2
+# 	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
+# 		action sample rate $rate group 6 trunc 60 \
+# 		action mirred egress redirect dev $rep2
+# 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+# 		action mirred egress redirect dev $rep2
 set +x
 }
 
