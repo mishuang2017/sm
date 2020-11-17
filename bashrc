@@ -33,6 +33,9 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-149-180-183" ]] && host_num=83
 [[ "$(hostname -s)" == "c-236-149-180-184" ]] && host_num=84
 
+[[ "$(hostname -s)" == "c-234-1-160-161" ]] && host_num=61
+[[ "$(hostname -s)" == "c-234-1-160-162" ]] && host_num=62
+
 function get_vf
 {
 	local h=$1
@@ -243,6 +246,49 @@ elif (( host_num == 84)); then
 	rhost_num=83
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
+
+elif (( host_num == 61 )); then
+	link_name=1
+	link=enp8s0f0
+	link2=enp8s0f1
+	machine_num=1
+
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
+		eval rep$((i+1))=${link}_$i
+	done
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
+		eval rep$((i+1))_2=${link2}_$i
+	done
+	rhost_num=62
+	link_remote_ip=192.168.1.$rhost_num
+	cloud=1
+	rep1=eth2
+	rep2=eth3
+	rep3=eth4
+	link_name=3
+elif (( host_num == 62)); then
+	link_name=1
+	link=enp8s0f0
+	link2=enp8s0f1
+	machine_num=2
+
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
+		eval rep$((i+1))=${link}_$i
+	done
+	for (( i = 0; i < numvfs; i++)); do
+		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
+		eval rep$((i+1))_2=${link2}_$i
+	done
+	rhost_num=61
+	link_remote_ip=192.168.1.$rhost_num
+	cloud=1
+	rep1=eth2
+	rep2=eth3
+	rep3=eth4
+	link_name=3
 fi
 
 vni=200
@@ -1986,7 +2032,14 @@ function restart-ovs
 
 function stop-ovs
 {
+set -x
 	ovs-appctl exit --cleanup
+	sudo systemctl stop openvswitch.service
+set +x
+}
+
+function stop-ovs-only
+{
 	sudo systemctl stop openvswitch.service
 }
 
@@ -4353,6 +4406,10 @@ function get_rep
 		return
 	elif (( link_name == 2 )); then
 		echo "${link_pre}pf0vf$1"
+		return
+	elif (( link_name == 3 )); then
+		i=$1
+		echo "eth$((i+2))"
 		return
 	else
 		echo "error"
@@ -11875,6 +11932,7 @@ function github_push
 {
 	git remote rm origin
 	git remote add origin git@github.com:mishuang2017/sm.git
+# 	git remote add origin https://github.com/mishuang2017/sm.git
 	git push -u origin master
 }
 
