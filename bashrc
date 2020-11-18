@@ -7830,8 +7830,7 @@ function ofed-unload
 function force-stop
 {
 set -x
-	ofed-unload
-	sudo /etc/init.d/openibd force-stop
+	sudo /etc/init.d/openibd stop
 set +x
 }
 
@@ -7839,7 +7838,7 @@ function force-start
 {
 set -x
 # 	ofed-unload
-	sudo /etc/init.d/openibd force-start
+	sudo /etc/init.d/openibd start
 # 	sudo systemctl restart systemd-udevd.service
 set +x
 }
@@ -7943,17 +7942,6 @@ function rebase
 
 	git fetch $repo $branch
 	git rebase FETCH_HEAD
-}
-
-alias git-lx='git apply  ~/sm/kgdb/lx-symbole.patch'
-
-function fetch-13
-{
-	[[ $# == 0 ]] && return
-	git branch -D 13
-	git fetch 13 $1
-	git checkout FETCH_HEAD
-	git checkout -b 13
 }
 
 function tcs
