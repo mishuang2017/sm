@@ -4853,7 +4853,7 @@ set -x
 set +x
 }
 
-function brx-ct
+function brx_ct
 {
 set -x
 	del-br
@@ -4880,6 +4880,36 @@ set -x
 	clear-mangle
 set +x
 }
+
+function brx6_ct
+{
+set -x
+	del-br
+	vs add-br $br
+# 	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < 2; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan6
+
+	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL
+
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal"
+
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal"
+
+# 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1"
+
+	clear-mangle
+set +x
+}
+
+
 
 function brx-fin
 {
