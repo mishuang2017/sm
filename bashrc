@@ -12579,8 +12579,8 @@ function ovs_run_test
 ip1=10.141.34.7
 ip2=10.141.34.8
 
-ip1=10.236.149.183
-ip2=10.236.149.184
+# ip1=10.236.149.183
+# ip2=10.236.149.184
 function test_setup
 {
 set -x
@@ -12588,9 +12588,9 @@ set -x
 	hostname2=c-141-34-1-008
 	test_config=10.141.34.7-8_cx5
 
-	hostname1=c-236-149-180-183
-	hostname2=c-236-149-180-184
-	test_config=10.236.149.183-184_cx5
+# 	hostname1=c-236-149-180-183
+# 	hostname2=c-236-149-180-184
+# 	test_config=10.236.149.183-184_cx5
 
 	test_file=/.autodirect/sw_regression/linux/sw_ovs/conf/mars/cloud-topologies/connectx5/VF/sw_steering/kernel/vxlan_vlan_ipv4/default.xml
 	python /auto/swgwork/isram/tools/ofed/prepareSetup.py	\
@@ -12609,7 +12609,9 @@ set +x
 
 function test_cleanup
 {
+set -x
 	/opt/python/2.7.3/bin/python2.7 /opt/python/2.7.3/bin/SetupCleanup.py --clusterIPs $ip1 $ip2
+set +x
 }
 
 ######## uuu #######
