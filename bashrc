@@ -1,4 +1,4 @@
-# Source global definitions
+# Source global definitions"
 if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
@@ -634,6 +634,7 @@ alias v5.2='git checkout v5.2; git checkout -b 5.2'
 alias v5.3='git checkout v5.3; git checkout -b 5.3'
 alias v5.4='git checkout v5.4; git checkout -b 5.4'
 alias v5.5='git checkout v5.5; git checkout -b 5.5'
+alias v5.9='git checkout v5.9; git checkout -b 5.9'
 alias v4.10='git checkout v4.10; git checkout -b 4.10'
 alias v4.8='git checkout v4.8; git checkout -b 4.8'
 alias v4.8-rc4='git checkout v4.8-rc4; git checkout -b 4.8-rc4'
@@ -12573,6 +12574,42 @@ function sflowtool_tcpdump
 function ovs_run_test
 {
 	make check TESTSUITEFLAGS=$1
+}
+
+ip1=10.141.34.7
+ip2=10.141.34.8
+
+ip1=10.236.149.183
+ip2=10.236.149.184
+function test_setup
+{
+set -x
+	hostname1=c-141-34-1-007
+	hostname2=c-141-34-1-008
+	test_config=10.141.34.7-8_cx5
+
+	hostname1=c-236-149-180-183
+	hostname2=c-236-149-180-184
+	test_config=10.236.149.183-184_cx5
+
+	test_file=/.autodirect/sw_regression/linux/sw_ovs/conf/mars/cloud-topologies/connectx5/VF/sw_steering/kernel/vxlan_vlan_ipv4/default.xml
+	python /auto/swgwork/isram/tools/ofed/prepareSetup.py	\
+		-clusterIPs "$ip1 $ip2"			\
+		-e "$hostname1 $hostname2"		\
+		-t $test_config				\
+		-c "$test_file --custom_configs None"
+
+# 	python /auto/swgwork/isram/tools/ofed/prepareSetup.py	\
+# 		-clusterIPs "10.141.34.7 10.141.34.8"		\
+# 		-e "c-141-34-1-007 c-141-34-1-008"		\
+# 		-t 10.141.34.7-8_cx5				\
+# 		-c "/.autodirect/sw_regression/linux/sw_ovs/conf/mars/cloud-topologies/connectx5/VF/sw_steering/kernel/vxlan_vlan_ipv4/default.xml --custom_configs None"
+set +x
+}
+
+function test_cleanup
+{
+	/opt/python/2.7.3/bin/python2.7 /opt/python/2.7.3/bin/SetupCleanup.py --clusterIPs $ip1 $ip2
 }
 
 ######## uuu #######
