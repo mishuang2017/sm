@@ -3787,6 +3787,58 @@ set -x
 set +x
 }
 
+alias test4=tc_vxlan_ct_test
+function tc_vxlan_ct_test
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on
+	ethtool -K $redirect  hw-tc-offload on
+
+	$TC qdisc add dev $link ingress
+	$TC qdisc add dev $redirect ingress
+	$TC qdisc add dev $vx ingress
+#	$TC qdisc add dev $link clsact
+#	$TC qdisc add dev $redirect clsact
+#	$TC qdisc add dev $vx clsact
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+	$TC filter add dev $vx protocol ip  parent ffff: chain 1 prio 2 flower $offload	\
+		src_mac $remote_vm_mac	\
+		dst_mac $local_vm_mac	\
+		enc_src_ip $link_remote_ip	\
+		enc_dst_ip $link_ip		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		ct_state +trk+est		\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+
+set +x
+}
+
+
 alias tun0='sudo ~chrism/sm/prg/c/tun/tun -i tun0 -s -d'
 
 function tc-tap
@@ -4091,7 +4143,8 @@ set -x
 		action mirred egress redirect dev $vx
 
 
-	$TC filter add dev $vx protocol ip  parent ffff: chain 0 prio 2 flower $offload	\
+	local ip_version=ip
+	$TC filter add dev $vx protocol $ip_version  parent ffff: chain 0 prio 2 flower $offload	\
 		src_mac $remote_vm_mac		\
 		dst_mac $local_vm_mac		\
 		enc_src_ip $link_remote_ipv6	\
@@ -4101,7 +4154,7 @@ set -x
 		ct_state -trk			\
 		action ct pipe			\
 		action goto chain 1
-	$TC filter add dev $vx protocol ip  parent ffff: chain 1 prio 2 flower $offload	\
+	$TC filter add dev $vx protocol $ip_version  parent ffff: chain 1 prio 2 flower $offload	\
 		src_mac $remote_vm_mac		\
 		dst_mac $local_vm_mac		\
 		enc_src_ip $link_remote_ipv6	\
@@ -4113,6 +4166,66 @@ set -x
 		action ct commit		\
 		action tunnel_key unset		\
 		action mirred egress redirect dev $redirect
+	$TC filter add dev $vx protocol $ip_version  parent ffff: chain 1 prio 2 flower $offload	\
+		src_mac $remote_vm_mac		\
+		dst_mac $local_vm_mac		\
+		enc_src_ip $link_remote_ipv6	\
+		enc_dst_ip $link_ipv6		\
+		enc_dst_port $vxlan_port	\
+		enc_key_id $vni			\
+		ct_state +trk+est		\
+		action tunnel_key unset		\
+		action mirred egress redirect dev $redirect
+set +x
+}
+
+alias test3=tc_vxlan64_ct_test
+function tc_vxlan64_ct_test
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx udp6zerocsumtx
+	ip link set $vx up
+
+	$TC qdisc del dev $link ingress > /dev/null 2>&1
+	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+	ethtool -K $link hw-tc-offload on 
+	ethtool -K $redirect  hw-tc-offload on 
+
+	$TC qdisc add dev $link ingress 
+	$TC qdisc add dev $redirect ingress 
+	$TC qdisc add dev $vx ingress 
+#	$TC qdisc add dev $link clsact
+#	$TC qdisc add dev $redirect clsact
+#	$TC qdisc add dev $vx clsact
+
+	ip link set $link promisc on
+	ip link set $redirect promisc on
+	ip link set $vx promisc on
+
+	local_vm_mac=02:25:d0:$host_num:01:02
+	remote_vm_mac=$vxlan_mac
+
+# 	$TC filter add dev $vx protocol ip  parent ffff: chain 0 prio 2 flower $offload	\
+# 		src_mac $remote_vm_mac		\
+# 		dst_mac $local_vm_mac		\
+# 		enc_src_ip $link_remote_ipv6	\
+# 		enc_dst_ip $link_ipv6		\
+# 		enc_dst_port $vxlan_port	\
+# 		enc_key_id $vni			\
+# 		ct_state -trk			\
+# 		action ct pipe			\
+# 		action goto chain 1
 	$TC filter add dev $vx protocol ip  parent ffff: chain 1 prio 2 flower $offload	\
 		src_mac $remote_vm_mac		\
 		dst_mac $local_vm_mac		\
