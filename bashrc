@@ -6799,7 +6799,9 @@ function syndrome
 
 	local ver=$(echo $1 | sed 's/\./_/g')
 	local type
-	if echo $ver | grep ^16; then
+	if echo $ver | grep ^22; then
+		type=4125
+	elif echo $ver | grep ^16; then
 		type=4119
 	elif echo $ver | grep ^14; then
 		type=4117
@@ -9279,7 +9281,7 @@ alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh 
 alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
-test1=test-eswitch-persistent-netdev.sh
+test1=test-ovs-ct-vxlan-vf-mirror.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
