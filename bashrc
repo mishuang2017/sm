@@ -3543,18 +3543,7 @@ set -x
 	local_vm_mac=02:25:d0:$host_num:01:02
 	remote_vm_mac=$vxlan_mac
 
-#	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
-	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower skip_hw \
-		src_mac $local_vm_mac	\
-		dst_mac $remote_vm_mac	\
-		action mirred egress mirror dev $mirror	\
-		action tunnel_key set	\
-		src_ip $link_ip		\
-		dst_ip $link_remote_ip	\
-		dst_port $vxlan_port	\
-		id $vni			\
-		action mirred egress redirect dev $vx
-
+	# arp
 	$TC filter add dev $redirect protocol arp parent ffff: prio 2 flower skip_hw	\
 		src_mac $local_vm_mac	\
 		action mirred egress mirror dev $mirror	\
@@ -3564,10 +3553,8 @@ set -x
 		dst_port $vxlan_port	\
 		id $vni			\
 		action mirred egress redirect dev $vx
-
-	$TC filter add dev $vx protocol ip  parent ffff: prio 3 flower $offload	\
-		src_mac $remote_vm_mac	\
-		dst_mac $local_vm_mac	\
+	$TC filter add dev $vx protocol arp parent ffff: prio 2 flower skip_hw	\
+		src_mac $remote_vm_mac \
 		enc_src_ip $link_remote_ip	\
 		enc_dst_ip $link_ip		\
 		enc_dst_port $vxlan_port	\
@@ -3575,8 +3562,20 @@ set -x
 		action tunnel_key unset		\
 		action mirred egress mirror dev $mirror	\
 		action mirred egress redirect dev $redirect
-	$TC filter add dev $vx protocol arp parent ffff: prio 4 flower skip_hw	\
-		src_mac $remote_vm_mac \
+
+	$TC filter add dev $redirect protocol ip  parent ffff: prio 1 flower $offload \
+		src_mac $local_vm_mac	\
+		dst_mac $remote_vm_mac	\
+		action mirred egress mirror dev $mirror	\
+		action tunnel_key set	\
+		src_ip $link_ip		\
+		dst_ip $link_remote_ip	\
+		dst_port $vxlan_port	\
+		id $vni			\
+		action mirred egress redirect dev $vx
+	$TC filter add dev $vx protocol ip  parent ffff: prio 1 flower $offload	\
+		src_mac $remote_vm_mac	\
+		dst_mac $local_vm_mac	\
 		enc_src_ip $link_remote_ip	\
 		enc_dst_ip $link_ip		\
 		enc_dst_port $vxlan_port	\
@@ -6850,18 +6849,7 @@ function none3
 
 function vsconfig2
 {
-	ovs-vsctl remove Open_vSwitch . other_config hw-offload
-	ovs-vsctl remove Open_vSwitch . other_config tc-policy
-	ovs-vsctl remove Open_vSwitch . other_config max-idle
-	ovs-vsctl remove Open_vSwitch . other_config max-revalidator
-	ovs-vsctl remove Open_vSwitch . other_config min_revalidate_pps
-	ovs-vsctl remove Open_vSwitch . other_config vlan-limit
-	ovs-vsctl remove Open_vSwitch . other_config n-revalidator-threads
-	ovs-vsctl remove Open_vSwitch . other_config n-handler-threads
-	ovs-vsctl remove Open_vSwitch . other_config flow-limit
-	ovs-vsctl remove Open_vSwitch . other_config dpdk-init
-	restart-ovs
-	vsconfig
+	ovs-vsctl clear Open_vSwitch . other_config
 }
 
 # /mswg/release/BUILDS/fw-4119/fw-4119-rel-16_24_0220-build-001/etc
