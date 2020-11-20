@@ -3823,7 +3823,7 @@ set -x
 	ip link set $redirect promisc on
 	ip link set $vx promisc on
 
-	ip link set dev $mirror up
+	ip link set dev $vf1 up
 
 	local_vm_mac=02:25:d0:$host_num:01:02
 	remote_vm_mac=$vxlan_mac
