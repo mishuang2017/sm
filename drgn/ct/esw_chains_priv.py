@@ -38,8 +38,8 @@ for i, chain in enumerate(hash(chains_ht, 'struct fs_chain', 'node')):
         print("\n=== chain: %x, prio: %x, level: %x ===" % \
             (prio.key.chain, prio.key.prio, prio.key.level))
         print("prio %lx, ref: %d" % (prio, prio.ref))
-        print("mlx5_flow_table: %lx, next_fdb: %lx, miss_group: %lx, miss_rule: mlx5_flow_handle %lx, refcount: %d" % \
-            (fdb, next_fdb, miss_group, miss_rule, fdb.node.refcount.refs.counter))
+        print("next_fdb: %lx, miss_group: %lx, miss_rule: mlx5_flow_handle %lx" % \
+            (next_fdb, miss_group, miss_rule))
         table = prio.ft
         flow_table("", table)
 
