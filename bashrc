@@ -26,8 +26,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
-[[ "$(hostname -s)" == "10.236.148.183 " ]] && host_num=83
-[[ "$(hostname -s)" == "10.236.148.184 " ]] && host_num=84
+[[ "$(hostname -s)" == "c-236-148-180-183" ]] && host_num=83
+[[ "$(hostname -s)" == "c-236-148-180-184" ]] && host_num=84
 
 function get_vf
 {
@@ -1137,6 +1137,7 @@ function cloud_install
 	sudo ./setup.py build
 	sudo ./setup.py install
 
+	clone-bcc
 	install_bcc
 }
 
