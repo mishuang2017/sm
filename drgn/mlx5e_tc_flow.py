@@ -46,6 +46,7 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
 #     print(flow.rule[0])
     flow_attr = flow.attr
     esw_attr = flow_attr.esw_attr[0]
+    print(esw_attr)
     parse_attr = flow_attr.parse_attr
     print("%-14s mlx5e_tc_flow %lx, cookie: %lx, flags: %x, refcnt: %d" % \
         (name, flow.value_(), flow.cookie.value_(), flow.flags.value_(), flow.refcnt.refs.counter))

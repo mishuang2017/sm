@@ -74,11 +74,17 @@ def print_namespace(ns):
 # offloads = priv.eswitch.fdb_table.offloads
 # print(offloads)
 
+root_ns = steering.root_ns
 print('')
+print("============ root_ns ===============")
+print_namespace(root_ns.ns)
+print('')
+
 print("============ fdb_root_ns ===============")
 print_namespace(fdb_root_ns.ns)
 print('')
 
+print("============ fdb_sub_ns ===============")
 fdb_sub_ns = steering.fdb_sub_ns
 for i in range(4):
     ns = fdb_sub_ns[i]

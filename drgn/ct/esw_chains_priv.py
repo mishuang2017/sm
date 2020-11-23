@@ -83,4 +83,19 @@ for i in range(256):
         flow_table("", mlx5_vport_table.fdb)
         print('-----------------------------')
 
+print("\n=== indir vport table ===\n")
+vports = offloads.indir.table
+# print(vports)
+
+for i in range(256):
+    node = vports[i].first
+    while node.value_():
+        obj = container_of(node, "struct mlx5_vport_table", "hlist")
+        mlx5_vport_table = Object(prog, 'struct mlx5_vport_table', address=obj.value_())
+        print(mlx5_vport_table)
+        node = node.next
+
+        flow_table("", mlx5_vport_table.fdb)
+        print('-----------------------------')
+
 

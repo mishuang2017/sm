@@ -26,15 +26,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
-[[ "$(hostname -s)" == "c-234-89-1-007" ]] && host_num=7
-[[ "$(hostname -s)" == "c-236-0-240-241" ]] && host_num=41
-[[ "$(hostname -s)" == "c-236-0-240-242" ]] && host_num=42
-
-[[ "$(hostname -s)" == "c-236-149-180-183" ]] && host_num=83
-[[ "$(hostname -s)" == "c-236-149-180-184" ]] && host_num=84
-
-[[ "$(hostname -s)" == "c-234-1-160-161" ]] && host_num=61
-[[ "$(hostname -s)" == "c-234-1-160-162" ]] && host_num=62
+[[ "$(hostname -s)" == "10.236.148.183 " ]] && host_num=83
+[[ "$(hostname -s)" == "10.236.148.184 " ]] && host_num=84
 
 function get_vf
 {
@@ -180,38 +173,6 @@ elif (( host_num == 17 )); then
 	link=ens9
 elif (( host_num == 18 )); then
 	link=ens9
-elif (( host_num == 7 )); then
-	link=enp6s0f0
-	cloud=1
-elif (( host_num == 41 )); then
-	link_name=2
-	link_pre=enp8s0f0n
-	link=${link_pre}p0
-	link_mac=0c:42:a1:d1:d1:50
-	remote_mac=0c:42:a1:d1:d0:b4
-
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
-		eval rep$((i+1))=${link_pre}pf0vf$i
-	done
-	rhost_num=42
-	link_remote_ip=192.168.1.$rhost_num
-	cloud=1
-elif (( host_num == 42)); then
-	link_name=2
-	link_pre=enp8s0f0n
-	link=${link_pre}p0
-
-	link_mac=0c:42:a1:d1:d0:b4
-	remote_mac=0c:42:a1:d1:d1:50
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=${link}v$i
-		eval rep$((i+1))=${link_pre}pf0vf$i
-	done
-	rhost_num=41
-	link_remote_ip=192.168.1.$rhost_num
-	cloud=1
-
 elif (( host_num == 83 )); then
 	link_name=1
 	link=enp8s0f0
@@ -229,7 +190,7 @@ elif (( host_num == 83 )); then
 	rhost_num=84
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
-elif (( host_num == 84)); then
+elif (( host_num == 84 )); then
 	link_name=1
 	link=enp8s0f0
 	link2=enp8s0f1
@@ -246,49 +207,6 @@ elif (( host_num == 84)); then
 	rhost_num=83
 	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
-
-elif (( host_num == 61 )); then
-	link_name=1
-	link=enp8s0f0
-	link2=enp8s0f1
-	machine_num=1
-
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
-		eval rep$((i+1))=${link}_$i
-	done
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
-		eval rep$((i+1))_2=${link2}_$i
-	done
-	rhost_num=62
-	link_remote_ip=192.168.1.$rhost_num
-	cloud=1
-	rep1=eth2
-	rep2=eth3
-	rep3=eth4
-	link_name=3
-elif (( host_num == 62)); then
-	link_name=1
-	link=enp8s0f0
-	link2=enp8s0f1
-	machine_num=2
-
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
-		eval rep$((i+1))=${link}_$i
-	done
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
-		eval rep$((i+1))_2=${link2}_$i
-	done
-	rhost_num=61
-	link_remote_ip=192.168.1.$rhost_num
-	cloud=1
-	rep1=eth2
-	rep2=eth3
-	rep3=eth4
-	link_name=3
 fi
 
 vni=200
@@ -1197,7 +1115,7 @@ function cloud_setup
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
 
-	yum install -y cscope tmux ctags rsync grubby iperf3
+	yum install -y cscope tmux ctags rsync grubby iperf3 htop
 
 	if ! test -f ~/.tmux.conf; then
 		mv ~/.bashrc bashrc.orig
@@ -3828,16 +3746,21 @@ set -x
 	remote_vm_mac=$vxlan_mac
 
 	# arp
-	$TC filter add dev $redirect protocol arp parent ffff: prio 1 flower skip_hw src_mac $local_vm_mac	\
-		action tunnel_key set src_ip $link_ip dst_ip $link_remote_ip dst_port $vxlan_port id $vni	\
-		action mirred egress redirect dev $vx
-	$TC filter add dev $vx protocol arp parent ffff: prio 1 flower skip_hw	\
+# 	$TC filter add dev $redirect protocol arp parent ffff: prio 1 flower $offload src_mac $local_vm_mac	\
+# 		action mirred egress mirror dev $mirror	\
+# 		action tunnel_key set src_ip $link_ip dst_ip $link_remote_ip dst_port $vxlan_port id $vni	\
+# 		action mirred egress redirect dev $vx
+	$TC filter add dev $vx protocol arp parent ffff: prio 1 flower $offload	\
 		src_mac $remote_vm_mac enc_src_ip $link_remote_ip enc_dst_ip $link_ip enc_dst_port $vxlan_port enc_key_id $vni	\
-		action tunnel_key unset	action mirred egress redirect dev $redirect
+		action tunnel_key unset \
+		action mirred egress mirror dev $mirror	\
+		action mirred egress redirect dev $redirect
+
+set +x
+	return
 
 	$TC filter add dev $redirect protocol ip  parent ffff: chain 0 prio 2 flower $offload \
 		src_mac $local_vm_mac dst_mac $remote_vm_mac ct_state -trk \
-		action mirred egress mirror dev $mirror	\
 		action ct pipe action goto chain 1
 	$TC filter add dev $redirect protocol ip  parent ffff: chain 1 prio 2 flower $offload \
 		src_mac $local_vm_mac dst_mac $remote_vm_mac ct_state +trk+new	\
@@ -5206,8 +5129,8 @@ function brx_ct
 set -x
 	del-br
 	vs add-br $br
-# 	for (( i = 0; i < numvfs; i++)); do
-	for (( i = 1; i < 2; i++)); do
+	for (( i = 0; i < numvfs; i++)); do
+# 	for (( i = 1; i < 2; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
@@ -9352,6 +9275,7 @@ alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
 alias psample='/labhome/chrism/asap_dev_reg/psample/psample'
+alias stack_devices='././test-ovs-vf-tunnel.sh'
 
 test2=test-ovs-sflow.sh
 alias test2="./$test2"
