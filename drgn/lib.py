@@ -44,12 +44,9 @@ if kernel("4.19.36+"):
     pf0_name = "enp4s0f0"
     pf1_name = "enp4s0f1"
 
-if hostname("c-236-0-240-241"):
-    pf0_name = "enp8s0f0np0"
-
-if hostname("c-236-149-180-183"):
+if hostname("c-236-148-180-183"):
     pf0_name = "enp8s0f0"
-if hostname("c-236-149-180-184"):
+if hostname("c-236-148-180-184"):
     pf0_name = "enp8s0f0"
 
 import os

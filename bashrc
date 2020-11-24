@@ -3747,21 +3747,22 @@ set -x
 	remote_vm_mac=$vxlan_mac
 
 	# arp
-# 	$TC filter add dev $redirect protocol arp parent ffff: prio 1 flower $offload src_mac $local_vm_mac	\
-# 		action mirred egress mirror dev $mirror	\
-# 		action tunnel_key set src_ip $link_ip dst_ip $link_remote_ip dst_port $vxlan_port id $vni	\
-# 		action mirred egress redirect dev $vx
+	$TC filter add dev $redirect protocol arp parent ffff: prio 1 flower $offload src_mac $local_vm_mac	\
+		action mirred egress mirror dev $mirror	\
+		action tunnel_key set src_ip $link_ip dst_ip $link_remote_ip dst_port $vxlan_port id $vni	\
+		action mirred egress redirect dev $vx
 	$TC filter add dev $vx protocol arp parent ffff: prio 1 flower $offload	\
 		src_mac $remote_vm_mac enc_src_ip $link_remote_ip enc_dst_ip $link_ip enc_dst_port $vxlan_port enc_key_id $vni	\
 		action tunnel_key unset \
 		action mirred egress mirror dev $mirror	\
 		action mirred egress redirect dev $redirect
 
-set +x
-	return
+# set +x
+# 	return
 
 	$TC filter add dev $redirect protocol ip  parent ffff: chain 0 prio 2 flower $offload \
 		src_mac $local_vm_mac dst_mac $remote_vm_mac ct_state -trk \
+		action mirred egress mirror dev $mirror	\
 		action ct pipe action goto chain 1
 	$TC filter add dev $redirect protocol ip  parent ffff: chain 1 prio 2 flower $offload \
 		src_mac $local_vm_mac dst_mac $remote_vm_mac ct_state +trk+new	\
@@ -3775,6 +3776,7 @@ set +x
 	$TC filter add dev $vx protocol ip  parent ffff: chain 0 prio 2 flower $offload	\
 		src_mac $remote_vm_mac dst_mac $local_vm_mac enc_src_ip $link_remote_ip	enc_dst_ip $link_ip enc_dst_port $vxlan_port enc_key_id $vni \
 		ct_state -trk \
+		action mirred egress mirror dev $mirror	\
 		action ct pipe action goto chain 1
 	$TC filter add dev $vx protocol ip  parent ffff: chain 1 prio 2 flower $offload	\
 		src_mac $remote_vm_mac dst_mac $local_vm_mac enc_src_ip $link_remote_ip	enc_dst_ip $link_ip enc_dst_port $vxlan_port enc_key_id $vni \
@@ -6064,6 +6066,9 @@ function stop-vm
 }
 
 # BOOT_IMAGE=/vmlinuz-4.19.36+ root=/dev/mapper/fedora-root ro biosdevname=0 pci=realloc crashkernel=256M intel_iommu=on iommu=pt isolcpus=2,4,6,8,10,12,14 intel_idle.max_cstate=0 nohz_full=2,4,6,8,10,12,14 rcu_nocbs=2,4,6,8,10,12,14 intel_pstate=disable audit=0 nosoftlockup rcu_nocb_poll nopti
+
+alias mkconfig=grub2-mkconfig
+alias mkconfig_cfg='grub2-mkconfig -o /boot/grub2/grub.cfg'
 
 function grub
 {
@@ -11244,7 +11249,7 @@ function flow
 function flow2
 {
 	cd $drgn_dir/ct
-	sudo ./esw_chains_priv.py
+	sudo ./1.sh
 }
 
 function ct_list
