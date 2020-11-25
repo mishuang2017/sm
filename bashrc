@@ -73,7 +73,8 @@ if (( host_num == 13 )); then
 	link2_pre=enp4s0f1n
 	link2=${link2_pre}p1
 
-# 	link=enp4s0f0
+	link_name=1
+ 	link=enp4s0f0
 
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
@@ -12282,16 +12283,16 @@ set -x
 	$TC filter add dev $rep2 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
 		action sample rate $rate group 5 trunc 60 \
 		action mirred egress redirect dev $rep3
-# 	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
-# 		action mirred egress redirect dev $rep3
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep3
 
 	src_mac=02:25:d0:$host_num:01:03
 	dst_mac=02:25:d0:$host_num:01:02
-# 	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
-# 		action sample rate $rate group 6 trunc 60 \
-# 		action mirred egress redirect dev $rep2
-# 	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
-# 		action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
+		action sample rate $rate group 6 trunc 60 \
+		action mirred egress redirect dev $rep2
+	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+		action mirred egress redirect dev $rep2
 set +x
 }
 
@@ -12781,3 +12782,5 @@ function load_psample
 
 alias status='systemctl status openvswitch-switch'
 alias status2='systemctl status openvswitch-nonetwork.service'
+alias mkconfig=grub-mkconfig
+alias mkconfig_cfg='grub-mkconfig -o /boot/grub/grub.cfg'
