@@ -74,8 +74,11 @@ if (( host_num == 13 )); then
 	link2_pre=enp4s0f1n
 	link2=${link2_pre}p1
 
-	link_name=1
- 	link=enp4s0f0
+	uname -r | grep 4.19.36 > /dev/null 2>&1
+        if (( $? == 0 )) ; then
+		link_name=1
+		link=enp4s0f0
+	fi
 
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
@@ -9274,6 +9277,7 @@ alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
 test1=test-ovs-ct-vxlan-vf-mirror.sh
+test1=test-vxlan-neigh-update-with-pedit.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
