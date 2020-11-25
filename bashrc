@@ -29,6 +29,7 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-148-180-183" ]] && host_num=83
 [[ "$(hostname -s)" == "c-236-148-180-184" ]] && host_num=84
 
+[[ "$(hostname -s)" == "c-234-231-1-007" ]] && host_num=7
 function get_vf
 {
 	local h=$1
@@ -175,27 +176,23 @@ elif (( host_num == 17 )); then
 elif (( host_num == 18 )); then
 	link=ens9
 elif (( host_num == 83 )); then
-	link_name=1
-	link=enp8s0f0
-	link2=enp8s0f1
 	machine_num=1
-
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
-		eval rep$((i+1))=${link}_$i
-	done
-	for (( i = 0; i < numvfs; i++)); do
-		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
-		eval rep$((i+1))_2=${link2}_$i
-	done
 	rhost_num=84
-	link_remote_ip=192.168.1.$rhost_num
 	cloud=1
 elif (( host_num == 84 )); then
+	machine_num=2
+	rhost_num=83
+	cloud=1
+elif (( host_num == 7 )); then
+	machine_num=1
+	rhost_num=8
+	cloud=1
+fi
+
+if (( cloud == 1 )); then
 	link_name=1
 	link=enp8s0f0
 	link2=enp8s0f1
-	machine_num=2
 
 	for (( i = 0; i < numvfs; i++)); do
 		eval vf$((i+1))=$(get_vf $host_num 1 $((i+1)))
@@ -205,9 +202,8 @@ elif (( host_num == 84 )); then
 		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
 		eval rep$((i+1))_2=${link2}_$i
 	done
-	rhost_num=83
+
 	link_remote_ip=192.168.1.$rhost_num
-	cloud=1
 fi
 
 vni=200
