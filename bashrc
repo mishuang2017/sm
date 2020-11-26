@@ -79,6 +79,8 @@ if (( host_num == 13 )); then
 		link_name=1
 		link=enp4s0f0
 	fi
+	link_name=1
+	link=enp4s0f0
 
 	rhost_num=14
 	link_remote_ip=192.168.1.$rhost_num
@@ -129,8 +131,9 @@ elif (( host_num == 14 )); then
 	link2_pre=enp4s0f1n
 	link2=${link2_pre}p1
 
-# 	link=enp4s0f0
-# 	link2=enp4s0f1
+	link_name=1
+ 	link=enp4s0f0
+ 	link2=enp4s0f1
 
 	rhost_num=13
 	link_remote_ip=192.168.1.$rhost_num
@@ -157,7 +160,7 @@ elif (( host_num == 14 )); then
 		eval rep$((i+1))_2=${link2_pre}pf1vf$i
 	done
 
-	if [[ "$link" == "enp4s0f0" ]]; then
+	if (( link_name == 1 )); then
 		for (( i = 0; i < numvfs; i++)); do
 			eval vf$((i+1))=${link}v$i
 			eval rep$((i+1))=${link}_$i
@@ -1137,7 +1140,8 @@ function cloud_install
 	sudo ./setup.py build
 	sudo ./setup.py install
 
-	clone-bcc
+	sm
+	git clone https://github.com/iovisor/bcc.git
 	install_bcc
 }
 
