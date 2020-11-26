@@ -121,6 +121,8 @@ ypserver nis
 EOF
 
 	echo lab.mtl.com > /etc/defaultdomain
+	echo "NISDOMAIN=lab.mtl.com" >> /etc/sysconfig/network
+	yum install -y authconfig
 
 	for i in nfs-client.target ypbind.service autofs.service; do
 		systemctl enable $i
@@ -128,6 +130,13 @@ EOF
 		systemctl start $i
 		sleep 1
 	done
+
+	authconfig \
+		 --enablenis \
+		 --nisdomain=lab.mtl.com \
+		 --nisserver=10.75.68.108 \
+		 --enablemkhomedir \
+		 --update
 
 	yptest | head -n 20
 
