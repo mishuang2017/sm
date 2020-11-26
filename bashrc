@@ -2149,91 +2149,15 @@ function make-all
 }
 alias m=make-all
 alias mm='sudo make modules_install -j; sudo make install; headers_install'
-alias mi2='make -j; sudo make install_kernel -j; ofed-unload; reprobe; /bin/rm -rf ~chrism/.ccache/ 2> /dev/null'
-alias mi="make -j $cpu_num2; sudo make install_kernel -j $cpu_num2; reprobe"
 
-function mi2
+function mi
 {
-set -x
-	sudo echo 0 > /sys/class/net/$link/device/sriov_numvfs;
-	make -j; sudo make install -j;
-	/bin/rm -rf ./drivers/infiniband/hw/mlx5/mlx5_ib.ko;
-	sudo /bin/rm -rf /lib/modules/3.10.0-957.el7.x86_64/extra/mlnx-ofa_kernel/drivers/infiniband/hw/mlx5/mlx5_ib.ko
-	force-restart
-set +x
+	test -f LINUX_BASE_BRANCH || return
+	make -j $cpu_num2; sudo make install_kernel -j $cpu_num2; reprobe
 }
 
 alias make-local='./configure; make -j; sudo make install'
-alias ml=make-local
 alias make-usr='./configure --prefix=/usr; make -j; sudo make install'
-alias mu=make-usr
-
-function iperfs
-{
-	n=1
-	[[ $# == 1 ]] && n=$1
-
-	IPERF=iperf3;
-	killall -KILL $IPERF;
-
-	if (( n == 1 )); then
-		$IPERF -s -p 7000
-	else
-		for ((i = 0; i < $n; i++)); do
-			p=$((7000+i))
-			echo $i
-			$IPERF -s -p $p &
-		done
-	fi
-}
-
-function iperfc
-{
-set -x
-	n=1
-	[[ $# == 1 ]] && n=$1
-
-	local udp=0
-	(( udp == 1 )) && u="-u" || u=""
-	t=1000
-	ip=1.1.1.3
-	IPERF=iperf3;
-#	  killall -KILL $IPERF;
-
-	if (( n == 1 )); then
-		$IPERF -c $ip $u -t $t -p 7000
-	else
-		for ((i = 0; i < $n; i++)); do
-			p=$((7000+i))
-			echo $i
-			$IPERF -c $ip $u -t $t -p $p &
-		done
-	fi
-set +x
-}
-
-function iperfc-n1
-{
-set -x
-	n=1
-	[[ $# == 1 ]] && n=$1
-
-	t=1000
-	ip=1.1.1.19
-	IPERF=iperf3;
-#	  killall -KILL $IPERF;
-
-	if (( n == 1 )); then
-		exe n1 $IPERF -c $ip -u -t $t -p 7000
-	else
-		for ((i = 0; i < $n; i++)); do
-			p=$((7000+i))
-			echo $i
-			exe n1 $IPERF -c $ip -u -t $t -p $p &
-		done
-	fi
-set +x
-}
 
 function tc2
 {
@@ -9826,6 +9750,7 @@ set -x
 set +x
 }
 
+alias s3=tc_ct_pf_sample
 function tc_ct_pf_sample
 {
 	rate=1
@@ -9871,9 +9796,9 @@ set -x
 			action mirred egress redirect dev $link
 	fi
 
+# 		action sample rate $rate group 5 trunc 60 \
 	$TC filter add dev $link ingress protocol ip chain 0 prio 2 flower $offload \
 		dst_mac $mac1 ct_state -trk \
-		action sample rate $rate group 5 trunc 60 \
 		action ct pipe action goto chain 1
 
 	if (( full == 1 )); then
@@ -9890,8 +9815,7 @@ set -x
 set +x
 }
 
-alias s3=tc_ct_pf_sample
-
+alias s4=tc_ct_vf_sample
 function tc_ct_vf_sample
 {
 	rate=1
@@ -9951,8 +9875,6 @@ set -x
 
 set +x
 }
-
-alias s4=tc_ct_vf_sample
 
 function tc_ct_sample
 {
@@ -10555,7 +10477,7 @@ alias gitr='git format-patch -o ~/backport/r -1'
 alias log1=' git log lib/rhashtable.c'
 
 alias cs='corrupt -s'
-alias cc='corrupt -c 1.1.1.2 -t 100000'
+alias c200='corrupt -c 1.1.1.200 -t 100000'
 alias cc2='corrupt -c 1.1.3.2 -t 100000 -l 2'
 alias cc3='corrupt -c 1.1.1.23 -t 100000'
 alias cc122='corrupt -c 1.1.1.122 -t 100000'
