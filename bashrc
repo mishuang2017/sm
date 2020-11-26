@@ -29,7 +29,7 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-148-180-183" ]] && host_num=83
 [[ "$(hostname -s)" == "c-236-148-180-184" ]] && host_num=84
 
-[[ "$(hostname -s)" == "c-234-231-1-007" ]] && host_num=7
+[[ "$(hostname -s)" == "c-135-183-1-007" ]] && host_num=7
 function get_vf
 {
 	local h=$1
@@ -12611,6 +12611,15 @@ function test_cleanup
 set -x
 	/opt/python/2.7.3/bin/python2.7 /opt/python/2.7.3/bin/SetupCleanup.py --clusterIPs $ip1 $ip2
 set +x
+}
+
+function asap_dev_test
+{
+	/workspace/cloud_tools/configure_asap_devtest_env.sh --sw_steering
+	export CONFIG=/workspace/dev_reg_conf.sh
+	cd /workspace/asap_dev_test/
+	/bin/rm -rf /workspace/asap_dev_test_logs
+	/workspace/asap_dev_test/test-all.py --db ofed-5.2/second_db.yaml --log_dir /workspace/asap_dev_test_logs --html --randomize
 }
 
 ######## uuu #######
