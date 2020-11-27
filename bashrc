@@ -6931,7 +6931,7 @@ function git-patch3
 
 function git_patch
 {
-	dir=~/stack_device
+	dir=~/sflow/ofproto
 	mkdir -p $dir
 	local n=$1
 	if [[ $# == 0 ]]; then
@@ -6939,7 +6939,8 @@ function git_patch
 		n=$((n+1))
 	fi
 	b=$(git branch | grep \* | cut -d ' ' -f2)
-	commit=$(git slog | grep $b | grep -v HEAD | cut -f 1 -d " ")
+	commit=$(git slog | grep origin/$b | head -1 | cut -f 1 -d " ")
+	echo $commit
 	git format-patch -o $dir/$n $commit
 }
 
