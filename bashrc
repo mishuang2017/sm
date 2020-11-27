@@ -2140,7 +2140,8 @@ function headers_install
 
 function make-all
 {
-	[[ $UID == 0 ]] && break
+	[[ $UID == 0 ]] && return
+	test -f MAINTAINERS || return
 
 	unset CONFIG_LOCALVERSION_AUTO
 	make olddefconfig
