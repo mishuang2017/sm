@@ -49,6 +49,9 @@ if hostname("c-236-148-180-183"):
 if hostname("c-236-148-180-184"):
     pf0_name = "enp8s0f0"
 
+pf0_name = "enp4s0f0"
+pf1_name = "enp4s0f1"
+
 import os
 
 def name_to_address(name):

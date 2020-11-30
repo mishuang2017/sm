@@ -5061,18 +5061,20 @@ function brx_ct
 set -x
 	del-br
 	vs add-br $br
-	for (( i = 0; i < numvfs; i++)); do
-# 	for (( i = 1; i < 2; i++)); do
+# 	for (( i = 0; i < numvfs; i++)); do
+	for (( i = 1; i < 2; i++)); do
 		local rep=$(get_rep $i)
 		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
 	done
 	vxlan1
 
-	ovs-ofctl add-flow $br dl_type=0x0806,actions=NORMAL 
+	ovs-ofctl del-flows $br
+	ovs-ofctl add-flow $br arp,actions=NORMAL 
+	ovs-ofctl add-flow $br icmp,actions=NORMAL 
 
-	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
-	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
-	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+# 	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
+# 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
+# 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
 
 	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
@@ -7012,7 +7014,7 @@ function git-format-patch
 #	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$n
 #	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$n
-	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v5" -o $patch_dir -$n
+	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v6" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
 }
 
