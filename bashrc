@@ -26,10 +26,9 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
-[[ "$(hostname -s)" == "c-236-148-180-183" ]] && host_num=83
-[[ "$(hostname -s)" == "c-236-148-180-184" ]] && host_num=84
+[[ "$(hostname -s)" == "c-237-188-1-017" ]] && host_num=7
+[[ "$(hostname -s)" == "c-237-188-1-018" ]] && host_num=8
 
-[[ "$(hostname -s)" == "c-135-183-1-007" ]] && host_num=7
 function get_vf
 {
 	local h=$1
@@ -181,17 +180,13 @@ elif (( host_num == 17 )); then
 	link=ens9
 elif (( host_num == 18 )); then
 	link=ens9
-elif (( host_num == 83 )); then
-	machine_num=1
-	rhost_num=84
-	cloud=1
-elif (( host_num == 84 )); then
-	machine_num=2
-	rhost_num=83
-	cloud=1
 elif (( host_num == 7 )); then
 	machine_num=1
 	rhost_num=8
+	cloud=1
+elif (( host_num == 8 )); then
+	machine_num=2
+	rhost_num=7
 	cloud=1
 fi
 
