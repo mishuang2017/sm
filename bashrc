@@ -12547,6 +12547,17 @@ function asap_dev_test
 	/workspace/asap_dev_test/test-all.py --db ofed-5.2/second_db.yaml --log_dir /workspace/asap_dev_test_logs --html --randomize
 }
 
+function mdev_create
+{
+	uid=$(uuidgen)
+	echo $uid
+	echo "/sys/bus/pci/devices/$pci/mdev_supported_types/mlx5_core-local/create"
+	echo $uid > /sys/bus/pci/devices/$pci/mdev_supported_types/mlx5_core-local/create
+	echo $uid > /sys/bus/mdev/drivers/vfio_mdev/unbind
+	echo 00:11:22:33:44:55 > /sys/bus/mdev/devices/$uid/devlink-compat-config/mac_addr
+	echo $udi > /sys/bus/mdev/drivers/mlx5_core/bind
+}
+
 ######## uuu #######
 
 [[ -f /usr/bin/lsb_release ]] || return
