@@ -29,6 +29,9 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-237-188-1-017" ]] && host_num=7
 [[ "$(hostname -s)" == "c-237-188-1-018" ]] && host_num=8
 
+[[ "$(hostname -s)" == "c-237-5-220-225" ]] && host_num=25
+[[ "$(hostname -s)" == "c-237-5-220-226" ]] && host_num=26
+
 function get_vf
 {
 	local h=$1
@@ -187,6 +190,14 @@ elif (( host_num == 7 )); then
 elif (( host_num == 8 )); then
 	machine_num=2
 	rhost_num=7
+	cloud=1
+elif (( host_num == 25 )); then
+	machine_num=1
+	rhost_num=26
+	cloud=1
+elif (( host_num == 26 )); then
+	machine_num=2
+	rhost_num=25
 	cloud=1
 fi
 
@@ -398,7 +409,11 @@ alias restart-network='/etc/init.d/network restart'
 
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 
-CRASH="sudo /$images/chrism/crash/crash"
+if test -f /$images/chrism/crash/crash; then
+	CRASH="sudo /$images/chrism/crash/crash"
+else
+	CRASH="sudo /bin/crash"
+fi
 VMLINUX=$linux_dir/vmlinux
 alias crash1="$CRASH -i /root/.crash $VMLINUX"
 alias c=crash1
@@ -9204,7 +9219,7 @@ alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
 test1=test-ovs-ct-vxlan-vf-mirror.sh
-test1=test-vxlan-neigh-update-with-pedit.sh
+test1=test-vf-vf-prio-tag-ping.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
