@@ -34,3 +34,12 @@ flow_block_indr_list = prog['flow_block_indr_list']
 
 for flow_block_cb in list_for_each_entry('struct flow_block_cb', flow_block_indr_list.address_of_(), 'indr.list'):
     print(flow_block_cb)
+
+tc_indr_block_priv_list = mlx5e_rep_priv.uplink_priv.tc_indr_block_priv_list
+for mlx5e_rep_indr_block_priv in list_for_each_entry('struct mlx5e_rep_indr_block_priv', tc_indr_block_priv_list.address_of_(), 'list'):
+    print(mlx5e_rep_indr_block_priv)
+
+# mlx5e_block_cb_list = prog['mlx5e_block_cb_list']
+# print(mlx5e_block_cb_list)
+# for flow_block_cb in list_for_each_entry('struct flow_block_cb', mlx5e_block_cb_list.address_of_(), 'driver_list'):
+#     print(flow_block_cb)
