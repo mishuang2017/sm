@@ -5115,12 +5115,12 @@ function brx
 set -x
 	del-br
 	vs add-br $br
-#  	for (( i = 0; i < numvfs; i++)); do
-	for (( i = 1; i < 2; i++)); do
-		local rep=$(get_rep $i)
-		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
-	done
-	vxlan1
+#   	for (( i = 0; i < numvfs; i++)); do
+#  	for (( i = 1; i < 2; i++)); do
+#  		local rep=$(get_rep $i)
+#  		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+#  	done
+#  	vxlan1
 # 	ifconfig $vf1 1.1.1.1/24 up
 # 	sflow_create
 set +x
