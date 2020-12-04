@@ -409,6 +409,8 @@ alias restart-network='/etc/init.d/network restart'
 
 alias crash2="$nfs_dir/crash/crash -i /root/.crash //boot/vmlinux-$(uname -r).bz2"
 
+# use 'crash -s' to avoid the following error
+# log: cannot determine length of symbol: log_end
 if test -f /$images/chrism/crash/crash; then
 	CRASH="sudo /$images/chrism/crash/crash"
 else
