@@ -519,6 +519,7 @@ alias clone-iproute2-ct='git clone https://github.com/roidayan/iproute2 --branch
 alias clone-iproute='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/iproute2'
 alias clone-iproute2-upstream='git clone git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git'
 alias clone-systemtap='git clone git://sourceware.org/git/systemtap.git'
+alias clone-systemd='git clone git@github.com:systemd/systemd.git'
 alias clone-crash-upstream='git clone git@github.com:crash-utility/crash.git'
 alias clone-crash='git clone https://github.com/mishuang2017/crash.git'
 alias clone-sm='git clone https://github.com/mishuang2017/sm'
@@ -12654,6 +12655,11 @@ function mdev_create
 	echo $uid > /sys/bus/mdev/drivers/vfio_mdev/unbind
 	echo 00:11:22:33:44:55 > /sys/bus/mdev/devices/$uid/devlink-compat-config/mac_addr
 	echo $udi > /sys/bus/mdev/drivers/mlx5_core/bind
+}
+
+function systemd_yum
+{
+        sudo yum install -y meson gperf libcap-devel libmount-devel
 }
 
 ######## uuu #######
