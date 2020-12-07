@@ -24,16 +24,23 @@ def print_encap(e):
 flow_block_indr_dev_list = prog['flow_block_indr_dev_list']
 
 for flow_indr_dev in list_for_each_entry('struct flow_indr_dev', flow_block_indr_dev_list.address_of_(), 'list'):
-    print(flow_indr_dev)
+#     print(flow_indr_dev)
     cb_priv = flow_indr_dev.cb_priv
     mlx5e_rep_priv = Object(prog, 'struct mlx5e_rep_priv', address=cb_priv.value_())
-#     print(mlx5e_rep_priv)
+    print("mlx5e_rep_priv %x" % cb_priv)
 
 
 flow_block_indr_list = prog['flow_block_indr_list']
 
+i = 1
 for flow_block_cb in list_for_each_entry('struct flow_block_cb', flow_block_indr_list.address_of_(), 'indr.list'):
+    print(i)
+    print(flow_block_cb.indr.dev.name)
+    print(flow_block_cb.indr.cb_priv)
+    print(flow_block_cb.indr.cleanup)
+    print(flow_block_cb.release)
     print(flow_block_cb)
+    i = i + 1
 
 tc_indr_block_priv_list = mlx5e_rep_priv.uplink_priv.tc_indr_block_priv_list
 for mlx5e_rep_indr_block_priv in list_for_each_entry('struct mlx5e_rep_indr_block_priv', tc_indr_block_priv_list.address_of_(), 'list'):
