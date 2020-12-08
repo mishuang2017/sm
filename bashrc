@@ -29,8 +29,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-237-188-1-017" ]] && host_num=7
 [[ "$(hostname -s)" == "c-237-188-1-018" ]] && host_num=8
 
-[[ "$(hostname -s)" == "c-237-5-220-225" ]] && host_num=25
-[[ "$(hostname -s)" == "c-237-5-220-226" ]] && host_num=26
+[[ "$(hostname -s)" == "c-236-4-240-243" ]] && host_num=43
+[[ "$(hostname -s)" == "c-236-4-240-244" ]] && host_num=44
 
 function get_vf
 {
@@ -191,13 +191,13 @@ elif (( host_num == 8 )); then
 	machine_num=2
 	rhost_num=7
 	cloud=1
-elif (( host_num == 25 )); then
+elif (( host_num == 43 )); then
 	machine_num=1
-	rhost_num=26
+	rhost_num=24
 	cloud=1
-elif (( host_num == 26 )); then
+elif (( host_num == 24 )); then
 	machine_num=2
-	rhost_num=25
+	rhost_num=43
 	cloud=1
 fi
 
@@ -9303,7 +9303,7 @@ alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
 test1=test-ovs-ct-vxlan-vf-mirror.sh
-test1=test-vf-vf-prio-tag-ping.sh
+test1=test-tc-insert-rules-vxlan-vf-tunnel.sh
 alias test1="./$test1"
 alias vi-test="vi ~chrism/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
