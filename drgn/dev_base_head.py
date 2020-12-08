@@ -2,6 +2,12 @@
 
 from drgn.helpers.linux import *
 from drgn import Object
+import sys
+import os
+
+libpath = os.path.dirname(os.path.realpath("__file__"))
+sys.path.append(libpath)
+from lib import *
 
 net_namespace_list = prog['net_namespace_list']
 for net in list_for_each_entry('struct net', net_namespace_list.address_of_(), 'list'):

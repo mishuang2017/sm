@@ -906,3 +906,11 @@ def print_tuple_rhash_tuple(tuple_rhash):
                 prog.type('struct flow_offload_tuple_rhash').size)
             print_flow_offload(flow_offload.address_of_(), dir)
         print_flow_offload_tuple(tuple)
+
+def print_pcpu_refcnt(dev):
+    count = 0
+    for cpu in for_each_online_cpu(prog):
+        refcnt = per_cpu_ptr(dev.pcpu_refcnt, cpu)
+#         count += refcnt
+        print(refcnt)
+#     print(count)

@@ -9,13 +9,13 @@ import os
 
 libpath = os.path.dirname(os.path.realpath("__file__"))
 sys.path.append(libpath)
-import lib
+from lib import *
 
 # TODO: multiple address
 def print_ip_address(dev):
     ifa_list = dev.ip_ptr.ifa_list
     if ifa_list:
-        print("%15s" % lib.ipv4(socket.ntohl(dev.ip_ptr.ifa_list.ifa_address.value_())), end="")
+        print("%15s" % ipv4(socket.ntohl(dev.ip_ptr.ifa_list.ifa_address.value_())), end="")
     else:
         print("%15s" % "", end="")
 
@@ -26,7 +26,7 @@ def print_kind(dev):
         kind = dev.rtnl_link_ops.kind
         print("%15s" % kind.string_().decode(), end='')
 
-for x, dev in enumerate(lib.get_netdevs()):
+for x, dev in enumerate(get_netdevs()):
     name = dev.name.string_().decode()
     addr = dev.value_()
 #     if "enp" in name:
@@ -34,4 +34,5 @@ for x, dev in enumerate(lib.get_netdevs()):
     print_ip_address(dev)
     print("%10x\t" % dev.priv_flags, end='')
     print_kind(dev)
+#     print_pcpu_refcnt(dev)
     print("")
