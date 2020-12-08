@@ -1135,7 +1135,7 @@ function cloud_setup
 	mkdir -p /images/chrism
 	chown chrism.mtl /images/chrism
 
-	yum install -y cscope tmux ctags rsync grubby iperf3 htop
+	yum install -y cscope tmux ctags rsync grubby iperf3 htop pciutils vim
 
 	if ! test -f ~/.tmux.conf; then
 		mv ~/.bashrc bashrc.orig
