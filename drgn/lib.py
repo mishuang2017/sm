@@ -907,10 +907,13 @@ def print_tuple_rhash_tuple(tuple_rhash):
             print_flow_offload(flow_offload.address_of_(), dir)
         print_flow_offload_tuple(tuple)
 
-def print_pcpu_refcnt(dev):
+def get_pcpu_refcnt(dev):
     count = 0
     for cpu in for_each_online_cpu(prog):
-        refcnt = per_cpu_ptr(dev.pcpu_refcnt, cpu)
-#         count += refcnt
-        print(refcnt)
-#     print(count)
+#         print(cpu, end='\t')
+        pointer = per_cpu_ptr(dev.pcpu_refcnt, cpu)
+        refcnt = Object(prog, 'int', address=pointer)
+#         print("%8d" % refcnt, end='\t')
+#         print(pointer)
+        count += refcnt
+    return count

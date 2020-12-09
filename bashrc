@@ -237,7 +237,7 @@ cpu_num=$(nproc)
 if (( cloud == 0 )); then
 	cpu_num2=$((cpu_num*2))
 else
-	cpu_num2=$((cpu_num-2))
+	cpu_num2=$((cpu_num-1))
 fi
 
 nfs_dir='/auto/mtbcswgwork/chrism'
@@ -2175,7 +2175,9 @@ alias mm='sudo make modules_install -j; sudo make install; headers_install'
 function mi
 {
 	test -f LINUX_BASE_BRANCH || return
-	make -j $cpu_num2; sudo make install_kernel -j $cpu_num2; reprobe
+	make -j $cpu_num2
+	sudo make install_kernel -j $cpu_num2
+	sudo /etc/init.d/openibd restart
 }
 
 alias make-local='./configure; make -j; sudo make install'
