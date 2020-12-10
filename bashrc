@@ -195,6 +195,7 @@ elif (( host_num == 43 )); then
 	machine_num=1
 	rhost_num=24
 	cloud=1
+
 elif (( host_num == 24 )); then
 	machine_num=2
 	rhost_num=43
@@ -214,6 +215,10 @@ if (( cloud == 1 )); then
 		eval vf$((i+1))_2=$(get_vf $host_num 2 $((i+1)))
 		eval rep$((i+1))_2=${link2}_$i
 	done
+
+	vf1=enp8s0f2
+	vf2=enp8s0f3
+	vf3=enp8s0f4
 
 	link_remote_ip=192.168.1.$rhost_num
 fi
@@ -2177,7 +2182,7 @@ function mi
 	test -f LINUX_BASE_BRANCH || return
 	make -j $cpu_num2
 	sudo make install_kernel -j $cpu_num2
-	sudo /etc/init.d/openibd restart
+	reprobe
 }
 
 alias make-local='./configure; make -j; sudo make install'

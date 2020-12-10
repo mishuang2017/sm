@@ -26,7 +26,7 @@ def print_kind(dev):
         kind = dev.rtnl_link_ops.kind
         print("%15s" % kind.string_().decode(), end='')
 
-addr = 0xffff93e6b7e00000
+addr = 0xffff9d793b400000
 dev = Object(prog, 'struct net_device', address=addr)
 name = dev.name.string_().decode()
 print("%5i%20s%20x\t" % (dev.ifindex, name, addr), end="")
