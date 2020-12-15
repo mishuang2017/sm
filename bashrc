@@ -12671,6 +12671,7 @@ function systemd_yum
 function rsync1
 {
 	rsync -tvr /labhome/chrism/sflow/mark vnc14:~/sflow
+	rsync -tvr /labhome/chrism/sflow/ct vnc14:~/sflow
 }
 
 ######## uuu #######
