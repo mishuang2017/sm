@@ -193,10 +193,10 @@ elif (( host_num == 8 )); then
 	cloud=1
 elif (( host_num == 43 )); then
 	machine_num=1
-	rhost_num=24
+	rhost_num=44
 	cloud=1
 
-elif (( host_num == 24 )); then
+elif (( host_num == 44 )); then
 	machine_num=2
 	rhost_num=43
 	cloud=1
@@ -1676,9 +1676,9 @@ set -x;
 	module=mlx5_core;
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	cd $linux_dir;
-	make M=$driver_dir -j W=1 || {
+	make M=$driver_dir -j $cpu_num2 W=1 || {
 # 	make M=$driver_dir -j C=2 || {
-		make M=$driver_dir -j W=1 > /tmp/1.txt 2>& 1
+		make M=$driver_dir -j $cpu_num2 W=1 > /tmp/1.txt 2>& 1
 		set +x
 		return
 	}
@@ -5116,11 +5116,11 @@ set -x
 	del-br
 	vs add-br $br
 #   	for (( i = 0; i < numvfs; i++)); do
-#  	for (( i = 1; i < 2; i++)); do
-#  		local rep=$(get_rep $i)
-#  		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
-#  	done
-#  	vxlan1
+	for (( i = 1; i < 2; i++)); do
+		local rep=$(get_rep $i)
+		vs add-port $br $rep -- set Interface $rep ofport_request=$((i+1))
+	done
+	vxlan1
 # 	ifconfig $vf1 1.1.1.1/24 up
 # 	sflow_create
 set +x
@@ -12566,8 +12566,8 @@ set -x
 # 		ovs-vsctl -- --id=@sflow create sflow agent=$link target=\"192.168.1.13:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 set +x
 	fi
-	if (( host_num == 41 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.236.0.242:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
+	if (( host_num == 43 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.236.4.244:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 	fi
 }
 
