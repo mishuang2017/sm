@@ -7034,15 +7034,15 @@ function git-patch3
 
 function git_patch
 {
-	dir=~/sflow/ofproto
+	dir=$1
 	mkdir -p $dir
-	local n=$1
-	if [[ $# == 0 ]]; then
+	local n=$2
+	if [[ $# == 1 ]]; then
 		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
 		n=$((n+1))
 	fi
 	b=$(git branch | grep \* | cut -d ' ' -f2)
-	commit=$(git slog | grep origin/$b | head -1 | cut -f 1 -d " ")
+	commit=$(git slog -50 | grep origin/$b | head -1 | cut -f 1 -d " ")
 	echo $commit
 	git format-patch -o $dir/$n $commit
 }
@@ -7050,15 +7050,14 @@ function git_patch
 function git_linux
 {
 	dir=~/sflow/mark
-	mkdir -p $dir
-	local n=$1
-	if [[ $# == 0 ]]; then
-		n=$(ls $dir | sort -n | tail -n 1 | cut -d _ -f 1)
-		n=$((n+1))
-	fi
-	git format-patch -o $dir/$n 6f14b7d62cb5
+	git_patch $dir $1
 }
 
+function git_ovs
+{
+	dir=~/sflow/ofproto
+	git_patch $dir $1
+}
 
 linux_file=~/idr/
 function checkout
@@ -12671,7 +12670,7 @@ function systemd_yum
 
 function rsync1
 {
-	rsync -r /labhome/chrism/sflow/mark vnc14:~/sflow
+	rsync -tvr /labhome/chrism/sflow/mark vnc14:~/sflow
 }
 
 ######## uuu #######
