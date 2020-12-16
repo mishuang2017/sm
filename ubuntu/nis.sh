@@ -101,8 +101,8 @@ ALL     ALL=(ALL) NOPASSWD: ALL, (root) PASSWD: FORBIDDEN, NOPASSWD: ALL, !FORBI
 EOF
 
 	cat << EOF > /etc/yp.conf
-# domain lab.mtl.com server 10.75.68.108
-# domain lab.mtl.com server 10.75.68.102
+# domain lab.mtl.com server 10.75.205.108
+# domain lab.mtl.com server 10.75.205.102
 ypserver nis
 EOF
 

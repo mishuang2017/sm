@@ -42,7 +42,7 @@ sudo apt -y install libunwind-dev libslang2-dev binutils-dev libnuma-dev libbabe
 # For crash, no termcap
 sudo apt install -y libncurses5-dev zlib1g-dev
 # defs.h:52:10: fatal error: lzo/lzo1x.h: No such file or directory
-sudo apt install liblzo2-dev
+sudo apt install -y liblzo2-dev
 
 # For drgn
 # must install libreadline-dev before install python 3.6
