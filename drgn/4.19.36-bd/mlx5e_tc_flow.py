@@ -12,6 +12,7 @@ from lib import *
 mlx5e_rep_priv = get_mlx5e_rep_priv()
 
 print("MLX5E_TC_FLOW_INGRESS   %10x" % (prog['MLX5E_TC_FLOW_INGRESS'].value_()))
+print("MLX5E_TC_FLOW_EGRESS    %10x" % (prog['MLX5E_TC_FLOW_EGRESS'].value_()))
 print("MLX5E_TC_FLOW_ESWITCH   %10x" % (prog['MLX5E_TC_FLOW_ESWITCH'].value_()))
 print("MLX5E_TC_FLOW_OFFLOADED %10x" % (prog['MLX5E_TC_FLOW_OFFLOADED'].value_()))
 print("MLX5E_TC_FLOW_SIMPLE    %10x" % (prog['MLX5E_TC_FLOW_SIMPLE'].value_()))
@@ -43,9 +44,10 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
 #     print(flow.esw_attr[0])
     print("")
 
-#     tun_info = flow.esw_attr[0].parse_attr.tun_info[0]
+#     tun_info = flow.esw_attr[0].parse_attr.tun_info
 #     if tun_info.value_():
 #         print_tun(tun_info)
+#         print(tun_info)
 
 #     continue
 #     print(flow.miniflow_list)
