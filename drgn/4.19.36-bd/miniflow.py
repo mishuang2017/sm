@@ -6,8 +6,7 @@ import socket
 import sys
 import os
 
-libpath = os.path.dirname(os.path.realpath("__file__"))
-sys.path.append(libpath)
+sys.path.append("..")
 import lib
 
 def print_miniflow_list(flow):
