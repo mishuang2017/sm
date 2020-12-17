@@ -33,7 +33,7 @@ miniflow_list = []
 #             miniflow_list.append(miniflow)
 
 mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
-mf_ht = mlx5e_rep_priv.uplink_priv.mf_ht
+mf_ht = mlx5e_rep_priv.mf_ht
 
 j = 0
 
@@ -56,7 +56,7 @@ for i in miniflow_list:
     if name == "enp4s0f0_1" or name == "enp4s0f0" or name == "enp4s0f0_2":
         flow = i.flow
         print("miniflow->flow: mlx5e_tc_flow %lx, refcnt: %d, flags: %x" % \
-            (flow, flow.refcnt.refs.counter, flow.flags))
+            (flow, flow.refcnt.refs.counter, flow.flags.counter))
         fc = flow.esw_attr[0].counter
 #         print(fc)
 #         lib.print_mlx5_flow_handle(flow.rule[0])
@@ -65,7 +65,7 @@ for i in miniflow_list:
         for j in range(8):
             flow = i.path.flows[j]
             if flow:
-                print("%s: path.flows[%d]: %lx, flags: %x" % (name, j, flow.value_(), flow.flags))
+                print("%s: path.flows[%d]: %lx, flags: %x" % (name, j, flow.value_(), flow.flags.counter))
 #                 print_miniflow_list(flow)
                 continue
                 attr = flow.esw_attr[0]
