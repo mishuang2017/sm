@@ -970,7 +970,7 @@ alias r9a='restart-ovs; sudo ~chrism/bin/test_router9-ar.sh; enable-ovs-debug'
 alias r9='restart-ovs; sudo ~chrism/bin/test_router9-orig.sh; enable-ovs-debug'
 
 alias r92='restart-ovs; sudo ~chrism/bin/test_router9-test2.sh; enable-ovs-debug'
-alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'
+alias rx='restart-ovs; sudo ~chrism/bin/test_router-vxlan.sh; enable-ovs-debug'	# snat + vxlan. vxlan in br-int, pf in br-ex
 alias baidu='del-br; sudo ~chrism/bin/test_router-baidu.sh; enable-ovs-debug'	# vm2 underlay
 alias dnat-no-ct='restart-ovs; sudo ~chrism/bin/test_router-dnat.sh; enable-ovs-debug'	# dnat
 alias dnat-ct='del-br; sudo ~chrism/bin/test_router-dnat-ct.sh; enable-ovs-debug'	# dnat
