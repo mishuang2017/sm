@@ -1,3 +1,5 @@
+dpkg-deb -c mlnx-ofed-kernel-utils_5.0-OFED.5.0.0.3.0.1.g3c54026_amd64.deb
+
 # list installed files on a package
 dpkg-query -L crash
 

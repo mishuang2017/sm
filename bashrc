@@ -12678,7 +12678,7 @@ function rsync1
 
 [[ -f /usr/bin/lsb_release ]] || return
 
-[[ "$USER" == "chrism" ]] && alias s='sudo su -'
+[[ "$USER" == "chrism" ]] && alias s='[[ $UID == 0 ]] && su - chrism'
 alias vig='sudo vim /boot/grub/grub.cfg'
 
 [[ "$(hostname -s)" == "xiaomi" ]] && host_num=200
