@@ -920,7 +920,7 @@ alias tune1="ethtool -C $link adaptive-rx off rx-usecs 64 rx-frames 128 tx-usecs
 alias tune2="ethtool -C $link adaptive-rx on"
 alias tune3="ethtool -c $link"
 
-alias lsblk_all='lsblk -o name,label,partlabel,mountpoint,size,uuid'
+alias lsblk_all='lsblk -o name,label,partlabel,mountpoint,size,uuid,fstype'
 
 ETHTOOL=/images/chrism/ethtool/ethtool
 function ethtool-rxvlan-off
@@ -11751,12 +11751,16 @@ set +x
 
 function dmfs
 {
-set -x
 	if (( ofed_mlx5 == 1 )); then
+		test -f /sys/class/net/enp4s0f0/compat/devlink/steering_mode || return
+set -x
 		echo dmfs > /sys/class/net/$link/compat/devlink/steering_mode 
+set +x
 	else
+set -x
 		devlink dev param set pci/$pci name flow_steering_mode value "dmfs" \
 			cmode runtime || echo "Failed to set steering sw"
+set +x
 	fi
 
 set +x
@@ -11764,14 +11768,17 @@ set +x
 
 function smfs
 {
-set -x
 	if (( ofed_mlx5 == 1 )); then
+		test -f /sys/class/net/enp4s0f0/compat/devlink/steering_mode || return
+set -x
 		echo smfs > /sys/class/net/$link/compat/devlink/steering_mode
+set +x
 	else
+set -x
 		devlink dev param set pci/$pci name flow_steering_mode value "smfs" \
 			cmode runtime || echo "Failed to set steering sw"
-	fi
 set +x
+	fi
 }
 
 function get-fs

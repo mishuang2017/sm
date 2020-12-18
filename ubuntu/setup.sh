@@ -1,6 +1,6 @@
 sudo apt -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 	git make build-essential flex bison libssl-dev libelf-dev		\
-	ethtool tree bc sysstat
+	ethtool tree bc sysstat dkms
 
 # misc, mkfs.vat, brctl
 sudo apt -y install dosfstools bridge-utils
