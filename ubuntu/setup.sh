@@ -1,3 +1,5 @@
+apt -y install sudo
+
 sudo apt -y install openssh-server vim exuberant-ctags cscope tmux ipcalc	\
 	git make build-essential flex bison libssl-dev libelf-dev		\
 	ethtool tree bc sysstat dkms

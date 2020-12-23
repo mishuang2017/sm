@@ -517,6 +517,7 @@ alias clone-ofed5_1='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_ker
 alias clone-ofed5_2='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_2'
 alias clone-ofed='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_5_0_2'
 alias clone-ofed-bd='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd'
+alias clone-ofed-bd-fix='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3_bd_fix'
 alias clone-ofed-4.7='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_7_3'
 alias clone-ofed-4.6='git clone ssh://gerrit.mtl.com:29418/mlnx_ofed/mlnx-ofa_kernel-4.0.git --branch=mlnx_ofed_4_6_3'
 alias clone-asap='git clone ssh://l-gerrit.mtl.labs.mlnx:29418/asap_dev_reg; cp ~/config_chrism_cx5.sh asap_dev_reg'
@@ -1126,7 +1127,7 @@ function ln-profile
 	ln -s ~chrism/.profile
 	ln -s ~chrism/.screenrc
 	ln -s ~chrism/.tmux.conf
-	ln -s ~chrism/.crash
+	/bin/cp ~chrism/.crash /root
 }
 
 function create-images
@@ -9693,10 +9694,10 @@ set -x
 	mac1=02:25:d0:$host_num:01:02
 	mac2=02:25:d0:$host_num:01:03
 	echo "add arp rules"
-	$TC filter add dev $rep2 ingress protocol arp prio 1 flower $offload \
+	$TC filter add dev $rep2 ingress protocol arp prio 1 flower skip_hw \
 		action mirred egress redirect dev $rep3
 
-	$TC filter add dev $rep3 ingress protocol arp prio 1 flower $offload \
+	$TC filter add dev $rep3 ingress protocol arp prio 1 flower skip_hw \
 		action mirred egress redirect dev $rep2
 
 	echo "add ct rules"
