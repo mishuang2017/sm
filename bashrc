@@ -8280,8 +8280,8 @@ function rebase
 function tcs
 {
 	[[ $# != 1 ]] && return
-	TC=/images/chrism/iproute2/tc/tc
 	TC=tc
+	TC=/images/chrism/iproute2/tc/tc
 	$TC -s filter show dev $1 root
 }
 
