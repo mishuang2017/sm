@@ -21,16 +21,13 @@ alias rc='. ~/.bashrc'
 
 [[ "$(hostname -s)" == "dev-r630-03" ]] && host_num=13
 [[ "$(hostname -s)" == "dev-r630-04" ]] && host_num=14
-[[ "$(hostname -s)" == "dev-chrism-vm1" ]] && host_num=15
-[[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
-[[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
-[[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
+# [[ "$(hostname -s)" == "dev-chrism-vm1" ]] && host_num=15
+# [[ "$(hostname -s)" == "dev-chrism-vm2" ]] && host_num=16
+# [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
+# [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
-[[ "$(hostname -s)" == "c-237-188-1-017" ]] && host_num=7
-[[ "$(hostname -s)" == "c-237-188-1-018" ]] && host_num=8
-
-[[ "$(hostname -s)" == "c-236-4-240-243" ]] && host_num=43
-[[ "$(hostname -s)" == "c-236-4-240-244" ]] && host_num=44
+[[ "$(hostname -s)" == "c-235-10-1-005" ]] && host_num=5
+[[ "$(hostname -s)" == "c-235-10-1-005" ]] && host_num=6
 
 function get_vf
 {
@@ -175,32 +172,22 @@ elif (( host_num == 14 )); then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
-elif (( host_num == 15 )); then
-	link=ens9
-elif (( host_num == 16 )); then
-	link=ens9
-elif (( host_num == 17 )); then
-	link=ens9
-elif (( host_num == 18 )); then
-	link=ens9
-elif (( host_num == 7 )); then
+
+elif (( host_num == 5 )); then
 	machine_num=1
-	rhost_num=8
-	cloud=1
-elif (( host_num == 8 )); then
-	machine_num=2
-	rhost_num=7
-	cloud=1
-elif (( host_num == 43 )); then
-	machine_num=1
-	rhost_num=44
+	rhost_num=6
+	link_mac=0c:42:a1:58:ab:9c
+	remote_mac=0c:42:a1:58:ab:fc
 	cloud=1
 
-elif (( host_num == 44 )); then
+elif (( host_num == 6 )); then
 	machine_num=2
-	rhost_num=43
+	rhost_num=5
+	link_mac=0c:42:a1:58:ab:fc
+	remote_mac=0c:42:a1:58:ab:9c
 	cloud=1
 fi
+
 
 if (( cloud == 1 )); then
 	link_name=1
@@ -1692,6 +1679,9 @@ set -x;
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 
+	sudo modprobe -r act_sample
+	sudo modprobe -r psample
+	sudo modprobe -r mlx5_vdpa
 	sudo modprobe -r mlx5_ib
 	sudo modprobe -r mlx5_core
 	sudo modprobe -v mlx5_core
@@ -9863,7 +9853,7 @@ alias s3=tc_ct_pf_sample
 function tc_ct_pf_sample
 {
 	rate=1
-	full=1
+	full=0
 	offload=""
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
@@ -9905,9 +9895,9 @@ set -x
 			action mirred egress redirect dev $link
 	fi
 
-# 		action sample rate $rate group 5 trunc 60 \
 	$TC filter add dev $link ingress protocol ip chain 0 prio 2 flower $offload \
 		dst_mac $mac1 ct_state -trk \
+		action sample rate $rate group 5 trunc 60 \
 		action ct pipe action goto chain 1
 
 	if (( full == 1 )); then
