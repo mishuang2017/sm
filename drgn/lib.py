@@ -596,6 +596,7 @@ def print_tun(tun):
 
 def print_dest(rule):
     print("\t\tmlx5_flow_rule %lx" % rule.address_of_().value_())
+#     print(rule.dest_attr)
     if prog['MLX5_FLOW_DESTINATION_TYPE_COUNTER'] == rule.dest_attr.type:
         print("\t\t\tdest: counter_id: %x" % (rule.dest_attr.counter_id))
         return

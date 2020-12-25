@@ -27,7 +27,7 @@ alias rc='. ~/.bashrc'
 # [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
 [[ "$(hostname -s)" == "c-235-10-1-005" ]] && host_num=5
-[[ "$(hostname -s)" == "c-235-10-1-005" ]] && host_num=6
+[[ "$(hostname -s)" == "c-235-10-1-006" ]] && host_num=6
 
 function get_vf
 {
