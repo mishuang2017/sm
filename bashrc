@@ -5865,9 +5865,6 @@ function start-switchdev-all
 	local port
 	local l
 	for port in $(seq $ports); do
-		(( port == 1 )) && l=$link
-		(( port == 2 )) && l=$link2
-		echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 		start-switchdev $port
 	done
 }
@@ -5901,6 +5898,11 @@ function start-switchdev
 	elif (( port == 2 )); then
 		l=$link2
 		pci_addr=$pci2
+	fi
+
+	num=$(cat /sys/class/net/$l/device/sriov_numvfs)
+	if (( num == 0 )); then
+		echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 	fi
 
 	set_mac $port
