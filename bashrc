@@ -667,13 +667,14 @@ fi
 
 alias spec="cd /$images/mi/rpmbuild/SPECS"
 alias sml="cd /$images/chrism/linux"
-alias sml2="cd /$images/chrism/linux2"
+alias sml2="cd /$images/chrism/linux_dmytro"
 alias sml3="cd /$images/chrism/linux3"
 alias sm5="cd /$images/chrism/5.4"
 alias 5c="cd /$images/chrism/5.4-ct"
 alias sm-build="cdr; cd build"
 alias smu="cd /$images/chrism/upstream"
 alias smm="cd /$images/chrism/mlnx-ofa_kernel-4.0"
+alias smm2="cd /$images/chrism/mlnx-ofa_kernel-4.0-dmytro"
 alias o5="cd /$images/chrism/ofed-5.0/mlnx-ofa_kernel-4.0"
 alias o5-5.4="cd /$images/chrism/ofed-5.0/mlnx-ofa_kernel-4.0"
 alias m7="cd /$images/chrism/ofed-4.7/mlnx-ofa_kernel-4.0"
@@ -2148,7 +2149,7 @@ function printk8
 
 function headers_install
 {
-	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr -j
+	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr -j -B
 }
 
 function make-all
@@ -5861,8 +5862,13 @@ set +x
 function start-switchdev-all
 {
 	start-ovs
-	for i in $(seq $ports); do
-		start-switchdev $i
+	local port
+	local l
+	for port in $(seq $ports); do
+		(( port == 1 )) && l=$link
+		(( port == 2 )) && l=$link2
+		echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
+		start-switchdev $port
 	done
 }
 
@@ -5870,6 +5876,7 @@ alias mystart=start-switchdev-all
 alias restart='off; dmfs; mystart'
 alias restart_smfs='off; smfs; mystart'
 
+# assume legacy mode was enabled
 function start-switchdev
 {
 	local port=$1
@@ -5882,7 +5889,6 @@ function start-switchdev
 		read
 	fi
 
-# 	smfs
 	get_pci
 	if [[ -z $pci ]]; then
 		echo "pci is null"
@@ -5896,8 +5902,6 @@ function start-switchdev
 		l=$link2
 		pci_addr=$pci2
 	fi
-
-	$TIME echo $numvfs > /sys/class/net/$l/device/sriov_numvfs
 
 	set_mac $port
 
@@ -6956,12 +6960,14 @@ function git_ofed_reset
 function git_ofed_reset_all
 {
 	for i in backports/*; do
-		if echo $i | egrep "0199-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch|0200-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
-			echo $i
+		if echo $i | egrep "0135-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
+			echo "ignore $i"
 			continue
 		fi
+		echo "reset $i"
 		git reset HEAD~ $i
 	done
+	git commit --amend
 }
 
 function git-am
@@ -8210,7 +8216,7 @@ alias ofed-configure-4.12="./configure --with-mlx5-core-and-ib-and-en-mod --with
 
 function ofed_configure
 {
-	smm
+# 	smm
 	./configure $(cat /etc/infiniband/info  | grep Configure | cut -d : -f 2 | sed 's/"//') -j $cpu_num2
 }
 
