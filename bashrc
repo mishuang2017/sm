@@ -196,6 +196,14 @@ elif (( host_num == 29 )); then
 	remote_mac=24:8a:07:96:4e:e6
 	link_name=1
 	link=enp139s0f0
+
+	if (( link_name == 1 )); then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link}_$i
+		done
+	fi
+
 elif (( host_num == 30 )); then
 	machine_num=2
 	rhost_num=29
@@ -203,8 +211,14 @@ elif (( host_num == 30 )); then
 	remote_mac=24:8a:07:96:4c:ee
 	link_name=1
 	link=enp134s0f0
-fi
 
+	if (( link_name == 1 )); then
+		for (( i = 0; i < numvfs; i++)); do
+			eval vf$((i+1))=${link}v$i
+			eval rep$((i+1))=${link}_$i
+		done
+	fi
+fi
 
 if (( cloud == 1 )); then
 	link_name=1
@@ -12592,6 +12606,9 @@ set +x
 	fi
 	if (( host_num == 43 )); then
 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.236.4.244:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
+	fi
+	if (( host_num == 29 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.195.30.1:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 	fi
 }
 
