@@ -29,6 +29,9 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-235-10-1-005" ]] && host_num=5
 [[ "$(hostname -s)" == "c-235-10-1-006" ]] && host_num=6
 
+[[ "$(hostname -s)" == "qa-h-vrt-029" ]] && host_num=29
+[[ "$(hostname -s)" == "qa-h-vrt-030" ]] && host_num=30
+
 function get_vf
 {
 	local h=$1
@@ -186,6 +189,20 @@ elif (( host_num == 6 )); then
 	link_mac=0c:42:a1:58:ab:fc
 	remote_mac=0c:42:a1:58:ab:9c
 	cloud=1
+elif (( host_num == 29 )); then
+	machine_num=1
+	rhost_num=30
+	link_mac=24:8a:07:96:4c:ee
+	remote_mac=24:8a:07:96:4e:e6
+	link_name=1
+	link=enp134s0f0
+elif (( host_num == 30 )); then
+	machine_num=2
+	rhost_num=29
+	link_mac=24:8a:07:96:4e:e6
+	remote_mac=24:8a:07:96:4c:ee
+	link_name=1
+	link=enp134s0f0
 fi
 
 
@@ -1121,7 +1138,8 @@ function ln-profile
 function create-images
 {
 	mkdir -p /images/chrism
-	chown chrism.mtl /images/chrism
+	ln -s ~chrism/sm /images/chrism/sm
+	chown -R chrism.mtl /images/chrism
 }
 
 function cloud_setup
@@ -1139,7 +1157,7 @@ function cloud_setup
 		ln -s ~chrism/.vim
 	fi
 
-	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel bzip2-devel
+	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel bzip2-devel kexec-tools
 	yum_bcc
 }
 
