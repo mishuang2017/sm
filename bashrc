@@ -195,7 +195,7 @@ elif (( host_num == 29 )); then
 	link_mac=24:8a:07:96:4c:ee
 	remote_mac=24:8a:07:96:4e:e6
 	link_name=1
-	link=enp134s0f0
+	link=enp139s0f0
 elif (( host_num == 30 )); then
 	machine_num=2
 	rhost_num=29
