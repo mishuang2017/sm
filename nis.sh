@@ -1,5 +1,7 @@
 #!/bin/bash
 
+usernamce=chrism
+
 function install-packages
 {
 set -x
@@ -142,14 +144,14 @@ EOF
 
 	for file in .bashrc .vim .vimrc .screenrc .tmux.conf; do
 		/bin/rm ~/$file
-		ln -s ~chrism/$file .
+		ln -s ~$username/$file .
 		sleep 1
 	done
 
-	cp ~chrism/.crash .
+	cp ~$username/.crash .
 	sleep 1
 
-	home=/images/chrism
+	home=/images/$username
 	mkdir -p $home
 	chown chrism.mtl $home
 	sleep 1
