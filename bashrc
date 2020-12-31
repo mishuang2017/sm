@@ -1138,13 +1138,13 @@ function greps
 function ln-profile
 {
 	mv ~/.bashrc bashrc.orig
-	ln -s ~$username/.bashrc
-	ln -s ~$username/.vim
-	ln -s ~$username/.vimrc
-	ln -s ~$username/.profile
-	ln -s ~$username/.screenrc
-	ln -s ~$username/.tmux.conf
-	/bin/cp ~$username/.crash /root
+	ln -s ~chrism/.bashrc
+	ln -s ~chrism/.vim
+	ln -s ~chrism/.vimrc
+	ln -s ~chrism/.profile
+	ln -s ~chrism/.screenrc
+	ln -s ~chrism/.tmux.conf
+	/bin/cp ~chrsim/.crash /root
 }
 
 function create-images
@@ -9068,7 +9068,7 @@ alias sendm="/labhome/$username/prg/python/scapy/m.py"
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j DESTDIR=install'
 # alias make-dpdk='sudo make install T=x86_64-native-linuxapp-gcc -j DESTDIR=/usr'
 
-alias ofed_debian='./mlnxofedinstall --without-fw-update  --force-dkms --force'
+alias ofed_debian='./mlnxofedinstall --without-fw-update  --force-dkms --force --add-kernel-support'
 # ./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update
 alias ofed_dpdk='./mlnxofedinstall  --upstream-libs --dpdk --without-fw-update --force --with-mft --with-mstflint'
 
