@@ -11184,7 +11184,7 @@ function kmsg() {
 	fi
 }
 
-drgn_dir=~$username//sm/drgn
+drgn_dir=~chrism//sm/drgn
 
 function _flowtable
 {
