@@ -7783,7 +7783,7 @@ EOF
 }
 
 mac_start=1
-mac_end=26
+mac_end=2
 mac_ns="ip netns exec n1"
 mac_ns=""
 function macvlan
@@ -7797,8 +7797,9 @@ function macvlan
 		mf1=$(printf %x $i)
 		local newlink=${l}.$i
 		echo $newlink
-		$mac_ns ip link add link $l address 00:11:11:11:11:$mf1 $newlink type macvlan
-		$mac_ns ifconfig $newlink 1.1.11.$i/16 up
+# 		ip link add link $l address 00:11:11:11:11:$mf1 $newlink type macvlan mode bridge
+		ip link add link $l $newlink type macvlan mode bridge
+# 		netns n1$i $newlink 1.1.11.$i
 	done
 }
 
@@ -7812,7 +7813,8 @@ function macvlan2
 		local newlink=${l}.$i
 		echo $newlink
 #		(( i == 13 )) && continue
-		$mac_ns ip link delete link dev $newlink
+		ip link delete link dev $newlink
+		ip netns del n1$i
 	done
 }
 
