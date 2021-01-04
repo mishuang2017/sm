@@ -119,7 +119,7 @@ def parse_pedit(l, h):
     print("\taction_type: 0x%x, field: 0x%2x, name: %-15s, offset: %d" % \
         (action_type, field, field_name.get(field), offset), end="")
     if field == 0x15 or field == 0x16:
-        print("\t%s" % lib.ipv4(h))
+        print("\t%s" % ipv4(h))
     elif field == 0x8 or field == 0x9:
         print("\t%x, %d" % (h, h))
     else:
