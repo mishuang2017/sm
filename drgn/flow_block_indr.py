@@ -39,6 +39,11 @@
 #         b'do_syscall_64+0x38 [kernel]'
 #         b'entry_SYSCALL_64_after_hwframe+0x44 [kernel]'
 
+# rep:
+# flow_block_cb cb     : mlx5e_rep_setup_tc_cb,      cb_priv: ffff8b7e47500bc0 (mlx5e_priv)
+# vxlan:
+# flow_block_cb cb     : mlx5e_rep_indr_setup_tc_cb, cb_priv: ffff8b85d8464a00 (mlx5e_rep_indr_block_priv)
+
 from drgn.helpers.linux import *
 from drgn import Object
 import time
