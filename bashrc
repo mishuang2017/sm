@@ -350,6 +350,7 @@ br2=br2
 vx=vxlan0
 vx2=vxlan1
 bond=bond0
+macvlan=macvlan1
 
 # if [[ "$USER" == "root" ]]; then
 #	if [[ "$(virt-what)" == "" && $centos72 != 1 ]]; then
@@ -7782,10 +7783,9 @@ EOF
 	cat $file
 }
 
+# https://hicu.be/bridge-vs-macvlan
 mac_start=1
 mac_end=2
-mac_ns="ip netns exec n1"
-mac_ns=""
 function macvlan
 {
 	local l=$link
@@ -7797,9 +7797,9 @@ function macvlan
 		mf1=$(printf %x $i)
 		local newlink=${l}.$i
 		echo $newlink
-# 		ip link add link $l address 00:11:11:11:11:$mf1 $newlink type macvlan mode bridge
+# 		ip link add link $l $newlink type macvlan mode private
 		ip link add link $l $newlink type macvlan mode bridge
-# 		netns n1$i $newlink 1.1.11.$i
+		netns n1$i $newlink 1.1.11.$i
 	done
 }
 
@@ -7814,8 +7814,37 @@ function macvlan2
 		echo $newlink
 #		(( i == 13 )) && continue
 		ip link delete link dev $newlink
-		ip netns del n1$i
+# 		ip netns del n1$i
 	done
+}
+
+
+function macvlan_private
+{
+	ip link delete link dev $macvlan > /dev/null 2>&1
+	ip link add link $link $macvlan type macvlan mode private
+	ip addr add dev $macvlan 1.2.1.$host_num/24
+	ip link set $macvlan up
+}
+
+function tc_macvlan
+{
+set -x
+	TC=/images/$username/iproute2/tc/tc
+
+	ip link delete link dev $macvlan > /dev/null 2>&1
+	ip link add link $link $macvlan type macvlan mode bridge
+
+	$TC qdisc del dev $macvlan ingress 2> /dev/null
+	$TC qdisc add dev $macvlan ingress 
+
+	$TC qdisc del dev $rep2 ingress 2> /dev/null
+	ethtool -K $rep2 hw-tc-offload on 
+	$TC qdisc add dev $rep2 ingress 
+
+# 	$TC filter add dev $macvlan ingress prio 1 protocol ip flower action mirred egress redirect dev $rep2
+	$TC filter add dev $rep2 ingress prio 1 protocol ip flower action mirred egress redirect dev $macvlan
+set +x
 }
 
 function vcpu
@@ -9302,8 +9331,7 @@ alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh 
 alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
-test1=test-ovs-ct-vxlan-vf-mirror.sh
-test1=test-tc-insert-rules-vxlan-vf-tunnel.sh
+test1=test-tc-insert-rules-macvlan.sh
 alias test1="./$test1"
 alias vi-test="vi ~$username/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
