@@ -1864,6 +1864,20 @@ function mybuild_psample
 
 }
 
+function mybuild_macvlan
+{
+	local module=macvlan
+	driver_dir=drivers/net
+	cd $linux_dir;
+	make M=$driver_dir -j || return
+	src_dir=$linux_dir/$driver_dir
+	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
+
+	sudo modprobe -r $module
+	sudo modprobe -v $module
+
+}
+
 alias bp=mybuild_psample
 
 alias bnetfilter='b4 nft_gen_flow_offload'
@@ -7872,8 +7886,10 @@ set -x
 	ethtool -K $rep2 hw-tc-offload on 
 	$TC qdisc add dev $rep2 ingress 
 
-# 	$TC filter add dev $macvlan ingress prio 1 protocol ip flower action mirred egress redirect dev $rep2
-	$TC filter add dev $rep2 ingress prio 1 protocol ip flower action mirred egress redirect dev $macvlan
+	sleep 1
+
+	$TC filter add dev $macvlan ingress prio 1 protocol ip flower action mirred egress redirect dev $rep2
+# 	$TC filter add dev $rep2 ingress prio 1 protocol ip flower action mirred egress redirect dev $macvlan
 set +x
 }
 
