@@ -20,7 +20,7 @@ def print_indr_setup_block_ht(block):
     cb_list = block.cb_list
 #     print(cb_list)
     for e in list_for_each_entry('struct flow_indr_block_cb', cb_list.address_of_(), 'list'):
-#         print(e)
+        print(e)
         print(address_to_name(hex(e.cb)))
         priv = Object(prog, "struct mlx5e_rep_priv", address=e.cb_priv.address_of_())
 #         print(priv)

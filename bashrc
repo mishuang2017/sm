@@ -3962,6 +3962,36 @@ set -x
 set +x
 }
 
+function tc_vxlan1
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	TC=tc
+	redirect=$rep2
+
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx udp6zerocsumtx
+	ip link set $vx up
+
+# 	$TC qdisc del dev $link ingress > /dev/null 2>&1
+# 	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+
+# 	ethtool -K $link hw-tc-offload on
+# 	ethtool -K $redirect  hw-tc-offload on
+
+# 	$TC qdisc add dev $link ingress
+# 	$TC qdisc add dev $redirect ingress
+	$TC qdisc add dev $vx ingress
+
+	$TC qdisc show dev $vx
+set +x
+}
+
 # outer v4, inner v4
 function tc_vxlan
 {

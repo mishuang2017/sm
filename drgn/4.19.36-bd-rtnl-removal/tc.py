@@ -18,10 +18,6 @@ for x, dev in enumerate(get_netdevs()):
 #         continue
 #     if "vxlan_sys_4789" != name:
 #         continue
-    mini_Qdisc = dev.miniq_ingress
-    if mini_Qdisc.value_() == 0:
-        continue
-    tcf_proto = mini_Qdisc.filter_list
     ingress_queue = dev.ingress_queue
     if ingress_queue.value_() == 0:
         continue
