@@ -17,6 +17,7 @@ indr_setup_block_ht = prog['indr_setup_block_ht']
 
 def print_indr_setup_block_ht(block):
     print(block)
+    print(block.dev.name.string_().decode())
     cb_list = block.cb_list
 #     print(cb_list)
     for e in list_for_each_entry('struct flow_indr_block_cb', cb_list.address_of_(), 'list'):
@@ -26,6 +27,6 @@ def print_indr_setup_block_ht(block):
 #         print(priv)
         print("mlx5e_rep_priv %lx" % e.cb_priv.address_of_())
 
-for i, node in enumerate(hash(indr_setup_block_ht, 'struct flow_indr_block_dev', 'ht_node')):
-    print(i)
-    print_indr_setup_block_ht(node)
+for i, block in enumerate(hash(indr_setup_block_ht, 'struct flow_indr_block_dev', 'ht_node')):
+    print("\n====== %d ========" % i)
+    print_indr_setup_block_ht(block)

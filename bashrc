@@ -5,7 +5,7 @@ fi
 
 debian=0
 cloud=0
-username=chrism
+username=cmi
 test -f /usr/bin/lsb_release && debian=1
 
 ofed_mlx5=0
@@ -1138,14 +1138,18 @@ function greps
 
 function ln-profile
 {
-	mv ~/.bashrc bashrc.orig
-	ln -s ~chrism/.bashrc
-	ln -s ~chrism/.vim
-	ln -s ~chrism/.vimrc
-	ln -s ~chrism/.profile
-	ln -s ~chrism/.screenrc
-	ln -s ~chrism/.tmux.conf
-	/bin/cp ~chrsim/.crash /root
+	rm .bashrc
+	rm .vim
+	rm .vimrc
+	rm .screenrc
+	rm .tmux.conf
+
+	ln -s ~cmi/.bashrc
+	ln -s ~cmi/.vim
+	ln -s ~cmi/.vimrc
+	ln -s ~cmi/.screenrc
+	ln -s ~cmi/.tmux.conf
+	/bin/cp ~cmi/.crash /root
 }
 
 function create-images
@@ -7886,10 +7890,8 @@ set -x
 	ethtool -K $rep2 hw-tc-offload on 
 	$TC qdisc add dev $rep2 ingress 
 
-	sleep 1
-
 	$TC filter add dev $macvlan ingress prio 1 protocol ip flower action mirred egress redirect dev $rep2
-# 	$TC filter add dev $rep2 ingress prio 1 protocol ip flower action mirred egress redirect dev $macvlan
+	$TC filter add dev $rep2 ingress prio 1 protocol ip flower action mirred egress redirect dev $macvlan
 set +x
 }
 
@@ -11260,7 +11262,7 @@ function kmsg() {
 	fi
 }
 
-drgn_dir=~chrism//sm/drgn
+drgn_dir=~cmi/sm/drgn
 
 function _flowtable
 {
