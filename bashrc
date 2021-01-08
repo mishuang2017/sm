@@ -27,8 +27,8 @@ alias rc='. ~/.bashrc'
 # [[ "$(hostname -s)" == "dev-chrism-vm3" ]] && host_num=17
 # [[ "$(hostname -s)" == "dev-chrism-vm4" ]] && host_num=18
 
-[[ "$(hostname -s)" == "c-235-10-1-005" ]] && host_num=5
-[[ "$(hostname -s)" == "c-235-10-1-006" ]] && host_num=6
+[[ "$(hostname -s)" == "c-236-149-180-183" ]] && host_num=83
+[[ "$(hostname -s)" == "c-236-149-180-184" ]] && host_num=84
 
 [[ "$(hostname -s)" == "qa-h-vrt-029" ]] && host_num=29
 [[ "$(hostname -s)" == "qa-h-vrt-030" ]] && host_num=30
@@ -177,18 +177,18 @@ elif (( host_num == 14 )); then
 		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
 
-elif (( host_num == 5 )); then
+elif (( host_num == 83 )); then
 	machine_num=1
-	rhost_num=6
-	link_mac=0c:42:a1:58:ab:9c
-	remote_mac=0c:42:a1:58:ab:fc
+	rhost_num=84
+	link_mac=0c:42:a1:d1:d0:e4
+	remote_mac=0c:42:a1:d1:d0:e0
 	cloud=1
 
-elif (( host_num == 6 )); then
+elif (( host_num == 84 )); then
 	machine_num=2
-	rhost_num=5
-	link_mac=0c:42:a1:58:ab:fc
-	remote_mac=0c:42:a1:58:ab:9c
+	rhost_num=83
+	link_mac=0c:42:a1:d1:d0:e0
+	remote_mac=0c:42:a1:d1:d0:e4
 	cloud=1
 elif (( host_num == 29 )); then
 	machine_num=1
@@ -9932,7 +9932,7 @@ alias s3=tc_ct_pf_sample
 function tc_ct_pf_sample
 {
 	rate=1
-	full=0
+	full=1
 	offload=""
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 	[[ "$1" == "hw" ]] && offload="skip_sw"
@@ -12646,8 +12646,8 @@ set +x
 	if (( host_num == 43 )); then
 		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.236.4.244:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 	fi
-	if (( host_num == 29 )); then
-		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.195.30.1:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
+	if (( host_num == 83 )); then
+		ovs-vsctl -- --id=@sflow create sflow agent=eno1 target=\"10.236.149.184:6343\" header=$header sampling=$rate polling=$polling -- set bridge br sflow=@sflow
 	fi
 }
 
