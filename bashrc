@@ -12788,6 +12788,7 @@ set +x
 
 function grub
 {
+	return
 set -x
 	local kernel
 	[[ $# == 1 ]] && kernel=$1
