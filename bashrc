@@ -1154,24 +1154,24 @@ function ln-profile
 
 function create-images
 {
-	mkdir -p /images/$username
-	ln -s ~$username/sm /images/$username/sm
-	chown -R $username.mtl /images/$username
+	mkdir -p /images/cmi
+	ln -s cmi/sm /images/cmi/sm
+	chown -R cmi.nvu /images/cmi
 }
 
 function cloud_setup
 {
-	mkdir -p /images/$username
-	chown $username.mtl /images/$username
+	mkdir -p /images/cmi
+	chown cmi.nvu /images/cmi
 
 	yum install -y cscope tmux ctags rsync grubby iperf3 htop pciutils vim
 
 	if ! test -f ~/.tmux.conf; then
 		mv ~/.bashrc bashrc.orig
-		ln -s ~$username/.bashrc
-		ln -s ~$username/.tmux.conf
-		ln -s ~$username/.vimrc
-		ln -s ~$username/.vim
+		ln -s ~cmi/.bashrc
+		ln -s ~cmi/.tmux.conf
+		ln -s ~cmi/.vimrc
+		ln -s ~cmi/.vim
 	fi
 
 	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel bzip2-devel kexec-tools
