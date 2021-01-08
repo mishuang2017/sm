@@ -1705,6 +1705,8 @@ git push origin HEAD:refs/for/ct-one-table-2.13.0/fix_tracked_enum
 
 git push origin HEAD:refs/for/net-next-mlx5/sflow-driver-decap-fix
 
+git push origin HEAD:refs/for/net-next-mlx5/sflow-driver
+
 git push origin HEAD:refs/for/master/new-sflow-ovs-test-case
 
 git push origin HEAD:refs/for/mlnx_ofed_5_2/ofed-sflow-driver
@@ -1717,7 +1719,7 @@ git push origin HEAD:refs/for/master/sflow-ovs
 git push origin HEAD:refs/for/mlnx_ofed_5_2/delete-datapath-flows-by-default
 git push origin HEAD:refs/for/mlnx_ofed_5_2/fix-panic-when-getting-route
 
-git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd_fix/fix-compilation-error
+git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd_fix/fix-pedit
 
 ===git===
 
