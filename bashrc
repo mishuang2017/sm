@@ -1809,8 +1809,8 @@ mybuild1 ()
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 
-	sudo modprobe -r $1
-	sudo modprobe -v $1
+	sudo modprobe -r $module
+	sudo modprobe -v $module
 
 }
 
