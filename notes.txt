@@ -9045,6 +9045,8 @@ http://wiki.ubuntu.org.cn/跟我一起写Makefile:使用函数
 
 ===skills===
 
+memchr_inv
+
 numactl --hardware
 
 getconf -a | grep CACHE
