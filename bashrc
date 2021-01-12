@@ -3988,24 +3988,32 @@ set -x
 	[[ "$1" == "sw" ]] && offload="skip_hw"
 
 	TC=tc
-	redirect=$rep2
-
 	ip1
 	ip link del $vx > /dev/null 2>&1
 	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx udp6zerocsumtx
 	ip link set $vx up
-
-# 	$TC qdisc del dev $link ingress > /dev/null 2>&1
-# 	$TC qdisc del dev $redirect ingress > /dev/null 2>&1
 	$TC qdisc del dev $vx ingress > /dev/null 2>&1
-
-# 	ethtool -K $link hw-tc-offload on
-# 	ethtool -K $redirect  hw-tc-offload on
-
-# 	$TC qdisc add dev $link ingress
-# 	$TC qdisc add dev $redirect ingress
 	$TC qdisc add dev $vx ingress
+	$TC qdisc show dev $vx
+set +x
+}
 
+function tc_vxlan2
+{
+set -x
+	offload=""
+	[[ "$1" == "hw" ]] && offload="skip_sw"
+	[[ "$1" == "sw" ]] && offload="skip_hw"
+
+	local vx=vxlan1
+	local vxlan_port=4000
+	TC=tc
+	ip1
+	ip link del $vx > /dev/null 2>&1
+	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx udp6zerocsumtx
+	ip link set $vx up
+	$TC qdisc del dev $vx ingress > /dev/null 2>&1
+	$TC qdisc add dev $vx ingress
 	$TC qdisc show dev $vx
 set +x
 }
@@ -9379,7 +9387,7 @@ alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh 
 alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
-test1=test-tc-insert-rules-macvlan.sh
+test1=test-ovs-dpctl-flows.sh
 alias test1="./$test1"
 alias vi-test="vi ~cmi/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
@@ -12721,6 +12729,11 @@ function rsync1
 {
 	rsync -tvr /labhome/cmi/sflow/mark vnc14:~/sflow
 	rsync -tvr /labhome/cmi/sflow/ct vnc14:~/sflow
+}
+
+function rsync_file
+{
+	rsync -tvr ~/$1 vnc14:~/$1
 }
 
 ######## uuu #######
