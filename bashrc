@@ -1690,6 +1690,9 @@ function mlx5_clean
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
 	cd $linux_dir;
 	make M=$driver_dir clean
+
+	driver_dir=net/psample
+	make M=$driver_dir clean
 }
 
 function mybuild
