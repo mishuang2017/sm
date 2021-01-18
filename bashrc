@@ -9373,7 +9373,7 @@ alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh 
 alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
-test1=test-ovs-dpctl-flows.sh
+test1=test-eswitch-reload-modules-different-state.sh
 alias test1="./$test1"
 alias vi-test="vi ~cmi/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
