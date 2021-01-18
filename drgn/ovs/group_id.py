@@ -13,9 +13,9 @@ import time
 sys.path.append(".")
 from lib_ovs import *
 
-cmap = prog['gid_map']
+cmap = prog['sgid_map']
 # print(cmap)
-ids = print_cmap(cmap, "gid_node", "id_node")
+ids = print_cmap(cmap, "sgid_node", "id_node")
 
 # for i, id in enumerate(ids):
 #     print(id)
@@ -44,7 +44,7 @@ for i, id in enumerate(ids):
 
 # It doesn't include the nodes whose refcount is 0
 def print_metadata_map():
-    cmap = prog['gid_metadata_map']
+    cmap = prog['sgid_metadata_map']
     ids = print_cmap(cmap, "group_id_node", "metadata_node")
 
     for i, id in enumerate(ids):
@@ -54,14 +54,14 @@ def print_metadata_map():
 
 print("\n=== group_expiring ===\n")
 
-expiring = prog['gid_expiring']
+expiring = prog['sgid_expiring']
 # print(expiring)
 
 next = expiring.next
 while 1:
     if next.value_() == expiring.address_of_().value_():
         break
-    id = container_of(next, "struct gid_node", "exp_node")
+    id = container_of(next, "struct sgid_node", "exp_node")
     next = id.exp_node.next
     print("id: %2x" % id.id, end='\t')
     print("next %lx" % next.value_())

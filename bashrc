@@ -867,7 +867,8 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
-alias   vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
+alias  vi_sample1="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
+alias   vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/esw/sample.c drivers/net/ethernet/mellanox/mlx5/core/esw/sample.h "
 alias       vi_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
 alias      vi_cts="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c \
 	              drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h"
@@ -2210,11 +2211,11 @@ function make-all
 	test -f MAINTAINERS || return
 
 	unset CONFIG_LOCALVERSION_AUTO
-	make olddefconfig
-	make -j $cpu_num2
+	[[ "$1" == "all" ]] && make olddefconfig
+	make -j $cpu_num2 || return
 	sudo make modules_install -j $cpu_num2
 	sudo make install
-	sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr
+	[[ "$1" == "all" ]] && sudo make headers_install ARCH=i386 INSTALL_HDR_PATH=/usr -j -B
 
 	/bin/rm -rf ~/.ccache
 }
@@ -7084,6 +7085,14 @@ function git-patch3
 	git format-patch -o $dir ${commit_old}..${commit_new}
 }
 
+function git_reset_hard
+{
+	b=$(git branch | grep \* | cut -d ' ' -f2)
+	commit=$(git slog -50 | grep origin/$b | head -1 | cut -f 1 -d " ")
+	echo $commit
+	git reset --hard $commit
+}
+
 function git_patch
 {
 	dir=$1
@@ -7101,7 +7110,7 @@ function git_patch
 
 function git_linux
 {
-	dir=~/sflow/mark
+	dir=~/sflow/saeed
 	git_patch $dir $1
 }
 
