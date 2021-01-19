@@ -630,6 +630,7 @@ alias watch_buddy='watch -d -n 1 cat /proc/buddyinfo'
 alias watch_coounters_tc_ct="watch -d -n 1 cat /sys/class/net/$link/device/counters_tc_ct"
 alias watch_upcall='watch -d -n 1 ovs-appctl upcall/show'
 alias watch_sar='watch -d -n 1 sar -n DEV 1'
+alias watch_lockdep='w1 cat /proc/lockdep_stats'
 # sar -n TCP 1
 # pidstat -t -p 3794
 alias ct=conntrack
@@ -12720,6 +12721,19 @@ function rsync1
 function rsync_file
 {
 	rsync -tvr ~/$1 vnc14:~/$1
+}
+
+function load_unload_test
+{
+	local i=1
+	while true; do
+		echo "==============$i==========="
+		reprobe
+		sleep 2
+		mystart
+		sleep 2
+		i=$((i+1))
+	done
 }
 
 ######## uuu #######

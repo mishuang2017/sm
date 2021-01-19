@@ -10,14 +10,19 @@ import os
 sys.path.append(".")
 from lib import *
 
+debug_locks = prog['debug_locks']
+print("debug_locks: %d" % debug_locks)
+
 lock_classes = prog['lock_classes']
 
 # for i in range(100):
 #     print(lock_classes[i].name.string_().decode())
 
-i=1
+i=0
 all_lock_classes = prog['all_lock_classes']
 for lock in list_for_each_entry('struct lock_class', all_lock_classes.address_of_(), 'lock_entry'):
-    print(i)
-    print(lock.name)
     i=i+1
+#     print(i)
+#     print(lock.key)
+
+print("number of all_lock_classes: %d" % i)
