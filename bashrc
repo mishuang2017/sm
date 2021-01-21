@@ -12422,6 +12422,7 @@ set -x
 	dst_mac=02:25:d0:$host_num:01:03
 	$TC filter add dev $rep2 ingress protocol ip  prio 2 flower $offload src_mac $src_mac dst_mac $dst_mac \
 		action sample rate $rate group 5 \
+		action sample rate $rate group 5 \
 		action mirred egress redirect dev $rep3
 set +x
 }

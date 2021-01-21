@@ -26,3 +26,9 @@ for lock in list_for_each_entry('struct lock_class', all_lock_classes.address_of
 #     print(lock.key)
 
 print("number of all_lock_classes: %d" % i)
+
+nr_lock_classes = prog['nr_lock_classes']
+print("nr_lock_classes: %d" % nr_lock_classes)
+
+# nr_zapped_classes = prog['nr_zapped_classes']
+# print("nr_zapped_classes: %d" % nr_zapped_classes)
