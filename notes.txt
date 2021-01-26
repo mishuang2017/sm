@@ -1723,6 +1723,8 @@ git push origin HEAD:refs/for/mlnx_ofed_4_6_3_bd_fix/fix-indr-block-unreg-issue
 
 ===git===
 
+git commit --allow-empty -F ~/sflow/cover-letter/sample.txt
+
 git tag --contains 6ae0a6286171154661b74f7f550f9441c6008424
 
 # Finding what branch a Git commit came from

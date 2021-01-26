@@ -1661,6 +1661,12 @@ function buildm
 	make M=$driver_dir -j
 }
 
+function psample_clean
+{
+	driver_dir=net/psample
+	make M=$driver_dir clean
+}
+
 function mlx5_clean
 {
 	driver_dir=drivers/net/ethernet/mellanox/mlx5/core
@@ -2478,11 +2484,13 @@ function tc-setup
 {
 	local l=$link
 	[[ $# == 1 ]] && l=$1
+set -x
 	TC=tc
 	TC=/images/cmi/iproute2/tc/tc
-	$TC qdisc del dev $link ingress > /dev/null 2>&1
-	ethtool -K $link hw-tc-offload on 
-	$TC qdisc add dev $link ingress 
+	$TC qdisc del dev $l ingress > /dev/null 2>&1
+	ethtool -K $l hw-tc-offload on 
+	$TC qdisc add dev $l ingress 
+set +x
 }
 
 function tc-vf-eswitch
@@ -7150,7 +7158,7 @@ function git-format-patch
 #	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$n
 #	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$n
-	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v9" -o $patch_dir -$n
+	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v11" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
 }
 
@@ -9374,7 +9382,7 @@ alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh 
 alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
-test1=test-eswitch-reload-modules-different-state.sh
+test1=test-ovs-tc-rules-checker.sh
 alias test1="./$test1"
 alias vi-test="vi ~cmi/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
