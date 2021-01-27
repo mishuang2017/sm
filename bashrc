@@ -6945,6 +6945,8 @@ set -x
 set +x
 }
 
+alias checkpatch="./scripts/checkpatch.pl --strict --show-types -g HEAD"
+alias git_fixes="git log -1 --pretty=fixes"
 alias gf1="git format-patch -o ~/tmp -1"
 
 function gt
