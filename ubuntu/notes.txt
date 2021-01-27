@@ -1,4 +1,9 @@
+# list all install packages
+dpkg -l
+
+# show content of package
 dpkg-deb -c mlnx-ofed-kernel-utils_5.0-OFED.5.0.0.3.0.1.g3c54026_amd64.deb
+dpkg --contents linux-image-4.19.0-6-amd64-dbg_4.19.67-2+deb10u2_amd64.deb
 
 # list installed files on a package
 dpkg-query -L crash
@@ -7,11 +12,11 @@ dpkg-query -l | grep crash
 
 dpkg-query -S /usr/bin/crash
 
+# install
 dpkg -i linux-image-unsigned-4.18.0-17-generic-dbgsym_4.18.0-17.18_amd64.ddeb
 
 apt-get install --download-only linux-image-4.19.0-6-amd64
 
-dpkg --contents linux-image-4.19.0-6-amd64-dbg_4.19.67-2+deb10u2_amd64.deb
 
 # add a user to sudoer
 usermod -aG sudo chrism
