@@ -30,7 +30,8 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-149-180-183" ]] && host_num=83
 [[ "$(hostname -s)" == "c-236-149-180-184" ]] && host_num=84
 
-[[ "$(hostname -s)" == "c-235-9-1-010" ]] && host_num=10
+[[ "$(hostname -s)" == "c-237-3-1-007" ]] && host_num=7
+[[ "$(hostname -s)" == "c-237-3-1-008" ]] && host_num=8
 
 function get_vf
 {
@@ -190,8 +191,8 @@ elif (( host_num == 84 )); then
 	remote_mac=0c:42:a1:d1:d0:e4
 	cloud=1
 
-elif (( host_num == 10 )); then
-	machine_num=2
+elif (( host_num == 7 )); then
+	machine_num=1
 	cloud=1
 fi
 
