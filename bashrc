@@ -6954,6 +6954,7 @@ set +x
 alias checkpatch="./scripts/checkpatch.pl --strict --show-types -g HEAD"
 alias git_fixes="git log -1 --pretty=fixes"
 alias gf1="git format-patch -o ~/tmp -1"
+alias sample_cover_letter='git commit --allow-empty -F ~/sflow/cover-letter/sample.txt'
 
 function gt
 {
@@ -12730,7 +12731,7 @@ function systemd_yum
 
 function rsync1
 {
-	rsync -tvr /labhome/cmi/sflow/mark vnc14:~/sflow
+	rsync -tvr /labhome/cmi/sflow/saeed vnc14:~/sflow
 	rsync -tvr /labhome/cmi/sflow/ct vnc14:~/sflow
 }
 

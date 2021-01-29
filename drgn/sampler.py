@@ -14,12 +14,12 @@ from lib import *
 mlx5e_priv = get_mlx5_pf0()
 mlx5e_rep_priv = get_mlx5e_rep_priv()
 uplink_priv = mlx5e_rep_priv.uplink_priv
-sample_priv = uplink_priv.tc_psample
+sample_priv = uplink_priv.esw_psample
 
-print('\n=== mlx5_tc_psample ===\n')
-print("mlx5_tc_psample %x" % sample_priv)
+print('\n=== mlx5_esw_psample ===\n')
+print("mlx5_esw_psample %x" % sample_priv)
 # print(sample_priv)
-ct = 1
+ct = 0
 
 # sys.exit(0)
 
@@ -40,14 +40,14 @@ print('\n=== sampler_termtbl ===')
 # print(sample_priv.termtbl)
 flow_table("sampler_termtbl", sample_priv.termtbl)
 
-print('\n=== sampler_hashtbl ===\n')
+print('\n=== hashtbl ===\n')
 
-sampler_hashtbl = sample_priv.sampler_hashtbl
+hashtbl = sample_priv.hashtbl
 
 for i in range(256):
-    node = sampler_hashtbl[i].first
+    node = hashtbl[i].first
     while node.value_():
-        obj = container_of(node, "struct mlx5_sampler", "sampler_hlist")
+        obj = container_of(node, "struct mlx5_sampler", "hlist")
 #         print("mlx5_sampler %lx" % obj.value_())
         mlx5_sampler = Object(prog, 'struct mlx5_sampler', address=obj.value_())
         print_mlx5_sampler(mlx5_sampler)
@@ -56,13 +56,13 @@ for i in range(256):
 print('\n=== offloads.num_flows.counter ===\n')
 print("num_flows: %d" % offloads.num_flows.counter)
 
-print('\n=== sample_restore_hashtbl ===\n')
-sample_restore_hashtbl = sample_priv.sample_restore_hashtbl
+print('\n=== restore_hashtbl ===\n')
+restore_hashtbl = sample_priv.restore_hashtbl
 
 for i in range(256):
-    node = sample_restore_hashtbl[i].first
+    node = restore_hashtbl[i].first
     while node.value_():
-        obj = container_of(node, "struct mlx5_sample_restore", "restore_hlist")
+        obj = container_of(node, "struct mlx5_sample_restore", "hlist")
         print("mlx5_sample_restore %lx" % obj.value_())
         mlx5_sample_restore = Object(prog, 'struct mlx5_sample_restore', address=obj.value_())
         print("mlx5_sample_restore.obj_id: %d" % (mlx5_sample_restore.obj_id))
