@@ -842,6 +842,7 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
+alias  vi_psample="vi net/psample/psample.c net/sched/psample_stub.c include/net/psample.h"
 alias  vi_sample1="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
 alias   vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/esw/sample.c drivers/net/ethernet/mellanox/mlx5/core/esw/sample.h "
 alias       vi_ct="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_ct.h "
@@ -1839,10 +1840,14 @@ alias b4=mybuild4
 
 function mybuild_psample
 {
+	psample_clean
+
 	local module=psample
 	driver_dir=net/psample
 	cd $linux_dir;
-	make M=$driver_dir -j || return
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-9.3.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' M=$driver_dir
+	return
+# 	make M=$driver_dir -j || return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
 
@@ -7159,7 +7164,7 @@ function git-format-patch
 #	git format-patch --cover-letter --subject-prefix="patch iproute2 v10" -o $patch_dir -$n
 #	git format-patch --cover-letter --subject-prefix="ovs-dev" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="branch-2.8/2.9 backport" -o $patch_dir -$n
-	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v11" -o $patch_dir -$n
+	git format-patch --cover-letter --subject-prefix="ovs-dev][PATCH v12" -o $patch_dir -$n
 # 	git format-patch --subject-prefix="PATCH net-next-internal v2" -o $patch_dir -$n
 }
 
