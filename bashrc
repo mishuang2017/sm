@@ -843,6 +843,7 @@ alias vic='vi ~/.crash'
 alias viu='vi /etc/udev/rules.d/82-net-setup-link.rules'
 alias vigdb='vi ~/.gdbinit'
 
+alias vi_update_skb='vi -t mlx5e_rep_tc_update_skb'
 alias  vi_psample="vi net/psample/psample.c net/sched/psample_stub.c include/net/psample.h"
 alias  vi_sample1="vi drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.c drivers/net/ethernet/mellanox/mlx5/core/en/tc_sample.h "
 alias   vi_sample="vi drivers/net/ethernet/mellanox/mlx5/core/esw/sample.c drivers/net/ethernet/mellanox/mlx5/core/esw/sample.h "

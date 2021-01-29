@@ -16,6 +16,8 @@ mlx5e_rep_priv = get_mlx5e_rep_priv()
 uplink_priv = mlx5e_rep_priv.uplink_priv
 sample_priv = uplink_priv.esw_psample
 
+tunnel_mapping = mlx5e_rep_priv.uplink_priv.tunnel_mapping
+
 print('\n=== mlx5_esw_psample ===\n')
 print("mlx5_esw_psample %x" % sample_priv)
 # print(sample_priv)
@@ -133,3 +135,22 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
 #     print("match_criteria_enable: %x" % flow.esw_attr[0].parse_attr.spec.match_criteria_enable)
 #     print(flow.esw_attr[0].parse_attr)
     print("")
+
+def print_tunnel_mapping(item):
+    print("mapping_item %lx" % item, end='\t')
+    print("cnt: %d" % item.cnt, end='\t')
+    print("id (tunnel_mapping): %d" % item.id, end='\t')
+    key = Object(prog, 'struct tunnel_match_key', address=item.data.address_of_())
+#     print(key)
+    print("tunnel: keyid: %x" % key.enc_key_id.keyid, end=' ')
+    print("ipv4 src: %s" % ipv4(ntohl(key.enc_ipv4.src.value_())), end=' ')
+    print("dst: %s" % ipv4(ntohl(key.enc_ipv4.dst.value_())), end=' ')
+    print("ifindex: %d" % key.filter_ifindex, end=' ')
+    print("port: %x" % key.enc_tp.ports)
+
+print('\n=== tunnel mapping_ctx ===\n')
+ht = tunnel_mapping.ht
+print("mapping_ctx %lx" % tunnel_mapping)
+for i in range(256):
+    for item in hlist_for_each_entry('struct mapping_item', ht[i], 'node'):
+        print_tunnel_mapping(item)
