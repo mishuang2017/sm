@@ -1848,7 +1848,7 @@ function mybuild_psample
 	driver_dir=net/psample
 	cd $linux_dir;
         COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-9.3.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' M=$driver_dir
-	return
+# 	return
 # 	make M=$driver_dir -j || return
 	src_dir=$linux_dir/$driver_dir
 	sudo /bin/cp -f $src_dir/$module.ko /lib/modules/$(uname -r)/kernel/$driver_dir
@@ -1858,6 +1858,7 @@ function mybuild_psample
 	sudo modprobe -v $module
 
 }
+alias bp=mybuild_psample
 
 function mybuild_macvlan
 {
@@ -1872,8 +1873,6 @@ function mybuild_macvlan
 	sudo modprobe -v $module
 
 }
-
-alias bp=mybuild_psample
 
 alias bnetfilter='b4 nft_gen_flow_offload'
 
