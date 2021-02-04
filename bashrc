@@ -1840,6 +1840,8 @@ set +x
 }
 alias b4=mybuild4
 
+alias make.sparse="COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-9.3.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' > ~/build.txt 2>&1"
+
 function mybuild_psample
 {
 	psample_clean
@@ -9390,7 +9392,7 @@ alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh 
 alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
-test1=test-ovs-tc-rules-checker.sh
+test1=test-tc-vxlan-sample.sh
 alias test1="./$test1"
 alias vi-test="vi ~cmi/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
@@ -12550,7 +12552,7 @@ set -x
 
 	ip1
 	ip link del $vx > /dev/null 2>&1
-	ip link add $vx type vxlan dstport $vxlan_port external udp6zerocsumrx #udp6zerocsumtx udp6zerocsumrx
+	ip link add $vx type vxlan dstport $vxlan_port external # udp6zerocsumrx udp6zerocsumtx udp6zerocsumrx
 	ip link set $vx up
 
 	$TC qdisc del dev $link ingress > /dev/null 2>&1
