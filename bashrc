@@ -628,7 +628,6 @@ alias tvx="tcpdump ip dst host 1.1.13.2 -e -xxx -i $vx"
 alias watch_netstat='watch -d -n 1 netstat -s'
 alias w1='watch -d -n 1'
 alias watch_buddy='watch -d -n 1 cat /proc/buddyinfo'
-alias watch_coounters_tc_ct="watch -d -n 1 cat /sys/class/net/$link/device/counters_tc_ct"
 alias watch_upcall='watch -d -n 1 ovs-appctl upcall/show'
 alias watch_sar='watch -d -n 1 sar -n DEV 1'
 alias watch_lockdep='w1 cat /proc/lockdep_stats'
@@ -1127,6 +1126,7 @@ function ln-profile
 	ln -s ~cmi/.vimrc
 	ln -s ~cmi/.screenrc
 	ln -s ~cmi/.tmux.conf
+
 	/bin/cp ~cmi/.crash /root
 }
 
@@ -5246,13 +5246,13 @@ set -x
 	ovs-ofctl add-flow $br arp,actions=NORMAL 
 	ovs-ofctl add-flow $br icmp,actions=NORMAL 
 
-# 	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)" 
-# 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal" 
-# 	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal" 
+	ovs-ofctl add-flow $br "table=0,udp,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1,udp,ct_state=+trk+est actions=normal"
 
-	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)" 
-	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal" 
-	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal" 
+	ovs-ofctl add-flow $br "table=0,tcp,ct_state=-trk actions=ct(table=1)"
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+new actions=ct(commit),normal"
+	ovs-ofctl add-flow $br "table=1,tcp,ct_state=+trk+est actions=normal"
 
 # 	ovs-ofctl add-flow $br "table=1,tcp,ct_state=-trk-est-new actions=$rep1" 
 
@@ -5452,13 +5452,22 @@ set +x
 
 alias bt='del-br; r; brx-ct'
 
-function counter-tc-ct
+function counters_tc_ct
 {
-set -x
-# 	cat /sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct
-	cat /sys/class/net/enp4s0f0/device/counters_tc_ct
-set +x
+	uname -a | grep 5.4.19 > /dev/null
+	if (( $? == 0 )); then
+		file=/sys/class/net/enp4s0f0/device/counters_tc_ct
+	fi
+	uname -a | grep 4.19.36 > /dev/null
+	if (( $? == 0 )); then
+		file=/sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct
+	fi
+	while :; do
+		sleep 1
+		cat $file
+	done
 }
+alias co=counters_tc_ct
 
 function create-br-vxlan-vlan
 {
@@ -5984,6 +5993,8 @@ function start-switchdev
 # 	ethtool -K $link tx-vlan-stag-hw-insert off
 
 # 	affinity_set
+
+	set_combined 4
 
 	return
 }
@@ -7009,7 +7020,7 @@ function git_ofed_reset
 function git_ofed_reset_all
 {
 	for i in backports/*; do
-		if echo $i | egrep "0135-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-en_.patch" > /dev/null 2>&1; then
+		if echo $i | egrep "0240-BACKPORT-drivers-net-ethernet-mellanox-mlx5-core-min.patch" > /dev/null 2>&1; then
 			echo "ignore $i"
 			continue
 		fi
@@ -8979,7 +8990,7 @@ function addflow2
 	    do
 		for((j=0;j<=254;j++))
 		do
-		    echo "ovs-ofctl add-flow $br -O openflow13 \"table=0, priority=10, ip,nw_dst=10.$k.$i.$j, in_port=enp4s0f0_2, action=output:vxlan0\""
+		    echo "ovs-ofctl add-flow $br -O openflow13 \"table=0, priority=10, ip,nw_dst=10.$k.$i.$j, in_port=enp4s0f0_1, action=output:vxlan0\""
 		    let cur+=1
 		    [ $cur -eq $count ] && break;
 		done
@@ -10682,33 +10693,6 @@ alias f1="sudo flint -d $pci q"
 
 alias cd-miniflow-cache='cd /sys/kernel/slab/mlx5_miniflow_cache'
 alias cd-wq='cd /sys/devices/virtual/workqueue'
-function counters_tc_ct
-{
-	while :; do
-# 		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
-		cat /sys/class/net/$link/device/counters_tc_ct | grep in_hw
-		sleep 1
-	done
-}
-alias co=counters_tc_ct
-
-function co2
-{
-	idle2
-	sleep 2
-	idle10
-	co
-}
-
-function counters_tc_ct10
-{
-	while :; do
-		cat /sys/class/net/$link/device/sriov/pf/counters_tc_ct | grep in_hw
-# 		cat /sys/class/net/$link/device/counters_tc_ct | grep in_hw
-		sleep 10
-	done | tee co.txt
-}
-alias co10=counters_tc_ct10
 
 alias dis="ethtool -S $link | grep dis"
 
@@ -11562,13 +11546,13 @@ function trex_loop
 	done
 }
 
-function trex-vxlan
+function trex_vxlan
 {
 	cd-trex
 	./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/IpVarianceVxlan.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 }
 
-function trex-vxlan2
+function trex_vxlan2
 {
 	cd-trex
 	i=0

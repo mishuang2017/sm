@@ -48,11 +48,10 @@ print("total: %d" % (j))
 print('')
 for i in miniflow_list:
     name = i.priv.netdev.name.string_().decode()
-    print("nr_flows: %d" % i.nr_flows)
 #     print("cookie: %lx" % i.cookie)     # pointer of skb
 #     print('{0}'.format(i.tuple))
 
-    if name == "enp4s0f0_1" or name == "enp4s0f0" or name == "enp4s0f0_2":
+    if name.startswith("enp4s0f0"):
         flow = i.flow
         print("miniflow->flow: mlx5e_tc_flow %lx, refcnt: %d, flags: %x" % \
             (flow, flow.refcnt.refs.counter, flow.flags.counter))
@@ -64,7 +63,7 @@ for i in miniflow_list:
         for j in range(8):
             flow = i.path.flows[j]
             if flow:
-                print("%s: path.flows[%d]: %lx, flags: %x" % (name, j, flow.value_(), flow.flags.counter))
+                print("%12s: path.flows[%d]: %lx, flags: %x" % (name, j, flow.value_(), flow.flags.counter))
 #                 print_miniflow_list(flow)
                 continue
                 attr = flow.esw_attr[0]
