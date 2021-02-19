@@ -93,21 +93,6 @@ def mac(m):
             s += ":"
     return s
 
-def print_nf_conntrack_tuple(tuple):
-    print("src ip  : %s" % ipv4(ntohl(tuple.src.u3.ip.value_())))
-    print("src port: %d" % ntohs(tuple.src.u.all.value_()))
-    print("dst ip  : %s" % ipv4(ntohl(tuple.dst.u3.ip.value_())))
-    print("dst port: %d" % ntohs(tuple.dst.u.all.value_()))
-
-def print_mlx5e_ct_tuple(k, tuple):
-    print("\n=== mlx5e_ct_tuple start ===")
-    print("%d: ipv4: %s" % (k, ipv4(ntohl(tuple.ipv4.value_()))))
-    print("%d: zone: %d" % (k, tuple.zone.id))
-    print("%d: nat: 0x%lx" % (k, tuple.nat))
-    print("%d: mlx5e_tc_flow %lx, refcnt: %d" % (k, tuple.flow, tuple.flow.refcnt.refs.counter.value_()))
-    print_nf_conntrack_tuple(tuple.tuple)
-    print("=== mlx5_ct_tuple end ===\n")
-
 #define TCA_FLOWER_KEY_CT_FLAGS_NEW               0x01
 #define TCA_FLOWER_KEY_CT_FLAGS_ESTABLISHED       0x02
 #define TCA_FLOWER_KEY_CT_FLAGS_RELATED           0x04

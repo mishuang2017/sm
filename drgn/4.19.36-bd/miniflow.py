@@ -7,7 +7,7 @@ import sys
 import os
 
 sys.path.append("..")
-import lib
+from lib import *
 
 def print_miniflow_list(flow):
     j = 0
@@ -16,6 +16,21 @@ def print_miniflow_list(flow):
         j = j + 1
 
 miniflow_list = []
+
+def print_nf_conntrack_tuple(tuple):
+    print("src ip  : %s" % ipv4(ntohl(tuple.src.u3.ip.value_())))
+    print("src port: %d" % ntohs(tuple.src.u.all.value_()))
+    print("dst ip  : %s" % ipv4(ntohl(tuple.dst.u3.ip.value_())))
+    print("dst port: %d" % ntohs(tuple.dst.u.all.value_()))
+
+def print_mlx5e_ct_tuple(k, tuple):
+    print("\n=== mlx5e_ct_tuple start ===")
+#     print("%d: ipv4: %s" % (k, ipv4(ntohl(tuple.ipv4.value_()))))
+#     print("%d: zone: %d" % (k, tuple.zone.id))
+#     print("%d: nat: 0x%lx" % (k, tuple.nat))
+#     print("%d: mlx5e_tc_flow %lx, refcnt: %d" % (k, tuple.flow, tuple.flow.refcnt.refs.counter.value_()))
+    print_nf_conntrack_tuple(tuple.tuple)
+    print("=== mlx5_ct_tuple end ===\n")
 
 # for old 4.20 kernel
 # for flow in list_for_each_entry('struct mlx5e_tc_flow', prog['ct_list'].address_of_(), 'nft_node'):
@@ -31,12 +46,12 @@ miniflow_list = []
 #         if miniflow not in miniflow_list:
 #             miniflow_list.append(miniflow)
 
-mlx5e_rep_priv = lib.get_mlx5e_rep_priv()
+mlx5e_rep_priv = get_mlx5e_rep_priv()
 mf_ht = mlx5e_rep_priv.mf_ht
 
 j = 0
 
-for i, flow in enumerate(lib.hash(mf_ht, 'struct mlx5e_miniflow', 'node')):
+for i, flow in enumerate(hash(mf_ht, 'struct mlx5e_miniflow', 'node')):
     print("%3d: mlx5e_miniflow %lx, nr_ct_tuples: %d, nr_flows: %d" % \
         (i, flow.value_(), flow.nr_ct_tuples, flow.nr_flows))
     miniflow_list.append(flow)
@@ -63,9 +78,9 @@ for i in miniflow_list:
         for j in range(8):
             flow = i.path.flows[j]
             if flow:
-                print("%12s: path.flows[%d]: %lx, flags: %x" % (name, j, flow.value_(), flow.flags.counter))
+                print("%12s: path.flows[%d]: mlx5e_tc_flow %lx, flags: %x" % (name, j, flow.value_(), flow.flags.counter))
 #                 print_miniflow_list(flow)
-                continue
+#                 continue
                 attr = flow.esw_attr[0]
                 fc = flow.dummy_counter
                 p = fc.lastpackets
@@ -76,11 +91,11 @@ for i in miniflow_list:
 
         for j in range(8):
             flow = i.path.flows[j]
-            continue
+#             continue
             if flow.value_():
                 lastuse = flow.dummy_counter.cache.lastuse
                 print("mlx5e_tc_flow %lx, lastuse: %lx" % (flow.value_(), lastuse / 1000))
-            continue
+#             continue
             cookie = i.path.cookies[j]
             if cookie:
                 addr = cookie.value_()
@@ -89,15 +104,16 @@ for i in miniflow_list:
                     print("=========== %d %s %s ==========" % (j, name, "nf_conntrack_tuple"))
                     addr = addr & ~0x1
                     nf_conntrack_tuple = Object(prog, 'struct nf_conntrack_tuple', address=addr)
-                    lib.print_nf_conntrack_tuple(nf_conntrack_tuple)
+                    print_nf_conntrack_tuple(nf_conntrack_tuple)
                 else:
                     print("=========== %d %s %s ==========" % (j, name, "cls_fl_filter"))
                     cls_fl_filter = Object(prog, 'struct cls_fl_filter', address=addr)
-                    lib.print_cls_fl_filter(cls_fl_filter)
+                    print_cls_fl_filter(cls_fl_filter)
 
-        continue
+#         continue
         n = i.nr_ct_tuples
         print("\nnr_ct_tuples: %x" % n)
         for k in range(n):
-            lib.print_mlx5e_ct_tuple(k, i.ct_tuples[k])
+#             print(i.ct_tuples[k])
+            print_mlx5e_ct_tuple(k, i.ct_tuples[k])
         print("+++++++++++++++++++++ end ++++++++++++++++++++\n")
