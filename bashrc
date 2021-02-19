@@ -7706,8 +7706,10 @@ function am
 
 function install-pip
 {
-	curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-	python get-pip.py
+	apt-get install python-pip
+# 	apt-get install python3-pip
+# 	curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+# 	python get-pip.py
 }
 
 function install-libevent
@@ -11561,6 +11563,7 @@ function trex_vxlan2
 		(( i++ == 100 )) && break
 		echo "=============== $i ==============="
 		sleep 60
+# 		sleep 10
 	done
 }
 
@@ -12734,6 +12737,19 @@ function load_unload_test
 		reprobe
 		sleep 2
 		mystart
+		sleep 2
+		i=$((i+1))
+	done
+}
+
+function loop
+{
+	local i=1
+	while true; do
+		echo "==============$i==========="
+		bash test-ovs-ct-scapy-udp-2ports.sh
+		sleep 2
+		bash test-ovs-ct-scapy-udp-aging-ovs.sh
 		sleep 2
 		i=$((i+1))
 	done
