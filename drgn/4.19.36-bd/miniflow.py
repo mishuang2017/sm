@@ -62,6 +62,7 @@ print("total: %d" % (j))
 
 print('')
 for i in miniflow_list:
+    print("+++++++++++++++++++++ start ++++++++++++++++++++\n")
     name = i.priv.netdev.name.string_().decode()
 #     print("cookie: %lx" % i.cookie)     # pointer of skb
 #     print('{0}'.format(i.tuple))
@@ -78,9 +79,10 @@ for i in miniflow_list:
         for j in range(8):
             flow = i.path.flows[j]
             if flow:
+                print("\n####################### %d ####################\n" % j)
                 print("%12s: path.flows[%d]: mlx5e_tc_flow %lx, flags: %x" % (name, j, flow.value_(), flow.flags.counter))
-#                 print_miniflow_list(flow)
-                continue
+                print_miniflow_list(flow)
+#                 continue
                 attr = flow.esw_attr[0]
                 fc = flow.dummy_counter
                 p = fc.lastpackets
@@ -89,13 +91,10 @@ for i in miniflow_list:
                 print("action: %4x, chain: %d" % (attr.action, attr.chain))
                 print('')
 
-        for j in range(8):
-            flow = i.path.flows[j]
-            continue
-            if flow.value_():
                 lastuse = flow.dummy_counter.cache.lastuse
                 print("mlx5e_tc_flow %lx, lastuse: %lx" % (flow.value_(), lastuse / 1000))
-            continue
+
+#             continue
             cookie = i.path.cookies[j]
             if cookie:
                 addr = cookie.value_()
@@ -110,7 +109,7 @@ for i in miniflow_list:
                     cls_fl_filter = Object(prog, 'struct cls_fl_filter', address=addr)
                     print_cls_fl_filter(cls_fl_filter)
 
-        continue
+#         continue
         n = i.nr_ct_tuples
         print("\nnr_ct_tuples: %x" % n)
         for k in range(n):
