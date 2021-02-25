@@ -10801,6 +10801,7 @@ alias execsnoop="sudo $BCC_DIR/tools/execsnoop"
 alias tcpaccept="sudo $BCC_DIR/tools/tcpaccept"
 alias funccount="sudo $BCC_DIR/tools/funccount -i 1"
 alias fl="$BCC_DIR/tools/funclatency"
+alias trace_psample='trace psample_sample_packet -K'
 
 function trace1
 {
