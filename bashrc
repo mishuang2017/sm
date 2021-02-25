@@ -174,7 +174,7 @@ elif (( host_num == 14 )); then
 
 	if [[ "$USER" == "root" ]]; then
 		echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal;
-		echo 2000000 > /proc/sys/net/netfilter/nf_conntrack_max
+		echo 5000000 > /proc/sys/net/netfilter/nf_conntrack_max
 	fi
 
 elif (( host_num == 83 )); then

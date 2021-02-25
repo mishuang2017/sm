@@ -128,7 +128,7 @@ for i, flow in enumerate(hash(tc_ht, 'struct mlx5e_tc_flow', 'node')):
         if ct:
             print(sample_flow.ct_attr)
         print("mlx5_sample_flow %x" % sample_flow)
-        print("fte_id: %d" % sample_flow.fte_id)
+#         print("fte_id: %d" % sample_flow.fte_id)
 #         print(sample_flow)
 #         print(sample_flow.pre_attr)
 #         print(flow_attr)
