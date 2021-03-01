@@ -1714,7 +1714,7 @@ git push origin HEAD:refs/for/mlnx_ofed_5_2/ofed-sflow-ovs
 
 git push origin HEAD:refs/for/mlnx_ofed_5_2/ofed-ct-trk-new
 
-git push origin HEAD:refs/for/master/sflow-ovs
+git push origin HEAD:refs/for/master/psample-vxlan-support
 
 git push origin HEAD:refs/for/mlnx_ofed_5_2/delete-datapath-flows-by-default
 git push origin HEAD:refs/for/mlnx_ofed_5_2/fix-panic-when-getting-route
