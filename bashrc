@@ -9406,6 +9406,7 @@ alias test-tc='./test-all.py -g "test-tc-*"'
 
 test1=test-tc-sample.sh
 test1=test-tc-vxlan-sample.sh
+test1=test-eswitch-par-actions.sh
 alias test1="./$test1"
 alias vi-test="vi ~cmi/asap_dev_reg/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
@@ -12719,16 +12720,16 @@ function systemd_yum
 	sudo yum install -y meson gperf libcap-devel libmount-devel
 }
 
-function rsync1
+function rsync_sflow
 {
 	rsync -tvr /labhome/cmi/sflow/saeed vnc14:~/sflow
 	rsync -tvr /labhome/cmi/sflow/ct vnc14:~/sflow
 	rsync -tvr /labhome/cmi/sflow/ofproto vnc14:~/sflow
 }
 
-function rsync_file
+function rsync1
 {
-	rsync -tvr ~/$1 vnc14:~/$1
+	rsync -tvr $1 vnc14:~
 }
 
 function load_unload_test
