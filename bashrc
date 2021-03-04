@@ -310,7 +310,6 @@ export DPDK_DIR=/root/dpdk-stable-17.11.4
 # make install T=$DPDK_TARGET DESTDIR=install
 # export LD_LIBRARY_PATH=$DPDK_DIR/x86_64-native-linuxapp-gcc/lib
 
-export CONFIG=config_chrism_cx5.sh
 # export INSTALL_MOD_STRIP=1
 unset CONFIG_LOCALVERSION_AUTO
 
@@ -1151,6 +1150,7 @@ function cloud_setup
 		ln -s ~cmi/.tmux.conf
 		ln -s ~cmi/.vimrc
 		ln -s ~cmi/.vim
+		/bin/cp ~cmi/.crash /root
 	fi
 
 	yum -y install python3-devel dh-autoreconf xz-devel zlib-devel lzo-devel bzip2-devel kexec-tools
@@ -9409,19 +9409,18 @@ alias test-all='./test-all.py -e "test-all-dev.py" -e "*-ct-*" -e "*-ecmp-*" '
 alias test-tc='./test-all.py -g "test-tc-*" -e test-tc-hairpin-disable-sriov.sh -e test-tc-hairpin-rules.sh'
 alias test-tc='./test-all.py -g "test-tc-*"'
 
+export CONFIG=config_chrism_cx5.sh
+
 test1=test-tc-sample.sh
 test1=test-tc-vxlan-sample.sh
-test1=test-eswitch-par-actions.sh
-alias test1="./$test1"
-alias vi-test="vi ~cmi/asap_dev_reg/$test1"
-alias vi-test3="vi /workspace/asap_dev_test/$test1"
-alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
-alias psample=/labhome/cmi/asap_dev_reg/psample/psample
-alias stack_devices='././test-ovs-vf-tunnel.sh'
+test1=test-ethtool-steering.sh
+alias test1="export CONFIG=config_chrism_cx5.sh; ./$test1"
+alias test2="export CONFIG=/workspace/dev_reg_conf.sh; cd /workspace/asap_dev_test; ./$test1"
 
-test2=test-ovs-sflow.sh
-alias test2="./$test2"
-alias vi-test2="vi ~cmi/asap_dev_reg/$test2"
+alias vi-test="vi ~cmi/asap_dev_reg/$test1"
+alias vi-test2="vi /workspace/asap_dev_test/$test1"
+alias psample=/labhome/cmi/asap_dev_reg/psample/psample
+alias cloud_tools_asap_dev="/workspace/cloud_tools/configure_asap_devtest_env.sh  --sw_steering"
 
 function get-diff
 {
