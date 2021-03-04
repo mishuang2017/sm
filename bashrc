@@ -857,6 +857,8 @@ alias  vi_mapping='vi drivers/net/ethernet/mellanox/mlx5/core/en/mapping.c drive
 alias   vi_chains="vi drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.c drivers/net/ethernet/mellanox/mlx5/core/lib/fs_chains.h "
 alias    vi_en_tc="vi drivers/net/ethernet/mellanox/mlx5/core/en_tc.c "
 
+alias r12="vi /labhome/cmi/sflow/ofproto/0/r12/*"
+
 alias vi_esw2="vi include/linux/mlx5/eswitch.h "
 
 alias vi_netdev-offload-tc="vi lib/netdev-offload-tc.c"
