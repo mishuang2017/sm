@@ -30,8 +30,7 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-149-180-183" ]] && host_num=83
 [[ "$(hostname -s)" == "c-236-149-180-184" ]] && host_num=84
 
-[[ "$(hostname -s)" == "c-237-3-1-007" ]] && host_num=7
-[[ "$(hostname -s)" == "c-237-3-1-008" ]] && host_num=8
+[[ "$(hostname -s)" == "c-236-148-240-245" ]] && host_num=45
 
 function get_vf
 {
@@ -191,7 +190,7 @@ elif (( host_num == 84 )); then
 	remote_mac=0c:42:a1:d1:d0:e4
 	cloud=1
 
-elif (( host_num == 7 )); then
+elif (( host_num == 45 )); then
 	machine_num=1
 	cloud=1
 fi
@@ -1289,6 +1288,10 @@ function off_pci
 	cd -
 }
 
+function compat_mode
+{
+	cat /sys/class/net/$link/compat/devlink/mode
+}
 function set-switchdev
 {
 set -x
@@ -9411,6 +9414,7 @@ test1=test-tc-vxlan-sample.sh
 test1=test-eswitch-par-actions.sh
 alias test1="./$test1"
 alias vi-test="vi ~cmi/asap_dev_reg/$test1"
+alias vi-test3="vi /workspace/asap_dev_test/$test1"
 alias term_test="./test-vxlan-rx-vlan-push-offload.sh"
 alias psample=/labhome/cmi/asap_dev_reg/psample/psample
 alias stack_devices='././test-ovs-vf-tunnel.sh'
@@ -10522,6 +10526,7 @@ alias udp13=/labhome/cmi/prg/python/scapy/udp13.py
 alias udp13-2=/labhome/cmi/prg/python/scapy/udp13-2.py
 alias udp14=/labhome/cmi/prg/python/scapy/udp14.py
 
+alias extra='/bin/rm -rf /lib/modules/4.19.36+/extra; depmod -a'
 alias reboot='echo reboot; read; reboot'
 
 # two way traffic
