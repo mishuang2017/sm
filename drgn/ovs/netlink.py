@@ -14,10 +14,17 @@ import time
 sys.path.append("..")
 from lib import *
 
+null_fops = prog['null_fops'].address_of_().value_()
+xfs_file_operations = prog['xfs_file_operations'].address_of_().value_()
+shmem_file_operations = prog['shmem_file_operations'].address_of_().value_()
+pipefifo_fops = prog['pipefifo_fops'].address_of_().value_()
+
+eventpoll_fops = prog['eventpoll_fops'].address_of_().value_()
+
 socket_file_ops = prog['socket_file_ops'].address_of_().value_()
+# both netlink_ops and netlink_ops belong to socket
 netlink_ops = prog['netlink_ops'].address_of_().value_()
 inet_dgram_ops = prog['inet_dgram_ops'].address_of_().value_()
-eventpoll_fops = prog['eventpoll_fops'].address_of_().value_()
 
 def print_netlink_sock(sock):
     print("sock.sk_protocol: %d" % sock.sk.sk_protocol, end='')
@@ -40,26 +47,33 @@ def print_files(files, n):
     for i in range(n):
         file = files[i]
 
+        print("%2d" % i, end='\t')
         # only print socket file
         if file.f_op.value_() == eventpoll_fops:
-            print("%2d" % i, end='\t')
             print_eventpoll(file)
-            continue
-        elif socket_file_ops != file.f_op.value_():
-            continue
-
-        print("%2d" % i, end='\t')
-        sock = Object(prog, "struct socket", address=file.private_data)
-        sk = sock.sk
-        # only print netlink socket
-        if netlink_ops == sock.ops.value_():
-            netlink_sock = cast('struct netlink_sock *', sk)
-            print_netlink_sock(netlink_sock)
-        elif inet_dgram_ops == sock.ops.value_():
-            print_udp_sock(sk)
+        elif file.f_op.value_() == socket_file_ops:
+            sock = Object(prog, "struct socket", address=file.private_data)
+            sk = sock.sk
+            # only print netlink socket
+            if netlink_ops == sock.ops.value_():
+                netlink_sock = cast('struct netlink_sock *', sk)
+                print_netlink_sock(netlink_sock)
+            elif inet_dgram_ops == sock.ops.value_():
+                print_udp_sock(sk)
+            else:
+                print('')
+        elif file.f_op.value_() == pipefifo_fops:
+            print('pipefifo_fops')
+        elif file.f_op.value_() == null_fops:
+            print('null_fops')
+        elif file.f_op.value_() == xfs_file_operations:
+            print('xfs_file_operations')
+        elif file.f_op.value_() == shmem_file_operations:
+            print('shmem_file_operations')
         else:
-            print('')
+            print(file.f_op)
 
+#         print("%2d" % i, end='\t')
 def find_task(name):
     print('PID        COMM')
     for task in for_each_task(prog):
