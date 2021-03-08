@@ -31,6 +31,9 @@ alias rc='. ~/.bashrc'
 [[ "$(hostname -s)" == "c-236-149-180-184" ]] && host_num=84
 
 [[ "$(hostname -s)" == "c-236-148-240-245" ]] && host_num=45
+[[ "$(hostname -s)" == "c-235-13-1-007" ]] && host_num=7
+
+[[ "$(hostname -s)" == "qa-h-vrt-074" ]] && host_num=74
 
 function get_vf
 {
@@ -193,6 +196,11 @@ elif (( host_num == 84 )); then
 elif (( host_num == 45 )); then
 	machine_num=1
 	cloud=1
+elif (( host_num == 7 )); then
+	machine_num=1
+	cloud=1
+elif (( host_num == 74 )); then
+	link=ens4f0
 fi
 
 if (( cloud == 1 )); then
@@ -5461,11 +5469,11 @@ function counters_tc_ct
 {
 	uname -a | grep 5.4.19 > /dev/null
 	if (( $? == 0 )); then
-		file=/sys/class/net/enp4s0f0/device/counters_tc_ct
+		file=/sys/class/net/$link/device/counters_tc_ct
 	fi
 	uname -a | grep 4.19.36 > /dev/null
 	if (( $? == 0 )); then
-		file=/sys/class/net/enp4s0f0/device/sriov/pf/counters_tc_ct
+		file=/sys/class/net/$link/device/sriov/pf/counters_tc_ct
 	fi
 	while :; do
 		sleep 1
