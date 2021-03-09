@@ -19,3 +19,13 @@ for i, port in enumerate(port_to_netdev_datas):
         (port.ifindex, port.dpif_port.name.string_().decode(), \
         port.dpif_port.type.string_().decode(), port.dpif_port.port_no))
     print(port.netdev)
+    print_seq(port.netdev.reconfigure_seq)
+
+# connectivity_seq = prog['connectivity_seq']
+# print_seq(connectivity_seq)
+# ifaces_changed = prog['ifaces_changed']
+# print_seq(ifaces_changed)
+# timewarp_seq = prog['timewarp_seq']
+# print_seq(timewarp_seq)
+# tnl_conf_seq = prog['tnl_conf_seq']
+# print_seq(tnl_conf_seq)

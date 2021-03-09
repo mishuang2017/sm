@@ -16,6 +16,18 @@ from lib_ovs import *
 backer = get_backer()
 udpif = backer.udpif
 
+print(udpif.exit_latch)
+print(udpif.pause_latch)
+
+print_seq(udpif.reval_seq, "udpif.reval_seq")
+print_seq(udpif.dump_seq, "udpif.dump_seq")
+
+# flushed_cbsets_seq = prog['flushed_cbsets_seq']
+# print_seq(flushed_cbsets_seq)
+
+# global_seqno = prog['global_seqno']
+# print_seq(global_seqno)
+
 def print_handlers():
     n1 = udpif.n_handlers
     n2 = udpif.n_revalidators

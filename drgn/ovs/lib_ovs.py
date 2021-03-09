@@ -130,3 +130,10 @@ def print_cmap(cmap, struct_name, member_name):
     return objs
 
 #     print("n = %d" % n)
+
+def print_seq(seq, name):
+    print("%20s: seq value: %d" % (name, seq.value))
+    seq_waiters = print_hmap(seq.waiters, "seq_waiter", "hmap_node")
+    for i, seq_waiter in enumerate(seq_waiters):
+        print(seq_waiter.thread)
+        print('')

@@ -11578,7 +11578,8 @@ function trex_vxlan2
 		./asapPerfTester.py --confFile  ./AsapPerfTester/TestParams/IpVarianceVxlan.py  --logsDir AsapPerfTester/logs --noGraphicDisplay
 		(( i++ == 100 )) && break
 		echo "=============== $i ==============="
-		sleep 60
+		sleep 60    # 1M
+# 		sleep 180   # 4M
 # 		sleep 10
 	done
 }
